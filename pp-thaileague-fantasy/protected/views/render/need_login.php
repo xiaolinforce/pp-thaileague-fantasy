@@ -1,0 +1,1 @@
+<p style="text-align: center; font-size: 26px;">โปรดรีเฟรชและเข้าสู่ระบบอีกครั้ง</p>
