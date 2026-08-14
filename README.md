@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PP Thaileague Fantasy
 
-## Getting Started
+Thai League fantasy football application built with Next.js, Drizzle ORM, and Neon Postgres.
 
-First, run the development server:
+## Getting started
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Copy the environment template and add the pooled connection string for the Neon `development` branch:
+
+```powershell
+Copy-Item .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then verify the database connection and start the development server:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run db:check
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3006](http://localhost:3006) in your browser. The local `.env.local` file connects to the Neon `development` branch and is excluded from Git.
 
-## Learn More
+## Database workflow
 
-To learn more about Next.js, take a look at the following resources:
+- Local development uses the Neon `development` branch.
+- Vercel Production must use the Neon `production` branch through its `DATABASE_URL` environment variable.
+- Add Drizzle table definitions to `src/db/schema.ts`.
+- Generate migrations with `npm run db:generate`.
+- Apply committed migrations with `npm run db:migrate`, testing development before production.
+- Inspect the current database with `npm run db:studio`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+You can start editing the application in `src/app/page.tsx`.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Quality checks
+
+```bash
+npm run types
+npm run lint
+npm run format:check
+```
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Deploy the application with [Vercel](https://vercel.com/new). Configure `DATABASE_URL` separately for each Vercel environment and never expose it with a `NEXT_PUBLIC_` prefix.
