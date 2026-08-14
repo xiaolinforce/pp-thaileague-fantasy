@@ -1,1 +1,0 @@
-<p style="text-align: center; font-size: 26px;"><?= $sText ?></p>
