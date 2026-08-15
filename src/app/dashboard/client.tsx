@@ -1,0 +1,182 @@
+"use client";
+
+import {
+  ArrowRight,
+  CalendarDays,
+  ChevronRight,
+  CircleDollarSign,
+  Clock3,
+  Crown,
+  Flame,
+  Goal,
+  Sparkles,
+  TrendingUp,
+  Trophy,
+} from "lucide-react";
+import Link from "next/link";
+import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { useLanguage } from "@/components/fantasy/i18n";
+import { PlayerKit } from "@/components/fantasy/player-kit";
+import { localize, type CompetitionDataset } from "@/lib/competition-types";
+
+export default function DashboardClient({ data }: { data: CompetitionDataset }) {
+  const { language } = useLanguage();
+  const featuredPlayers = [...data.players].sort((a, b) => b.form - a.form).slice(0, 4);
+  const nextFixtures = data.fixtures.slice(0, 2);
+  const firstFixture = nextFixtures[0];
+  return (
+    <AppShell>
+      <main className="content product-content">
+        <PageHeader
+          eyebrow="ภาพรวม"
+          title="สวัสดี ผู้จัดการ PIYA FC"
+          description="ทุกอย่างพร้อมสำหรับ Gameweek แรก — ตรวจทีมก่อนเดดไลน์วันศุกร์"
+          actions={
+            <Link href="/team" className="primary-button">
+              จัดทีมตอนนี้ <ArrowRight size={17} />
+            </Link>
+          }
+        />
+        <section className="dashboard-hero">
+          <div className="hero-copy">
+            <span className="hero-kicker">
+              <Flame size={14} /> GAMEWEEK 01
+            </span>
+            <h2>
+              เริ่มฤดูกาล
+              <br />
+              ให้เหนือคู่แข่ง
+            </h2>
+            <p>เหลือเวลาอีก 5 วันก่อนตลาดปิด ทีมของคุณจัดครบ 15 คนแล้ว</p>
+            <div className="hero-actions">
+              <Link href="/team" className="hero-button">
+                ดูทีมของฉัน <ChevronRight size={17} />
+              </Link>
+              <span className="hero-deadline">
+                <Clock3 size={15} /> {firstFixture ? `${localize(firstFixture.dateLabel, language)} · ${localize(firstFixture.timeLabel, language)}` : "TBC"}
+              </span>
+            </div>
+          </div>
+          <div className="hero-score-orbit">
+            <div className="score-ring">
+              <span>คะแนน</span>
+              <strong>67</strong>
+              <small>GW 01</small>
+            </div>
+            <span className="orbit-label orbit-top">
+              อันดับ <b>18,420</b>
+            </span>
+            <span className="orbit-label orbit-bottom">
+              <TrendingUp size={13} /> TOP 12%
+            </span>
+          </div>
+        </section>
+
+        <div className="metric-grid">
+          <article className="metric-card">
+            <span className="metric-icon orange-bg">
+              <Trophy />
+            </span>
+            <div>
+              <span>อันดับรวม</span>
+              <strong>18,420</strong>
+              <small className="positive">▲ 4,281 อันดับ</small>
+            </div>
+          </article>
+          <article className="metric-card">
+            <span className="metric-icon green-bg">
+              <Goal />
+            </span>
+            <div>
+              <span>คะแนนรวม</span>
+              <strong>67</strong>
+              <small>เฉลี่ย 52 คะแนน</small>
+            </div>
+          </article>
+          <article className="metric-card">
+            <span className="metric-icon blue-bg">
+              <CircleDollarSign />
+            </span>
+            <div>
+              <span>มูลค่าทีม</span>
+              <strong>฿96.5m</strong>
+              <small>คงเหลือ ฿3.5m</small>
+            </div>
+          </article>
+          <article className="metric-card">
+            <span className="metric-icon purple-bg">
+              <Crown />
+            </span>
+            <div>
+              <span>อันดับมินิลีก</span>
+              <strong>3</strong>
+              <small>จาก 24 ทีม</small>
+            </div>
+          </article>
+        </div>
+
+        <div className="overview-grid">
+          <section className="product-card dashboard-team-preview">
+            <div className="product-card-head">
+              <div>
+                <span className="eyebrow">ดาวเด่นในทีม</span>
+                <h2>ผู้เล่นฟอร์มร้อน</h2>
+              </div>
+              <Link href="/points">
+                ดูคะแนนทั้งหมด <ChevronRight size={15} />
+              </Link>
+            </div>
+            <div className="top-player-list">
+              {featuredPlayers.map((player, index) => (
+                <article className="top-player" key={player.id}>
+                  <span className="player-rank">0{index + 1}</span>
+                  <PlayerKit color={player.color} accent={player.accent} />
+                  <div className="top-player-name">
+                    <strong>{localize(player.name, language)}</strong>
+                    <span>
+                      {localize(player.club, language)} · {player.position}
+                    </span>
+                  </div>
+                  <span className="form-chip">
+                    <Sparkles size={12} /> {player.form}
+                  </span>
+                  <strong className="top-player-points">
+                    {player.points}
+                    <small>PTS</small>
+                  </strong>
+                </article>
+              ))}
+            </div>
+          </section>
+
+          <section className="product-card next-fixture-card">
+            <div className="product-card-head">
+              <div>
+                <span className="eyebrow">นัดถัดไป</span>
+                <h2>{firstFixture ? localize(firstFixture.dateLabel, language) : "ยังไม่มีโปรแกรม"}</h2>
+              </div>
+              <CalendarDays size={19} />
+            </div>
+            {nextFixtures.map((fixture) => (
+              <article className="compact-fixture" key={fixture.id}>
+                <span className="fixture-time">{localize(fixture.timeLabel, language)}</span>
+                <div>
+                  <strong>{localize(fixture.home.name, language)}</strong>
+                  <span>{localize(fixture.home.shortName, language)}</span>
+                </div>
+                <b>VS</b>
+                <div>
+                  <strong>{localize(fixture.away.name, language)}</strong>
+                  <span>{localize(fixture.away.shortName, language)}</span>
+                </div>
+              </article>
+            ))}
+            <Link href="/fixtures" className="full-card-link">
+              ดูโปรแกรมทั้งหมด <ArrowRight size={15} />
+            </Link>
+          </section>
+        </div>
+      </main>
+    </AppShell>
+  );
+}

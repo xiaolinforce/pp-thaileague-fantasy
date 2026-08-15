@@ -13,7 +13,11 @@
     "db:check": "tsx scripts/check-database.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:seed:competition": "tsx scripts/seed-competition-data.ts",
+    "db:seed:club-colors": "tsx scripts/seed-club-visual-identities.ts",
+    "db:studio": "drizzle-kit studio",
+    "db:verify:competition": "tsx scripts/verify-competition-data.ts",
+    "db:normalize:clubs": "tsx scripts/normalize-club-display-names.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -27,6 +31,7 @@
     "react-dom": "19.2.8",
     "server-only": "^0.0.1",
     "shadcn": "^4.18.0",
+    "sonner": "^2.0.8",
     "tailwind-merge": "^3.6.0",
     "tw-animate-css": "^1.4.0"
   },
