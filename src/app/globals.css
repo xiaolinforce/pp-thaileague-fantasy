@@ -4633,8 +4633,8 @@ button:focus-visible {
 }
 .admin-stat-form label > span {
   color: #57534e;
-  font-size: 13px;
-  font-weight: 800;
+  font-size: 16px;
+  font-weight: 500;
 }
 .admin-stat-form input,
 .admin-stat-form select {
@@ -4671,7 +4671,7 @@ button:focus-visible {
 }
 .admin-gameweek-meta dd {
   margin: 0;
-  font-weight: 800;
+  font-weight: 500;
   text-align: right;
 }
 .admin-rule-copy {
@@ -4704,4 +4704,128 @@ button:focus-visible {
   .admin-stat-fields {
     grid-template-columns: 1fr;
   }
+}
+
+/* Final type-weight system: reserve bold text for hierarchy and key metrics. */
+body {
+  font-weight: 400;
+}
+
+.product-content :is(button, input, select, textarea),
+.side-nav a,
+.sidebar-bottom > a,
+.manager-card strong,
+.top-stats-link,
+.primary-button,
+.secondary-button,
+.hero-button,
+.full-card-link,
+.auto-pick,
+.transfer-button,
+.filter-button,
+.toast,
+.swap-hint,
+.profile-nav-card nav a,
+.rules-list [data-slot="accordion-trigger"] {
+  font-weight: 500;
+}
+
+.sidebar-language-test-switch,
+.eyebrow,
+.gameweek-main span,
+.hero-kicker,
+.season-pill,
+.formation-label,
+.card-title,
+.list-head,
+.market-head,
+.points-head,
+.league-head,
+.roster-head,
+.fixture-week-bar span,
+.position-chip,
+.position-badge,
+.tier-pill,
+.form-chip,
+.status-dot,
+.captain-badge,
+.bench-number,
+.club-badge {
+  font-weight: 600;
+}
+
+.page-intro h1,
+.hero-copy h2,
+.score-ring strong,
+.points-hero strong {
+  font-weight: 700;
+}
+
+.product-content :is(h2, h3, h4),
+.team-card-head h2,
+.bench-heading h3,
+.settings-heading h2,
+.product-content :is(strong, b),
+.metric-card strong,
+.points-mini-card strong,
+.budget-number strong,
+.league-feature-card > strong,
+.stats-ranking > article > strong,
+.leader-player strong,
+.top-player-points {
+  font-weight: 600;
+}
+
+/* Entity names and ordinary row content should read like body copy. */
+.fixture-club strong,
+.compact-fixture strong,
+.top-player-name strong,
+.market-player strong,
+.player-identity-component strong,
+.player-label strong,
+.squad-name,
+.roster-identity strong,
+.list-identity strong,
+.league-row > div strong,
+.leader-player h3 {
+  font-weight: 400;
+}
+
+.fixture-row time,
+.fixture-vs,
+.fixture-time,
+.player-rank,
+.week-switcher span,
+.rank-number,
+.roster-row,
+.market-row,
+.points-row,
+.league-row,
+.form-grid label,
+.team-brand-editor label,
+.language-settings-row strong,
+.notification-settings strong,
+.points-mini-card strong,
+.profile-identity h3,
+.league-feature-card h3,
+.accessible-player-modal [data-slot="dialog-title"] {
+  font-weight: 500;
+}
+
+.fixture-row time,
+.fixture-time {
+  font-weight: 400;
+}
+
+.roster-row > b,
+.market-row > strong,
+.points-row > strong,
+.league-row > strong,
+.rank-row strong,
+.mini-stats strong,
+.budget-split b,
+.player-detail-grid strong,
+.transfer-overview strong,
+.score-legend strong {
+  font-weight: 600;
 }
