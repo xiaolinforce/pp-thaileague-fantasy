@@ -6,6 +6,7 @@ import {
   doublePrecision,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   smallint,
@@ -48,6 +49,57 @@ export const fixtureStatusEnum = pgEnum("fixture_status", [
   "finished",
   "postponed",
   "cancelled",
+]);
+
+export const fantasyGameweekStatusEnum = pgEnum("fantasy_gameweek_status", [
+  "planned",
+  "open",
+  "locked",
+  "provisional",
+  "final",
+]);
+
+export const fantasySelectionStatusEnum = pgEnum("fantasy_selection_status", [
+  "draft",
+  "locked",
+]);
+
+export const fantasyChipEnum = pgEnum("fantasy_chip", [
+  "triple_captain",
+  "bench_boost",
+  "wildcard",
+]);
+
+export const fantasyLineupRoleEnum = pgEnum("fantasy_lineup_role", [
+  "starter",
+  "bench",
+]);
+
+export const fantasyCaptainRoleEnum = pgEnum("fantasy_captain_role", [
+  "none",
+  "captain",
+  "vice_captain",
+]);
+
+export const fantasyRevisionStatusEnum = pgEnum("fantasy_revision_status", [
+  "confirmed",
+  "cancelled",
+]);
+
+export const fantasyStatsStatusEnum = pgEnum("fantasy_stats_status", [
+  "imported",
+  "reviewed",
+  "corrected",
+]);
+
+export const fantasyScoreStatusEnum = pgEnum("fantasy_score_status", [
+  "provisional",
+  "final",
+]);
+
+export const fantasyLeagueTypeEnum = pgEnum("fantasy_league_type", [
+  "overall",
+  "private",
 ]);
 
 const timestamps = {
@@ -428,6 +480,485 @@ export const fixtures = pgTable(
     check(
       "fixtures_attendance_nonnegative_check",
       sql`${table.attendance} is null or ${table.attendance} >= 0`,
+    ),
+  ],
+);
+
+export const fantasySeasons = pgTable(
+  "fantasy_seasons",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    competitionSeasonId: uuid("competition_season_id")
+      .notNull()
+      .references(() => competitionSeasons.id, { onDelete: "cascade" }),
+    slug: varchar("slug", { length: 80 }).notNull(),
+    nameTh: text("name_th").notNull(),
+    nameEn: text("name_en").notNull(),
+    squadSize: smallint("squad_size").default(15).notNull(),
+    sameClubLimit: smallint("same_club_limit").default(3).notNull(),
+    foreignPlayerLimit: smallint("foreign_player_limit").default(7).notNull(),
+    weeklyFreeTransfers: smallint("weekly_free_transfers").default(2).notNull(),
+    maximumFreeTransfers: smallint("maximum_free_transfers")
+      .default(4)
+      .notNull(),
+    transferPointCost: smallint("transfer_point_cost").default(4).notNull(),
+    deadlineOffsetMinutes: smallint("deadline_offset_minutes")
+      .default(90)
+      .notNull(),
+    chipUsesPerSeason: smallint("chip_uses_per_season").default(2).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_seasons_competition_season_unique").on(
+      table.competitionSeasonId,
+    ),
+    uniqueIndex("fantasy_seasons_slug_unique").on(table.slug),
+    check("fantasy_seasons_squad_size_check", sql`${table.squadSize} > 0`),
+    check(
+      "fantasy_seasons_limits_check",
+      sql`${table.sameClubLimit} > 0 and ${table.foreignPlayerLimit} >= 0 and ${table.weeklyFreeTransfers} >= 0 and ${table.maximumFreeTransfers} >= ${table.weeklyFreeTransfers}`,
+    ),
+    check(
+      "fantasy_seasons_transfer_cost_check",
+      sql`${table.transferPointCost} >= 0 and ${table.deadlineOffsetMinutes} >= 0 and ${table.chipUsesPerSeason} > 0`,
+    ),
+  ],
+);
+
+export const fantasyGameweeks = pgTable(
+  "fantasy_gameweeks",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    number: smallint("number").notNull(),
+    deadlineAt: timestamp("deadline_at", { withTimezone: true }).notNull(),
+    status: fantasyGameweekStatusEnum("status").default("planned").notNull(),
+    scoreComplete: boolean("score_complete").default(false).notNull(),
+    finalizedAt: timestamp("finalized_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_gameweeks_season_number_unique").on(
+      table.fantasySeasonId,
+      table.number,
+    ),
+    index("fantasy_gameweeks_deadline_idx").on(table.deadlineAt),
+    index("fantasy_gameweeks_status_idx").on(table.status),
+    check("fantasy_gameweeks_number_check", sql`${table.number} > 0`),
+  ],
+);
+
+export const fantasyTierDefinitions = pgTable(
+  "fantasy_tier_definitions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    level: smallint("level").notNull(),
+    slotCount: smallint("slot_count").notNull(),
+    nameTh: text("name_th").notNull(),
+    nameEn: text("name_en").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_tier_definitions_season_level_unique").on(
+      table.fantasySeasonId,
+      table.level,
+    ),
+    check(
+      "fantasy_tier_definitions_values_check",
+      sql`${table.level} > 0 and ${table.slotCount} >= 0`,
+    ),
+  ],
+);
+
+export const fantasyPlayers = pgTable(
+  "fantasy_players",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "restrict" }),
+    lockedPosition: playerPositionEnum("locked_position").notNull(),
+    isThai: boolean("is_thai").default(false).notNull(),
+    isAvailable: boolean("is_available").default(true).notNull(),
+    nationalitySource: text("nationality_source"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_players_season_player_unique").on(
+      table.fantasySeasonId,
+      table.playerId,
+    ),
+    index("fantasy_players_season_available_idx").on(
+      table.fantasySeasonId,
+      table.isAvailable,
+    ),
+  ],
+);
+
+export const fantasyPlayerTiers = pgTable(
+  "fantasy_player_tiers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasyPlayerId: uuid("fantasy_player_id")
+      .notNull()
+      .references(() => fantasyPlayers.id, { onDelete: "cascade" }),
+    effectiveGameweekId: uuid("effective_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "restrict" }),
+    level: smallint("level").notNull(),
+    sourceName: text("source_name").notNull(),
+    reason: text("reason"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_player_tiers_player_gameweek_unique").on(
+      table.fantasyPlayerId,
+      table.effectiveGameweekId,
+    ),
+    index("fantasy_player_tiers_gameweek_idx").on(table.effectiveGameweekId),
+    check("fantasy_player_tiers_level_check", sql`${table.level} > 0`),
+  ],
+);
+
+export const fantasyManagers = pgTable(
+  "fantasy_managers",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    displayName: text("display_name").notNull(),
+    isDemo: boolean("is_demo").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [index("fantasy_managers_demo_idx").on(table.isDemo)],
+);
+
+export const fantasyTeams = pgTable(
+  "fantasy_teams",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    managerId: uuid("manager_id")
+      .notNull()
+      .references(() => fantasyManagers.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    freeTransfers: smallint("free_transfers").default(0).notNull(),
+    isActive: boolean("is_active").default(true).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_teams_season_manager_unique").on(
+      table.fantasySeasonId,
+      table.managerId,
+    ),
+    index("fantasy_teams_season_active_idx").on(
+      table.fantasySeasonId,
+      table.isActive,
+    ),
+    check(
+      "fantasy_teams_free_transfers_check",
+      sql`${table.freeTransfers} >= 0`,
+    ),
+  ],
+);
+
+export const fantasyTeamSelections = pgTable(
+  "fantasy_team_selections",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasyTeamId: uuid("fantasy_team_id")
+      .notNull()
+      .references(() => fantasyTeams.id, { onDelete: "cascade" }),
+    fantasyGameweekId: uuid("fantasy_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "cascade" }),
+    status: fantasySelectionStatusEnum("status").default("draft").notNull(),
+    activeChip: fantasyChipEnum("active_chip"),
+    freeTransfersBefore: smallint("free_transfers_before").default(0).notNull(),
+    freeTransfersAfter: smallint("free_transfers_after"),
+    netTransferCount: smallint("net_transfer_count").default(0).notNull(),
+    transferPoints: smallint("transfer_points").default(0).notNull(),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    lockedAt: timestamp("locked_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_team_selections_team_gameweek_unique").on(
+      table.fantasyTeamId,
+      table.fantasyGameweekId,
+    ),
+    index("fantasy_team_selections_gameweek_status_idx").on(
+      table.fantasyGameweekId,
+      table.status,
+    ),
+    check(
+      "fantasy_team_selections_transfer_values_check",
+      sql`${table.freeTransfersBefore} >= 0 and (${table.freeTransfersAfter} is null or ${table.freeTransfersAfter} >= 0) and ${table.netTransferCount} >= 0 and ${table.transferPoints} >= 0`,
+    ),
+  ],
+);
+
+export const fantasyTeamSelectionPlayers = pgTable(
+  "fantasy_team_selection_players",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    selectionId: uuid("selection_id")
+      .notNull()
+      .references(() => fantasyTeamSelections.id, { onDelete: "cascade" }),
+    fantasyPlayerId: uuid("fantasy_player_id")
+      .notNull()
+      .references(() => fantasyPlayers.id, { onDelete: "restrict" }),
+    clubIdSnapshot: uuid("club_id_snapshot")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "restrict" }),
+    positionSnapshot: playerPositionEnum("position_snapshot").notNull(),
+    tierSnapshot: smallint("tier_snapshot").notNull(),
+    isThaiSnapshot: boolean("is_thai_snapshot").notNull(),
+    lineupRole: fantasyLineupRoleEnum("lineup_role").notNull(),
+    benchOrder: smallint("bench_order"),
+    captainRole: fantasyCaptainRoleEnum("captain_role")
+      .default("none")
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_selection_players_selection_player_unique").on(
+      table.selectionId,
+      table.fantasyPlayerId,
+    ),
+    index("fantasy_selection_players_selection_role_idx").on(
+      table.selectionId,
+      table.lineupRole,
+    ),
+    check(
+      "fantasy_selection_players_tier_check",
+      sql`${table.tierSnapshot} > 0`,
+    ),
+    check(
+      "fantasy_selection_players_bench_order_check",
+      sql`(${table.lineupRole} = 'starter' and ${table.benchOrder} is null) or (${table.lineupRole} = 'bench' and ${table.benchOrder} between 0 and 3)`,
+    ),
+  ],
+);
+
+export const fantasyTransferRevisions = pgTable(
+  "fantasy_transfer_revisions",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    selectionId: uuid("selection_id")
+      .notNull()
+      .references(() => fantasyTeamSelections.id, { onDelete: "cascade" }),
+    revision: integer("revision").notNull(),
+    status: fantasyRevisionStatusEnum("status").default("confirmed").notNull(),
+    squad: jsonb("squad").$type<string[]>().notNull(),
+    lineup: jsonb("lineup").$type<Record<string, unknown>>().notNull(),
+    activeChip: fantasyChipEnum("active_chip"),
+    netTransferCount: smallint("net_transfer_count").default(0).notNull(),
+    transferPoints: smallint("transfer_points").default(0).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_transfer_revisions_selection_revision_unique").on(
+      table.selectionId,
+      table.revision,
+    ),
+    check(
+      "fantasy_transfer_revisions_values_check",
+      sql`${table.revision} > 0 and ${table.netTransferCount} >= 0 and ${table.transferPoints} >= 0`,
+    ),
+  ],
+);
+
+export const fantasyPlayerMatchStats = pgTable(
+  "fantasy_player_match_stats",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fixtureId: uuid("fixture_id")
+      .notNull()
+      .references(() => fixtures.id, { onDelete: "cascade" }),
+    fantasyPlayerId: uuid("fantasy_player_id")
+      .notNull()
+      .references(() => fantasyPlayers.id, { onDelete: "cascade" }),
+    status: fantasyStatsStatusEnum("status").default("imported").notNull(),
+    sourceName: text("source_name").notNull(),
+    minutes: smallint("minutes").default(0).notNull(),
+    goals: smallint("goals").default(0).notNull(),
+    sourceAssists: smallint("source_assists").default(0).notNull(),
+    fantasyAssists: smallint("fantasy_assists"),
+    goalsConcededWhilePlaying: smallint("goals_conceded_while_playing")
+      .default(0)
+      .notNull(),
+    saves: smallint("saves").default(0).notNull(),
+    penaltySaves: smallint("penalty_saves").default(0).notNull(),
+    penaltyMisses: smallint("penalty_misses").default(0).notNull(),
+    yellowCards: smallint("yellow_cards").default(0).notNull(),
+    redCards: smallint("red_cards").default(0).notNull(),
+    ownGoals: smallint("own_goals").default(0).notNull(),
+    sourcePayload: jsonb("source_payload").$type<Record<string, unknown>>(),
+    reviewedAt: timestamp("reviewed_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_player_match_stats_fixture_player_unique").on(
+      table.fixtureId,
+      table.fantasyPlayerId,
+    ),
+    index("fantasy_player_match_stats_fixture_status_idx").on(
+      table.fixtureId,
+      table.status,
+    ),
+    check(
+      "fantasy_player_match_stats_nonnegative_check",
+      sql`${table.minutes} >= 0 and ${table.goals} >= 0 and ${table.sourceAssists} >= 0 and (${table.fantasyAssists} is null or ${table.fantasyAssists} >= 0) and ${table.goalsConcededWhilePlaying} >= 0 and ${table.saves} >= 0 and ${table.penaltySaves} >= 0 and ${table.penaltyMisses} >= 0 and ${table.yellowCards} >= 0 and ${table.redCards} >= 0 and ${table.ownGoals} >= 0`,
+    ),
+  ],
+);
+
+export const fantasyStatOverrides = pgTable(
+  "fantasy_stat_overrides",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    playerMatchStatsId: uuid("player_match_stats_id")
+      .notNull()
+      .references(() => fantasyPlayerMatchStats.id, { onDelete: "cascade" }),
+    fieldName: varchar("field_name", { length: 80 }).notNull(),
+    previousValue: jsonb("previous_value"),
+    nextValue: jsonb("next_value").notNull(),
+    reason: text("reason").notNull(),
+    changedBy: text("changed_by").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("fantasy_stat_overrides_stats_created_idx").on(
+      table.playerMatchStatsId,
+      table.createdAt,
+    ),
+  ],
+);
+
+export const fantasyPlayerMatchPoints = pgTable(
+  "fantasy_player_match_points",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    playerMatchStatsId: uuid("player_match_stats_id")
+      .notNull()
+      .references(() => fantasyPlayerMatchStats.id, { onDelete: "cascade" }),
+    breakdown: jsonb("breakdown").$type<Record<string, number>>().notNull(),
+    totalPoints: integer("total_points").notNull(),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_player_match_points_stats_unique").on(
+      table.playerMatchStatsId,
+    ),
+  ],
+);
+
+export const fantasyTeamGameweekScores = pgTable(
+  "fantasy_team_gameweek_scores",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    selectionId: uuid("selection_id")
+      .notNull()
+      .references(() => fantasyTeamSelections.id, { onDelete: "cascade" }),
+    status: fantasyScoreStatusEnum("status").default("provisional").notNull(),
+    lineupPoints: integer("lineup_points").default(0).notNull(),
+    benchPoints: integer("bench_points").default(0).notNull(),
+    captainBonus: integer("captain_bonus").default(0).notNull(),
+    transferPoints: integer("transfer_points").default(0).notNull(),
+    totalPoints: integer("total_points").default(0).notNull(),
+    autoSubstitutions: jsonb("auto_substitutions")
+      .$type<Array<{ out: string; in: string }>>()
+      .default([])
+      .notNull(),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_team_gameweek_scores_selection_unique").on(
+      table.selectionId,
+    ),
+    index("fantasy_team_gameweek_scores_total_idx").on(table.totalPoints),
+  ],
+);
+
+export const fantasyLeagues = pgTable(
+  "fantasy_leagues",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    type: fantasyLeagueTypeEnum("type").notNull(),
+    inviteCode: varchar("invite_code", { length: 32 }),
+    isDemo: boolean("is_demo").default(false).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_leagues_invite_code_unique").on(table.inviteCode),
+    index("fantasy_leagues_season_type_idx").on(
+      table.fantasySeasonId,
+      table.type,
+    ),
+  ],
+);
+
+export const fantasyLeagueMembers = pgTable(
+  "fantasy_league_members",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasyLeagueId: uuid("fantasy_league_id")
+      .notNull()
+      .references(() => fantasyLeagues.id, { onDelete: "cascade" }),
+    fantasyTeamId: uuid("fantasy_team_id")
+      .notNull()
+      .references(() => fantasyTeams.id, { onDelete: "cascade" }),
+    joinedAt: timestamp("joined_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_league_members_league_team_unique").on(
+      table.fantasyLeagueId,
+      table.fantasyTeamId,
+    ),
+    index("fantasy_league_members_team_idx").on(table.fantasyTeamId),
+  ],
+);
+
+export const fantasyAdminAuditLog = pgTable(
+  "fantasy_admin_audit_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    action: varchar("action", { length: 120 }).notNull(),
+    entityType: varchar("entity_type", { length: 80 }).notNull(),
+    entityId: uuid("entity_id"),
+    reason: text("reason"),
+    changedBy: text("changed_by").notNull(),
+    before: jsonb("before").$type<Record<string, unknown>>(),
+    after: jsonb("after").$type<Record<string, unknown>>(),
+    ...timestamps,
+  },
+  (table) => [
+    index("fantasy_admin_audit_entity_idx").on(
+      table.entityType,
+      table.entityId,
+      table.createdAt,
     ),
   ],
 );

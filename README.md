@@ -14,6 +14,9 @@ Then verify the database connection and start the development server:
 
 ```bash
 npm run db:check
+npm run db:migrate
+npm run db:seed:competition
+npm run db:seed:fantasy
 npm run dev
 ```
 
@@ -28,6 +31,26 @@ Open [http://localhost:3006](http://localhost:3006) in your browser. The local `
 - Apply committed migrations with `npm run db:migrate`, testing development before production.
 - Inspect the current database with `npm run db:studio`.
 
+The fantasy seed is idempotent and creates a single playable demo account,
+its initial squad, two Classic leagues, 27 gameweeks, and tier metadata for
+the imported Thai League players. Use `npm run db:verify:fantasy` to inspect
+the resulting row counts. Demo write actions are disabled in production by
+default; set `FANTASY_DEMO_WRITE_ENABLED=true` only where the one-account demo
+should be editable.
+
+## Fantasy prototype
+
+The playable flow is available at `/team`, `/transfers`, `/points`, and
+`/leagues`. Internal match scoring, player tier/Thai-status corrections, and
+gameweek locking are available at `/admin/fantasy`.
+
+The rules engine includes 15-player squads, FPL formations and automatic
+substitutions, captain/vice-captain, Triple Captain, Bench Boost, Wildcard,
+two uses of each chip per season, two free transfers per gameweek (capped at
+four), four-point transfer hits, three players per club, seven foreign
+players, and the tier-slot limits. Scoring follows FPL except that Defensive
+Contributions and bonus points are intentionally excluded.
+
 You can start editing the application in `src/app/page.tsx`.
 
 ## Quality checks
@@ -35,6 +58,7 @@ You can start editing the application in `src/app/page.tsx`.
 ```bash
 npm run types
 npm run lint
+npm run test:rules
 npm run format:check
 ```
 

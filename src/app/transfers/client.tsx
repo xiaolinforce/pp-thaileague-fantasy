@@ -4,85 +4,208 @@ import {
   ArrowDownUp,
   ArrowRight,
   Check,
-  Filter,
-  Flame,
-  Plus,
+  LoaderCircle,
+  RotateCcw,
   Search,
-  TrendingUp,
+  ShieldCheck,
+  UserRoundMinus,
+  UserRoundPlus,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
+import {
+  cancelDemoChangesAction,
+  saveDemoSelectionAction,
+  type DemoSelectionInput,
+} from "@/app/fantasy-actions";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
 import { PlayerIdentity } from "@/components/fantasy/player-identity";
-import { localize, type CompetitionDataset } from "@/lib/competition-types";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
-import { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { DemoFantasyState } from "@/data/fantasy";
+import {
+  localize,
+  type CompetitionDataset,
+  type CompetitionPlayerView,
+} from "@/lib/competition-types";
 
-export default function TransfersClient({ data }: { data: CompetitionDataset }) {
+type PendingMember = DemoSelectionInput["members"][number];
+
+export default function TransfersClient({
+  data,
+  fantasy,
+}: {
+  data: CompetitionDataset;
+  fantasy: DemoFantasyState;
+}) {
+  const router = useRouter();
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("ALL");
+  const [tier, setTier] = useState("all");
   const [sort, setSort] = useState("points");
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [page, setPage] = useState(1);
-  const [confirmOpen, setConfirmOpen] = useState(false);
-  const [onlyWatchlist, setOnlyWatchlist] = useState(false);
-  const [maxPrice, setMaxPrice] = useState("all");
-  const { language } = useLanguage();
-  const hotPlayer = [...data.players].sort((a, b) => b.selected - a.selected)[0];
+  const [onlySquad, setOnlySquad] = useState(false);
+  const [selectedOutgoing, setSelectedOutgoing] = useState<string | null>(null);
+  const [members, setMembers] = useState<PendingMember[]>(
+    fantasy.selection.members.map((member) => ({
+      fantasyPlayerId: member.fantasyPlayerId,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder,
+      captainRole: member.captainRole,
+    })),
+  );
+  const [isPending, startTransition] = useTransition();
+  const playersByFantasyId = useMemo(
+    () =>
+      new Map(
+        data.players.flatMap((player) =>
+          player.fantasyPlayerId
+            ? [[player.fantasyPlayerId, player] as const]
+            : [],
+        ),
+      ),
+    [data.players],
+  );
+  const ownedIds = useMemo(
+    () => new Set(members.map((member) => member.fantasyPlayerId)),
+    [members],
+  );
+  const originalIds = useMemo(
+    () =>
+      new Set(
+        fantasy.selection.members.map((member) => member.fantasyPlayerId),
+      ),
+    [fantasy.selection.members],
+  );
+  const localTransferCount = [...ownedIds].filter(
+    (id) => !originalIds.has(id),
+  ).length;
+  const selectedOutgoingPlayer = selectedOutgoing
+    ? playersByFantasyId.get(selectedOutgoing)
+    : null;
 
   const players = useMemo(() => {
     return data.players
+      .filter((player) => player.fantasyPlayerId)
       .filter((player) => position === "ALL" || player.position === position)
-      .filter((player) => !onlyWatchlist || watchlist.includes(player.id))
-      .filter((player) => maxPrice === "all" || player.price <= Number(maxPrice))
+      .filter((player) => tier === "all" || player.tier === Number(tier))
+      .filter(
+        (player) =>
+          !onlySquad ||
+          (player.fantasyPlayerId && ownedIds.has(player.fantasyPlayerId)),
+      )
       .filter((player) =>
         `${player.name.th} ${player.name.en} ${player.club.th} ${player.club.en}`
           .toLowerCase()
           .includes(query.toLowerCase()),
       )
       .sort((a, b) =>
-        sort === "price"
-          ? b.price - a.price
+        sort === "tier"
+          ? a.tier - b.tier
           : sort === "form"
             ? b.form - a.form
             : b.points - a.points,
       );
-  }, [data.players, maxPrice, onlyWatchlist, position, query, sort, watchlist]);
-  const pageSize = 40;
-  const pageCount = Math.max(1, Math.ceil(players.length / pageSize));
-  const visiblePlayers = players.slice((page - 1) * pageSize, page * pageSize);
+  }, [data.players, onlySquad, ownedIds, position, query, sort, tier]);
 
-  const toggleWatchlist = (id: string) =>
-    setWatchlist((current) =>
-      current.includes(id)
-        ? current.filter((item) => item !== id)
-        : [...current, id],
+  const squadPlayers = members.flatMap((member) => {
+    const player = playersByFantasyId.get(member.fantasyPlayerId);
+    return player ? [player] : [];
+  });
+  const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
+  const premiumSlots = squadPlayers.filter((player) => player.tier <= 2).length;
+  const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
+  const clubCounts = new Map<string, number>();
+  for (const player of squadPlayers) {
+    clubCounts.set(player.clubId, (clubCounts.get(player.clubId) ?? 0) + 1);
+  }
+  const invalidClub = [...clubCounts.values()].some((count) => count > 3);
+  const quotaValid =
+    levelOne <= 3 && premiumSlots <= 10 && foreignPlayers <= 7 && !invalidClub;
+
+  function choosePlayer(player: CompetitionPlayerView) {
+    if (!player.fantasyPlayerId) return;
+    if (ownedIds.has(player.fantasyPlayerId)) {
+      setSelectedOutgoing(
+        selectedOutgoing === player.fantasyPlayerId
+          ? null
+          : player.fantasyPlayerId,
+      );
+      return;
+    }
+    if (!selectedOutgoing || !selectedOutgoingPlayer) {
+      toast.info("เลือกนักเตะในทีมที่ต้องการขายก่อน");
+      return;
+    }
+    if (player.position !== selectedOutgoingPlayer.position) {
+      toast.error("นักเตะที่ซื้อเข้าต้องอยู่ตำแหน่งเดียวกับนักเตะที่ขาย");
+      return;
+    }
+    setMembers((current) =>
+      current.map((member) =>
+        member.fantasyPlayerId === selectedOutgoing
+          ? { ...member, fantasyPlayerId: player.fantasyPlayerId! }
+          : member,
+      ),
     );
+    toast.success(
+      `${localize(selectedOutgoingPlayer.name, language)} → ${localize(player.name, language)}`,
+    );
+    setSelectedOutgoing(null);
+  }
+
+  function confirmTransfers() {
+    if (!quotaValid) {
+      toast.error("ทีมยังเกินโควต้า กรุณาแก้ให้ถูกต้องก่อนยืนยัน");
+      return;
+    }
+    startTransition(async () => {
+      const result = await saveDemoSelectionAction({
+        members,
+        activeChip: fantasy.selection.activeChip,
+      });
+      if (result.ok) {
+        toast.success(result.message);
+        router.refresh();
+      } else {
+        toast.error(result.message, {
+          description: result.violations?.join(" · "),
+        });
+      }
+    });
+  }
+
+  function cancelChanges() {
+    startTransition(async () => {
+      const result = await cancelDemoChangesAction();
+      if (result.ok) {
+        toast.success(result.message);
+        setMembers(
+          fantasy.selection.members.map((member) => ({
+            fantasyPlayerId: member.fantasyPlayerId,
+            lineupRole: member.lineupRole,
+            benchOrder: member.benchOrder,
+            captainRole: member.captainRole,
+          })),
+        );
+        setSelectedOutgoing(null);
+        router.refresh();
+      } else {
+        toast.error(result.message);
+      }
+    });
+  }
 
   return (
     <AppShell>
@@ -90,64 +213,90 @@ export default function TransfersClient({ data }: { data: CompetitionDataset }) 
         <PageHeader
           eyebrow="ตลาดนักเตะ"
           title="ซื้อขายนักเตะ"
-          description="ค้นหา เปรียบเทียบ และปรับทีมให้พร้อมก่อนเดดไลน์"
+          description={`Gameweek ${String(fantasy.gameweek.number).padStart(2, "0")} · Deadline ${new Intl.DateTimeFormat("th-TH", { dateStyle: "medium", timeStyle: "short", timeZone: "Asia/Bangkok" }).format(new Date(fantasy.gameweek.deadlineAt))}`}
           actions={
-            <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
-              <AlertDialogTrigger render={<button className="primary-button" />}>
-                ยืนยันการซื้อขาย <ArrowRight size={17} />
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>ยืนยันการซื้อขาย?</AlertDialogTitle>
-                  <AlertDialogDescription>ตรวจสอบรายชื่อนักเตะและงบประมาณให้เรียบร้อยก่อนยืนยัน รายการนี้ยังเป็นข้อมูลเกมจำลอง</AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>กลับไปตรวจสอบ</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => { setConfirmOpen(false); toast.success(language === "th" ? "ยืนยันการซื้อขายแล้ว" : "Transfers confirmed"); }}>ยืนยัน</AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+            <>
+              {(localTransferCount > 0 ||
+                fantasy.selection.netTransferCount > 0 ||
+                fantasy.selection.hasPendingChanges) && (
+                <button
+                  className="secondary-button"
+                  onClick={cancelChanges}
+                  disabled={isPending}
+                >
+                  <RotateCcw size={17} /> ยกเลิกการเปลี่ยนแปลง
+                </button>
+              )}
+              <button
+                className="primary-button"
+                onClick={confirmTransfers}
+                disabled={isPending}
+              >
+                {isPending ? (
+                  <LoaderCircle className="spin" size={17} />
+                ) : (
+                  <Check size={17} />
+                )}
+                ยืนยันทีม
+              </button>
+            </>
           }
         />
+
         <div className="transfer-overview">
           <article>
-            <span>งบคงเหลือ</span>
-            <strong>฿3.5m</strong>
-            <small>จาก ฿100.0m</small>
-          </article>
-          <article>
             <span>ฟรีทรานส์เฟอร์</span>
-            <strong>1</strong>
-            <small>ครั้งใน Gameweek นี้</small>
+            <strong>{fantasy.team.freeTransfers}</strong>
+            <small>สะสมสูงสุด 4 ครั้ง</small>
           </article>
           <article>
-            <span>นักเตะในทีม</span>
-            <strong>15/15</strong>
-            <small>ครบทุกตำแหน่ง</small>
+            <span>รายการรอยืนยัน</span>
+            <strong>{localTransferCount}</strong>
+            <small>เกินโควต้า -4 คะแนน/ครั้ง</small>
           </article>
           <article>
-            <span>รายการที่สนใจ</span>
-            <strong>{watchlist.length}</strong>
-            <small>นักเตะที่บันทึกไว้</small>
+            <span>ระดับ 1 / ช่องพรีเมียม</span>
+            <strong>
+              {levelOne}/3 · {premiumSlots}/10
+            </strong>
+            <small>ระดับต่ำกว่าใช้ช่องสูงกว่าได้</small>
+          </article>
+          <article>
+            <span>นักเตะต่างชาติ</span>
+            <strong>{foreignPlayers}/7</strong>
+            <small>
+              {quotaValid ? "ทีมผ่านโควต้า" : "ต้องแก้โควต้าก่อนยืนยัน"}
+            </small>
           </article>
         </div>
 
-        <section className="market-insight">
+        <section
+          className={`market-insight ${quotaValid ? "" : "quota-warning"}`}
+        >
           <div>
             <span className="insight-icon">
-              <Flame />
+              <ShieldCheck />
             </span>
             <div>
-              <span className="eyebrow">ตลาดกำลังร้อน</span>
-              <h3>{hotPlayer ? localize(hotPlayer.name, language) : "-"} ถูกซื้อเข้ามากที่สุด</h3>
-              <p>ผู้จัดการ 18,421 คนซื้อเข้าภายใน 24 ชั่วโมง</p>
+              <span className="eyebrow">สถานะทีม</span>
+              <h3>
+                {quotaValid ? "ทีมอยู่ภายในทุกโควต้า" : "ทีมยังเกินโควต้า"}
+              </h3>
+              <p>
+                {selectedOutgoingPlayer
+                  ? `กำลังเลือกผู้เล่นตำแหน่ง ${selectedOutgoingPlayer.position} แทน ${localize(selectedOutgoingPlayer.name, language)}`
+                  : "เลือกนักเตะในทีมที่ต้องการขาย แล้วเลือกนักเตะตำแหน่งเดียวกันเข้ามาแทน"}
+              </p>
             </div>
           </div>
-          <div className="price-alert">
-            <TrendingUp size={17} />
-            <span>คาดว่าราคาจะขึ้นคืนนี้</span>
-            <strong>+฿0.1m</strong>
-          </div>
+          {selectedOutgoingPlayer && (
+            <button
+              className="filter-button active"
+              onClick={() => setSelectedOutgoing(null)}
+            >
+              <X size={16} /> ยกเลิกเลือกขาย
+            </button>
+          )}
         </section>
 
         <section className="product-card transfer-table-card">
@@ -157,11 +306,11 @@ export default function TransfersClient({ data }: { data: CompetitionDataset }) 
               <Input
                 className="market-search-input"
                 value={query}
-                onChange={(event) => { setQuery(event.target.value); setPage(1); }}
+                onChange={(event) => setQuery(event.target.value)}
                 placeholder="ค้นหาชื่อนักเตะหรือสโมสร"
               />
               {query && (
-                <button onClick={() => { setQuery(""); setPage(1); }} aria-label="ล้างคำค้น">
+                <button onClick={() => setQuery("")} aria-label="ล้างคำค้น">
                   <X size={15} />
                 </button>
               )}
@@ -169,52 +318,54 @@ export default function TransfersClient({ data }: { data: CompetitionDataset }) 
             <ToggleGroup
               className="position-filter"
               value={[position]}
-                onValueChange={(values) => { if (values[0]) { setPosition(String(values[0])); setPage(1); } }}
+              onValueChange={(values) =>
+                values[0] && setPosition(String(values[0]))
+              }
             >
-              {["ALL", "GK", "DEF", "MID", "FWD"].map((item) => (
+              {(["ALL", "GK", "DEF", "MID", "FWD"] as const).map((item) => (
                 <ToggleGroupItem value={item} key={item}>
                   {item === "ALL" ? "ทั้งหมด" : item}
                 </ToggleGroupItem>
               ))}
             </ToggleGroup>
             <div className="sort-select">
-              <ArrowDownUp size={15} />
-              <Select value={sort} onValueChange={(value) => { if (value) { setSort(String(value)); setPage(1); } }}>
-                <SelectTrigger aria-label="เรียงลำดับนักเตะ"><SelectValue /></SelectTrigger>
+              <Select
+                value={tier}
+                onValueChange={(value) => value && setTier(String(value))}
+              >
+                <SelectTrigger aria-label="กรองระดับ">
+                  <SelectValue />
+                </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="points">คะแนนสูงสุด</SelectItem>
-                  <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
-                  <SelectItem value="price">ราคาสูงสุด</SelectItem>
+                  <SelectItem value="all">ทุกระดับ</SelectItem>
+                  <SelectItem value="1">ระดับ 1</SelectItem>
+                  <SelectItem value="2">ระดับ 2</SelectItem>
+                  <SelectItem value="3">ระดับ 3</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-            <Popover>
-              <PopoverTrigger render={<button className={`filter-button ${onlyWatchlist || maxPrice !== "all" ? "active" : ""}`} />}>
-                <Filter size={16} /> ตัวกรอง
-              </PopoverTrigger>
-              <PopoverContent align="end" className="market-filter-popover">
-                <PopoverHeader>
-                  <PopoverTitle>ตัวกรองเพิ่มเติม</PopoverTitle>
-                  <PopoverDescription>จำกัดผลลัพธ์ตามรายการที่สนใจและงบประมาณ</PopoverDescription>
-                </PopoverHeader>
-                <div className="market-filter-row">
-                  <span><strong>เฉพาะรายการที่สนใจ</strong><small>{watchlist.length} นักเตะ</small></span>
-                  <Switch checked={onlyWatchlist} onCheckedChange={(checked) => { setOnlyWatchlist(checked); setPage(1); }} />
-                </div>
-                <div className="market-filter-row vertical">
-                  <strong>ราคาสูงสุด</strong>
-                  <Select value={maxPrice} onValueChange={(value) => { if (value) { setMaxPrice(String(value)); setPage(1); } }}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">ไม่จำกัด</SelectItem>
-                      <SelectItem value="6">฿6.0m</SelectItem>
-                      <SelectItem value="8">฿8.0m</SelectItem>
-                      <SelectItem value="10">฿10.0m</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </PopoverContent>
-            </Popover>
+            <div className="sort-select">
+              <ArrowDownUp size={15} />
+              <Select
+                value={sort}
+                onValueChange={(value) => value && setSort(String(value))}
+              >
+                <SelectTrigger aria-label="เรียงลำดับ">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="points">คะแนนสูงสุด</SelectItem>
+                  <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
+                  <SelectItem value="tier">ระดับสูงสุด</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <button
+              className={`filter-button ${onlySquad ? "active" : ""}`}
+              onClick={() => setOnlySquad((value) => !value)}
+            >
+              <ShieldCheck size={16} /> ทีมของฉัน
+            </button>
           </div>
 
           <div className="market-table">
@@ -222,31 +373,48 @@ export default function TransfersClient({ data }: { data: CompetitionDataset }) 
               <span>นักเตะ</span>
               <span>นัดถัดไป</span>
               <span>ฟอร์ม</span>
-              <span>เลือกโดย</span>
-              <span>ราคา</span>
+              <span>สัญชาติ</span>
+              <span>ระดับ</span>
               <span>คะแนน</span>
               <span />
             </div>
-            {visiblePlayers.map((player) => {
-              const selected = watchlist.includes(player.id);
+            {players.map((player) => {
+              const owned = Boolean(
+                player.fantasyPlayerId && ownedIds.has(player.fantasyPlayerId),
+              );
+              const selling = player.fantasyPlayerId === selectedOutgoing;
+              const compatible =
+                !selectedOutgoingPlayer ||
+                player.position === selectedOutgoingPlayer.position;
               return (
-                <article className="market-row" key={player.id}>
+                <article
+                  className={`market-row ${selling ? "selected-transfer-player" : ""}`}
+                  key={player.id}
+                >
                   <PlayerIdentity player={player} />
                   <span>{localize(player.next, language)}</span>
                   <strong className="form-value">{player.form}</strong>
-                  <span>{player.selected}%</span>
-                  <strong>฿{player.price.toFixed(1)}</strong>
+                  <span>{player.isThai ? "ไทย" : "ต่างชาติ"}</span>
+                  <strong className={`tier-pill tier-${player.tier}`}>
+                    L{player.tier}
+                  </strong>
                   <strong className="orange-text">{player.points}</strong>
-                  <Tooltip>
-                    <TooltipTrigger
-                      className={selected ? "watching" : ""}
-                      onClick={() => toggleWatchlist(player.id)}
-                      aria-label={selected ? "นำออกจากรายการ" : "เพิ่มในรายการ"}
-                    >
-                      {selected ? <Check size={16} /> : <Plus size={16} />}
-                    </TooltipTrigger>
-                    <TooltipContent>{selected ? "นำออกจากรายการ" : "เพิ่มในรายการ"}</TooltipContent>
-                  </Tooltip>
+                  <button
+                    className={`transfer-player-action ${owned ? "owned" : ""}`}
+                    disabled={!owned && !compatible}
+                    onClick={() => choosePlayer(player)}
+                    aria-label={
+                      owned ? "เลือกนักเตะที่จะขาย" : "ซื้อนักเตะเข้าทีม"
+                    }
+                  >
+                    {owned ? (
+                      <UserRoundMinus size={17} />
+                    ) : selectedOutgoing ? (
+                      <ArrowRight size={17} />
+                    ) : (
+                      <UserRoundPlus size={17} />
+                    )}
+                  </button>
                 </article>
               );
             })}
@@ -260,19 +428,9 @@ export default function TransfersClient({ data }: { data: CompetitionDataset }) 
           )}
           <div className="table-footer">
             <span>
-              แสดง {visiblePlayers.length} จาก {players.length} นักเตะ
+              แสดง {players.length} นักเตะ · ทีมปัจจุบัน {ownedIds.size}/15
             </span>
-            {pageCount > 1 && (
-              <Pagination className="market-pagination">
-                <PaginationContent>
-                  <PaginationItem><PaginationPrevious href="#" text="ก่อนหน้า" aria-disabled={page === 1} onClick={(event) => { event.preventDefault(); setPage((value) => Math.max(1, value - 1)); }} /></PaginationItem>
-                  {[...new Set([1, page, pageCount])].sort((a, b) => a - b).map((item) => (
-                    <PaginationItem key={item}><PaginationLink href="#" isActive={item === page} onClick={(event) => { event.preventDefault(); setPage(item); }}>{item}</PaginationLink></PaginationItem>
-                  ))}
-                  <PaginationItem><PaginationNext href="#" text="ถัดไป" aria-disabled={page === pageCount} onClick={(event) => { event.preventDefault(); setPage((value) => Math.min(pageCount, value + 1)); }} /></PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            )}
+            <span>{quotaValid ? "พร้อมยืนยัน" : "ยังไม่ผ่านกติกา"}</span>
           </div>
         </section>
       </main>

@@ -17,26 +17,45 @@ import { useState } from "react";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { LanguageSwitcher, useLanguage } from "@/components/fantasy/i18n";
 import { Switch } from "@/components/ui/switch";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 
 const rules = [
   {
     title: "การจัดทีม",
-    copy: "แต่ละทีมมีนักเตะ 15 คน แบ่งเป็นผู้รักษาประตู 2 กองหลัง 5 กองกลาง 5 และกองหน้า 3 คน โดยเลือกนักเตะจากสโมสรเดียวกันได้ตามจำนวนที่กำหนด",
+    copy: "ทีมมี 15 คน: ผู้รักษาประตู 2 กองหลัง 5 กองกลาง 5 และกองหน้า 3 คน ตัวจริงต้องมี 1 GK, อย่างน้อย 3 DEF, 2 MID และ 1 FWD สโมสรเดียวกันไม่เกิน 3 คนและต่างชาติไม่เกิน 7 คน โดยลูกครึ่งไทยนับเป็นนักเตะไทย",
   },
   {
-    title: "การคิดคะแนน",
-    copy: "คะแนนมาจากการลงสนาม ประตู แอสซิสต์ คลีนชีต การเซฟ และโบนัส ส่วนรายละเอียดตัวเลขยังเป็นฉบับร่างและสามารถปรับก่อนเปิดฤดูกาล",
+    title: "ระดับนักเตะ",
+    copy: "ระดับ 1 มี 3 ช่อง ระดับ 2 มี 7 ช่อง และระดับ 3 มี 5 ช่อง ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ว่างได้ จึงมีระดับ 1 ได้สูงสุด 3 คน และระดับ 1–2 รวมกันสูงสุด 10 คน ระดับมีผลเป็นราย Gameweek",
   },
   {
     title: "การซื้อขาย",
-    copy: "ได้รับสิทธิ์ซื้อขายฟรีในแต่ละ Gameweek หากใช้เกินจำนวนฟรีอาจถูกหักคะแนน ทั้งนี้กติกาสุดท้ายจะประกาศก่อนเริ่มเกม",
+    copy: "ได้รับ Free Transfer เพิ่ม 2 ครั้งหลังแต่ละ Deadline สะสมได้สูงสุด 4 ครั้ง ส่วนที่เกินหัก 4 คะแนนต่อครั้ง นับจากความแตกต่างสุทธิของทีม และยกเลิกได้จนถึง Deadline 90 นาทีก่อนคู่แรก",
   },
   {
-    title: "กัปตันและตัวสำรอง",
-    copy: "กัปตันได้รับคะแนนคูณสอง รองกัปตันจะทำหน้าที่แทนหากกัปตันไม่ได้ลงสนาม ระบบจะเปลี่ยนตัวสำรองอัตโนมัติตามลำดับ",
+    title: "Chips",
+    copy: "มี Triple Captain, Bench Boost และ Wildcard อย่างละ 2 ครั้งตลอดฤดูกาล ใช้ได้หนึ่ง Chip ต่อ Gameweek ใช้ชนิดเดิมติดกันได้ และยกเลิกได้ก่อน Deadline โดย Wildcard เก็บ Free Transfer ที่สะสมไว้",
+  },
+  {
+    title: "การคิดคะแนน",
+    copy: "ใช้คะแนน FPL สำหรับนาที ประตู แอสซิสต์ คลีนชีต เซฟ จุดโทษ ใบเหลือง ใบแดง และประตูตัวเอง โดยไม่มี Defensive Contributions และ Bonus/BPS ผู้เล่นที่ถูกไล่ออกไม่ถูกคิดประตูที่ทีมเสียหลังออกจากสนาม",
+  },
+  {
+    title: "แมตช์ตกค้างและอันดับ",
+    copy: "แมตช์ตกค้างให้คะแนนย้อนหลังแก่ Gameweek เดิม แล้วคำนวณ Auto-sub กัปตัน Chips และอันดับใหม่ Classic League ใช้คะแนนรวมและจำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน โดยไม่นับ Wildcard",
   },
 ];
 
@@ -50,7 +69,9 @@ export default function ProfilePage() {
     news: false,
   });
   const save = () => {
-    toast.success(language === "th" ? "บันทึกการตั้งค่าแล้ว" : "Settings saved");
+    toast.success(
+      language === "th" ? "บันทึกการตั้งค่าแล้ว" : "Settings saved",
+    );
   };
 
   return (
@@ -130,11 +151,17 @@ export default function ProfilePage() {
                   <span>จังหวัด</span>
                   <Select
                     value={province}
-                    onValueChange={(value) => value && setProvince(String(value))}
+                    onValueChange={(value) =>
+                      value && setProvince(String(value))
+                    }
                   >
-                    <SelectTrigger className="settings-select"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="settings-select">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="กรุงเทพมหานคร">กรุงเทพมหานคร</SelectItem>
+                      <SelectItem value="กรุงเทพมหานคร">
+                        กรุงเทพมหานคร
+                      </SelectItem>
                       <SelectItem value="เชียงใหม่">เชียงใหม่</SelectItem>
                       <SelectItem value="ชลบุรี">ชลบุรี</SelectItem>
                     </SelectContent>
@@ -144,12 +171,18 @@ export default function ProfilePage() {
                   <span>ทีมโปรด</span>
                   <Select
                     value={favouriteClub}
-                    onValueChange={(value) => value && setFavouriteClub(String(value))}
+                    onValueChange={(value) =>
+                      value && setFavouriteClub(String(value))
+                    }
                   >
-                    <SelectTrigger className="settings-select"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="settings-select">
+                      <SelectValue />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="การท่าเรือ">การท่าเรือ</SelectItem>
-                      <SelectItem value="บุรีรัมย์ ยูไนเต็ด">บุรีรัมย์ ยูไนเต็ด</SelectItem>
+                      <SelectItem value="บุรีรัมย์ ยูไนเต็ด">
+                        บุรีรัมย์ ยูไนเต็ด
+                      </SelectItem>
                       <SelectItem value="บีจี ปทุม">บีจี ปทุม</SelectItem>
                     </SelectContent>
                   </Select>
@@ -217,7 +250,7 @@ export default function ProfilePage() {
                   {
                     key: "price" as const,
                     icon: Palette,
-                    title: "การเปลี่ยนแปลงราคา",
+                    title: "การเปลี่ยนแปลงระดับ",
                     copy: "เมื่อนักเตะในรายการสนใจมีแนวโน้มขึ้นหรือลง",
                   },
                   {
@@ -256,8 +289,8 @@ export default function ProfilePage() {
                   <CircleHelp />
                 </span>
                 <div>
-                  <h2>กติกาเกมฉบับร่าง</h2>
-                  <p>รายละเอียดส่วนนี้สามารถปรับได้ก่อนเปิดฤดูกาล</p>
+                  <h2>กติกาเกม</h2>
+                  <p>กติกาที่ระบบใช้ตรวจทีมและคำนวณคะแนน</p>
                 </div>
               </div>
               <Accordion className="rules-list" defaultValue={["0"]}>
@@ -267,15 +300,18 @@ export default function ProfilePage() {
                       <span>{String(index + 1).padStart(2, "0")}</span>
                       {rule.title}
                     </AccordionTrigger>
-                    <AccordionContent><p>{rule.copy}</p></AccordionContent>
+                    <AccordionContent>
+                      <p>{rule.copy}</p>
+                    </AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
               <div className="draft-note">
                 <Lock size={16} />
                 <span>
-                  <strong>กติกายังไม่ใช่ฉบับสุดท้าย</strong> ระบบ UI
-                  แยกจากสูตรคะแนน จึงปรับภายหลังได้โดยไม่กระทบหน้าจอ
+                  <strong>กติกาถูกบันทึกเป็นข้อมูลรายฤดูกาล</strong> ระดับ
+                  ตำแหน่ง และทีมในแต่ละ Gameweek เก็บแบบ snapshot
+                  เพื่อรักษาประวัติย้อนหลัง
                 </span>
               </div>
             </section>

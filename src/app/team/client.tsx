@@ -12,12 +12,18 @@ import {
   Shirt,
   Sparkles,
   Wallet,
+  Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
-import { localize, type CompetitionDataset, type CompetitionPlayerView } from "@/lib/competition-types";
+import {
+  localize,
+  type CompetitionDataset,
+  type CompetitionPlayerView,
+} from "@/lib/competition-types";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import {
   Dialog,
@@ -30,7 +36,17 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import type { DemoFantasyState } from "@/data/fantasy";
+import {
+  saveDemoSelectionAction,
+  type DemoSelectionInput,
+} from "@/app/fantasy-actions";
+import type { FantasyChip } from "@/lib/fantasy/rules";
 
 const rows = ["GK", "DEF", "MID", "FWD"] as const;
 
@@ -58,32 +74,139 @@ function SquadPlayer({
           />
           {captain && <i>{captain}</i>}
         </span>
-        <span className="squad-name">{localize(player.name, language).split(" ")[0]}</span>
+        <span className="squad-name">
+          {localize(player.name, language).split(" ")[0]}
+        </span>
         <span className="squad-fixture">{localize(player.next, language)}</span>
       </button>
     </Localized>
   );
 }
 
-export default function TeamClient({ data }: { data: CompetitionDataset }) {
+export default function TeamClient({
+  data,
+  fantasy,
+}: {
+  data: CompetitionDataset;
+  fantasy: DemoFantasyState;
+}) {
   const [view, setView] = useState<"pitch" | "list">("pitch");
-  const [week, setWeek] = useState(1);
+  const [week, setWeek] = useState(fantasy.gameweek.number);
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
+  const [swapFrom, setSwapFrom] = useState<string | null>(null);
+  const [activeChip, setActiveChip] = useState<FantasyChip | null>(
+    fantasy.selection.activeChip,
+  );
+  const [members, setMembers] = useState<DemoSelectionInput["members"]>(
+    fantasy.selection.members.map((member) => ({
+      fantasyPlayerId: member.fantasyPlayerId,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder,
+      captainRole: member.captainRole,
+    })),
+  );
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const { language } = useLanguage();
-  const byPosition = (position: CompetitionPlayerView["position"]) =>
-    data.players.filter((player) => player.position === position).sort((a, b) => b.points - a.points);
-  const goalkeepers = byPosition("GK");
-  const defenders = byPosition("DEF");
-  const midfielders = byPosition("MID");
-  const forwards = byPosition("FWD");
-  const starters = [goalkeepers[0], ...defenders.slice(0, 4), ...midfielders.slice(0, 4), ...forwards.slice(0, 2)].filter(Boolean);
-  const bench = [goalkeepers[1], defenders[4], midfielders[4], forwards[2]].filter(Boolean);
-  const captainId = midfielders[0]?.id;
-  const viceCaptainId = forwards[0]?.id;
-  const firstFixture = data.fixtures[0];
+  const playersByFantasyId = useMemo(
+    () =>
+      new Map(
+        data.players.flatMap((player) =>
+          player.fantasyPlayerId
+            ? [[player.fantasyPlayerId, player] as const]
+            : [],
+        ),
+      ),
+    [data.players],
+  );
+  const squad = members.flatMap((member) => {
+    const player = playersByFantasyId.get(member.fantasyPlayerId);
+    return player ? [{ player, member }] : [];
+  });
+  const starters = squad
+    .filter((item) => item.member.lineupRole === "starter")
+    .map((item) => item.player);
+  const bench = squad
+    .filter((item) => item.member.lineupRole === "bench")
+    .sort((a, b) => (a.member.benchOrder ?? 99) - (b.member.benchOrder ?? 99))
+    .map((item) => item.player);
+  const captainId = members.find(
+    (member) => member.captainRole === "captain",
+  )?.fantasyPlayerId;
+  const viceCaptainId = members.find(
+    (member) => member.captainRole === "vice_captain",
+  )?.fantasyPlayerId;
+  const selectedMember = selected?.fantasyPlayerId
+    ? members.find(
+        (member) => member.fantasyPlayerId === selected.fantasyPlayerId,
+      )
+    : null;
+  const levelOne = squad.filter((item) => item.player.tier === 1).length;
+  const premiumSlots = squad.filter((item) => item.player.tier <= 2).length;
+  const foreignPlayers = squad.filter((item) => !item.player.isThai).length;
+  const formation = (["DEF", "MID", "FWD"] as const)
+    .map(
+      (position) =>
+        starters.filter((player) => player.position === position).length,
+    )
+    .join(" · ");
 
   const saveTeam = () => {
-    toast.success(language === "th" ? "บันทึกการจัดทีมแล้ว" : "Team saved");
+    startTransition(async () => {
+      const result = await saveDemoSelectionAction({ members, activeChip });
+      if (result.ok) {
+        toast.success(result.message);
+        router.refresh();
+      } else {
+        toast.error(result.message, {
+          description: result.violations?.join(" · "),
+        });
+      }
+    });
+  };
+
+  const selectPlayer = (player: CompetitionPlayerView) => {
+    if (!player.fantasyPlayerId) return;
+    if (!swapFrom) {
+      setSelected(player);
+      return;
+    }
+    if (swapFrom === player.fantasyPlayerId) {
+      setSwapFrom(null);
+      return;
+    }
+    setMembers((current) => {
+      const from = current.find(
+        (member) => member.fantasyPlayerId === swapFrom,
+      );
+      const to = current.find(
+        (member) => member.fantasyPlayerId === player.fantasyPlayerId,
+      );
+      if (!from || !to) return current;
+      return current.map((member) => {
+        if (member.fantasyPlayerId === from.fantasyPlayerId) {
+          return {
+            ...member,
+            lineupRole: to.lineupRole,
+            benchOrder: to.benchOrder,
+            captainRole:
+              to.lineupRole === "starter" ? member.captainRole : "none",
+          };
+        }
+        if (member.fantasyPlayerId === to.fantasyPlayerId) {
+          return {
+            ...member,
+            lineupRole: from.lineupRole,
+            benchOrder: from.benchOrder,
+            captainRole:
+              from.lineupRole === "starter" ? member.captainRole : "none",
+          };
+        }
+        return member;
+      });
+    });
+    setSwapFrom(null);
+    toast.success("สลับตำแหน่งในทีมแล้ว");
   };
 
   return (
@@ -106,7 +229,11 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
                 )}
                 {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
               </button>
-              <button className="primary-button" onClick={saveTeam}>
+              <button
+                className="primary-button"
+                onClick={saveTeam}
+                disabled={isPending}
+              >
                 <Save size={17} />
                 บันทึกทีม
               </button>
@@ -129,7 +256,13 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
             <span>
               <Clock3 size={16} /> เดดไลน์จัดทีม
             </span>
-            <strong>{firstFixture ? `${localize(firstFixture.dateLabel, language)} · ${localize(firstFixture.timeLabel, language)}` : "รอยืนยัน"}</strong>
+            <strong>
+              {new Intl.DateTimeFormat("th-TH", {
+                dateStyle: "medium",
+                timeStyle: "short",
+                timeZone: "Asia/Bangkok",
+              }).format(new Date(fantasy.gameweek.deadlineAt))}
+            </strong>
           </div>
           <div className="countdown">
             <span>
@@ -149,7 +282,9 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
           </div>
           <button
             className="week-arrow"
-            onClick={() => setWeek(Math.min(data.matchweeks.at(-1) ?? 30, week + 1))}
+            onClick={() =>
+              setWeek(Math.min(data.matchweeks.at(-1) ?? 30, week + 1))
+            }
           >
             <ChevronRight />
           </button>
@@ -159,18 +294,40 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
           <section className="product-card squad-card">
             <div className="product-card-head">
               <div>
-                <span className="eyebrow">แผนการเล่น 4 · 4 · 2</span>
-                <h2>PIYA FC</h2>
+                <span className="eyebrow">แผนการเล่น {formation}</span>
+                <h2>{fantasy.team.name}</h2>
+                {swapFrom && (
+                  <small className="swap-hint">
+                    เลือกผู้เล่นอีกคนเพื่อสลับตำแหน่ง
+                  </small>
+                )}
               </div>
-              <ToggleGroup className="view-toggle" value={[view]} onValueChange={(values) => values[0] && setView(values[0] as "pitch" | "list")}>
+              <ToggleGroup
+                className="view-toggle"
+                value={[view]}
+                onValueChange={(values) =>
+                  values[0] && setView(values[0] as "pitch" | "list")
+                }
+              >
                 <Tooltip>
-                  <TooltipTrigger render={<ToggleGroupItem value="pitch" aria-label="มุมมองสนาม" />}>
+                  <TooltipTrigger
+                    render={
+                      <ToggleGroupItem value="pitch" aria-label="มุมมองสนาม" />
+                    }
+                  >
                     <LayoutGrid size={17} />
                   </TooltipTrigger>
                   <TooltipContent>มุมมองสนาม</TooltipContent>
                 </Tooltip>
                 <Tooltip>
-                  <TooltipTrigger render={<ToggleGroupItem value="list" aria-label="มุมมองรายชื่อ" />}>
+                  <TooltipTrigger
+                    render={
+                      <ToggleGroupItem
+                        value="list"
+                        aria-label="มุมมองรายชื่อ"
+                      />
+                    }
+                  >
                     <List size={17} />
                   </TooltipTrigger>
                   <TooltipContent>มุมมองรายชื่อ</TooltipContent>
@@ -197,11 +354,11 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
                             <SquadPlayer
                               key={player.id}
                               player={player}
-                              onSelect={setSelected}
+                              onSelect={selectPlayer}
                               captain={
-                                player.id === captainId
+                                player.fantasyPlayerId === captainId
                                   ? "C"
-                                  : player.id === viceCaptainId
+                                  : player.fantasyPlayerId === viceCaptainId
                                     ? "V"
                                     : undefined
                               }
@@ -223,7 +380,7 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
                     {bench.map((player, index) => (
                       <div className="bench-item" key={player.id}>
                         <b>{index === 0 ? "GK" : index}</b>
-                        <SquadPlayer player={player} onSelect={setSelected} />
+                        <SquadPlayer player={player} onSelect={selectPlayer} />
                       </div>
                     ))}
                   </div>
@@ -234,14 +391,14 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
                 <div className="roster-head">
                   <span>ผู้เล่น</span>
                   <span>นัดถัดไป</span>
-                  <span>ราคา</span>
+                  <span>ระดับ</span>
                   <span>คะแนน</span>
                 </div>
                 {[...starters, ...bench].map((player, index) => (
                   <button
                     className="roster-row"
                     key={player.id}
-                    onClick={() => setSelected(player)}
+                    onClick={() => selectPlayer(player)}
                   >
                     <span className="roster-identity">
                       <PlayerKit
@@ -258,7 +415,7 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
                       </span>
                     </span>
                     <span>{localize(player.next, language)}</span>
-                    <span>฿{player.price.toFixed(1)}</span>
+                    <span>ระดับ {player.tier}</span>
                     <b>{player.points}</b>
                   </button>
                 ))}
@@ -302,34 +459,64 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
             <section className="summary-card">
               <div className="card-title">
                 <span>
-                  <Wallet size={18} /> งบประมาณ
+                  <Wallet size={18} /> โควต้าระดับ
                 </span>
               </div>
               <div className="budget-number">
-                <strong>฿100.0</strong>
-                <span>ล้าน</span>
+                <strong>{levelOne}/3</strong>
+                <span>ระดับ 1</span>
               </div>
               <div className="budget-bar">
-                <span />
+                <span
+                  style={{ width: `${Math.min(100, (levelOne / 3) * 100)}%` }}
+                />
               </div>
               <div className="budget-split">
                 <span>
-                  ใช้ไป <b>฿96.5</b>
+                  L1 + L2 <b>{premiumSlots}/10</b>
                 </span>
                 <span>
-                  คงเหลือ <b className="orange-text">฿3.5</b>
+                  ต่างชาติ <b className="orange-text">{foreignPlayers}/7</b>
                 </span>
               </div>
             </section>
-            <button className="auto-pick" onClick={saveTeam}>
-              <Sparkles size={18} />
-              จัดทีมอัตโนมัติ <ChevronRight size={17} />
-            </button>
+            <section className="summary-card chip-card">
+              <div className="card-title">
+                <span>
+                  <Zap size={18} /> Chips
+                </span>
+              </div>
+              <div className="chip-options">
+                {(
+                  [
+                    ["triple_captain", "กัปตัน ×3"],
+                    ["bench_boost", "นับตัวสำรอง"],
+                    ["wildcard", "Wildcard"],
+                  ] as const
+                ).map(([chip, label]) => (
+                  <button
+                    key={chip}
+                    className={activeChip === chip ? "active" : ""}
+                    onClick={() =>
+                      setActiveChip((current) =>
+                        current === chip ? null : chip,
+                      )
+                    }
+                  >
+                    <span>{label}</span>
+                    <b>{fantasy.chipsRemaining[chip]} ครั้ง</b>
+                  </button>
+                ))}
+              </div>
+            </section>
           </aside>
         </div>
       </main>
 
-      <Dialog open={selected !== null} onOpenChange={(open) => !open && setSelected(null)}>
+      <Dialog
+        open={selected !== null}
+        onOpenChange={(open) => !open && setSelected(null)}
+      >
         {selected && (
           <DialogContent className="player-modal accessible-player-modal">
             <div className="modal-player-top">
@@ -342,14 +529,16 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
                 <PositionBadge position={selected.position} />
                 <DialogHeader>
                   <DialogTitle>{localize(selected.name, language)}</DialogTitle>
-                  <DialogDescription>{localize(selected.club, language)}</DialogDescription>
+                  <DialogDescription>
+                    {localize(selected.club, language)}
+                  </DialogDescription>
                 </DialogHeader>
               </div>
             </div>
             <div className="player-detail-grid">
               <div>
-                <span>ราคา</span>
-                <strong>฿{selected.price.toFixed(1)}</strong>
+                <span>ระดับ</span>
+                <strong>{selected.tier}</strong>
               </div>
               <div>
                 <span>คะแนนล่าสุด</span>
@@ -361,9 +550,81 @@ export default function TeamClient({ data }: { data: CompetitionDataset }) {
               </div>
             </div>
             <DialogFooter className="modal-actions">
-              <button className="secondary-button">ดูสถิติ</button>
+              <button
+                className="secondary-button"
+                onClick={() => {
+                  if (selected.fantasyPlayerId)
+                    setSwapFrom(selected.fantasyPlayerId);
+                  setSelected(null);
+                }}
+              >
+                สลับตัว
+              </button>
+              <button
+                className="secondary-button"
+                disabled={selectedMember?.lineupRole !== "starter"}
+                onClick={() => {
+                  if (!selected.fantasyPlayerId) return;
+                  setMembers((current) => {
+                    const oldCaptain = current.find(
+                      (member) => member.captainRole === "captain",
+                    );
+                    const wasVice =
+                      current.find(
+                        (member) => member.captainRole === "vice_captain",
+                      )?.fantasyPlayerId === selected.fantasyPlayerId;
+                    return current.map((member) => ({
+                      ...member,
+                      captainRole:
+                        member.fantasyPlayerId === selected.fantasyPlayerId
+                          ? "captain"
+                          : wasVice &&
+                              member.fantasyPlayerId ===
+                                oldCaptain?.fantasyPlayerId
+                            ? "vice_captain"
+                            : member.captainRole === "captain"
+                              ? "none"
+                              : member.captainRole,
+                    }));
+                  });
+                  setSelected(null);
+                }}
+              >
+                กัปตัน
+              </button>
+              <button
+                className="secondary-button"
+                disabled={selectedMember?.lineupRole !== "starter"}
+                onClick={() => {
+                  if (!selected.fantasyPlayerId) return;
+                  setMembers((current) => {
+                    const oldVice = current.find(
+                      (member) => member.captainRole === "vice_captain",
+                    );
+                    const wasCaptain =
+                      current.find((member) => member.captainRole === "captain")
+                        ?.fantasyPlayerId === selected.fantasyPlayerId;
+                    return current.map((member) => ({
+                      ...member,
+                      captainRole:
+                        member.fantasyPlayerId === selected.fantasyPlayerId
+                          ? "vice_captain"
+                          : wasCaptain &&
+                              member.fantasyPlayerId ===
+                                oldVice?.fantasyPlayerId
+                            ? "captain"
+                            : member.captainRole === "vice_captain"
+                              ? "none"
+                              : member.captainRole,
+                    }));
+                  });
+                  setSelected(null);
+                }}
+              >
+                รองกัปตัน
+              </button>
               <DialogClose render={<button className="primary-button" />}>
-                <Check size={17} /> เลือกผู้เล่นนี้
+                <Check size={17} /> ปิด
               </DialogClose>
             </DialogFooter>
           </DialogContent>

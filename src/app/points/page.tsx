@@ -1,70 +1,84 @@
-"use client";
+import { Crown, Info, ShieldCheck, Star } from "lucide-react";
 
-import {
-  ChevronLeft,
-  ChevronRight,
-  Crown,
-  Info,
-  Sparkles,
-  Star,
-  TrendingUp,
-} from "lucide-react";
-import { useState } from "react";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
-import { playerPool } from "@/lib/fantasy-data";
+import { getCompetitionDataset } from "@/data/competition";
+import { getDemoPointsState } from "@/data/fantasy";
 
-const scoring = [
-  { label: "ลงสนาม", value: 22, color: "#f56617" },
-  { label: "ประตู", value: 18, color: "#1a6954" },
-  { label: "แอสซิสต์", value: 12, color: "#3974c7" },
-  { label: "คลีนชีต", value: 9, color: "#8c63c7" },
-  { label: "โบนัส", value: 6, color: "#eab437" },
-];
+const breakdownLabels: Record<string, string> = {
+  appearance: "ลงสนาม",
+  goals: "ประตู",
+  assists: "แอสซิสต์",
+  cleanSheet: "คลีนชีต",
+  saves: "เซฟ",
+  penaltySaves: "เซฟจุดโทษ",
+  penaltyMisses: "พลาดจุดโทษ",
+  goalsConceded: "เสียประตู",
+  yellowCards: "ใบเหลือง",
+  redCards: "ใบแดง",
+  ownGoals: "เข้าประตูตัวเอง",
+};
 
-export default function PointsPage() {
-  const [week, setWeek] = useState(1);
-  const total = playerPool
-    .slice(0, 11)
-    .reduce((sum, player) => sum + player.points, 0);
+export default async function PointsPage() {
+  const [data, points] = await Promise.all([
+    getCompetitionDataset(),
+    getDemoPointsState(),
+  ]);
+  const playerByFantasyId = new Map(
+    data.players.flatMap((player) =>
+      player.fantasyPlayerId ? [[player.fantasyPlayerId, player] as const] : [],
+    ),
+  );
+  const resultByPlayer = new Map(
+    points.players.map((player) => [player.fantasyPlayerId, player]),
+  );
+  const rows = points.fantasy.selection.members
+    .map((member) => ({
+      member,
+      player: playerByFantasyId.get(member.fantasyPlayerId),
+      result: resultByPlayer.get(member.fantasyPlayerId),
+    }))
+    .filter((row) => row.player)
+    .sort((a, b) => {
+      if (a.member.lineupRole !== b.member.lineupRole)
+        return a.member.lineupRole === "starter" ? -1 : 1;
+      return (a.member.benchOrder ?? -1) - (b.member.benchOrder ?? -1);
+    });
+  const total = points.teamScore?.totalPoints ?? 0;
+  const captain = rows.find((row) => row.member.captainRole === "captain");
+  const best = [...rows].sort(
+    (a, b) => (b.result?.totalPoints ?? 0) - (a.result?.totalPoints ?? 0),
+  )[0];
+  const categoryTotals = new Map<string, number>();
+  for (const row of points.players) {
+    for (const [key, value] of Object.entries(row.breakdown)) {
+      categoryTotals.set(key, (categoryTotals.get(key) ?? 0) + value);
+    }
+  }
 
   return (
     <AppShell>
       <main className="content product-content">
         <PageHeader
           eyebrow="คะแนน"
-          title="ผลงาน Gameweek"
-          description="ดูคะแนนทุกคนในทีมและที่มาของคะแนนแบบละเอียด"
-          actions={
-            <div className="week-switcher">
-              <button
-                onClick={() => setWeek(Math.max(1, week - 1))}
-                disabled={week === 1}
-              >
-                <ChevronLeft />
-              </button>
-              <span>
-                GAMEWEEK <b>{String(week).padStart(2, "0")}</b>
-              </span>
-              <button onClick={() => setWeek(Math.min(30, week + 1))}>
-                <ChevronRight />
-              </button>
-            </div>
-          }
+          title={`ผลงาน Gameweek ${String(points.fantasy.gameweek.number).padStart(2, "0")}`}
+          description="คะแนนคำนวณจากข้อมูลไทยลีกและคำตัดสิน Fantasy Assist ที่แก้ไขย้อนหลังได้"
         />
-
         <div className="points-summary-grid">
           <article className="points-total-card">
             <div>
               <span>คะแนน Gameweek</span>
-              <strong>{week === 1 ? 67 : total - week * 2}</strong>
+              <strong>{total}</strong>
               <small>
-                <TrendingUp size={13} /> สูงกว่าค่าเฉลี่ย 15 คะแนน
+                <ShieldCheck size={13} />{" "}
+                {points.teamScore?.status === "final"
+                  ? "คะแนน Final"
+                  : "คะแนนชั่วคราว"}
               </small>
             </div>
             <div className="points-gauge">
-              <span>TOP</span>
-              <strong>12%</strong>
+              <span>TRANSFERS</span>
+              <strong>-{points.teamScore?.transferPoints ?? 0}</strong>
             </div>
           </article>
           <article className="points-mini-card">
@@ -73,8 +87,10 @@ export default function PointsPage() {
             </span>
             <div>
               <span>กัปตัน</span>
-              <strong>ชนาธิป</strong>
-              <small>14 × 2 = 28 pts</small>
+              <strong>{captain?.player?.name.th ?? "—"}</strong>
+              <small>
+                {points.teamScore?.captainBonus ?? 0} คะแนนเพิ่มจากกัปตัน
+              </small>
             </div>
           </article>
           <article className="points-mini-card">
@@ -83,8 +99,8 @@ export default function PointsPage() {
             </span>
             <div>
               <span>ดาวเด่น</span>
-              <strong>ธีราทร</strong>
-              <small>11 คะแนน</small>
+              <strong>{best?.player?.name.th ?? "—"}</strong>
+              <small>{best?.result?.totalPoints ?? 0} คะแนน</small>
             </div>
           </article>
         </div>
@@ -97,7 +113,10 @@ export default function PointsPage() {
                 <h2>ตัวจริงและตัวสำรอง</h2>
               </div>
               <span className="live-score">
-                <i /> อัปเดตแล้ว
+                <i />{" "}
+                {points.fantasy.gameweek.scoreComplete
+                  ? "Final"
+                  : "Provisional"}
               </span>
             </div>
             <div className="points-table">
@@ -107,37 +126,47 @@ export default function PointsPage() {
                 <span>G</span>
                 <span>A</span>
                 <span>CS</span>
-                <span>BON</span>
+                <span>LV</span>
                 <span>PTS</span>
               </div>
-              {playerPool.slice(0, 11).map((player, index) => (
-                <article className="points-row" key={player.id}>
-                  <div className="market-player">
-                    <PlayerKit
-                      color={player.color}
-                      accent={player.accent}
-                      size="small"
-                    />
-                    <div>
-                      <strong>{player.name}</strong>
+              {rows.map(
+                ({ member, player, result }) =>
+                  player && (
+                    <article
+                      className="points-row"
+                      key={member.fantasyPlayerId}
+                    >
+                      <div className="market-player">
+                        <PlayerKit
+                          color={player.color}
+                          accent={player.accent}
+                          size="small"
+                        />
+                        <div>
+                          <strong>{player.name.th}</strong>
+                          <span>
+                            {player.position} · {player.clubShort.th}
+                            {member.captainRole === "captain"
+                              ? " · กัปตัน"
+                              : member.captainRole === "vice_captain"
+                                ? " · รองกัปตัน"
+                                : ""}
+                            {member.lineupRole === "bench" ? " · สำรอง" : ""}
+                          </span>
+                        </div>
+                      </div>
+                      <span>{result?.minutes ?? 0}</span>
                       <span>
-                        {player.position} · {player.club}
-                        {index === 0 ? " · กัปตัน" : ""}
+                        {(result?.breakdown.goals ?? 0) /
+                          { GK: 10, DEF: 6, MID: 5, FWD: 4 }[player.position]}
                       </span>
-                    </div>
-                  </div>
-                  <span>90</span>
-                  <span>{[0, 0, 1, 0][index % 4]}</span>
-                  <span>{[1, 0, 0, 1, 0][index % 5]}</span>
-                  <span>
-                    {player.position === "DEF" || player.position === "GK"
-                      ? 1
-                      : "—"}
-                  </span>
-                  <span>{index < 3 ? 3 - index : 0}</span>
-                  <strong>{player.points}</strong>
-                </article>
-              ))}
+                      <span>{(result?.breakdown.assists ?? 0) / 3}</span>
+                      <span>{result?.breakdown.cleanSheet ?? 0}</span>
+                      <span>L{player.tier}</span>
+                      <strong>{result?.totalPoints ?? 0}</strong>
+                    </article>
+                  ),
+              )}
             </div>
           </section>
 
@@ -145,34 +174,33 @@ export default function PointsPage() {
             <section className="product-card score-breakdown">
               <div className="product-card-head">
                 <div>
-                  <span className="eyebrow">ที่มาคะแนน</span>
-                  <h2>รวม 67 คะแนน</h2>
+                  <span className="eyebrow">ที่มาคะแนนผู้เล่น</span>
+                  <h2>ไม่มี DC และ Bonus</h2>
                 </div>
                 <Info size={17} />
               </div>
-              <div className="donut-wrap">
-                <div className="score-donut">
-                  <span>
-                    <strong>67</strong>PTS
-                  </span>
-                </div>
-                <div className="score-legend">
-                  {scoring.map((item) => (
-                    <div key={item.label}>
-                      <i style={{ background: item.color }} />
-                      <span>{item.label}</span>
-                      <strong>{item.value}</strong>
-                    </div>
-                  ))}
-                </div>
+              <div className="score-legend standalone-score-legend">
+                {[...categoryTotals.entries()].map(([key, value]) => (
+                  <div key={key}>
+                    <i />
+                    <span>{breakdownLabels[key] ?? key}</span>
+                    <strong>{value > 0 ? `+${value}` : value}</strong>
+                  </div>
+                ))}
+                {categoryTotals.size === 0 && (
+                  <p>ยังไม่มีข้อมูลสถิติสำหรับ Gameweek นี้</p>
+                )}
               </div>
             </section>
             <section className="captain-callout">
-              <Sparkles />
+              <ShieldCheck />
               <div>
-                <span className="eyebrow">กัปตันของคุณ</span>
-                <h3>ชนาธิปทำ 28 คะแนน!</h3>
-                <p>เลือกกัปตันได้ดีกว่า 72% ของผู้จัดการทั้งหมด</p>
+                <span className="eyebrow">แมตช์ตกค้าง</span>
+                <h3>ระบบคำนวณย้อนหลังอัตโนมัติ</h3>
+                <p>
+                  Auto-sub, กัปตัน, Chips
+                  และอันดับจะถูกคำนวณใหม่เมื่อข้อมูลนัดตกค้างเข้ามา
+                </p>
               </div>
             </section>
           </aside>

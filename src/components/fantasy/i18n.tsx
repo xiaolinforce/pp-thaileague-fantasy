@@ -469,3 +469,29 @@ export function LanguageSwitcher() {
     </RadioGroup>
   );
 }
+
+/**
+ * Temporary shortcut for switching language while the product is in testing.
+ * Keep this separate from LanguageSwitcher so it can be removed without
+ * changing the Settings control.
+ */
+export function TemporarySidebarLanguageSwitcher() {
+  const { language, setLanguage } = useLanguage();
+  const nextLanguage: Language = language === "th" ? "en" : "th";
+
+  return (
+    <button
+      type="button"
+      className="sidebar-language-test-switch"
+      onClick={() => setLanguage(nextLanguage)}
+      aria-label={
+        language === "th"
+          ? "Switch language to English"
+          : "เปลี่ยนภาษาเป็นภาษาไทย"
+      }
+      title={language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
+    >
+      {language === "th" ? "TH" : "EN"}
+    </button>
+  );
+}

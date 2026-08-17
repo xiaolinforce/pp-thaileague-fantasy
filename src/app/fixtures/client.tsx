@@ -57,7 +57,9 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
   const [view, setView] = useState<"fixtures" | "stats">("fixtures");
   const [week, setWeek] = useState(data.matchweeks[0] ?? 1);
   const { language } = useLanguage();
-  const weekFixtures = data.fixtures.filter((fixture) => fixture.matchweek === week);
+  const weekFixtures = data.fixtures.filter(
+    (fixture) => fixture.matchweek === week,
+  );
   const fixturesByDate = weekFixtures.reduce<Map<string, typeof weekFixtures>>(
     (groups, fixture) => {
       const label = formatMatchDate(fixture.kickoffAt, language);
@@ -67,7 +69,11 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
     new Map(),
   );
   const rankedPlayers = [...data.players].sort((a, b) => b.form - a.form);
-  const leaders = [rankedPlayers[0], rankedPlayers[1], rankedPlayers.find((player) => player.position === "GK")].filter(Boolean);
+  const leaders = [
+    rankedPlayers[0],
+    rankedPlayers[1],
+    rankedPlayers.find((player) => player.position === "GK"),
+  ].filter(Boolean);
   return (
     <AppShell>
       <main className="content product-content">
@@ -76,16 +82,19 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
           title="โปรแกรมและสถิติ"
           description="วิเคราะห์โปรแกรม ฟอร์ม และตัวเลขสำคัญก่อนจัดทีม"
           actions={
-            <Tabs value={view} onValueChange={(value) => setView(value as "fixtures" | "stats")}>
+            <Tabs
+              value={view}
+              onValueChange={(value) => setView(value as "fixtures" | "stats")}
+            >
               <TabsList className="segment-tabs page-tabs">
-              <TabsTrigger value="fixtures">
-                <CalendarDays size={16} />
-                โปรแกรม
-              </TabsTrigger>
-              <TabsTrigger value="stats">
-                <BarChart3 size={16} />
-                สถิติ
-              </TabsTrigger>
+                <TabsTrigger value="fixtures">
+                  <CalendarDays size={16} />
+                  โปรแกรม
+                </TabsTrigger>
+                <TabsTrigger value="stats">
+                  <BarChart3 size={16} />
+                  สถิติ
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           }
@@ -108,7 +117,9 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                       <article className="fixture-row" key={fixture.id}>
                         <time>{localize(fixture.timeLabel, language)}</time>
                         <div className="fixture-club home">
-                          <strong>{localize(fixture.home.name, language)}</strong>
+                          <strong>
+                            {localize(fixture.home.name, language)}
+                          </strong>
                         </div>
                         <ClubColor
                           color={fixture.home.colors[0]}
@@ -130,7 +141,9 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                           }
                         />
                         <div className="fixture-club">
-                          <strong>{localize(fixture.away.name, language)}</strong>
+                          <strong>
+                            {localize(fixture.away.name, language)}
+                          </strong>
                         </div>
                       </article>
                     ))}
@@ -164,26 +177,28 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                   value: "5 คลีนชีต",
                   player: leaders[2],
                 },
-              ].filter((item) => item.player).map(({ title, icon: Icon, color, value, player }) => (
-                <article className="product-card leader-card" key={title}>
-                  <div className={`leader-icon ${color}`}>
-                    <Icon />
-                  </div>
-                  <span className="eyebrow">{title}</span>
-                  <div className="leader-player">
-                    <PlayerKit
-                      color={player!.color}
-                      accent={player!.accent}
-                      size="large"
-                    />
-                    <div>
-                      <h3>{localize(player!.name, language)}</h3>
-                      <p>{localize(player!.club, language)}</p>
-                      <strong>{value}</strong>
+              ]
+                .filter((item) => item.player)
+                .map(({ title, icon: Icon, color, value, player }) => (
+                  <article className="product-card leader-card" key={title}>
+                    <div className={`leader-icon ${color}`}>
+                      <Icon />
                     </div>
-                  </div>
-                </article>
-              ))}
+                    <span className="eyebrow">{title}</span>
+                    <div className="leader-player">
+                      <PlayerKit
+                        color={player!.color}
+                        accent={player!.accent}
+                        size="large"
+                      />
+                      <div>
+                        <h3>{localize(player!.name, language)}</h3>
+                        <p>{localize(player!.club, language)}</p>
+                        <strong>{value}</strong>
+                      </div>
+                    </div>
+                  </article>
+                ))}
             </div>
             <section className="product-card stats-ranking-card">
               <div className="product-card-head">
@@ -203,7 +218,7 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                     </div>
                     <strong>{player.form}</strong>
                     <span>{player.points} pts</span>
-                    <span>฿{player.price.toFixed(1)}</span>
+                    <span>ระดับ {player.tier}</span>
                   </article>
                 ))}
               </div>

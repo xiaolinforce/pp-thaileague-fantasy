@@ -1,0 +1,336 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import {
+  getDeadline,
+  getNetTransfers,
+  settleTransfers,
+  THAI_LEAGUE_FANTASY_RULES,
+  validateLineup,
+  validateSquad,
+  type LineupPlayer,
+  type SquadPlayer,
+} from "./rules.ts";
+import { calculatePlayerPoints, resolveTeamScore } from "./scoring.ts";
+
+const positions = [
+  "goalkeeper",
+  "goalkeeper",
+  "defender",
+  "defender",
+  "defender",
+  "defender",
+  "defender",
+  "midfielder",
+  "midfielder",
+  "midfielder",
+  "midfielder",
+  "midfielder",
+  "forward",
+  "forward",
+  "forward",
+] as const;
+
+function makeSquad(tiers = [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]) {
+  return positions.map<SquadPlayer>((position, index) => ({
+    id: `p${index + 1}`,
+    clubId: `c${Math.floor(index / 3) + 1}`,
+    position,
+    tier: tiers[index],
+    isThai: index >= 7,
+  }));
+}
+
+test("accepts the agreed level-B tier slots", () => {
+  assert.deepEqual(validateSquad(makeSquad()), []);
+  const tenLevelTwo = makeSquad([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]);
+  assert.deepEqual(validateSquad(tenLevelTwo), []);
+});
+
+test("rejects four level-one players", () => {
+  const violations = validateSquad(
+    makeSquad([1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]),
+  );
+  assert.ok(violations.some((violation) => violation.code === "tier_quota"));
+});
+
+test("rejects more than seven foreign players", () => {
+  const squad = makeSquad().map((player, index) => ({
+    ...player,
+    isThai: index >= 8,
+  }));
+  assert.ok(
+    validateSquad(squad).some(
+      (violation) => violation.code === "foreign_quota",
+    ),
+  );
+});
+
+test("validates formation, captain and ordered bench", () => {
+  const squad = makeSquad();
+  const starters = new Set([
+    "p1",
+    "p3",
+    "p4",
+    "p5",
+    "p8",
+    "p9",
+    "p10",
+    "p11",
+    "p13",
+    "p14",
+    "p15",
+  ]);
+  const benchOrder = new Map([
+    ["p2", 0],
+    ["p6", 1],
+    ["p7", 2],
+    ["p12", 3],
+  ]);
+  const lineup: LineupPlayer[] = squad.map((player) => ({
+    ...player,
+    lineupRole: starters.has(player.id) ? "starter" : "bench",
+    benchOrder: starters.has(player.id)
+      ? null
+      : (benchOrder.get(player.id) ?? null),
+    captainRole:
+      player.id === "p8"
+        ? "captain"
+        : player.id === "p13"
+          ? "vice_captain"
+          : "none",
+  }));
+  assert.deepEqual(validateLineup(lineup), []);
+});
+
+test("counts transfers by the net squad difference", () => {
+  const diff = getNetTransfers(["a", "b", "c"], ["a", "b", "d"]);
+  assert.deepEqual(diff, { outgoing: ["c"], incoming: ["d"], count: 1 });
+});
+
+test("adds two free transfers and caps the balance at four", () => {
+  assert.deepEqual(
+    settleTransfers({
+      freeTransfersBefore: 2,
+      transferCount: 0,
+      wildcard: false,
+    }),
+    { transferPoints: 0, freeTransfersAfter: 4 },
+  );
+  assert.deepEqual(
+    settleTransfers({
+      freeTransfersBefore: 2,
+      transferCount: 4,
+      wildcard: false,
+    }),
+    { transferPoints: 8, freeTransfersAfter: 2 },
+  );
+});
+
+test("wildcard preserves saved transfers and still adds the weekly allowance", () => {
+  assert.deepEqual(
+    settleTransfers({
+      freeTransfersBefore: 2,
+      transferCount: 12,
+      wildcard: true,
+    }),
+    { transferPoints: 0, freeTransfersAfter: 4 },
+  );
+});
+
+test("sets the deadline 90 minutes before the first kickoff", () => {
+  const kickoff = new Date("2026-08-20T12:00:00.000Z");
+  assert.equal(getDeadline(kickoff).toISOString(), "2026-08-20T10:30:00.000Z");
+});
+
+test("calculates FPL points without defensive contribution or bonus", () => {
+  const score = calculatePlayerPoints("defender", {
+    minutes: 90,
+    goals: 1,
+    sourceAssists: 1,
+    goalsConcededWhilePlaying: 0,
+    saves: 0,
+    penaltySaves: 0,
+    penaltyMisses: 0,
+    yellowCards: 1,
+    redCards: 0,
+    ownGoals: 0,
+  });
+  assert.equal(score.total, 14);
+  assert.equal("bonus" in score.breakdown, false);
+});
+
+test("ignores goals conceded after a player has left the pitch", () => {
+  const score = calculatePlayerPoints("defender", {
+    minutes: 65,
+    goals: 0,
+    sourceAssists: 0,
+    goalsConcededWhilePlaying: 0,
+    saves: 0,
+    penaltySaves: 0,
+    penaltyMisses: 0,
+    yellowCards: 0,
+    redCards: 1,
+    ownGoals: 0,
+  });
+  assert.equal(score.breakdown.cleanSheet, 4);
+  assert.equal(score.breakdown.goalsConceded, 0);
+  assert.equal(score.total, 3);
+});
+
+test("auto-subs preserve formation and triple captain passes to vice captain", () => {
+  const selection = [
+    {
+      playerId: "gk",
+      position: "goalkeeper",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "d1",
+      position: "defender",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "d2",
+      position: "defender",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "d3",
+      position: "defender",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "m1",
+      position: "midfielder",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "captain",
+    },
+    {
+      playerId: "m2",
+      position: "midfielder",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "m3",
+      position: "midfielder",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "m4",
+      position: "midfielder",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "m5",
+      position: "midfielder",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "f1",
+      position: "forward",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "vice_captain",
+    },
+    {
+      playerId: "f2",
+      position: "forward",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      playerId: "gk2",
+      position: "goalkeeper",
+      lineupRole: "bench",
+      benchOrder: 0,
+      captainRole: "none",
+    },
+    {
+      playerId: "m6",
+      position: "midfielder",
+      lineupRole: "bench",
+      benchOrder: 1,
+      captainRole: "none",
+    },
+    {
+      playerId: "d4",
+      position: "defender",
+      lineupRole: "bench",
+      benchOrder: 2,
+      captainRole: "none",
+    },
+    {
+      playerId: "f3",
+      position: "forward",
+      lineupRole: "bench",
+      benchOrder: 3,
+      captainRole: "none",
+    },
+  ] as const;
+  const results = selection.map((player) => ({
+    playerId: player.playerId,
+    minutes: player.playerId === "m1" || player.playerId === "d1" ? 0 : 90,
+    points: player.playerId === "f1" ? 8 : player.playerId === "d4" ? 6 : 2,
+  }));
+  const score = resolveTeamScore({
+    selection: [...selection],
+    playerResults: results,
+    activeChip: "triple_captain",
+    transferPoints: 0,
+  });
+  assert.deepEqual(score.autoSubstitutions, [
+    { out: "d1", in: "d4" },
+    { out: "m1", in: "m6" },
+  ]);
+  assert.equal(score.captainBonus, 16);
+});
+
+test("bench boost counts every squad member exactly once", () => {
+  const selection = makeSquad().map((player, index) => ({
+    playerId: player.id,
+    position: player.position,
+    lineupRole: index < 11 ? ("starter" as const) : ("bench" as const),
+    benchOrder: index < 11 ? null : index - 11,
+    captainRole:
+      index === 0
+        ? ("captain" as const)
+        : index === 1
+          ? ("vice_captain" as const)
+          : ("none" as const),
+  }));
+  const score = resolveTeamScore({
+    selection,
+    playerResults: selection.map((player) => ({
+      playerId: player.playerId,
+      minutes: 90,
+      points: 2,
+    })),
+    activeChip: "bench_boost",
+    transferPoints: 0,
+  });
+  assert.equal(score.totalPoints, 32);
+  assert.equal(score.countedPlayerIds.length, 15);
+});
+
+test("default rules remain the agreed 15-player configuration", () => {
+  assert.equal(THAI_LEAGUE_FANTASY_RULES.squadSize, 15);
+  assert.equal(THAI_LEAGUE_FANTASY_RULES.maximumFreeTransfers, 4);
+});

@@ -11,12 +11,16 @@ export type ClubColorPalette = [string, string, string, string];
 
 export type CompetitionPlayerView = {
   id: string;
+  fantasyPlayerId: string | null;
+  clubId: string;
   photoUrl: string | null;
   name: LocalizedText;
   club: LocalizedText;
   clubShort: LocalizedText;
   position: CompetitionPosition;
   price: number;
+  tier: number;
+  isThai: boolean;
   points: number;
   form: number;
   selected: number;

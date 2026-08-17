@@ -96,6 +96,34 @@ button:focus-visible {
   flex-direction: column;
   z-index: 30;
 }
+.sidebar-language-test-switch {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  z-index: 1;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0 7px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+.sidebar-language-test-switch:hover {
+  border-color: rgba(255, 155, 98, 0.8);
+  background: rgba(245, 102, 23, 0.24);
+}
+.sidebar-language-test-switch:active {
+  transform: translateY(1px);
+}
 .brand {
   display: flex;
   align-items: center;
@@ -1284,6 +1312,10 @@ button:focus-visible {
     padding-left: 13px;
     padding-right: 13px;
     align-items: center;
+  }
+  .sidebar-language-test-switch {
+    top: 78px;
+    right: 13px;
   }
   .brand-copy,
   .side-nav span:not(.nav-pip),
@@ -3329,7 +3361,10 @@ button:focus-visible {
   padding: 8px 18px;
   border-bottom: 1px solid #f0eeeb;
   display: grid;
-  grid-template-columns: 46px minmax(120px, 1fr) 20px 28px 20px minmax(120px, 1fr);
+  grid-template-columns: 46px minmax(120px, 1fr) 20px 28px 20px minmax(
+      120px,
+      1fr
+    );
   align-items: center;
   gap: 8px;
 }
@@ -3399,10 +3434,22 @@ button:focus-visible {
   font-weight: 800;
 }
 
-.position-gk { background: #fff3cf; color: #866200; }
-.position-def { background: #e6f3ff; color: #17619a; }
-.position-mid { background: #e7f7ef; color: #187153; }
-.position-fwd { background: #ffe9df; color: #b8410c; }
+.position-gk {
+  background: #fff3cf;
+  color: #866200;
+}
+.position-def {
+  background: #e6f3ff;
+  color: #17619a;
+}
+.position-mid {
+  background: #e7f7ef;
+  color: #187153;
+}
+.position-fwd {
+  background: #ffe9df;
+  color: #b8410c;
+}
 
 .competition-state {
   width: min(1120px, calc(100% - 32px));
@@ -4469,4 +4516,192 @@ button:focus-visible {
 
 .player-label strong {
   font-size: 16px;
+}
+
+/* Fantasy rules: level-based market and reversible transfer draft */
+.tier-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  min-height: 28px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+.tier-1 {
+  color: #7c2d12;
+  background: #ffedd5;
+}
+.tier-2 {
+  color: #1e3a8a;
+  background: #dbeafe;
+}
+.tier-3 {
+  color: #166534;
+  background: #dcfce7;
+}
+.transfer-player-action {
+  display: inline-grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #d6d3d1;
+  border-radius: 10px;
+  color: #1a6954;
+  background: #fff;
+  cursor: pointer;
+}
+.transfer-player-action.owned {
+  color: #b42318;
+  background: #fff1f0;
+  border-color: #fecaca;
+}
+.transfer-player-action:disabled {
+  opacity: 0.28;
+  cursor: not-allowed;
+}
+.selected-transfer-player {
+  background: #fff7ed;
+  box-shadow: inset 3px 0 #f56617;
+}
+.quota-warning {
+  border-color: #fecaca;
+  background: #fff7f7;
+}
+.spin {
+  animation: fantasy-spin 900ms linear infinite;
+}
+@keyframes fantasy-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.swap-hint {
+  display: inline-block;
+  margin-top: 6px;
+  color: #c2410c;
+  font-weight: 800;
+}
+.chip-options {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.chip-options button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  color: #292524;
+  background: #fafaf9;
+  cursor: pointer;
+}
+.chip-options button b {
+  color: #78716c;
+  font-size: 12px;
+}
+.chip-options button.active {
+  border-color: #f56617;
+  color: #9a3412;
+  background: #fff7ed;
+  box-shadow: inset 3px 0 #f56617;
+}
+.admin-fantasy-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  margin-top: 20px;
+}
+.admin-stat-card {
+  padding: 22px;
+}
+.admin-main-stack {
+  display: grid;
+  gap: 20px;
+}
+.admin-stat-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 18px;
+}
+.admin-stat-form label {
+  display: grid;
+  gap: 7px;
+}
+.admin-stat-form label > span {
+  color: #57534e;
+  font-size: 13px;
+  font-weight: 800;
+}
+.admin-stat-form input,
+.admin-stat-form select {
+  min-height: 42px;
+  width: 100%;
+  padding: 8px 11px;
+  border: 1px solid #d6d3d1;
+  border-radius: 10px;
+  color: #292524;
+  background: #fff;
+}
+.admin-stat-fields {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.admin-gameweek-stack {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+.admin-gameweek-meta {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0;
+}
+.admin-gameweek-meta div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admin-gameweek-meta dt {
+  color: #78716c;
+}
+.admin-gameweek-meta dd {
+  margin: 0;
+  font-weight: 800;
+  text-align: right;
+}
+.admin-rule-copy {
+  color: #57534e;
+  line-height: 1.7;
+}
+.admin-finalize-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+.admin-finalize-list form {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.fantasy-league-section + .fantasy-league-section {
+  margin-top: 20px;
+}
+@media (max-width: 980px) {
+  .admin-fantasy-grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-stat-fields {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 620px) {
+  .admin-stat-fields {
+    grid-template-columns: 1fr;
+  }
 }

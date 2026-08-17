@@ -9,6 +9,14 @@ import {
   competitionEntries,
   competitionSeasons,
   fixtures,
+  fantasyGameweeks,
+  fantasyPlayerMatchPoints,
+  fantasyPlayerMatchStats,
+  fantasyPlayers,
+  fantasyPlayerTiers,
+  fantasySeasons,
+  fantasyTeamSelectionPlayers,
+  fantasyTeamSelections,
   playerRegistrations,
   players,
   venues,
@@ -32,15 +40,6 @@ const DEFAULT_CLUB_COLORS: ClubColorPalette = [
   "#E7E5E4",
 ];
 
-function stableNumber(value: string) {
-  let result = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    result ^= value.charCodeAt(index);
-    result = Math.imul(result, 16777619);
-  }
-  return Math.abs(result >>> 0);
-}
-
 function toPosition(position: string): CompetitionPosition | null {
   if (position === "goalkeeper") return "GK";
   if (position === "defender") return "DEF";
@@ -49,18 +48,11 @@ function toPosition(position: string): CompetitionPosition | null {
   return null;
 }
 
-function fantasyValues(id: string, position: CompetitionPosition) {
-  const seed = stableNumber(id);
-  const basePrice = { GK: 4, DEF: 4, MID: 5, FWD: 5.5 }[position];
-  return {
-    price: Number((basePrice + (seed % 46) / 10).toFixed(1)),
-    points: 18 + (seed % 70),
-    form: Number((3.5 + (seed % 55) / 10).toFixed(1)),
-    selected: Number((1 + (seed % 380) / 10).toFixed(1)),
-  };
-}
-
-function localized(th: string | null, en: string | null, fallback: string): LocalizedText {
+function localized(
+  th: string | null,
+  en: string | null,
+  fallback: string,
+): LocalizedText {
   return { th: th || en || fallback, en: en || th || fallback };
 }
 
@@ -112,10 +104,7 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
       })
       .from(competitionEntries)
       .innerJoin(clubs, eq(competitionEntries.clubId, clubs.id))
-      .leftJoin(
-        clubVisualIdentities,
-        eq(clubVisualIdentities.clubId, clubs.id),
-      )
+      .leftJoin(clubVisualIdentities, eq(clubVisualIdentities.clubId, clubs.id))
       .where(
         and(
           eq(competitionEntries.competitionSeasonId, season.id),
@@ -129,6 +118,117 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
       .orderBy(asc(fixtures.matchweek), asc(fixtures.kickoffAt)),
     db.select().from(venues),
   ]);
+
+  const fantasySeason = await db.query.fantasySeasons.findFirst({
+    where: eq(fantasySeasons.competitionSeasonId, season.id),
+  });
+  const [fantasyPlayerRows, fantasyGameweekRows] = fantasySeason
+    ? await Promise.all([
+        db
+          .select()
+          .from(fantasyPlayers)
+          .where(eq(fantasyPlayers.fantasySeasonId, fantasySeason.id)),
+        db
+          .select()
+          .from(fantasyGameweeks)
+          .where(eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id))
+          .orderBy(asc(fantasyGameweeks.number)),
+      ])
+    : [[], []];
+  const fantasyPlayerIds = fantasyPlayerRows.map((player) => player.id);
+  const fantasyTierRows = fantasyPlayerIds.length
+    ? await db
+        .select({ tier: fantasyPlayerTiers, gameweek: fantasyGameweeks })
+        .from(fantasyPlayerTiers)
+        .innerJoin(
+          fantasyGameweeks,
+          eq(fantasyPlayerTiers.effectiveGameweekId, fantasyGameweeks.id),
+        )
+        .where(inArray(fantasyPlayerTiers.fantasyPlayerId, fantasyPlayerIds))
+    : [];
+  const currentFantasyGameweek =
+    fantasyGameweekRows.find((gameweek) => gameweek.status === "open") ??
+    fantasyGameweekRows.find((gameweek) => gameweek.status === "planned") ??
+    fantasyGameweekRows.at(-1);
+  const [fantasyPointRows, ownershipRows] = fantasyPlayerIds.length
+    ? await Promise.all([
+        db
+          .select({
+            stats: fantasyPlayerMatchStats,
+            points: fantasyPlayerMatchPoints,
+          })
+          .from(fantasyPlayerMatchStats)
+          .innerJoin(
+            fantasyPlayerMatchPoints,
+            eq(
+              fantasyPlayerMatchStats.id,
+              fantasyPlayerMatchPoints.playerMatchStatsId,
+            ),
+          )
+          .where(
+            inArray(fantasyPlayerMatchStats.fantasyPlayerId, fantasyPlayerIds),
+          ),
+        currentFantasyGameweek
+          ? db
+              .select({
+                fantasyPlayerId: fantasyTeamSelectionPlayers.fantasyPlayerId,
+                selectionId: fantasyTeamSelections.id,
+              })
+              .from(fantasyTeamSelectionPlayers)
+              .innerJoin(
+                fantasyTeamSelections,
+                eq(
+                  fantasyTeamSelectionPlayers.selectionId,
+                  fantasyTeamSelections.id,
+                ),
+              )
+              .where(
+                eq(
+                  fantasyTeamSelections.fantasyGameweekId,
+                  currentFantasyGameweek.id,
+                ),
+              )
+          : Promise.resolve([]),
+      ])
+    : [[], []];
+  const fantasyPlayerByPlayerId = new Map(
+    fantasyPlayerRows.map((player) => [player.playerId, player]),
+  );
+  const tierByFantasyPlayerId = new Map<string, number>();
+  for (const row of fantasyTierRows
+    .filter(
+      (row) =>
+        !currentFantasyGameweek ||
+        row.gameweek.number <= currentFantasyGameweek.number,
+    )
+    .sort((a, b) => a.gameweek.number - b.gameweek.number)) {
+    tierByFantasyPlayerId.set(row.tier.fantasyPlayerId, row.tier.level);
+  }
+  const pointsByFantasyPlayer = new Map<
+    string,
+    Array<{ matchweek: number; points: number }>
+  >();
+  const fixtureById = new Map(
+    fixtureRows.map((fixture) => [fixture.id, fixture]),
+  );
+  for (const row of fantasyPointRows) {
+    const fixture = fixtureById.get(row.stats.fixtureId);
+    const list = pointsByFantasyPlayer.get(row.stats.fantasyPlayerId) ?? [];
+    list.push({
+      matchweek: fixture?.matchweek ?? 0,
+      points: row.points.totalPoints,
+    });
+    pointsByFantasyPlayer.set(row.stats.fantasyPlayerId, list);
+  }
+  const ownershipByFantasyPlayer = new Map<string, number>();
+  for (const row of ownershipRows) {
+    ownershipByFantasyPlayer.set(
+      row.fantasyPlayerId,
+      (ownershipByFantasyPlayer.get(row.fantasyPlayerId) ?? 0) + 1,
+    );
+  }
+  const selectionCount = new Set(ownershipRows.map((row) => row.selectionId))
+    .size;
 
   const entryIds = entryRows.map(({ entry }) => entry.id);
   const registrationRows = entryIds.length
@@ -160,8 +260,15 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
     const view: CompetitionClubView = {
       id: club.id,
       name: localized(entry.displayNameTh, entry.displayNameEn, club.nameEn),
-      shortName: localized(club.shortNameTh, club.shortNameEn, entry.abbreviation || club.nameEn),
-      abbreviation: entry.abbreviation || club.abbreviation || club.nameEn.slice(0, 3).toUpperCase(),
+      shortName: localized(
+        club.shortNameTh,
+        club.shortNameEn,
+        entry.abbreviation || club.nameEn,
+      ),
+      abbreviation:
+        entry.abbreviation ||
+        club.abbreviation ||
+        club.nameEn.slice(0, 3).toUpperCase(),
       colors,
     };
     clubByEntry.set(entry.id, view);
@@ -169,23 +276,29 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
   });
   const venueById = new Map(venueRows.map((venue) => [venue.id, venue]));
 
-  const fixtureViews: CompetitionFixtureView[] = fixtureRows.flatMap((fixture) => {
-    const home = clubByEntry.get(fixture.homeEntryId);
-    const away = clubByEntry.get(fixture.awayEntryId);
-    if (!home || !away) return [];
-    const venue = fixture.venueId ? venueById.get(fixture.venueId) : null;
-    return [{
-      id: fixture.id,
-      matchweek: fixture.matchweek,
-      kickoffAt: fixture.kickoffAt?.toISOString() ?? null,
-      dateLabel: formatFixtureDate(fixture.kickoffAt),
-      timeLabel: formatFixtureTime(fixture.kickoffAt),
-      home,
-      away,
-      venue: venue ? localized(venue.nameTh, venue.nameEn, venue.nameTh) : null,
-      status: fixture.status,
-    }];
-  });
+  const fixtureViews: CompetitionFixtureView[] = fixtureRows.flatMap(
+    (fixture) => {
+      const home = clubByEntry.get(fixture.homeEntryId);
+      const away = clubByEntry.get(fixture.awayEntryId);
+      if (!home || !away) return [];
+      const venue = fixture.venueId ? venueById.get(fixture.venueId) : null;
+      return [
+        {
+          id: fixture.id,
+          matchweek: fixture.matchweek,
+          kickoffAt: fixture.kickoffAt?.toISOString() ?? null,
+          dateLabel: formatFixtureDate(fixture.kickoffAt),
+          timeLabel: formatFixtureTime(fixture.kickoffAt),
+          home,
+          away,
+          venue: venue
+            ? localized(venue.nameTh, venue.nameEn, venue.nameTh)
+            : null,
+          status: fixture.status,
+        },
+      ];
+    },
+  );
 
   const fixturesByEntry = new Map<string, typeof fixtureRows>();
   for (const fixture of fixtureRows) {
@@ -198,15 +311,22 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
 
   const playerViews: CompetitionPlayerView[] = registrationRows.flatMap(
     ({ registration, player }) => {
-      const position = toPosition(registration.registeredPosition || player.primaryPosition);
+      const position = toPosition(
+        registration.registeredPosition || player.primaryPosition,
+      );
       const club = clubByEntry.get(registration.competitionEntryId);
       const clubRow = clubRowsByEntry.get(registration.competitionEntryId);
       if (!position || !club || !clubRow) return [];
-      const nextFixture = (fixturesByEntry.get(registration.competitionEntryId) ?? [])[0];
+      const nextFixture = (fixturesByEntry.get(
+        registration.competitionEntryId,
+      ) ?? [])[0];
       let next: LocalizedText = { th: "ยังไม่มีโปรแกรม", en: "No fixture" };
       if (nextFixture) {
-        const isHome = nextFixture.homeEntryId === registration.competitionEntryId;
-        const opponent = clubByEntry.get(isHome ? nextFixture.awayEntryId : nextFixture.homeEntryId);
+        const isHome =
+          nextFixture.homeEntryId === registration.competitionEntryId;
+        const opponent = clubByEntry.get(
+          isHome ? nextFixture.awayEntryId : nextFixture.homeEntryId,
+        );
         if (opponent) {
           next = {
             th: `${opponent.abbreviation} (${isHome ? "H" : "A"})`,
@@ -215,18 +335,59 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
         }
       }
       const [color, accent] = club.colors;
-      return [{
-        id: player.id,
-        photoUrl: player.photoUrl,
-        name: localized(player.fullNameTh, player.fullNameEn, player.fullNameEn),
-        club: club.name,
-        clubShort: club.shortName,
-        position,
-        ...fantasyValues(player.id, position),
-        next,
-        color,
-        accent,
-      }];
+      const fantasyPlayer = fantasyPlayerByPlayerId.get(player.id);
+      const tier = fantasyPlayer
+        ? (tierByFantasyPlayerId.get(fantasyPlayer.id) ?? 3)
+        : 3;
+      const matchPoints = fantasyPlayer
+        ? (pointsByFantasyPlayer.get(fantasyPlayer.id) ?? []).sort(
+            (a, b) => b.matchweek - a.matchweek,
+          )
+        : [];
+      const recentPoints = matchPoints.slice(0, 5);
+      return [
+        {
+          id: player.id,
+          fantasyPlayerId: fantasyPlayer?.id ?? null,
+          clubId: clubRow.club.id,
+          photoUrl: player.photoUrl,
+          name: localized(
+            player.fullNameTh,
+            player.fullNameEn,
+            player.fullNameEn,
+          ),
+          club: club.name,
+          clubShort: club.shortName,
+          position,
+          price: tier,
+          points: matchPoints.reduce((sum, item) => sum + item.points, 0),
+          form:
+            recentPoints.length > 0
+              ? Number(
+                  (
+                    recentPoints.reduce((sum, item) => sum + item.points, 0) /
+                    recentPoints.length
+                  ).toFixed(1),
+                )
+              : 0,
+          selected:
+            fantasyPlayer && selectionCount > 0
+              ? Number(
+                  (
+                    ((ownershipByFantasyPlayer.get(fantasyPlayer.id) ?? 0) /
+                      selectionCount) *
+                    100
+                  ).toFixed(1),
+                )
+              : 0,
+          trend: "same" as const,
+          tier,
+          isThai: fantasyPlayer?.isThai ?? false,
+          next,
+          color,
+          accent,
+        },
+      ];
     },
   );
 
