@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  AlertTriangle,
-  ArrowRight,
-  CheckCircle2,
-  Gamepad2,
-  Mail,
-  ShieldCheck,
-} from "lucide-react";
+import { AlertTriangle, ArrowRight, Mail } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -174,47 +167,28 @@ export default function OnboardingClient({
           <h1>
             {upgradeMode
               ? "เก็บทีม Guest นี้ไว้กับบัญชีของคุณ"
-              : "จัดทีมไทยลีกในฝัน แล้ววัดฝีมือตลอดฤดูกาล"}
+              : "จัดทีมไทยลีกในฝัน"}
           </h1>
           <p>
-            เริ่มเล่นได้ทันที
-            หรือเข้าสู่ระบบเพื่อเก็บทีมไว้อย่างปลอดภัยและเล่นต่อได้ทุกอุปกรณ์
+            {upgradeMode
+              ? "เข้าสู่ระบบเพื่อเก็บทีมนี้และเล่นต่อได้ทุกอุปกรณ์"
+              : "เลือกนักเตะ ลุ้นคะแนน และแข่งกับเพื่อนตลอดฤดูกาล"}
           </p>
-          <ul>
-            <li>
-              <CheckCircle2 /> ทีมและคะแนนผูกกับบัญชี
-            </li>
-            <li>
-              <CheckCircle2 /> ตั้งชื่อผู้จัดการและชื่อทีมได้
-            </li>
-            <li>
-              <CheckCircle2 /> เข้าต่อจากมือถือหรือคอมพิวเตอร์เครื่องอื่น
-            </li>
-          </ul>
         </section>
 
         <section className="onboarding-panel" aria-labelledby="start-title">
           <div className="onboarding-panel-heading">
-            <span>
-              <Gamepad2 />
-            </span>
             <div>
-              <p>พร้อมลงสนาม</p>
+              <p>{upgradeMode ? "เก็บทีมของคุณ" : "พร้อมลงสนาม"}</p>
               <h2 id="start-title">
-                {upgradeMode
-                  ? "สมัครสมาชิกหรือเข้าสู่ระบบ"
-                  : "เลือกวิธีเริ่มเล่น"}
+                {upgradeMode ? "เข้าสู่ระบบ" : "เริ่มเล่น"}
               </h2>
             </div>
           </div>
 
           <div className="member-card">
             <div className="member-card-title">
-              <ShieldCheck />
-              <div>
-                <strong>เข้าสู่ระบบหรือสมัครสมาชิก</strong>
-                <small>แนะนำ — ไม่มีรหัสผ่าน</small>
-              </div>
+              <strong>เข้าสู่ระบบหรือสมัครสมาชิก</strong>
             </div>
 
             {googleEnabled && (
@@ -224,7 +198,7 @@ export default function OnboardingClient({
                 disabled={busy}
               >
                 <span className="google-g">G</span>
-                ดำเนินการต่อด้วย Google
+                ใช้บัญชี Google
               </button>
             )}
 
@@ -316,34 +290,39 @@ export default function OnboardingClient({
           </div>
 
           {!upgradeMode && (
-            <div className="guest-card">
-              <div className="guest-warning">
-                <AlertTriangle />
-                <div>
-                  <strong>เล่นต่อโดยไม่สมัครสมาชิก</strong>
-                  <p>
-                    เล่นได้บนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น
-                    ข้อมูลอาจเข้าถึงไม่ได้หากล้างคุกกี้หรือไม่ได้กลับมาเล่นภายใน
-                    30 วัน และระบบจะสุ่มชื่อให้โดยเปลี่ยนไม่ได้
-                  </p>
-                </div>
+            <>
+              <div className="onboarding-choice-divider">
+                <span>หรือ</span>
               </div>
-              <label className="guest-confirmation">
-                <input
-                  type="checkbox"
-                  checked={guestAccepted}
-                  onChange={(event) => setGuestAccepted(event.target.checked)}
-                />
-                ฉันเข้าใจความเสี่ยงและต้องการเริ่มแบบ Guest
-              </label>
-              <button
-                className="auth-button guest-button"
-                onClick={playAsGuest}
-                disabled={busy || !guestAccepted}
-              >
-                เริ่มเล่นเลย <ArrowRight />
-              </button>
-            </div>
+              <div className="guest-card">
+                <div className="guest-warning">
+                  <AlertTriangle />
+                  <div>
+                    <strong>เล่นแบบ Guest</strong>
+                    <ul className="guest-risk-list">
+                      <li>เฉพาะอุปกรณ์และเบราว์เซอร์นี้</li>
+                      <li>ชื่อเป็นแบบสุ่มและเปลี่ยนไม่ได้</li>
+                      <li>ล้างคุกกี้หรือหายไป 30 วัน อาจเข้าถึงทีมไม่ได้</li>
+                    </ul>
+                  </div>
+                </div>
+                <label className="guest-confirmation">
+                  <input
+                    type="checkbox"
+                    checked={guestAccepted}
+                    onChange={(event) => setGuestAccepted(event.target.checked)}
+                  />
+                  ฉันเข้าใจและต้องการเล่นแบบ Guest
+                </label>
+                <button
+                  className="auth-button guest-button"
+                  onClick={playAsGuest}
+                  disabled={busy || !guestAccepted}
+                >
+                  เล่นแบบ Guest <ArrowRight />
+                </button>
+              </div>
+            </>
           )}
 
           {error && (
@@ -351,10 +330,6 @@ export default function OnboardingClient({
               {error}
             </p>
           )}
-          <p className="auth-legal">
-            ระบบสมาชิก production
-            จะเปิดหลังจากยืนยันโดเมนและเผยแพร่เงื่อนไขการใช้งานกับนโยบายความเป็นส่วนตัวแล้ว
-          </p>
         </section>
       </main>
     </Localized>

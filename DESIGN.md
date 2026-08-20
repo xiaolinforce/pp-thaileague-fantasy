@@ -59,11 +59,13 @@ current session's team identity. Reuse `AppShell` and `PageHeader` for product r
 
 ## Account onboarding
 
-The root route presents member sign-in first and Guest play second. The member
-card explains passwordless Email OTP and Google; the Guest card must retain an
-explicit acknowledgement beside the warning that access is device/browser
-bound, a 30-day absence can make it inaccessible, and names are random and
-locked. Never pre-check that acknowledgement.
+The root route presents member sign-in first and Guest play second. Keep this
+screen decision-oriented: the hero uses one headline and one supporting
+sentence, and the action panel avoids repeating marketing benefits. The member
+card exposes passwordless Email OTP and Google directly. The Guest card presents
+the device/browser boundary, 30-day access risk, and locked random names as
+short scannable facts, with an explicit acknowledgement beside them. Never
+pre-check that acknowledgement.
 
 Email OTP must visibly expose a labelled email field, Turnstile state, a
 separate labelled six-digit field after sending, disabled/pending states, and a

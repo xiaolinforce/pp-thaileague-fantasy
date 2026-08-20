@@ -53,21 +53,19 @@ const translations: Record<string, string> = {
   การแจ้งเตือน: "Notifications",
 
   // Authentication and onboarding
-  "จัดทีมไทยลีกในฝัน แล้ววัดฝีมือตลอดฤดูกาล":
-    "Build your dream Thai League squad and compete all season",
+  จัดทีมไทยลีกในฝัน: "Build your dream Thai League squad",
   "เก็บทีม Guest นี้ไว้กับบัญชีของคุณ": "Save this Guest team to your account",
-  "เริ่มเล่นได้ทันที หรือเข้าสู่ระบบเพื่อเก็บทีมไว้อย่างปลอดภัยและเล่นต่อได้ทุกอุปกรณ์":
-    "Start immediately, or sign in to keep your team safe and continue on any device",
-  ทีมและคะแนนผูกกับบัญชี: "Keep your team and points with your account",
-  ตั้งชื่อผู้จัดการและชื่อทีมได้: "Choose your manager and team names",
-  เข้าต่อจากมือถือหรือคอมพิวเตอร์เครื่องอื่น:
-    "Continue on another phone or computer",
+  เข้าสู่ระบบเพื่อเก็บทีมนี้และเล่นต่อได้ทุกอุปกรณ์:
+    "Sign in to save this team and continue on any device",
+  "เลือกนักเตะ ลุ้นคะแนน และแข่งกับเพื่อนตลอดฤดูกาล":
+    "Pick players, score points, and compete with friends all season",
   พร้อมลงสนาม: "Ready to play",
-  เลือกวิธีเริ่มเล่น: "Choose how to start",
+  เก็บทีมของคุณ: "Save your team",
+  เริ่มเล่น: "Start playing",
+  เข้าสู่ระบบ: "Sign in",
   สมัครสมาชิกหรือเข้าสู่ระบบ: "Sign up or sign in",
   เข้าสู่ระบบหรือสมัครสมาชิก: "Sign in or create an account",
-  "แนะนำ — ไม่มีรหัสผ่าน": "Recommended — no password",
-  "ดำเนินการต่อด้วย Google": "Continue with Google",
+  "ใช้บัญชี Google": "Use Google account",
   หรือ: "or",
   "รหัส OTP 6 หลัก": "6-digit OTP",
   ยืนยันและเริ่มเล่น: "Verify and start playing",
@@ -75,14 +73,13 @@ const translations: Record<string, string> = {
   "ส่งรหัส OTP ทางอีเมล": "Send an OTP by email",
   "การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้ แต่ยังทดลองเล่นแบบ Guest ได้":
     "Member sign-in is not enabled in this environment, but Guest play is available",
-  เล่นต่อโดยไม่สมัครสมาชิก: "Continue without an account",
-  "เล่นได้บนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น ข้อมูลอาจเข้าถึงไม่ได้หากล้างคุกกี้หรือไม่ได้กลับมาเล่นภายใน 30 วัน และระบบจะสุ่มชื่อให้โดยเปลี่ยนไม่ได้":
-    "This works only on this device and browser. Clearing cookies or staying away for 30 days may make the data inaccessible, and random names cannot be changed.",
-  "ฉันเข้าใจความเสี่ยงและต้องการเริ่มแบบ Guest":
-    "I understand the risk and want to start as a Guest",
-  เริ่มเล่นเลย: "Start playing",
-  "ระบบสมาชิก production จะเปิดหลังจากยืนยันโดเมนและเผยแพร่เงื่อนไขการใช้งานกับนโยบายความเป็นส่วนตัวแล้ว":
-    "Production accounts will open after domain verification and publication of reviewed terms and privacy policy.",
+  "เล่นแบบ Guest": "Play as Guest",
+  เฉพาะอุปกรณ์และเบราว์เซอร์นี้: "Only on this device and browser",
+  ชื่อเป็นแบบสุ่มและเปลี่ยนไม่ได้: "Names are random and cannot be changed",
+  "ล้างคุกกี้หรือหายไป 30 วัน อาจเข้าถึงทีมไม่ได้":
+    "Clearing cookies or staying away for 30 days may make the team inaccessible",
+  "ฉันเข้าใจและต้องการเล่นแบบ Guest":
+    "I understand and want to play as a Guest",
   "บัญชี Guest": "Guest account",
   บัญชีสมาชิก: "Member account",
   สมัครสมาชิกเพื่อเก็บทีม: "Create an account to save this team",
