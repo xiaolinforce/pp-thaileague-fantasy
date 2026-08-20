@@ -4,7 +4,6 @@ import { AlertTriangle, ArrowRight, Mail } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { Brand } from "@/components/fantasy/app-shell";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { authClient } from "@/lib/auth/client";
 
@@ -188,12 +187,11 @@ export default function OnboardingClient({
         </div>
 
         <section className="onboarding-hero">
-          <Brand />
           <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
           <h1>
             {upgradeMode
               ? "เก็บทีม Guest นี้ไว้กับบัญชีของคุณ"
-              : "จัดทีมไทยลีกในฝัน"}
+              : "จัดทีมไทยลีกของคุณ"}
           </h1>
           <p>
             {upgradeMode

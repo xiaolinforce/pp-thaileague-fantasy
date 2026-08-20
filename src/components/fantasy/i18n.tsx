@@ -53,7 +53,7 @@ const translations: Record<string, string> = {
   การแจ้งเตือน: "Notifications",
 
   // Authentication and onboarding
-  จัดทีมไทยลีกในฝัน: "Build your dream Thai League squad",
+  จัดทีมไทยลีกของคุณ: "Build your Thai League squad",
   "เก็บทีม Guest นี้ไว้กับบัญชีของคุณ": "Save this Guest team to your account",
   เข้าสู่ระบบเพื่อเก็บทีมนี้และเล่นต่อได้ทุกอุปกรณ์:
     "Sign in to save this team and continue on any device",
