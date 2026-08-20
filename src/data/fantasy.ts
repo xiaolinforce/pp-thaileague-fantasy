@@ -20,11 +20,11 @@ import {
   fixtures,
 } from "@/db/schema";
 import type { FantasyChip } from "@/lib/fantasy/rules";
+import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
-const DEMO_MANAGER_NAME = "Piyawat K.";
 
-export type DemoSquadMember = {
+export type FantasySquadMember = {
   fantasyPlayerId: string;
   clubId: string;
   position: "goalkeeper" | "defender" | "midfielder" | "forward";
@@ -46,7 +46,7 @@ export type ClassicStanding = {
   mine: boolean;
 };
 
-export type DemoFantasyState = {
+export type FantasyState = {
   seasonId: string;
   team: {
     id: string;
@@ -68,7 +68,7 @@ export type DemoFantasyState = {
     hasPendingChanges: boolean;
     netTransferCount: number;
     transferPoints: number;
-    members: DemoSquadMember[];
+    members: FantasySquadMember[];
   };
   chipsRemaining: Record<FantasyChip, number>;
   leagues: Array<{
@@ -80,46 +80,13 @@ export type DemoFantasyState = {
   }>;
 };
 
-export async function getDemoFantasyState(): Promise<DemoFantasyState> {
+export async function getFantasyState(): Promise<FantasyState> {
   await connection();
-
-  const fantasySeason = await db.query.fantasySeasons.findFirst({
-    where: eq(fantasySeasons.slug, FANTASY_SEASON_SLUG),
-  });
-  if (!fantasySeason) throw new Error("Fantasy season has not been seeded.");
-
-  const gameweeks = await db
-    .select()
-    .from(fantasyGameweeks)
-    .where(eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id))
-    .orderBy(asc(fantasyGameweeks.number));
-  const gameweek =
-    gameweeks.find((item) => item.status === "open") ??
-    gameweeks.find((item) => item.status === "planned") ??
-    gameweeks.at(-1);
-  if (!gameweek) throw new Error("Fantasy Gameweeks have not been seeded.");
-
-  const teamRows = await db
-    .select({ team: fantasyTeams, manager: fantasyManagers })
-    .from(fantasyTeams)
-    .innerJoin(fantasyManagers, eq(fantasyTeams.managerId, fantasyManagers.id))
-    .where(
-      and(
-        eq(fantasyTeams.fantasySeasonId, fantasySeason.id),
-        eq(fantasyManagers.displayName, DEMO_MANAGER_NAME),
-      ),
-    )
-    .limit(1);
-  const demo = teamRows[0];
-  if (!demo) throw new Error("Demo fantasy team has not been seeded.");
-
-  const selection = await db.query.fantasyTeamSelections.findFirst({
-    where: and(
-      eq(fantasyTeamSelections.fantasyTeamId, demo.team.id),
-      eq(fantasyTeamSelections.fantasyGameweekId, gameweek.id),
-    ),
-  });
-  if (!selection) throw new Error("Demo team selection has not been seeded.");
+  const profile = await requireFantasyProfile();
+  const fantasySeason = profile.season;
+  const gameweek = profile.gameweek;
+  const selection = profile.selection;
+  const current = { team: profile.team, manager: profile.manager };
 
   const members = await db
     .select()
@@ -151,7 +118,7 @@ export async function getDemoFantasyState(): Promise<DemoFantasyState> {
   };
   for (const row of allSelections) {
     if (
-      row.fantasy_team_selections.fantasyTeamId === demo.team.id &&
+      row.fantasy_team_selections.fantasyTeamId === current.team.id &&
       row.fantasy_team_selections.status === "locked" &&
       row.fantasy_team_selections.activeChip
     ) {
@@ -222,7 +189,7 @@ export async function getDemoFantasyState(): Promise<DemoFantasyState> {
         gameweekPoints: scoresByTeam.get(row.team.id)?.gameweek ?? 0,
         totalPoints: scoresByTeam.get(row.team.id)?.total ?? 0,
         transferCount: transfersByTeam.get(row.team.id) ?? 0,
-        mine: row.team.id === demo.team.id,
+        mine: row.team.id === current.team.id,
       }))
       .sort(
         (a, b) =>
@@ -243,10 +210,10 @@ export async function getDemoFantasyState(): Promise<DemoFantasyState> {
   return {
     seasonId: fantasySeason.id,
     team: {
-      id: demo.team.id,
-      name: demo.team.name,
-      managerName: demo.manager.displayName,
-      freeTransfers: demo.team.freeTransfers,
+      id: current.team.id,
+      name: current.team.name,
+      managerName: current.manager.displayName,
+      freeTransfers: current.team.freeTransfers,
     },
     gameweek: {
       id: gameweek.id,
@@ -265,7 +232,7 @@ export async function getDemoFantasyState(): Promise<DemoFantasyState> {
       members: members.map((member) => ({
         fantasyPlayerId: member.fantasyPlayerId,
         clubId: member.clubIdSnapshot,
-        position: member.positionSnapshot as DemoSquadMember["position"],
+        position: member.positionSnapshot as FantasySquadMember["position"],
         tier: member.tierSnapshot,
         isThai: member.isThaiSnapshot,
         lineupRole: member.lineupRole,
@@ -282,15 +249,15 @@ export async function getDemoFantasyState(): Promise<DemoFantasyState> {
   };
 }
 
-export type DemoPlayerPointsRow = {
+export type PlayerPointsRow = {
   fantasyPlayerId: string;
   minutes: number;
   totalPoints: number;
   breakdown: Record<string, number>;
 };
 
-export async function getDemoPointsState() {
-  const fantasy = await getDemoFantasyState();
+export async function getFantasyPointsState() {
+  const fantasy = await getFantasyState();
   const season = await db.query.fantasySeasons.findFirst({
     where: eq(fantasySeasons.id, fantasy.seasonId),
   });
@@ -321,7 +288,7 @@ export async function getDemoPointsState() {
         )
         .where(inArray(fantasyPlayerMatchStats.fixtureId, fixtureIds))
     : [];
-  const byPlayer = new Map<string, DemoPlayerPointsRow>();
+  const byPlayer = new Map<string, PlayerPointsRow>();
   for (const row of pointRows) {
     const current = byPlayer.get(row.stats.fantasyPlayerId) ?? {
       fantasyPlayerId: row.stats.fantasyPlayerId,
@@ -357,6 +324,7 @@ export async function getDemoPointsState() {
 
 export async function getFantasyAdminGameweeks() {
   await connection();
+  await requireAdmin();
   const season = await db.query.fantasySeasons.findFirst({
     where: eq(fantasySeasons.slug, FANTASY_SEASON_SLUG),
   });

@@ -6,7 +6,8 @@
 - Thai-first responsive landing, dashboard, squad, transfers, points, leagues,
   fixtures, profile/rules, and internal Fantasy administration screens.
 - Client-side Thai/English display preference.
-- One playable demo identity with additional demo managers for league tables.
+- Email OTP, Google, and device-bound Guest identities with 30-day sliding sessions.
+- Account-owned managers and season teams; valid opening squads are provisioned automatically.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.
 - Pure player-points and team-score engines with automatic substitutions.
@@ -21,11 +22,12 @@
 These are required before the prototype can safely become a public, writable
 Fantasy service:
 
-1. Add authentication, account lifecycle, and server-side authorization.
-2. Replace the hard-coded `PIYA FC` demo context with the authenticated
-   manager/team context on every read and mutation.
-3. Protect `/admin/fantasy` with explicit roles and permissions, trustworthy
-   actor identity, and a reviewed audit policy.
+1. Verify a production domain and sending domain; publish reviewed privacy and
+   terms pages; complete Google OAuth verification; then approve
+   `AUTH_PRODUCTION_READY`.
+2. Add account recovery/support procedures, auth/email observability, provider
+   quota alerts, abuse review, and periodic cleanup of expired auth artifacts.
+3. Review the admin role assignment process and audit retention policy.
 4. Define a controlled import schedule, upstream failure behavior, source terms,
    rate limits, freshness reporting, and operational ownership.
 5. Add database backup/recovery, migration promotion, rollback, monitoring,
@@ -39,8 +41,9 @@ Fantasy service:
 9. Run a full rules acceptance review with the product owner and freeze the
    season configuration before opening entries.
 
-`FANTASY_DEMO_WRITE_ENABLED` is only a mutation guard. It does not satisfy any
-authentication or authorization blocker above.
+Better Auth session checks and the admin role boundary are implemented. The
+production-readiness environment gate is an intentional launch control, not a
+substitute for those authorization checks.
 
 ## Prepared next steps
 
@@ -64,7 +67,6 @@ authentication or authorization blocker above.
 
 ## Later capabilities
 
-- Authenticated manager registration, team naming, and account settings.
 - Joining and creating real private leagues.
 - Notifications for deadlines, player availability, and reviewed score changes.
 - Managed player news, availability, suspension, and injury data.

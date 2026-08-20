@@ -3,7 +3,7 @@ import { Crown, Info, ShieldCheck, Star } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { getCompetitionDataset } from "@/data/competition";
-import { getDemoPointsState } from "@/data/fantasy";
+import { getFantasyPointsState } from "@/data/fantasy";
 
 const breakdownLabels: Record<string, string> = {
   appearance: "ลงสนาม",
@@ -22,7 +22,7 @@ const breakdownLabels: Record<string, string> = {
 export default async function PointsPage() {
   const [data, points] = await Promise.all([
     getCompetitionDataset(),
-    getDemoPointsState(),
+    getFantasyPointsState(),
   ]);
   const playerByFantasyId = new Map(
     data.players.flatMap((player) =>

@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   check,
   date,
@@ -102,6 +103,24 @@ export const fantasyLeagueTypeEnum = pgEnum("fantasy_league_type", [
   "private",
 ]);
 
+export const fantasyManagerStatusEnum = pgEnum("fantasy_manager_status", [
+  "seeded",
+  "guest",
+  "member",
+  "abandoned",
+]);
+
+export const authEmailProviderEnum = pgEnum("auth_email_provider", [
+  "resend",
+  "brevo",
+  "mailjet",
+]);
+
+export const authEmailDeliveryStatusEnum = pgEnum(
+  "auth_email_delivery_status",
+  ["accepted", "failed", "skipped_quota"],
+);
+
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
@@ -110,6 +129,127 @@ const timestamps = {
     .defaultNow()
     .notNull(),
 };
+
+export const authUsers = pgTable(
+  "auth_users",
+  {
+    id: text("id").primaryKey(),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    emailVerified: boolean("email_verified").default(false).notNull(),
+    image: text("image"),
+    isAnonymous: boolean("is_anonymous").default(false),
+    role: varchar("role", { length: 16 }).default("member").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("auth_users_email_unique").on(table.email),
+    index("auth_users_anonymous_idx").on(table.isAnonymous),
+    check("auth_users_role_check", sql`${table.role} in ('member', 'admin')`),
+  ],
+);
+
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: text("id").primaryKey(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    token: text("token").notNull(),
+    ipAddress: text("ip_address"),
+    userAgent: text("user_agent"),
+    userId: text("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("auth_sessions_token_unique").on(table.token),
+    index("auth_sessions_user_idx").on(table.userId),
+    index("auth_sessions_expires_idx").on(table.expiresAt),
+  ],
+);
+
+export const authAccounts = pgTable(
+  "auth_accounts",
+  {
+    id: text("id").primaryKey(),
+    issuer: text("issuer").notNull(),
+    accountId: text("account_id").notNull(),
+    providerId: text("provider_id").notNull(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    accessToken: text("access_token"),
+    refreshToken: text("refresh_token"),
+    idToken: text("id_token"),
+    accessTokenExpiresAt: timestamp("access_token_expires_at", {
+      withTimezone: true,
+    }),
+    refreshTokenExpiresAt: timestamp("refresh_token_expires_at", {
+      withTimezone: true,
+    }),
+    scope: text("scope"),
+    password: text("password"),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("auth_accounts_issuer_account_unique").on(
+      table.issuer,
+      table.accountId,
+    ),
+    index("auth_accounts_user_idx").on(table.userId),
+  ],
+);
+
+export const authVerifications = pgTable(
+  "auth_verifications",
+  {
+    id: text("id").primaryKey(),
+    identifier: text("identifier").notNull(),
+    value: text("value").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    index("auth_verifications_identifier_idx").on(table.identifier),
+    index("auth_verifications_expires_idx").on(table.expiresAt),
+  ],
+);
+
+export const authRateLimits = pgTable(
+  "auth_rate_limits",
+  {
+    id: text("id").primaryKey(),
+    key: text("key").notNull(),
+    count: integer("count").notNull(),
+    lastRequest: bigint("last_request", { mode: "number" }).notNull(),
+  },
+  (table) => [uniqueIndex("auth_rate_limits_key_unique").on(table.key)],
+);
+
+export const authEmailDeliveries = pgTable(
+  "auth_email_deliveries",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    provider: authEmailProviderEnum("provider").notNull(),
+    status: authEmailDeliveryStatusEnum("status").notNull(),
+    recipientHash: varchar("recipient_hash", { length: 64 }).notNull(),
+    purpose: varchar("purpose", { length: 32 }).default("sign-in").notNull(),
+    providerMessageId: text("provider_message_id"),
+    errorCode: text("error_code"),
+    ...timestamps,
+  },
+  (table) => [
+    index("auth_email_deliveries_provider_created_idx").on(
+      table.provider,
+      table.createdAt,
+    ),
+    index("auth_email_deliveries_recipient_created_idx").on(
+      table.recipientHash,
+      table.createdAt,
+    ),
+  ],
+);
 
 export const competitions = pgTable(
   "competitions",
@@ -632,11 +772,22 @@ export const fantasyManagers = pgTable(
   "fantasy_managers",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    authUserId: text("auth_user_id").references(() => authUsers.id, {
+      onDelete: "set null",
+    }),
     displayName: text("display_name").notNull(),
     isDemo: boolean("is_demo").default(true).notNull(),
+    status: fantasyManagerStatusEnum("status").default("seeded").notNull(),
+    nameChangeAvailableAt: timestamp("name_change_available_at", {
+      withTimezone: true,
+    }),
     ...timestamps,
   },
-  (table) => [index("fantasy_managers_demo_idx").on(table.isDemo)],
+  (table) => [
+    uniqueIndex("fantasy_managers_auth_user_unique").on(table.authUserId),
+    index("fantasy_managers_demo_idx").on(table.isDemo),
+    index("fantasy_managers_status_idx").on(table.status),
+  ],
 );
 
 export const fantasyTeams = pgTable(
@@ -651,6 +802,7 @@ export const fantasyTeams = pgTable(
       .references(() => fantasyManagers.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     freeTransfers: smallint("free_transfers").default(0).notNull(),
+    nameChangesUsed: smallint("name_changes_used").default(0).notNull(),
     isActive: boolean("is_active").default(true).notNull(),
     ...timestamps,
   },
@@ -666,6 +818,10 @@ export const fantasyTeams = pgTable(
     check(
       "fantasy_teams_free_transfers_check",
       sql`${table.freeTransfers} >= 0`,
+    ),
+    check(
+      "fantasy_teams_name_changes_check",
+      sql`${table.nameChangesUsed} between 0 and 3`,
     ),
   ],
 );

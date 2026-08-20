@@ -17,9 +17,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import {
-  cancelDemoChangesAction,
-  saveDemoSelectionAction,
-  type DemoSelectionInput,
+  cancelFantasyChangesAction,
+  saveFantasySelectionAction,
+  type FantasySelectionInput,
 } from "@/app/fantasy-actions";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
@@ -33,21 +33,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { DemoFantasyState } from "@/data/fantasy";
+import type { FantasyState } from "@/data/fantasy";
 import {
   localize,
   type CompetitionDataset,
   type CompetitionPlayerView,
 } from "@/lib/competition-types";
 
-type PendingMember = DemoSelectionInput["members"][number];
+type PendingMember = FantasySelectionInput["members"][number];
 
 export default function TransfersClient({
   data,
   fantasy,
 }: {
   data: CompetitionDataset;
-  fantasy: DemoFantasyState;
+  fantasy: FantasyState;
 }) {
   const router = useRouter();
   const { language } = useLanguage();
@@ -171,7 +171,7 @@ export default function TransfersClient({
       return;
     }
     startTransition(async () => {
-      const result = await saveDemoSelectionAction({
+      const result = await saveFantasySelectionAction({
         members,
         activeChip: fantasy.selection.activeChip,
       });
@@ -188,7 +188,7 @@ export default function TransfersClient({
 
   function cancelChanges() {
     startTransition(async () => {
-      const result = await cancelDemoChangesAction();
+      const result = await cancelFantasyChangesAction();
       if (result.ok) {
         toast.success(result.message);
         setMembers(

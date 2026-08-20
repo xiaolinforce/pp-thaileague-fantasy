@@ -2,7 +2,7 @@
 
 ## Product character
 
-Thai Fantasy should feel like a credible Thai football product: energetic,
+PP Thai League Fantasy should feel like a credible Thai football product: energetic,
 competitive, and warm, while remaining clear enough for repeated squad and
 score-management tasks. The interface combines a dark match-night shell with
 bright orange actions and clean white working surfaces.
@@ -55,7 +55,22 @@ use stable alignment and tabular numerals where practical.
 
 Desktop uses a fixed 238px navy sidebar and a flexible main canvas. The sidebar
 contains the brand, primary Fantasy navigation, support/settings links, and the
-current demo manager. Reuse `AppShell` and `PageHeader` for product routes.
+current session's team identity. Reuse `AppShell` and `PageHeader` for product routes.
+
+## Account onboarding
+
+The root route presents member sign-in first and Guest play second. The member
+card explains passwordless Email OTP and Google; the Guest card must retain an
+explicit acknowledgement beside the warning that access is device/browser
+bound, a 30-day absence can make it inaccessible, and names are random and
+locked. Never pre-check that acknowledgement.
+
+Email OTP must visibly expose a labelled email field, Turnstile state, a
+separate labelled six-digit field after sending, disabled/pending states, and a
+plain failure message. The production UI hides methods whose complete provider
+configuration is not enabled. Guest profiles expose an upgrade action; member
+profiles expose sign-out and naming controls. Do not make a Guest name field
+appear editable.
 
 At 900px and below, the sidebar gives way to the bottom mobile navigation. The
 four highest-frequency destinations remain visible; Leagues, Fixtures, Profile,

@@ -10,6 +10,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "types": "tsc -p tsconfig.json --noEmit --skipLibCheck",
+    "test:email": "node --experimental-strip-types --test src/lib/email/*.test.ts",
     "test:rules": "node --experimental-strip-types --test src/lib/fantasy/*.test.ts",
     "db:check": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/check-database.ts",
     "db:generate": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs generate",
@@ -25,6 +26,7 @@
   "dependencies": {
     "@base-ui/react": "^1.7.0",
     "@neondatabase/serverless": "^1.1.0",
+    "better-auth": "^1.7.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "drizzle-orm": "^0.45.2",

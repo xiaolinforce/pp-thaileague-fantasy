@@ -3,6 +3,8 @@ import { Mitr } from "next/font/google";
 import { LanguageProvider } from "@/components/fantasy/i18n";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { IdentityProvider } from "@/components/fantasy/identity";
+import { getCurrentFantasyIdentity } from "@/lib/auth/context";
 import "./globals.css";
 
 const mitr = Mitr({
@@ -16,10 +18,10 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3006",
   ),
-  title: "Thai Fantasy — เกมแฟนตาซีฟุตบอลไทย",
+  title: "PP Thai League Fantasy — เกมแฟนตาซีฟุตบอลไทย",
   description: "จัดทีมในฝัน เลือกนักเตะไทยลีก และแข่งขันกับเพื่อนตลอดฤดูกาล",
   openGraph: {
-    title: "Thai Fantasy — เกมแฟนตาซีฟุตบอลไทย",
+    title: "PP Thai League Fantasy — เกมแฟนตาซีฟุตบอลไทย",
     description: "จัดทีมไทยลีกในฝันของคุณ วางแผน และท้าทายเพื่อนตลอดฤดูกาล",
     type: "website",
     locale: "th_TH",
@@ -27,18 +29,37 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Thai Fantasy",
+    title: "PP Thai League Fantasy",
     description: "จัดทีมไทยลีกในฝันของคุณ",
     images: ["/og.png"],
   },
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  const current = await getCurrentFantasyIdentity();
+  const identity =
+    current?.manager && current.team
+      ? {
+          managerName: current.manager.displayName,
+          teamName: current.team.name,
+          email: current.isAnonymous ? null : current.user.email,
+          isGuest: current.isAnonymous,
+          role: current.role,
+          teamNameChangesRemaining: Math.max(
+            0,
+            3 - current.team.nameChangesUsed,
+          ),
+          managerNameChangeAvailableAt:
+            current.manager.nameChangeAvailableAt?.toISOString() ?? null,
+        }
+      : null;
   return (
     <html lang="th" className={mitr.variable} suppressHydrationWarning>
       <body>
         <LanguageProvider>
-          <TooltipProvider>{children}</TooltipProvider>
+          <IdentityProvider identity={identity}>
+            <TooltipProvider>{children}</TooltipProvider>
+          </IdentityProvider>
           <Toaster position="bottom-center" richColors />
         </LanguageProvider>
       </body>

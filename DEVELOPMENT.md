@@ -21,15 +21,26 @@ Copy-Item .env.example .env.local
 
 Set the pooled Neon connection string for the intended development branch:
 
-| Variable                     | Purpose                                                                                    |
-| ---------------------------- | ------------------------------------------------------------------------------------------ |
-| `DATABASE_URL`               | Server runtime, Drizzle Kit, migration, seed, and verification database connection.        |
-| `FANTASY_DEMO_WRITE_ENABLED` | Allows demo mutations in production only when explicitly `true`; leave `false` by default. |
-| `NEXT_PUBLIC_SITE_URL`       | Optional public metadata base URL; local fallback is `http://localhost:3006`.              |
+| Variable                                                   | Purpose                                                                                     |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                             | Server runtime, Drizzle Kit, migration, seed, and verification connection.                  |
+| `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                    | Better Auth origin and signing/encryption secret.                                           |
+| `AUTH_EMAIL_HASH_SECRET`                                   | Separate salt for privacy-safe recipient hashes in delivery logs.                           |
+| `AUTH_EMAIL_ENABLED`, `AUTH_GOOGLE_ENABLED`                | Opt each sign-in method into the current environment.                                       |
+| `AUTH_PRODUCTION_READY`                                    | Additional production-only gate; keep false until domain/legal/provider review is complete. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                 | Google OAuth web application credentials.                                                   |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`   | Required pair for every Email OTP request.                                                  |
+| `AUTH_EMAIL_PROVIDERS`, `EMAIL_FROM`, provider keys/limits | Resend → Mailjet delivery routing and quota headroom.                                       |
+| `NEXT_PUBLIC_SITE_URL`                                     | Optional public metadata base URL; local fallback is `http://localhost:3006`.               |
 
-`NEXT_PUBLIC_SITE_URL` is optional and is therefore not required in
-`.env.example`. Never give `DATABASE_URL` a `NEXT_PUBLIC_` prefix or commit a
-real connection string.
+Never commit a real connection string, auth secret, OAuth credential, email API
+key, or Turnstile secret. The Turnstile site key is intentionally public; do
+not expose any other secret with a `NEXT_PUBLIC_` prefix.
+
+For local Email OTP testing, configure Turnstile test keys plus one email
+provider and a permitted sender. For public production, use a verified sending
+domain, configure the Google callback at `/api/auth/callback/google`, publish
+reviewed privacy/terms pages, and only then set `AUTH_PRODUCTION_READY=true`.
 
 Prepare and start a fresh development database:
 
@@ -54,6 +65,7 @@ Open `http://localhost:3006`.
 | `npm run start`                 | Serve an existing production build.                             |
 | `npm run lint`                  | Run ESLint.                                                     |
 | `npm run types`                 | Run TypeScript without emitting files.                          |
+| `npm run test:email`            | Run transactional email routing and fallback tests.             |
 | `npm run test:rules`            | Run squad, transfer, deadline, scoring, and substitution tests. |
 | `npm run format:check`          | Check repository formatting with Prettier.                      |
 | `npm run format`                | Rewrite formatting across the repository; use intentionally.    |
@@ -107,8 +119,11 @@ Confirm the target before any migration, import, normalization, or seed command.
   same change.
 - Do not use `src/lib/fantasy-data.ts` as a new runtime source; it is legacy
   prototype data.
-- Do not enable production demo writes or treat `/admin/fantasy` as protected
-  until authentication and server-side authorization are implemented.
+- Derive player ownership from `requireFantasyProfile`; never accept manager or
+  team ownership from a client payload. Require `requireAdmin` on every admin
+  read and mutation.
+- Preserve expired/abandoned Guest Fantasy rows. Session or auth cleanup must
+  not cascade into managers, teams, selections, scores, or standings.
 
 ## Verification checklist
 
@@ -117,6 +132,7 @@ checks before handoff:
 
 ```bash
 npm run test:rules
+npm run test:email
 npm run types
 npm run lint
 npm run format:check

@@ -8,6 +8,7 @@ import {
   competitionEntries,
   fantasyAdminAuditLog,
   fantasyGameweeks,
+  fantasyManagers,
   fantasyPlayers,
   fantasyPlayerMatchPoints,
   fantasyPlayerMatchStats,
@@ -35,10 +36,10 @@ import {
 } from "@/lib/fantasy/rules";
 import { calculatePlayerPoints } from "@/lib/fantasy/scoring";
 import { recalculateGameweek } from "@/lib/fantasy/scoring-service";
+import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
+import { validateFantasyName } from "@/lib/auth/names";
 
-const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
-
-export type DemoSelectionInput = {
+export type FantasySelectionInput = {
   members: Array<{
     fantasyPlayerId: string;
     lineupRole: "starter" | "bench";
@@ -48,48 +49,72 @@ export type DemoSelectionInput = {
   activeChip: FantasyChip | null;
 };
 
-export type DemoActionResult =
+export type FantasyActionResult =
   | { ok: true; message: string }
   | { ok: false; message: string; violations?: string[] };
 
-function assertDemoMutationAllowed() {
-  if (
-    process.env.NODE_ENV === "production" &&
-    process.env.FANTASY_DEMO_WRITE_ENABLED !== "true"
-  ) {
-    throw new Error("Demo writes are disabled in production.");
+export async function updateFantasyNamesAction(input: {
+  managerName: string;
+  teamName: string;
+}): Promise<FantasyActionResult> {
+  const profile = await requireFantasyProfile();
+  if (profile.isAnonymous) {
+    return {
+      ok: false,
+      message: "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อได้ กรุณาสมัครสมาชิกก่อน",
+    };
   }
-}
-
-async function getDemoContext() {
-  const season = await db.query.fantasySeasons.findFirst({
-    where: eq(fantasySeasons.slug, FANTASY_SEASON_SLUG),
-  });
-  if (!season) throw new Error("Fantasy season was not found.");
-  const gameweeks = await db
-    .select()
-    .from(fantasyGameweeks)
-    .where(eq(fantasyGameweeks.fantasySeasonId, season.id))
-    .orderBy(asc(fantasyGameweeks.number));
-  const gameweek =
-    gameweeks.find((item) => item.status === "open") ??
-    gameweeks.find((item) => item.status === "planned");
-  if (!gameweek) throw new Error("No open Gameweek was found.");
-  const team = await db.query.fantasyTeams.findFirst({
-    where: and(
-      eq(fantasyTeams.fantasySeasonId, season.id),
-      eq(fantasyTeams.name, "PIYA FC"),
-    ),
-  });
-  if (!team) throw new Error("Demo team was not found.");
-  const selection = await db.query.fantasyTeamSelections.findFirst({
-    where: and(
-      eq(fantasyTeamSelections.fantasyTeamId, team.id),
-      eq(fantasyTeamSelections.fantasyGameweekId, gameweek.id),
-    ),
-  });
-  if (!selection) throw new Error("Demo selection was not found.");
-  return { season, gameweeks, gameweek, team, selection };
+  const managerName = validateFantasyName(input.managerName);
+  const teamName = validateFantasyName(input.teamName);
+  if (!managerName.ok || !teamName.ok) {
+    return {
+      ok: false,
+      message:
+        (!managerName.ok ? managerName.message : teamName.message) ??
+        "ชื่อไม่ถูกต้อง",
+    };
+  }
+  const now = new Date();
+  const managerChanged = managerName.value !== profile.manager.displayName;
+  const teamChanged = teamName.value !== profile.team.name;
+  if (
+    managerChanged &&
+    profile.manager.nameChangeAvailableAt &&
+    profile.manager.nameChangeAvailableAt > now
+  ) {
+    return {
+      ok: false,
+      message: `เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่ ${profile.manager.nameChangeAvailableAt.toLocaleDateString("th-TH")}`,
+    };
+  }
+  if (teamChanged && profile.team.nameChangesUsed >= 3) {
+    return { ok: false, message: "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว" };
+  }
+  if (managerChanged) {
+    const nextChange = new Date(now);
+    nextChange.setUTCDate(nextChange.getUTCDate() + 30);
+    await db
+      .update(fantasyManagers)
+      .set({
+        displayName: managerName.value,
+        nameChangeAvailableAt: nextChange,
+        updatedAt: now,
+      })
+      .where(eq(fantasyManagers.id, profile.manager.id));
+  }
+  if (teamChanged) {
+    await db
+      .update(fantasyTeams)
+      .set({
+        name: teamName.value,
+        nameChangesUsed: profile.team.nameChangesUsed + 1,
+        updatedAt: now,
+      })
+      .where(eq(fantasyTeams.id, profile.team.id));
+  }
+  revalidateFantasyPages();
+  revalidatePath("/profile");
+  return { ok: true, message: "บันทึกชื่อเรียบร้อยแล้ว" };
 }
 
 async function getCurrentPlayerSnapshots(
@@ -167,11 +192,10 @@ function revalidateFantasyPages() {
   }
 }
 
-export async function saveDemoSelectionAction(
-  input: DemoSelectionInput,
-): Promise<DemoActionResult> {
-  assertDemoMutationAllowed();
-  const { season, gameweek, team, selection } = await getDemoContext();
+export async function saveFantasySelectionAction(
+  input: FantasySelectionInput,
+): Promise<FantasyActionResult> {
+  const { season, gameweek, team, selection } = await requireFantasyProfile();
   if (!isBeforeDeadline(gameweek.deadlineAt)) {
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
@@ -334,9 +358,8 @@ export async function saveDemoSelectionAction(
   };
 }
 
-export async function cancelDemoChangesAction(): Promise<DemoActionResult> {
-  assertDemoMutationAllowed();
-  const { gameweek, selection } = await getDemoContext();
+export async function cancelFantasyChangesAction(): Promise<FantasyActionResult> {
+  const { gameweek, selection } = await requireFantasyProfile();
   if (!isBeforeDeadline(gameweek.deadlineAt)) {
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
@@ -424,7 +447,8 @@ function formInteger(formData: FormData, key: string) {
 }
 
 export async function savePlayerMatchStatsAction(formData: FormData) {
-  assertDemoMutationAllowed();
+  const admin = await requireAdmin();
+  const changedBy = `${admin.user.email} (${admin.user.id})`;
   const fixtureId = String(formData.get("fixtureId") ?? "");
   const fantasyPlayerId = String(formData.get("fantasyPlayerId") ?? "");
   const reason = String(
@@ -503,7 +527,7 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
         previousValue,
         nextValue,
         reason,
-        changedBy: "demo-admin",
+        changedBy,
       });
     }
   }
@@ -532,7 +556,7 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
     entityType: "fantasy_player_match_stats",
     entityId: stat.id,
     reason,
-    changedBy: "demo-admin",
+    changedBy,
     before: existing ?? null,
     after: values,
   });
@@ -554,7 +578,8 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
 export async function updateFantasyPlayerClassificationAction(
   formData: FormData,
 ) {
-  assertDemoMutationAllowed();
+  const admin = await requireAdmin();
+  const changedBy = `${admin.user.email} (${admin.user.id})`;
   const fantasyPlayerId = String(formData.get("fantasyPlayerId") ?? "");
   const effectiveGameweekId = String(formData.get("effectiveGameweekId") ?? "");
   const level = formInteger(formData, "level");
@@ -647,7 +672,7 @@ export async function updateFantasyPlayerClassificationAction(
     entityType: "fantasy_player",
     entityId: fantasyPlayerId,
     reason,
-    changedBy: "demo-admin",
+    changedBy,
     before: { level: previousTier?.level ?? null, isThai: player.isThai },
     after: { level, isThai, effectiveGameweekId },
   });
@@ -655,7 +680,7 @@ export async function updateFantasyPlayerClassificationAction(
 }
 
 export async function lockFantasyGameweekAction(formData: FormData) {
-  assertDemoMutationAllowed();
+  await requireAdmin();
   const gameweekId = String(formData.get("gameweekId") ?? "");
   const gameweek = await db.query.fantasyGameweeks.findFirst({
     where: eq(fantasyGameweeks.id, gameweekId),
@@ -773,7 +798,7 @@ export async function lockFantasyGameweekAction(formData: FormData) {
 }
 
 export async function finalizeFantasyGameweekAction(formData: FormData) {
-  assertDemoMutationAllowed();
+  await requireAdmin();
   const gameweekId = String(formData.get("gameweekId") ?? "");
   await db
     .update(fantasyGameweeks)

@@ -19,7 +19,7 @@ truth and must change together with this guide and their tests.
 | Fantasy season     | The game configuration attached one-to-one to a competition season.                                                            |
 | Gameweek           | A numbered scoring period whose deadline is derived from the first fixture kickoff.                                            |
 | Fantasy player     | A registered competition player with a locked Fantasy position, Thai classification, availability, and effective tier history. |
-| Manager            | The owner identity of a Fantasy team. Managers are demo records today, not authenticated users.                                |
+| Manager            | The persistent Fantasy identity owned by an auth account while active; it may outlive a Guest session.                         |
 | Selection          | One team's squad, lineup, captaincy, active chip, and transfer settlement for one Gameweek.                                    |
 | Selection snapshot | The club, position, tier, and Thai status copied onto a selected player for historical consistency.                            |
 | Transfer revision  | An ordered record of confirmed or cancelled pre-deadline squad revisions.                                                      |
@@ -162,6 +162,27 @@ Classic standings sort by:
 2. Counted transfers, lowest first.
 3. Team name, locale order.
 
-The current application has Overall and Private Classic demo leagues. Cup
-leagues, head-to-head scoring, live price changes, and authenticated multi-user
-ownership are not implemented.
+The current application has Overall and Private Classic leagues. Seeded
+opponents keep local standings populated during development. Cup
+leagues, head-to-head scoring, and live price changes are not implemented.
+
+## Accounts, Guests, and names
+
+- A user may start as a device-bound Guest or authenticate with Email OTP or
+  Google. There are no passwords.
+- Guest and member sessions expire after 30 days and slide forward when the
+  user returns. Losing a Guest session does not delete its manager, selections,
+  scores, or standings.
+- Every account owns one manager identity. The manager owns at most one team
+  per Fantasy season.
+- A new team receives a deterministic valid 15-player opening squad and joins
+  every Overall league for that season.
+- Guest manager and team names are random and cannot be edited. Member names
+  may duplicate, are 3–30 characters, and accept Thai, English, digits, spaces,
+  period, underscore, and hyphen after whitespace normalization and abuse/
+  impersonation filtering.
+- A member may change the manager name once every 30 days and the team name up
+  to three times per season.
+- Upgrading a Guest to a new member preserves the Guest manager/team. If the
+  destination account already owns a team, that account team wins: the Guest
+  manager becomes `abandoned`, stays in historical rankings, and is not merged.

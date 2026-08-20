@@ -18,14 +18,14 @@ import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { localize, type CompetitionDataset } from "@/lib/competition-types";
-import type { DemoFantasyState } from "@/data/fantasy";
+import type { FantasyState } from "@/data/fantasy";
 
 export default function DashboardClient({
   data,
   fantasy,
 }: {
   data: CompetitionDataset;
-  fantasy: DemoFantasyState;
+  fantasy: FantasyState;
 }) {
   const { language } = useLanguage();
   const owned = new Set(
@@ -49,7 +49,11 @@ export default function DashboardClient({
       <main className="content product-content">
         <PageHeader
           eyebrow="ภาพรวม"
-          title={`สวัสดี ผู้จัดการ ${fantasy.team.name}`}
+          title={
+            language === "th"
+              ? `สวัสดี ผู้จัดการ ${fantasy.team.name}`
+              : `Welcome, ${fantasy.team.name} Manager`
+          }
           description="ทุกอย่างพร้อมสำหรับ Gameweek แรก — ตรวจทีมก่อนเดดไลน์วันศุกร์"
           actions={
             <Link href="/team" className="primary-button">

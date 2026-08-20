@@ -8,7 +8,8 @@ import {
 } from "@/app/fantasy-actions";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { getCompetitionDataset } from "@/data/competition";
-import { getDemoFantasyState, getFantasyAdminGameweeks } from "@/data/fantasy";
+import { getFantasyState, getFantasyAdminGameweeks } from "@/data/fantasy";
+import { requireAdmin } from "@/lib/auth/context";
 
 const statFields = [
   ["minutes", "นาที"],
@@ -25,9 +26,10 @@ const statFields = [
 ] as const;
 
 export default async function FantasyAdminPage() {
+  await requireAdmin();
   const [data, fantasy, gameweeks] = await Promise.all([
     getCompetitionDataset(),
-    getDemoFantasyState(),
+    getFantasyState(),
     getFantasyAdminGameweeks(),
   ]);
   const players = data.players
@@ -49,11 +51,11 @@ export default async function FantasyAdminPage() {
               <ShieldCheck />
             </span>
             <div>
-              <span className="eyebrow">Development only</span>
-              <h3>การเขียนข้อมูลถูกปิดอัตโนมัติบน Production</h3>
+              <span className="eyebrow">Admin only</span>
+              <h3>เฉพาะบัญชีที่มีสิทธิ์ผู้ดูแลระบบ</h3>
               <p>
-                เปิดได้เฉพาะเมื่อกำหนด FANTASY_DEMO_WRITE_ENABLED=true
-                อย่างตั้งใจ
+                Server Action ทุกตัวตรวจ session และ role
+                จากฐานข้อมูลใหม่ก่อนเขียนข้อมูล อย่างตั้งใจ
               </p>
             </div>
           </div>

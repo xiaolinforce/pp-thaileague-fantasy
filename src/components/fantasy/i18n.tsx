@@ -37,22 +37,59 @@ const translations: Record<string, string> = {
     "Access competitions, fixtures, and your settings",
   กำลังโหลดข้อมูล: "Loading data",
   โหลดข้อมูลการแข่งขันไม่สำเร็จ: "Unable to load competition data",
-  "กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูลแล้วลองอีกครั้ง":
+  กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูลแล้วลองอีกครั้ง:
     "Please check the database connection and try again",
   ลองอีกครั้ง: "Try again",
   ช่วยเหลือ: "Help",
   ตั้งค่า: "Settings",
   ภาษา: "Language",
-  "เลือกภาษาที่ใช้แสดงผลบนเว็บไซต์": "Choose the language used across the website",
-  "ภาษาที่ใช้แสดงผล": "Display Language",
-  "การตั้งค่านี้จะถูกจดจำในอุปกรณ์เครื่องนี้":
+  เลือกภาษาที่ใช้แสดงผลบนเว็บไซต์:
+    "Choose the language used across the website",
+  ภาษาที่ใช้แสดงผล: "Display Language",
+  การตั้งค่านี้จะถูกจดจำในอุปกรณ์เครื่องนี้:
     "This preference is saved on this device",
   ผู้จัดการทีม: "Manager",
   ศูนย์สถิติ: "Stats Centre",
   การแจ้งเตือน: "Notifications",
 
+  // Authentication and onboarding
+  "จัดทีมไทยลีกในฝัน แล้ววัดฝีมือตลอดฤดูกาล":
+    "Build your dream Thai League squad and compete all season",
+  "เก็บทีม Guest นี้ไว้กับบัญชีของคุณ": "Save this Guest team to your account",
+  "เริ่มเล่นได้ทันที หรือเข้าสู่ระบบเพื่อเก็บทีมไว้อย่างปลอดภัยและเล่นต่อได้ทุกอุปกรณ์":
+    "Start immediately, or sign in to keep your team safe and continue on any device",
+  ทีมและคะแนนผูกกับบัญชี: "Keep your team and points with your account",
+  ตั้งชื่อผู้จัดการและชื่อทีมได้: "Choose your manager and team names",
+  เข้าต่อจากมือถือหรือคอมพิวเตอร์เครื่องอื่น:
+    "Continue on another phone or computer",
+  พร้อมลงสนาม: "Ready to play",
+  เลือกวิธีเริ่มเล่น: "Choose how to start",
+  สมัครสมาชิกหรือเข้าสู่ระบบ: "Sign up or sign in",
+  เข้าสู่ระบบหรือสมัครสมาชิก: "Sign in or create an account",
+  "แนะนำ — ไม่มีรหัสผ่าน": "Recommended — no password",
+  "ดำเนินการต่อด้วย Google": "Continue with Google",
+  หรือ: "or",
+  "รหัส OTP 6 หลัก": "6-digit OTP",
+  ยืนยันและเริ่มเล่น: "Verify and start playing",
+  เปลี่ยนอีเมลหรือขอรหัสใหม่: "Change email or request a new code",
+  "ส่งรหัส OTP ทางอีเมล": "Send an OTP by email",
+  "การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้ แต่ยังทดลองเล่นแบบ Guest ได้":
+    "Member sign-in is not enabled in this environment, but Guest play is available",
+  เล่นต่อโดยไม่สมัครสมาชิก: "Continue without an account",
+  "เล่นได้บนอุปกรณ์และเบราว์เซอร์นี้เท่านั้น ข้อมูลอาจเข้าถึงไม่ได้หากล้างคุกกี้หรือไม่ได้กลับมาเล่นภายใน 30 วัน และระบบจะสุ่มชื่อให้โดยเปลี่ยนไม่ได้":
+    "This works only on this device and browser. Clearing cookies or staying away for 30 days may make the data inaccessible, and random names cannot be changed.",
+  "ฉันเข้าใจความเสี่ยงและต้องการเริ่มแบบ Guest":
+    "I understand the risk and want to start as a Guest",
+  เริ่มเล่นเลย: "Start playing",
+  "ระบบสมาชิก production จะเปิดหลังจากยืนยันโดเมนและเผยแพร่เงื่อนไขการใช้งานกับนโยบายความเป็นส่วนตัวแล้ว":
+    "Production accounts will open after domain verification and publication of reviewed terms and privacy policy.",
+  "บัญชี Guest": "Guest account",
+  บัญชีสมาชิก: "Member account",
+  สมัครสมาชิกเพื่อเก็บทีม: "Create an account to save this team",
+  ออกจากระบบ: "Sign out",
+  "Guest ไม่มีอีเมล": "Guest has no email",
+
   // Dashboard
-  "สวัสดี ผู้จัดการ PIYA FC": "Welcome, PIYA FC Manager",
   "ทุกอย่างพร้อมสำหรับ Gameweek แรก — ตรวจทีมก่อนเดดไลน์วันศุกร์":
     "Everything is ready for the opening Gameweek — check your squad before Friday's deadline",
   จัดทีมตอนนี้: "Pick Team",
@@ -144,7 +181,7 @@ const translations: Record<string, string> = {
   ราคาสูงสุด: "Highest Price",
   ตัวกรอง: "Filters",
   ตัวกรองเพิ่มเติม: "More Filters",
-  "จำกัดผลลัพธ์ตามรายการที่สนใจและงบประมาณ":
+  จำกัดผลลัพธ์ตามรายการที่สนใจและงบประมาณ:
     "Narrow results by watchlist and budget",
   เฉพาะรายการที่สนใจ: "Watchlist only",
   ไม่จำกัด: "No limit",
@@ -231,7 +268,6 @@ const translations: Record<string, string> = {
   "จัดการข้อมูลทีม การแจ้งเตือน และอ่านกติกาของเกม":
     "Manage your team details, notifications, and game rules",
   บันทึกการเปลี่ยนแปลง: "Save Changes",
-  "ผู้จัดการ PIYA FC": "PIYA FC Manager",
   "เข้าร่วมเมื่อ ส.ค. 2026": "Joined August 2026",
   ข้อมูลบัญชี: "Account Details",
   ข้อมูลทีม: "Team Details",
@@ -258,8 +294,8 @@ const translations: Record<string, string> = {
   เมื่อนักเตะในรายการสนใจมีแนวโน้มขึ้นหรือลง:
     "When a watched player's price is likely to rise or fall",
   ข่าวและโปรโมชัน: "News & Promotions",
-  "ข่าวสาร กิจกรรม และรางวัลจาก Thai Fantasy":
-    "News, activities, and rewards from Thai Fantasy",
+  "ข่าวสาร กิจกรรม และรางวัลจาก PP Thai League Fantasy":
+    "News, activities, and rewards from PP Thai League Fantasy",
   กติกาเกมฉบับร่าง: "Draft Game Rules",
   รายละเอียดส่วนนี้สามารถปรับได้ก่อนเปิดฤดูกาล:
     "These details can be updated before the season begins",
@@ -458,13 +494,27 @@ export function LanguageSwitcher() {
       onValueChange={(value) => setLanguage(value as Language)}
       aria-label="Language"
     >
-      <label className={language === "th" ? "language-option active" : "language-option"}>
+      <label
+        className={
+          language === "th" ? "language-option active" : "language-option"
+        }
+      >
         <RadioGroupItem value="th" />
-        <span><b>TH</b><small>ไทย</small></span>
+        <span>
+          <b>TH</b>
+          <small>ไทย</small>
+        </span>
       </label>
-      <label className={language === "en" ? "language-option active" : "language-option"}>
+      <label
+        className={
+          language === "en" ? "language-option active" : "language-option"
+        }
+      >
         <RadioGroupItem value="en" />
-        <span><b>EN</b><small>English</small></span>
+        <span>
+          <b>EN</b>
+          <small>English</small>
+        </span>
       </label>
     </RadioGroup>
   );

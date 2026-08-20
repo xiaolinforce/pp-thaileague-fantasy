@@ -22,6 +22,13 @@
       "when": 1786949750940,
       "tag": "0002_perfect_spencer_smythe",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1787131868194,
+      "tag": "0003_violet_scarlet_witch",
+      "breakpoints": true
     }
   ]
 }

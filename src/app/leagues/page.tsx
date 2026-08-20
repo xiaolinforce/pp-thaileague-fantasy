@@ -1,10 +1,10 @@
 import { Crown, Lock, Trophy, UsersRound } from "lucide-react";
 
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
-import { getDemoFantasyState } from "@/data/fantasy";
+import { getFantasyState } from "@/data/fantasy";
 
 export default async function LeaguesPage() {
-  const fantasy = await getDemoFantasyState();
+  const fantasy = await getFantasyState();
   const privateLeague = fantasy.leagues.find(
     (league) => league.type === "private",
   );

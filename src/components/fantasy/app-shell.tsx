@@ -29,6 +29,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { useAppIdentity } from "@/components/fantasy/identity";
 
 const navigation = [
   { label: "ภาพรวม", shortLabel: "หน้าแรก", href: "/dashboard", icon: Home },
@@ -57,13 +58,13 @@ const navigation = [
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="brand" aria-label="Thai Fantasy">
+    <div className="brand" aria-label="PP Thai League Fantasy">
       <span className="brand-mark">
-        <span>TF</span>
+        <span>PP</span>
       </span>
       {!compact && (
         <span className="brand-copy">
-          <strong>THAI</strong>
+          <strong>PP THAI</strong>
           <span>FANTASY</span>
         </span>
       )}
@@ -73,6 +74,13 @@ export function Brand({ compact = false }: { compact?: boolean }) {
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const identity = useAppIdentity();
+  const initials = (identity?.managerName ?? "Guest")
+    .split(/\s+/)
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <Localized>
@@ -107,10 +115,12 @@ export function AppShell({ children }: { children: ReactNode }) {
               <span>ตั้งค่า</span>
             </Link>
             <Link href="/profile" className="manager-card">
-              <span className="manager-avatar">PK</span>
+              <span className="manager-avatar">{initials}</span>
               <span>
-                <strong>PIYA FC</strong>
-                <small>ผู้จัดการทีม</small>
+                <strong>{identity?.teamName ?? "บัญชีผู้เล่น"}</strong>
+                <small>
+                  {identity?.isGuest ? "ผู้เล่น Guest" : "ผู้จัดการทีม"}
+                </small>
               </span>
               <ChevronRight size={16} />
             </Link>
@@ -131,7 +141,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
           <Sheet>
             <SheetTrigger
-              className={navigation.slice(4).some((item) => item.href === pathname) ? "active" : ""}
+              className={
+                navigation.slice(4).some((item) => item.href === pathname)
+                  ? "active"
+                  : ""
+              }
             >
               <MoreHorizontal size={21} strokeWidth={1.8} />
               <span>เพิ่มเติม</span>
@@ -139,7 +153,9 @@ export function AppShell({ children }: { children: ReactNode }) {
             <SheetContent side="bottom" className="mobile-more-sheet">
               <SheetHeader>
                 <SheetTitle>เมนูเพิ่มเติม</SheetTitle>
-                <SheetDescription>เข้าถึงการแข่งขัน โปรแกรม และการตั้งค่าของคุณ</SheetDescription>
+                <SheetDescription>
+                  เข้าถึงการแข่งขัน โปรแกรม และการตั้งค่าของคุณ
+                </SheetDescription>
               </SheetHeader>
               <div className="mobile-more-links">
                 {navigation.slice(4).map(({ label, href, icon: Icon }) => (

@@ -14,8 +14,13 @@ import {
   UserRound,
 } from "lucide-react";
 import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { updateFantasyNamesAction } from "@/app/fantasy-actions";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { useAppIdentity } from "@/components/fantasy/identity";
 import { LanguageSwitcher, useLanguage } from "@/components/fantasy/i18n";
+import { authClient } from "@/lib/auth/client";
 import { Switch } from "@/components/ui/switch";
 import {
   Accordion,
@@ -60,7 +65,12 @@ const rules = [
 ];
 
 export default function ProfilePage() {
+  const router = useRouter();
   const { language } = useLanguage();
+  const identity = useAppIdentity();
+  const [managerName, setManagerName] = useState(identity?.managerName ?? "");
+  const [teamName, setTeamName] = useState(identity?.teamName ?? "");
+  const [saving, setSaving] = useState(false);
   const [province, setProvince] = useState("กรุงเทพมหานคร");
   const [favouriteClub, setFavouriteClub] = useState("การท่าเรือ");
   const [notifications, setNotifications] = useState({
@@ -68,10 +78,21 @@ export default function ProfilePage() {
     price: true,
     news: false,
   });
-  const save = () => {
-    toast.success(
-      language === "th" ? "บันทึกการตั้งค่าแล้ว" : "Settings saved",
-    );
+  const save = async () => {
+    setSaving(true);
+    const result = await updateFantasyNamesAction({ managerName, teamName });
+    if (result.ok) {
+      toast.success(result.message);
+      window.location.reload();
+    } else {
+      toast.error(result.message);
+      setSaving(false);
+    }
+  };
+  const signOut = async () => {
+    await authClient.signOut();
+    router.push("/");
+    router.refresh();
   };
 
   return (
@@ -82,7 +103,11 @@ export default function ProfilePage() {
           title="โปรไฟล์และการตั้งค่า"
           description="จัดการข้อมูลทีม การแจ้งเตือน และอ่านกติกาของเกม"
           actions={
-            <button className="primary-button" onClick={save}>
+            <button
+              className="primary-button"
+              onClick={save}
+              disabled={saving || identity?.isGuest}
+            >
               <Save size={17} />
               บันทึกการเปลี่ยนแปลง
             </button>
@@ -93,9 +118,9 @@ export default function ProfilePage() {
           <aside className="profile-nav-card product-card">
             <div className="profile-identity">
               <span>PK</span>
-              <h3>Piyawat K.</h3>
-              <p>ผู้จัดการ PIYA FC</p>
-              <small>เข้าร่วมเมื่อ ส.ค. 2026</small>
+              <h3>{identity?.managerName ?? "—"}</h3>
+              <p>ผู้จัดการ {identity?.teamName ?? "—"}</p>
+              <small>{identity?.isGuest ? "บัญชี Guest" : "บัญชีสมาชิก"}</small>
             </div>
             <nav>
               <a href="#account" className="active">
@@ -123,6 +148,15 @@ export default function ProfilePage() {
                 ความเป็นส่วนตัว <ChevronRight />
               </a>
             </nav>
+            {identity?.isGuest ? (
+              <Link href="/upgrade" className="primary-button">
+                สมัครสมาชิกเพื่อเก็บทีม
+              </Link>
+            ) : (
+              <button className="secondary-button" onClick={signOut}>
+                ออกจากระบบ
+              </button>
+            )}
           </aside>
           <div className="profile-sections">
             <section className="product-card settings-card" id="account">
@@ -132,19 +166,40 @@ export default function ProfilePage() {
                 </span>
                 <div>
                   <h2>ข้อมูลบัญชี</h2>
-                  <p>ข้อมูลที่ใช้แสดงในเกม</p>
+                  <p>
+                    {identity?.isGuest
+                      ? language === "th"
+                        ? "Guest ใช้ชื่อสุ่มและเปลี่ยนชื่อไม่ได้"
+                        : "Guests use a random name that cannot be changed"
+                      : identity?.managerNameChangeAvailableAt
+                        ? language === "th"
+                          ? `เปลี่ยนชื่อผู้จัดการได้อีกครั้งหลัง ${new Date(identity.managerNameChangeAvailableAt).toLocaleDateString("th-TH")}`
+                          : `Manager name can be changed again after ${new Date(identity.managerNameChangeAvailableAt).toLocaleDateString("en-GB")}`
+                        : language === "th"
+                          ? "เปลี่ยนชื่อผู้จัดการได้ โดยจะเปลี่ยนครั้งถัดไปได้ใน 30 วัน"
+                          : "After changing the manager name, the next change is available in 30 days"}
+                  </p>
                 </div>
               </div>
               <div className="form-grid">
                 <label>
                   <span>ชื่อที่แสดง</span>
-                  <input defaultValue="Piyawat K." />
+                  <input
+                    value={managerName}
+                    onChange={(event) => setManagerName(event.target.value)}
+                    disabled={identity?.isGuest}
+                    minLength={3}
+                    maxLength={30}
+                  />
                 </label>
                 <label>
                   <span>อีเมล</span>
                   <div className="input-with-icon">
                     <Mail />
-                    <input defaultValue="piyawat@example.com" />
+                    <input
+                      value={identity?.email ?? "Guest ไม่มีอีเมล"}
+                      disabled
+                    />
                   </div>
                 </label>
                 <label>
@@ -222,9 +277,23 @@ export default function ProfilePage() {
                 <div>
                   <label>
                     <span>ชื่อทีม</span>
-                    <input defaultValue="PIYA FC" />
+                    <input
+                      value={teamName}
+                      onChange={(event) => setTeamName(event.target.value)}
+                      disabled={identity?.isGuest}
+                      minLength={3}
+                      maxLength={30}
+                    />
                   </label>
-                  <p>เปลี่ยนชื่อทีมได้ไม่เกิน 3 ครั้งต่อฤดูกาล</p>
+                  <p>
+                    {identity?.isGuest
+                      ? language === "th"
+                        ? "Guest ใช้ชื่อทีมแบบสุ่มและเปลี่ยนไม่ได้"
+                        : "Guests use a random team name that cannot be changed"
+                      : language === "th"
+                        ? `เปลี่ยนชื่อทีมได้อีก ${identity?.teamNameChangesRemaining ?? 0} ครั้งในฤดูกาลนี้`
+                        : `${identity?.teamNameChangesRemaining ?? 0} team-name changes remain this season`}
+                  </p>
                 </div>
                 <button className="secondary-button">เปลี่ยนตราทีม</button>
               </div>
@@ -257,7 +326,7 @@ export default function ProfilePage() {
                     key: "news" as const,
                     icon: Bell,
                     title: "ข่าวและโปรโมชัน",
-                    copy: "ข่าวสาร กิจกรรม และรางวัลจาก Thai Fantasy",
+                    copy: "ข่าวสาร กิจกรรม และรางวัลจาก PP Thai League Fantasy",
                   },
                 ].map(({ key, icon: Icon, title, copy }) => (
                   <div key={key}>

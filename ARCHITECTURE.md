@@ -5,7 +5,7 @@
 PP Thaileague Fantasy is a Next.js 16 App Router application backed by Neon
 Postgres through Drizzle ORM. Server Components load competition and fantasy
 state, focused Client Components own interactive team-management screens, and
-Server Actions validate and persist demo-game changes.
+Server Actions validate authenticated player and administrative changes.
 
 ```text
 Thai League API + Transfermarkt + curated club identities
@@ -17,7 +17,7 @@ Thai League API + Transfermarkt + curated club identities
                     Neon Postgres
                          |
                          v
-              Drizzle server-only queries
+          Better Auth + Drizzle server-only queries
                          |
               +----------+-----------+
               |                      |
@@ -30,9 +30,10 @@ Thai League API + Transfermarkt + curated club identities
                  interactive clients
 ```
 
-The application currently presents one playable demo identity, `PIYA FC`.
-Other seeded managers provide league standings but cannot sign in or take over
-their teams.
+Better Auth owns passwordless Email OTP, Google OAuth, anonymous Guest users,
+30-day sliding sessions, and database-backed rate limiting. Fantasy managers
+reference auth users without making historical teams dependent on the auth row.
+Seeded managers remain ranking fixtures and are not sign-in identities.
 
 ## Main boundaries
 
@@ -43,6 +44,9 @@ their teams.
 | UI primitives            | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                  |
 | Read models              | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                               |
 | Game rules               | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
+| Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
+| Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, valid opening squad, Overall membership, and Guest upgrade behavior.      |
+| Transactional email      | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
 | Scoring                  | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
 | Score persistence        | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
 | Persistence              | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
@@ -58,15 +62,16 @@ file; remove it in a deliberate cleanup once no design reference depends on it.
 
 | Route            | Rendering and data                                                                            |
 | ---------------- | --------------------------------------------------------------------------------------------- |
-| `/`              | Static product landing page.                                                                  |
+| `/`              | Dynamic Email OTP, Google, and Guest onboarding; authenticated users redirect to the game.    |
+| `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google.                                      |
 | `/dashboard`     | Server-loads competition and demo fantasy summaries.                                          |
 | `/team`          | Server-loads data, then hands interactive lineup management to a Client Component.            |
 | `/transfers`     | Server-loads data, then hands search, filtering, and squad changes to a Client Component.     |
 | `/points`        | Server-renders the selected Gameweek score and its breakdown.                                 |
 | `/leagues`       | Server-renders Overall and Private Classic standings.                                         |
 | `/fixtures`      | Server-loads competition fixtures, then delegates interactive browsing to a Client Component. |
-| `/profile`       | Client-owned prototype settings, language selection, and game-rules presentation.             |
-| `/admin/fantasy` | Server-rendered internal controls for stats, classification, locking, and finalization.       |
+| `/profile`       | Authenticated account/team naming, sign-out or Guest upgrade, settings, and game rules.       |
+| `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                 |
 
 The root layout provides Mitr, the language context, shared tooltips, and toast
 feedback. Database-backed pages are dynamically rendered: their data modules
@@ -74,13 +79,12 @@ are server-only and call the current Next.js connection API before querying.
 
 ## Read flow
 
-1. A route calls `getCompetitionDataset`, `getDemoFantasyState`,
-   `getDemoPointsState`, or `getFantasyAdminGameweeks`.
+1. A route resolves the Better Auth session and calls a server-only read model.
 2. The server-only data module queries Drizzle using the shared client from
    `src/db/index.ts`.
 3. Competition records are normalized into UI-facing club, player, fixture,
    and table shapes. Fantasy records are assembled around the current season,
-   open/planned Gameweek, and `PIYA FC` selection.
+   open/planned Gameweek, and the current account's manager/team selection.
 4. The page renders directly or passes serializable data to a focused Client
    Component.
 
@@ -91,18 +95,35 @@ by explicit import scripts and persisted before the application serves them.
 
 1. The team, transfer, or admin UI invokes an action in
    `src/app/fantasy-actions.ts`.
-2. The action blocks production demo mutations unless
-   `FANTASY_DEMO_WRITE_ENABLED=true`.
+2. The action resolves the account-owned team from the session; admin actions
+   additionally reload and require the `admin` role.
 3. The server reloads current database snapshots and validates deadlines,
    squad composition, lineup, chips, and transfer settlement.
 4. Drizzle writes selections, revisions, stats, classifications, or Gameweek
    state. Administrative corrections also append application-level audit rows.
 5. Affected fantasy routes are revalidated.
 
-The production environment flag is a safety guard, not authorization. There is
-currently no authentication, role model, or protected admin boundary. Do not
-enable demo writes or expose `/admin/fantasy` as a production administration
-surface until server-side identity and permission checks exist.
+Authentication providers are independently opt-in and also subject to
+`AUTH_PRODUCTION_READY`. This deployment gate prevents accidental public use
+before domain/legal/provider review; it complements rather than replaces the
+session and role checks on each mutation.
+
+## Account lifecycle
+
+Anonymous users receive a 30-day sliding Better Auth session, a random manager
+and team name, and no naming controls. Expiry removes access, not Fantasy rows;
+the team remains in historical standings. Linking a Guest to a new member moves
+the manager ownership to the new auth user. Signing into an existing account
+keeps that account's team and marks the Guest manager `abandoned`, preserving
+both histories without merging selections.
+
+Email OTP values are hashed in the verification table, expire after five
+minutes, allow three attempts, and rotate on resend. Turnstile protects every
+OTP request. Delivery logs store a salted recipient hash and provider metadata,
+never the address or OTP. OTP delivery uses Resend first with Mailjet as the
+only fallback; ambiguous delivery outcomes stop without retrying to avoid two
+valid messages. Google may implicitly link only trusted, matching, verified
+email identities; different-email linking is disabled.
 
 ## Gameweek and scoring flow
 
@@ -127,7 +148,10 @@ late or corrected match data to update the original Gameweek.
 
 ## Persistence model
 
-The schema is organized into three related groups:
+The schema is organized into four related groups:
+
+- Authentication: users, sessions, provider accounts, OTP verifications,
+  rate-limit state, and privacy-safe email delivery attempts.
 
 - Competition: competitions, seasons, competition seasons, venues, clubs,
   visual identities, entries, players, registrations, and fixtures.

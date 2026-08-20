@@ -41,10 +41,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { DemoFantasyState } from "@/data/fantasy";
+import type { FantasyState } from "@/data/fantasy";
 import {
-  saveDemoSelectionAction,
-  type DemoSelectionInput,
+  saveFantasySelectionAction,
+  type FantasySelectionInput,
 } from "@/app/fantasy-actions";
 import type { FantasyChip } from "@/lib/fantasy/rules";
 
@@ -88,7 +88,7 @@ export default function TeamClient({
   fantasy,
 }: {
   data: CompetitionDataset;
-  fantasy: DemoFantasyState;
+  fantasy: FantasyState;
 }) {
   const [view, setView] = useState<"pitch" | "list">("pitch");
   const [week, setWeek] = useState(fantasy.gameweek.number);
@@ -97,7 +97,7 @@ export default function TeamClient({
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
     fantasy.selection.activeChip,
   );
-  const [members, setMembers] = useState<DemoSelectionInput["members"]>(
+  const [members, setMembers] = useState<FantasySelectionInput["members"]>(
     fantasy.selection.members.map((member) => ({
       fantasyPlayerId: member.fantasyPlayerId,
       lineupRole: member.lineupRole,
@@ -153,7 +153,7 @@ export default function TeamClient({
 
   const saveTeam = () => {
     startTransition(async () => {
-      const result = await saveDemoSelectionAction({ members, activeChip });
+      const result = await saveFantasySelectionAction({ members, activeChip });
       if (result.ok) {
         toast.success(result.message);
         router.refresh();
