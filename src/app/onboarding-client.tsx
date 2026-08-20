@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { Brand } from "@/components/fantasy/app-shell";
-import { Localized } from "@/components/fantasy/i18n";
+import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { authClient } from "@/lib/auth/client";
 
 declare global {
@@ -84,6 +84,7 @@ export default function OnboardingClient({
   upgradeMode?: boolean;
 }) {
   const router = useRouter();
+  const { language, setLanguage } = useLanguage();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -161,6 +162,31 @@ export default function OnboardingClient({
   return (
     <Localized>
       <main className="onboarding-page">
+        <div
+          className="onboarding-language-switcher"
+          role="group"
+          aria-label={language === "th" ? "เปลี่ยนภาษา" : "Change language"}
+        >
+          <button
+            type="button"
+            className={language === "th" ? "is-active" : undefined}
+            aria-label={language === "th" ? "ภาษาไทย" : "Thai"}
+            aria-pressed={language === "th"}
+            onClick={() => setLanguage("th")}
+          >
+            TH
+          </button>
+          <button
+            type="button"
+            className={language === "en" ? "is-active" : undefined}
+            aria-label={language === "th" ? "ภาษาอังกฤษ" : "English"}
+            aria-pressed={language === "en"}
+            onClick={() => setLanguage("en")}
+          >
+            EN
+          </button>
+        </div>
+
         <section className="onboarding-hero">
           <Brand />
           <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>

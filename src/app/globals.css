@@ -87,6 +87,34 @@ button:focus-visible {
   grid-template-columns: minmax(0, 1fr) minmax(400px, 520px);
   background: var(--paper);
 }
+.onboarding-language-switcher {
+  position: fixed;
+  top: 22px;
+  right: 24px;
+  z-index: 20;
+  display: flex;
+  padding: 3px;
+  border: 1px solid rgba(24, 32, 38, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 8px 24px rgba(24, 32, 38, 0.1);
+  backdrop-filter: blur(12px);
+}
+.onboarding-language-switcher button {
+  min-width: 34px;
+  min-height: 30px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.onboarding-language-switcher button.is-active {
+  color: #fff;
+  background: var(--navy);
+}
 .onboarding-hero {
   position: relative;
   min-height: 100svh;
@@ -356,6 +384,10 @@ button:focus-visible {
   }
 }
 @media (max-width: 640px) {
+  .onboarding-language-switcher {
+    top: 20px;
+    right: 16px;
+  }
   .onboarding-hero {
     padding: 88px 20px 28px;
   }

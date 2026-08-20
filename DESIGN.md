@@ -65,7 +65,9 @@ sentence, and the action panel avoids repeating marketing benefits. The member
 card exposes passwordless Email OTP and Google directly. The Guest card presents
 the device/browser boundary, 30-day access risk, and locked random names as
 short scannable facts, with an explicit acknowledgement beside them. Never
-pre-check that acknowledgement.
+pre-check that acknowledgement. Keep the compact TH/EN language switch visible
+at the top right and connect it to the same stored preference as the product
+shell without letting it compete with the primary authentication actions.
 
 Email OTP must visibly expose a labelled email field, Turnstile state, a
 separate labelled six-digit field after sending, disabled/pending states, and a
