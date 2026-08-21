@@ -1,6 +1,7 @@
 "use client";
 
-import { ArrowRight, Mail, UserRound } from "lucide-react";
+import { ArrowLeft, ArrowRight, Mail, UserRound } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -18,6 +19,7 @@ declare global {
           "expired-callback": () => void;
           "error-callback": () => void;
           theme: "light";
+          size: "flexible" | "compact";
         },
       ) => string;
       remove: (widgetId: string) => void;
@@ -54,6 +56,9 @@ function Turnstile({
         "expired-callback": () => onToken(""),
         "error-callback": () => onToken(""),
         theme: "light",
+        size: window.matchMedia("(max-width: 400px)").matches
+          ? "compact"
+          : "flexible",
       });
     }, 100);
     return () => {
@@ -91,6 +96,7 @@ export default function OnboardingClient({
   const [captchaEpoch, setCaptchaEpoch] = useState(0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [authView, setAuthView] = useState<"choices" | "email">("choices");
 
   const sendOtp = async () => {
     setBusy(true);
@@ -161,6 +167,20 @@ export default function OnboardingClient({
     setLanguage(language === "th" ? "en" : "th");
   };
 
+  const showEmailForm = () => {
+    setError("");
+    setAuthView("email");
+  };
+
+  const showAuthChoices = () => {
+    setAuthView("choices");
+    setOtpSent(false);
+    setOtp("");
+    setCaptchaToken("");
+    setCaptchaEpoch((value) => value + 1);
+    setError("");
+  };
+
   return (
     <Localized>
       <main className="onboarding-page">
@@ -173,7 +193,9 @@ export default function OnboardingClient({
             aria-label={
               language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"
             }
-            title={language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"}
+            title={
+              language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"
+            }
             onClick={toggleLanguage}
           >
             <span className={language === "th" ? "is-active" : undefined}>
@@ -198,37 +220,89 @@ export default function OnboardingClient({
         </section>
 
         <section className="onboarding-panel" aria-labelledby="start-title">
-          <div className="onboarding-panel-heading">
-            <div>
-              <p>{upgradeMode ? "เก็บทีมของคุณ" : ""}</p>
-              <h2 id="start-title">{upgradeMode ? "เข้าสู่ระบบ" : ""}</h2>
-            </div>
-          </div>
-
-          <div className="member-card">
-            <div className="member-card-title">
-              <strong>เข้าสู่ระบบหรือสมัครสมาชิก</strong>
-            </div>
-
-            {googleEnabled && (
-              <button
-                className="auth-button google-button"
-                onClick={signInWithGoogle}
-                disabled={busy}
-              >
-                <span className="google-g">G</span>
-                ใช้บัญชี Google
-              </button>
-            )}
-
-            {googleEnabled && emailEnabled && (
-              <div className="auth-divider">
-                <span>หรือ</span>
+          {upgradeMode ? (
+            <div className="onboarding-panel-heading">
+              <div>
+                <p>เก็บทีมของคุณ</p>
+                <h2 id="start-title">เข้าสู่ระบบ</h2>
               </div>
-            )}
+            </div>
+          ) : (
+            <h2 id="start-title" className="sr-only">
+              เลือกวิธีเริ่มเล่น
+            </h2>
+          )}
 
-            {emailEnabled ? (
+          <div
+            className={
+              authView === "choices"
+                ? "member-card auth-choice-card"
+                : "member-card"
+            }
+          >
+            {authView === "choices" ? (
+              <div className="auth-choice-stack">
+                {!upgradeMode && (
+                  <button
+                    type="button"
+                    className="auth-button guest-button"
+                    onClick={playAsGuest}
+                    disabled={busy}
+                  >
+                    <UserRound />
+                    ทดลองเล่นแบบไม่สมัครสมาชิก
+                  </button>
+                )}
+
+                {googleEnabled && (
+                  <button
+                    type="button"
+                    className="auth-button google-button"
+                    onClick={signInWithGoogle}
+                    disabled={busy}
+                  >
+                    <Image
+                      className="google-sign-in-icon"
+                      src="/google-sign-in-icon.svg"
+                      width={40}
+                      height={40}
+                      alt=""
+                      unoptimized
+                    />
+                    เข้าสู่ระบบหรือสมัครด้วย GOOGLE
+                  </button>
+                )}
+
+                {emailEnabled && (
+                  <button
+                    type="button"
+                    className="auth-button email-choice-button"
+                    onClick={showEmailForm}
+                    disabled={busy}
+                  >
+                    <Mail />
+                    เข้าสู่ระบบหรือสมัครด้วย EMAIL
+                  </button>
+                )}
+
+                {!emailEnabled && !googleEnabled && (
+                  <p className="auth-unavailable">
+                    การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้
+                    แต่ยังทดลองเล่นแบบ Guest ได้
+                  </p>
+                )}
+              </div>
+            ) : (
               <div className="email-auth-form">
+                <button
+                  type="button"
+                  className="auth-back-button"
+                  onClick={showAuthChoices}
+                  disabled={busy}
+                >
+                  <ArrowLeft /> ย้อนกลับ
+                </button>
+                <h3>เข้าสู่ระบบหรือสมัครด้วย EMAIL</h3>
                 <label htmlFor="auth-email">อีเมล</label>
                 <div className="auth-input-wrap">
                   <Mail />
@@ -258,6 +332,7 @@ export default function OnboardingClient({
                       placeholder="000000"
                     />
                     <button
+                      type="button"
                       className="auth-button primary-auth-button"
                       onClick={verifyOtp}
                       disabled={busy || otp.length !== 6}
@@ -265,6 +340,7 @@ export default function OnboardingClient({
                       ยืนยันและเริ่มเล่น <ArrowRight />
                     </button>
                     <button
+                      type="button"
                       className="auth-text-button"
                       onClick={() => {
                         setOtpSent(false);
@@ -287,6 +363,7 @@ export default function OnboardingClient({
                       />
                     )}
                     <button
+                      type="button"
                       className="auth-button primary-auth-button"
                       onClick={sendOtp}
                       disabled={
@@ -300,37 +377,8 @@ export default function OnboardingClient({
                   </>
                 )}
               </div>
-            ) : !googleEnabled ? (
-              <p className="auth-unavailable">
-                การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้
-                แต่ยังทดลองเล่นแบบ Guest ได้
-              </p>
-            ) : null}
+            )}
           </div>
-
-          {!upgradeMode && (
-            <>
-              <div className="onboarding-choice-divider">
-                <span>หรือ</span>
-              </div>
-              <div className="guest-card">
-                <div className="guest-warning">
-                  <UserRound />
-                  <div>
-                    <strong>ทดลองเล่นแบบไม่สมัครสมาชิก</strong>
-                    <p>สามารถสมัครสมาชิกภายหลังได้ มาลองเล่นกันก่อน</p>
-                  </div>
-                </div>
-                <button
-                  className="auth-button guest-button"
-                  onClick={playAsGuest}
-                  disabled={busy}
-                >
-                  เล่นแบบ Guest <ArrowRight />
-                </button>
-              </div>
-            </>
-          )}
 
           {error && (
             <p className="auth-error" role="alert">

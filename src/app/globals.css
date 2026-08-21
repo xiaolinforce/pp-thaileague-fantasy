@@ -189,21 +189,18 @@ button:focus-visible {
   font-size: 30px;
   line-height: 1.2;
 }
-.member-card,
-.guest-card {
+.member-card {
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 18px;
   background: #fff;
   box-shadow: 0 14px 38px rgba(24, 32, 38, 0.06);
 }
-.guest-warning {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.member-card-title {
-  margin-bottom: 14px;
+.auth-choice-card {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 .auth-button {
   width: 100%;
@@ -227,10 +224,45 @@ button:focus-visible {
   background: #fff;
   color: var(--ink);
 }
-.google-g {
-  font-size: 20px;
-  font-weight: 900;
-  color: #4285f4;
+.auth-choice-stack {
+  display: grid;
+  gap: 12px;
+}
+.auth-choice-stack .auth-button {
+  min-height: 52px;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.auth-choice-stack .auth-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(24, 32, 38, 0.12);
+}
+.auth-choice-stack .auth-button > svg,
+.email-choice-button > svg {
+  width: 19px;
+  height: 19px;
+  flex: 0 0 auto;
+}
+.email-choice-button {
+  border: 1px solid #f1c7aa;
+  color: var(--orange-deep);
+  background: var(--orange-soft);
+}
+.google-button:not(:disabled):hover {
+  border-color: #babdc1;
+  background: #fcfcfc;
+}
+.email-choice-button:not(:disabled):hover {
+  border-color: var(--orange);
+  background: #ffe2cc;
+}
+.google-sign-in-icon {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 auto;
 }
 .primary-auth-button {
   color: white;
@@ -241,24 +273,14 @@ button:focus-visible {
 .guest-button svg {
   width: 18px;
 }
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 16px 0;
-}
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: var(--line);
-}
 .email-auth-form {
   display: grid;
   gap: 8px;
+}
+.email-auth-form h3 {
+  margin: 2px 0 8px;
+  font-size: 18px;
+  line-height: 1.4;
 }
 .email-auth-form label {
   font-size: 13px;
@@ -298,43 +320,42 @@ button:focus-visible {
   background: transparent;
   cursor: pointer;
 }
+.auth-back-button {
+  width: fit-content;
+  min-height: 40px;
+  margin: -4px 0 2px -8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--orange-deep);
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+.auth-back-button svg {
+  width: 18px;
+  height: 18px;
+}
+.auth-back-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 .turnstile-slot {
+  width: 100%;
   min-height: 65px;
   margin-top: 5px;
 }
-.guest-card {
-  background: #fffbf7;
-  box-shadow: none;
-}
-.guest-warning > svg {
-  flex: 0 0 auto;
-  color: #c96b16;
-}
-.guest-warning p {
-  margin: 8px 0 0;
-  color: #6f6258;
-  font-size: 13px;
-  line-height: 1.45;
-}
-.onboarding-choice-divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 12px 0;
-}
-.onboarding-choice-divider::before,
-.onboarding-choice-divider::after {
-  content: "";
-  height: 1px;
-  flex: 1;
-  background: var(--line);
+.turnstile-slot > div {
+  margin-inline: auto;
 }
 .guest-button {
   color: #fff;
   background: var(--orange);
-  margin-top: 14px;
+}
+.guest-button:not(:disabled):hover {
+  background: var(--orange-deep);
 }
 .auth-error {
   color: #aa2d24;
@@ -389,8 +410,7 @@ button:focus-visible {
   .onboarding-panel-heading h2 {
     font-size: 27px;
   }
-  .member-card,
-  .guest-card {
+  .member-card {
     padding: 16px;
   }
 }

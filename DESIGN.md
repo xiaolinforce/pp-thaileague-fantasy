@@ -59,18 +59,19 @@ current session's team identity. Reuse `AppShell` and `PageHeader` for product r
 
 ## Account onboarding
 
-The root route presents member sign-in first and Guest play second. Keep this
-screen decision-oriented: the hero uses one headline and one supporting
-sentence, and the action panel avoids repeating marketing benefits. The member
-card exposes passwordless Email OTP and Google directly. The Guest card is a
-low-friction trial action with a person icon, one short reassurance that an
-account can be created later, and no acknowledgement checkbox. Keep the compact
-TH/EN language switch visible at the top right and connect it to the same stored
-preference as the product shell without letting it compete with the primary
-authentication actions. Use an orange-led hero, primary Guest action, and a
-warm off-white action canvas; the hero starts with the prominent product name
-instead of repeating the full shell brand lockup. The onboarding page explicitly
-uses Mitr for all Thai and Latin copy.
+The root route presents one compact card with the available actions in this
+order: Guest play, Google, then Email. Keep this screen decision-oriented: the
+hero uses one headline and one supporting sentence, and the action panel avoids
+repeating marketing benefits. Selecting Email replaces the three choices inside
+the same card with the passwordless Email OTP form; a Back action restores the
+choice list without navigating to another route. Guest is the orange primary
+trial action with a person icon and no acknowledgement checkbox. Keep the
+compact TH/EN language switch at the top right of the hero and connect it to the
+same stored preference as the product shell without letting it compete with the
+primary authentication actions. Use an orange-led hero and a warm off-white
+action canvas; the hero starts with the prominent product name instead of
+repeating the full shell brand lockup. The onboarding page explicitly uses Mitr
+for all Thai and Latin copy.
 
 Email OTP must visibly expose a labelled email field, Turnstile state, a
 separate labelled six-digit field after sending, disabled/pending states, and a
