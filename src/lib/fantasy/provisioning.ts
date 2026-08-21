@@ -19,7 +19,10 @@ import {
   playerRegistrations,
 } from "@/db/schema";
 import { createGuestNames } from "@/lib/auth/names";
-import type { FantasyPosition } from "@/lib/fantasy/rules";
+import {
+  THAI_LEAGUE_FANTASY_RULES,
+  type FantasyPosition,
+} from "@/lib/fantasy/rules";
 
 export const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
 
@@ -30,6 +33,52 @@ type Candidate = {
   tier: number;
   isThai: boolean;
 };
+
+type SelectionMemberValue = typeof fantasyTeamSelectionPlayers.$inferInsert;
+
+async function getSelectionMembers(
+  selectionId: string,
+): Promise<SelectionMemberValue[]> {
+  return db
+    .select({
+      selectionId: fantasyTeamSelectionPlayers.selectionId,
+      fantasyPlayerId: fantasyTeamSelectionPlayers.fantasyPlayerId,
+      clubIdSnapshot: fantasyTeamSelectionPlayers.clubIdSnapshot,
+      positionSnapshot: fantasyTeamSelectionPlayers.positionSnapshot,
+      tierSnapshot: fantasyTeamSelectionPlayers.tierSnapshot,
+      isThaiSnapshot: fantasyTeamSelectionPlayers.isThaiSnapshot,
+      lineupRole: fantasyTeamSelectionPlayers.lineupRole,
+      benchOrder: fantasyTeamSelectionPlayers.benchOrder,
+      captainRole: fantasyTeamSelectionPlayers.captainRole,
+    })
+    .from(fantasyTeamSelectionPlayers)
+    .where(eq(fantasyTeamSelectionPlayers.selectionId, selectionId))
+    .orderBy(asc(fantasyTeamSelectionPlayers.fantasyPlayerId));
+}
+
+async function ensureInitialRevision(
+  selectionId: string,
+  members: SelectionMemberValue[],
+) {
+  if (members.length !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
+    throw new Error(
+      `Initial selection has ${members.length} players instead of ${THAI_LEAGUE_FANTASY_RULES.squadSize}.`,
+    );
+  }
+  await db
+    .insert(fantasyTransferRevisions)
+    .values({
+      selectionId,
+      revision: 1,
+      status: "confirmed",
+      squad: members.map((member) => member.fantasyPlayerId),
+      lineup: { members },
+      activeChip: null,
+      netTransferCount: 0,
+      transferPoints: 0,
+    })
+    .onConflictDoNothing();
+}
 
 async function getActiveSeasonAndGameweek() {
   const season = await db.query.fantasySeasons.findFirst({
@@ -177,10 +226,16 @@ async function ensureInitialSelection(
       ),
     }));
   if (!selection) throw new Error("Initial selection could not be created.");
-  const existing = await db.query.fantasyTeamSelectionPlayers.findFirst({
-    where: eq(fantasyTeamSelectionPlayers.selectionId, selection.id),
-  });
-  if (existing) return selection;
+  const existingMembers = await getSelectionMembers(selection.id);
+  if (existingMembers.length === THAI_LEAGUE_FANTASY_RULES.squadSize) {
+    await ensureInitialRevision(selection.id, existingMembers);
+    return selection;
+  }
+  if (existingMembers.length > 0) {
+    throw new Error(
+      `Initial selection is incomplete with ${existingMembers.length} players.`,
+    );
+  }
 
   const selected = await buildInitialSquad(season, gameweek);
   const starterLimits: Record<FantasyPosition, number> = {
@@ -221,38 +276,42 @@ async function ensureInitialSelection(
       starterIds.has(candidate.fantasyPlayerId) &&
       candidate.position === "forward",
   );
-  const members: Array<typeof fantasyTeamSelectionPlayers.$inferInsert> =
-    selected.map((candidate) => ({
-      selectionId: selection.id,
-      fantasyPlayerId: candidate.fantasyPlayerId,
-      clubIdSnapshot: candidate.clubId,
-      positionSnapshot: candidate.position,
-      tierSnapshot: candidate.tier,
-      isThaiSnapshot: candidate.isThai,
-      lineupRole: starterIds.has(candidate.fantasyPlayerId)
-        ? "starter"
-        : "bench",
-      benchOrder: starterIds.has(candidate.fantasyPlayerId)
-        ? null
-        : (benchOrder.get(candidate.fantasyPlayerId) ?? null),
-      captainRole:
-        candidate.fantasyPlayerId === captain?.fantasyPlayerId
-          ? "captain"
-          : candidate.fantasyPlayerId === viceCaptain?.fantasyPlayerId
-            ? "vice_captain"
-            : "none",
-    }));
-  await db.insert(fantasyTeamSelectionPlayers).values(members);
-  await db.insert(fantasyTransferRevisions).values({
+  const members: SelectionMemberValue[] = selected.map((candidate) => ({
     selectionId: selection.id,
-    revision: 1,
-    status: "confirmed",
-    squad: selected.map((candidate) => candidate.fantasyPlayerId),
-    lineup: { members },
-    activeChip: null,
-    netTransferCount: 0,
-    transferPoints: 0,
-  });
+    fantasyPlayerId: candidate.fantasyPlayerId,
+    clubIdSnapshot: candidate.clubId,
+    positionSnapshot: candidate.position,
+    tierSnapshot: candidate.tier,
+    isThaiSnapshot: candidate.isThai,
+    lineupRole: starterIds.has(candidate.fantasyPlayerId) ? "starter" : "bench",
+    benchOrder: starterIds.has(candidate.fantasyPlayerId)
+      ? null
+      : (benchOrder.get(candidate.fantasyPlayerId) ?? null),
+    captainRole:
+      candidate.fantasyPlayerId === captain?.fantasyPlayerId
+        ? "captain"
+        : candidate.fantasyPlayerId === viceCaptain?.fantasyPlayerId
+          ? "vice_captain"
+          : "none",
+  }));
+  await db
+    .insert(fantasyTeamSelectionPlayers)
+    .values(members)
+    .onConflictDoNothing();
+
+  const persistedMembers = await getSelectionMembers(selection.id);
+  const expectedPlayerIds = new Set(
+    selected.map((candidate) => candidate.fantasyPlayerId),
+  );
+  if (
+    persistedMembers.length !== THAI_LEAGUE_FANTASY_RULES.squadSize ||
+    persistedMembers.some(
+      (member) => !expectedPlayerIds.has(member.fantasyPlayerId),
+    )
+  ) {
+    throw new Error("Initial selection could not be completed consistently.");
+  }
+  await ensureInitialRevision(selection.id, persistedMembers);
   return selection;
 }
 
