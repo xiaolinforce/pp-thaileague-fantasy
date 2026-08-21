@@ -71,7 +71,8 @@ same stored preference as the product shell without letting it compete with the
 primary authentication actions. Use an orange-led hero and a warm off-white
 action canvas; the hero starts with the prominent product name instead of
 repeating the full shell brand lockup. The onboarding page explicitly uses Mitr
-for all Thai and Latin copy.
+for all Thai and Latin copy. A low-contrast football-pitch line pattern may
+support the hero, but it remains decorative behind readable text.
 
 Email OTP must visibly expose a labelled email field, Turnstile state, a
 separate labelled six-digit field after sending, disabled/pending states, and a

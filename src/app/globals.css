@@ -135,6 +135,7 @@ button:focus-visible {
   padding: clamp(40px, 6vw, 84px);
   color: #fff;
   background:
+    url("/onboarding-pitch-pattern.svg") center / 100% 100% no-repeat,
     radial-gradient(
       circle at 85% 15%,
       rgba(255, 190, 132, 0.42),
