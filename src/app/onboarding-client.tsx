@@ -195,9 +195,9 @@ export default function OnboardingClient({
         <section className="onboarding-panel" aria-labelledby="start-title">
           <div className="onboarding-panel-heading">
             <div>
-              <p>{upgradeMode ? "เก็บทีมของคุณ" : "พร้อมลงสนาม"}</p>
+              <p>{upgradeMode ? "เก็บทีมของคุณ" : ""}</p>
               <h2 id="start-title">
-                {upgradeMode ? "เข้าสู่ระบบ" : "เริ่มเล่น"}
+                {upgradeMode ? "เข้าสู่ระบบ" : ""}
               </h2>
             </div>
           </div>
