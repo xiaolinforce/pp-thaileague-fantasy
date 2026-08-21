@@ -62,14 +62,15 @@ current session's team identity. Reuse `AppShell` and `PageHeader` for product r
 The root route presents member sign-in first and Guest play second. Keep this
 screen decision-oriented: the hero uses one headline and one supporting
 sentence, and the action panel avoids repeating marketing benefits. The member
-card exposes passwordless Email OTP and Google directly. The Guest card presents
-the device/browser boundary, 30-day access risk, and locked random names as
-short scannable facts, with an explicit acknowledgement beside them. Never
-pre-check that acknowledgement. Keep the compact TH/EN language switch visible
-at the top right and connect it to the same stored preference as the product
-shell without letting it compete with the primary authentication actions. Use
-an orange-led hero and a warm off-white action canvas; the hero starts with the
-prominent product name instead of repeating the full shell brand lockup.
+card exposes passwordless Email OTP and Google directly. The Guest card is a
+low-friction trial action with a person icon, one short reassurance that an
+account can be created later, and no acknowledgement checkbox. Keep the compact
+TH/EN language switch visible at the top right and connect it to the same stored
+preference as the product shell without letting it compete with the primary
+authentication actions. Use an orange-led hero, primary Guest action, and a
+warm off-white action canvas; the hero starts with the prominent product name
+instead of repeating the full shell brand lockup. The onboarding page explicitly
+uses Mitr for all Thai and Latin copy.
 
 Email OTP must visibly expose a labelled email field, Turnstile state, a
 separate labelled six-digit field after sending, disabled/pending states, and a

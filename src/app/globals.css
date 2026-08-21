@@ -86,6 +86,7 @@ button:focus-visible {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(400px, 520px);
   background: #fff5ed;
+  font-family: var(--font-mitr), "Leelawadee UI", Tahoma, Arial, sans-serif;
 }
 .onboarding-language-switcher {
   position: fixed;
@@ -102,7 +103,9 @@ button:focus-visible {
   font-size: 12px;
   font-weight: 800;
   overflow: hidden;
-  transition: border-color 150ms ease, background 150ms ease;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
   cursor: pointer;
 }
 .onboarding-language-switcher span {
@@ -114,7 +117,9 @@ button:focus-visible {
   border-radius: 999px;
   color: #bb5a0f;
   background: transparent;
-  transition: background-color 150ms ease, color 150ms ease;
+  transition:
+    background-color 150ms ease,
+    color 150ms ease;
 }
 .onboarding-language-switcher .is-active {
   color: #fff;
@@ -305,25 +310,11 @@ button:focus-visible {
   flex: 0 0 auto;
   color: #c96b16;
 }
-.guest-risk-list {
-  list-style: none;
-  display: grid;
-  gap: 5px;
-  padding: 0;
+.guest-warning p {
   margin: 8px 0 0;
   color: #6f6258;
   font-size: 13px;
   line-height: 1.45;
-}
-.guest-risk-list li {
-  position: relative;
-  padding-left: 13px;
-}
-.guest-risk-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #c96b16;
 }
 .onboarding-choice-divider {
   display: flex;
@@ -340,26 +331,10 @@ button:focus-visible {
   flex: 1;
   background: var(--line);
 }
-.guest-confirmation {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  min-height: 36px;
-  font-size: 13px;
-  color: #5f554d;
-  margin: 12px 0;
-  cursor: pointer;
-}
-.guest-confirmation input {
-  width: 17px;
-  height: 17px;
-  margin: 0;
-  flex: 0 0 auto;
-  accent-color: var(--orange);
-}
 .guest-button {
   color: #fff;
-  background: var(--navy);
+  background: var(--orange);
+  margin-top: 14px;
 }
 .auth-error {
   color: #aa2d24;

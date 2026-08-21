@@ -73,13 +73,10 @@ const translations: Record<string, string> = {
   "ส่งรหัส OTP ทางอีเมล": "Send an OTP by email",
   "การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้ แต่ยังทดลองเล่นแบบ Guest ได้":
     "Member sign-in is not enabled in this environment, but Guest play is available",
+  ทดลองเล่นแบบไม่สมัครสมาชิก: "Try without creating an account",
+  "สามารถสมัครสมาชิกภายหลังได้ มาลองเล่นกันก่อน":
+    "You can create an account later. Let's try it first",
   "เล่นแบบ Guest": "Play as Guest",
-  เฉพาะอุปกรณ์และเบราว์เซอร์นี้: "Only on this device and browser",
-  ชื่อเป็นแบบสุ่มและเปลี่ยนไม่ได้: "Names are random and cannot be changed",
-  "ล้างคุกกี้หรือหายไป 30 วัน อาจเข้าถึงทีมไม่ได้":
-    "Clearing cookies or staying away for 30 days may make the team inaccessible",
-  "ฉันเข้าใจและต้องการเล่นแบบ Guest":
-    "I understand and want to play as a Guest",
   "บัญชี Guest": "Guest account",
   บัญชีสมาชิก: "Member account",
   สมัครสมาชิกเพื่อเก็บทีม: "Create an account to save this team",

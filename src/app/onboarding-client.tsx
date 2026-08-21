@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, ArrowRight, Mail } from "lucide-react";
+import { ArrowRight, Mail, UserRound } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -89,7 +89,6 @@ export default function OnboardingClient({
   const [otpSent, setOtpSent] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaEpoch, setCaptchaEpoch] = useState(0);
-  const [guestAccepted, setGuestAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -170,12 +169,18 @@ export default function OnboardingClient({
           className="onboarding-language-switcher"
           role="switch"
           aria-checked={language === "en"}
-          aria-label={language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"}
+          aria-label={
+            language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"
+          }
           title={language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"}
           onClick={toggleLanguage}
         >
-          <span className={language === "th" ? "is-active" : undefined}>TH</span>
-          <span className={language === "en" ? "is-active" : undefined}>EN</span>
+          <span className={language === "th" ? "is-active" : undefined}>
+            TH
+          </span>
+          <span className={language === "en" ? "is-active" : undefined}>
+            EN
+          </span>
         </button>
 
         <section className="onboarding-hero">
@@ -196,9 +201,7 @@ export default function OnboardingClient({
           <div className="onboarding-panel-heading">
             <div>
               <p>{upgradeMode ? "เก็บทีมของคุณ" : ""}</p>
-              <h2 id="start-title">
-                {upgradeMode ? "เข้าสู่ระบบ" : ""}
-              </h2>
+              <h2 id="start-title">{upgradeMode ? "เข้าสู่ระบบ" : ""}</h2>
             </div>
           </div>
 
@@ -312,28 +315,16 @@ export default function OnboardingClient({
               </div>
               <div className="guest-card">
                 <div className="guest-warning">
-                  <AlertTriangle />
+                  <UserRound />
                   <div>
-                    <strong>เล่นแบบ Guest</strong>
-                    <ul className="guest-risk-list">
-                      <li>เฉพาะอุปกรณ์และเบราว์เซอร์นี้</li>
-                      <li>ชื่อเป็นแบบสุ่มและเปลี่ยนไม่ได้</li>
-                      <li>ล้างคุกกี้หรือหายไป 30 วัน อาจเข้าถึงทีมไม่ได้</li>
-                    </ul>
+                    <strong>ทดลองเล่นแบบไม่สมัครสมาชิก</strong>
+                    <p>สามารถสมัครสมาชิกภายหลังได้ มาลองเล่นกันก่อน</p>
                   </div>
                 </div>
-                <label className="guest-confirmation">
-                  <input
-                    type="checkbox"
-                    checked={guestAccepted}
-                    onChange={(event) => setGuestAccepted(event.target.checked)}
-                  />
-                  ฉันเข้าใจและต้องการเล่นแบบ Guest
-                </label>
                 <button
                   className="auth-button guest-button"
                   onClick={playAsGuest}
-                  disabled={busy || !guestAccepted}
+                  disabled={busy}
                 >
                   เล่นแบบ Guest <ArrowRight />
                 </button>
