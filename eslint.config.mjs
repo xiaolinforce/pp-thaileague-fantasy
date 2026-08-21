@@ -13,6 +13,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Third-party project-local Codex skills are vendored tooling, not app code.
+    ".agents/skills/impeccable/**",
+    ".agents/skills/web-design-guidelines/**",
   ]),
   // Turns off ESLint rules that would conflict with Prettier formatting.
   prettier,

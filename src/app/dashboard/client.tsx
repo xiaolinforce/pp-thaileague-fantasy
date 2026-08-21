@@ -43,10 +43,31 @@ export default function DashboardClient({
   const firstFixture = nextFixtures[0];
   const overall = fantasy.leagues.find((league) => league.type === "overall");
   const mine = overall?.standings.find((standing) => standing.mine);
+  const privateLeague = fantasy.leagues.find(
+    (league) => league.type === "private",
+  );
+  const privateStanding = privateLeague?.standings.find(
+    (standing) => standing.mine,
+  );
+  const overallAverage = overall?.standings.length
+    ? Math.round(
+        overall.standings.reduce(
+          (total, standing) => total + standing.totalPoints,
+          0,
+        ) / overall.standings.length,
+      )
+    : 0;
+  const overallBest = overall?.standings.length
+    ? Math.max(...overall.standings.map((standing) => standing.totalPoints))
+    : 0;
   const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
+  const numberFormat = new Intl.NumberFormat(
+    language === "th" ? "th-TH" : "en-GB",
+  );
+  const isOpeningGameweek = fantasy.gameweek.number === 1;
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="ภาพรวม"
           title={
@@ -54,7 +75,11 @@ export default function DashboardClient({
               ? `สวัสดี ผู้จัดการ ${fantasy.team.name}`
               : `Welcome, ${fantasy.team.name} Manager`
           }
-          description="ทุกอย่างพร้อมสำหรับ Gameweek แรก — ตรวจทีมก่อนเดดไลน์วันศุกร์"
+          description={
+            language === "th"
+              ? `ทีมพร้อมสำหรับ Gameweek ${fantasy.gameweek.number} — ตรวจรายชื่อก่อนเดดไลน์`
+              : `Your squad is ready for Gameweek ${fantasy.gameweek.number} — review it before the deadline`
+          }
           actions={
             <Link href="/team" className="primary-button">
               จัดทีมตอนนี้ <ArrowRight size={17} />
@@ -68,13 +93,16 @@ export default function DashboardClient({
               {String(fantasy.gameweek.number).padStart(2, "0")}
             </span>
             <h2>
-              เริ่มฤดูกาล
+              {isOpeningGameweek
+                ? "เริ่มฤดูกาล"
+                : `วางแผน Gameweek ${fantasy.gameweek.number}`}
               <br />
-              ให้เหนือคู่แข่ง
+              {isOpeningGameweek ? "ให้เหนือคู่แข่ง" : "ก่อนเดดไลน์"}
             </h2>
             <p>
-              ทีมของคุณจัดครบ 15 คนแล้ว และแก้ไขได้จนถึง Deadline 90
-              นาทีก่อนคู่แรก
+              {language === "th"
+                ? `ทีมของคุณมี ${squadPlayers.length}/15 คน และแก้ไขได้จนถึง 90 นาทีก่อนคู่แรก`
+                : `Your squad has ${squadPlayers.length}/15 players and remains editable until 90 minutes before the first kickoff`}
             </p>
             <div className="hero-actions">
               <Link href="/team" className="hero-button">
@@ -119,7 +147,11 @@ export default function DashboardClient({
             <div>
               <span>อันดับรวม</span>
               <strong>{mine?.rank ?? "—"}</strong>
-              <small className="positive">▲ 4,281 อันดับ</small>
+              <small>
+                {language === "th" ? "จาก" : "of"}{" "}
+                {numberFormat.format(overall?.standings.length ?? 0)}{" "}
+                {language === "th" ? "ทีม" : "teams"}
+              </small>
             </div>
           </article>
           <article className="metric-card">
@@ -129,7 +161,13 @@ export default function DashboardClient({
             <div>
               <span>คะแนนรวม</span>
               <strong>{mine?.totalPoints ?? 0}</strong>
-              <small>เฉลี่ย 52 คะแนน</small>
+              <small>
+                {language === "th" ? "เฉลี่ย" : "Average"}{" "}
+                {numberFormat.format(overallAverage)}{" "}
+                {language === "th" ? "คะแนน" : "points"} ·{" "}
+                {language === "th" ? "สูงสุด" : "best"}{" "}
+                {numberFormat.format(overallBest)}
+              </small>
             </div>
           </article>
           <article className="metric-card">
@@ -137,9 +175,9 @@ export default function DashboardClient({
               <CircleDollarSign />
             </span>
             <div>
-              <span>ระดับ 1</span>
+              <span>นักเตะระดับ 1</span>
               <strong>{levelOne}/3</strong>
-              <small>ใช้ระบบระดับแทนราคา</small>
+              <small>โควตาสูงสุด 3 คน</small>
             </div>
           </article>
           <article className="metric-card">
@@ -148,16 +186,11 @@ export default function DashboardClient({
             </span>
             <div>
               <span>อันดับมินิลีก</span>
-              <strong>
-                {fantasy.leagues
-                  .find((league) => league.type === "private")
-                  ?.standings.find((standing) => standing.mine)?.rank ?? "—"}
-              </strong>
+              <strong>{privateStanding?.rank ?? "—"}</strong>
               <small>
-                จาก{" "}
-                {fantasy.leagues.find((league) => league.type === "private")
-                  ?.standings.length ?? 0}{" "}
-                ทีม
+                {language === "th" ? "จาก" : "of"}{" "}
+                {numberFormat.format(privateLeague?.standings.length ?? 0)}{" "}
+                {language === "th" ? "ทีม" : "teams"}
               </small>
             </div>
           </article>
@@ -194,6 +227,11 @@ export default function DashboardClient({
                   </strong>
                 </article>
               ))}
+              {featuredPlayers.length === 0 && (
+                <p className="inline-empty-state">
+                  ยังไม่มีนักเตะในทีมสำหรับแสดงฟอร์ม
+                </p>
+              )}
             </div>
           </section>
 
@@ -225,6 +263,11 @@ export default function DashboardClient({
                 </div>
               </article>
             ))}
+            {nextFixtures.length === 0 && (
+              <p className="inline-empty-state">
+                ยังไม่มีโปรแกรมที่ยืนยันสำหรับ Gameweek นี้
+              </p>
+            )}
             <Link href="/fixtures" className="full-card-link">
               ดูโปรแกรมทั้งหมด <ArrowRight size={15} />
             </Link>

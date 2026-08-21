@@ -66,6 +66,31 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+::selection {
+  color: #fff;
+  background: var(--orange-deep);
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+  padding: 10px 14px;
+  border-radius: 10px;
+  color: #fff;
+  background: var(--navy);
+  box-shadow: 0 8px 20px rgba(24, 32, 38, 0.22);
+  transform: translateY(-160%);
+  transition: transform 150ms ease-out;
+}
+
+.skip-link:focus-visible {
+  outline: 3px solid rgba(245, 102, 23, 0.55);
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
 button,
 input,
 select,
@@ -76,7 +101,8 @@ button,
 a {
   -webkit-tap-highlight-color: transparent;
 }
-button:focus-visible {
+button:focus-visible,
+a:focus-visible {
   outline: 3px solid rgba(245, 102, 23, 0.32);
   outline-offset: 2px;
 }
@@ -734,6 +760,13 @@ button:focus-visible {
   font-size: 12px;
   font-weight: 800;
   white-space: nowrap;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+  box-shadow: none;
 }
 .primary-button {
   background: var(--orange);
@@ -2100,6 +2133,40 @@ button:focus-visible {
   border-radius: var(--radius);
   box-shadow: 0 8px 22px rgba(40, 35, 30, 0.035);
   overflow: hidden;
+}
+
+.inline-empty-state {
+  min-width: 0;
+  margin: 0;
+  padding: 20px;
+  color: var(--muted);
+  line-height: 1.65;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.inline-empty-state.large {
+  min-height: 180px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 7px;
+  padding: 32px 20px;
+}
+
+.inline-empty-state.large > svg {
+  width: 28px;
+  height: 28px;
+  margin-bottom: 4px;
+  color: var(--orange);
+}
+
+.inline-empty-state strong {
+  color: var(--ink);
+}
+
+.inline-empty-state span {
+  max-width: 48ch;
 }
 
 .product-card-head {
@@ -4061,8 +4128,6 @@ button:focus-visible {
 
 .league-row.mine {
   background: #fff5ed;
-  border-left: 3px solid var(--orange);
-  padding-left: 18px;
 }
 
 .rank-number {
@@ -4204,6 +4269,19 @@ button:focus-visible {
 
 .fixture-club strong {
   font-size: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.stats-position-filter {
+  display: inline-flex;
+}
+
+.stats-position-filter select.filter-button {
+  min-height: 40px;
+  padding-right: 34px;
+  color: var(--ink);
+  background-color: #fff;
 }
 
 .fixture-club span {
@@ -5037,7 +5115,10 @@ button:focus-visible {
 
 @media (max-width: 640px) {
   .product-page-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     align-items: flex-start;
+    gap: 16px;
   }
 
   .language-control {
@@ -5067,7 +5148,18 @@ button:focus-visible {
   }
 
   .product-page-intro .intro-actions {
-    max-width: 46%;
+    width: 100%;
+    max-width: none;
+    flex-wrap: wrap;
+  }
+
+  .product-page-intro .intro-actions > .primary-button {
+    flex: 1 1 auto;
+  }
+
+  .product-page-intro .intro-actions > [data-slot="tabs"],
+  .product-page-intro .page-tabs {
+    width: 100%;
   }
 
   .product-page-intro:has(.points-week-switcher) {
@@ -5303,6 +5395,33 @@ button:focus-visible {
 
   .fixture-week-bar {
     min-height: 82px;
+  }
+
+  .fixture-list-card {
+    overflow-x: hidden;
+  }
+
+  .fixture-row {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 42px minmax(0, 1fr) 18px 24px 18px minmax(0, 1fr);
+    gap: 4px;
+    padding: 10px;
+  }
+
+  .fixture-row time,
+  .fixture-club strong {
+    font-size: 13px;
+  }
+
+  .profile-nav-card {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .profile-nav-card nav {
+    width: 100%;
+    overscroll-behavior-x: contain;
   }
 
   .team-brand-editor {

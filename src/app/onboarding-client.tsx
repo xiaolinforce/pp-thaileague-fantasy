@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowLeft, ArrowRight, Mail, UserRound } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  LoaderCircle,
+  Mail,
+  UserRound,
+} from "lucide-react";
 import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -94,12 +100,15 @@ export default function OnboardingClient({
   const [otpSent, setOtpSent] = useState(false);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaEpoch, setCaptchaEpoch] = useState(0);
-  const [busy, setBusy] = useState(false);
+  const [busyAction, setBusyAction] = useState<
+    "guest" | "google" | "send-otp" | "verify-otp" | null
+  >(null);
   const [error, setError] = useState("");
   const [authView, setAuthView] = useState<"choices" | "email">("choices");
+  const busy = busyAction !== null;
 
   const sendOtp = async () => {
-    setBusy(true);
+    setBusyAction("send-otp");
     setError("");
     try {
       const result = await authClient.emailOtp.sendVerificationOtp(
@@ -115,12 +124,12 @@ export default function OnboardingClient({
       setCaptchaToken("");
       setCaptchaEpoch((value) => value + 1);
     } finally {
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
   const verifyOtp = async () => {
-    setBusy(true);
+    setBusyAction("verify-otp");
     setError("");
     try {
       const result = await authClient.signIn.emailOtp({
@@ -132,12 +141,12 @@ export default function OnboardingClient({
       router.refresh();
     } catch (requestError) {
       setError(errorMessage(requestError));
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
   const playAsGuest = async () => {
-    setBusy(true);
+    setBusyAction("guest");
     setError("");
     try {
       const result = await authClient.signIn.anonymous();
@@ -146,12 +155,12 @@ export default function OnboardingClient({
       router.refresh();
     } catch (requestError) {
       setError(errorMessage(requestError));
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
   const signInWithGoogle = async () => {
-    setBusy(true);
+    setBusyAction("google");
     setError("");
     const result = await authClient.signIn.social({
       provider: "google",
@@ -159,7 +168,7 @@ export default function OnboardingClient({
     });
     if (result?.error) {
       setError(errorMessage(result.error));
-      setBusy(false);
+      setBusyAction(null);
     }
   };
 
@@ -183,7 +192,7 @@ export default function OnboardingClient({
 
   return (
     <Localized>
-      <main className="onboarding-page">
+      <main id="main-content" className="onboarding-page">
         <section className="onboarding-hero">
           <button
             type="button"
@@ -248,9 +257,16 @@ export default function OnboardingClient({
                     className="auth-button guest-button"
                     onClick={playAsGuest}
                     disabled={busy}
+                    aria-busy={busyAction === "guest"}
                   >
-                    <UserRound />
-                    ทดลองเล่นแบบไม่สมัครสมาชิก
+                    {busyAction === "guest" ? (
+                      <LoaderCircle className="spin" aria-hidden="true" />
+                    ) : (
+                      <UserRound aria-hidden="true" />
+                    )}
+                    {busyAction === "guest"
+                      ? "กำลังเริ่มโหมด Guest…"
+                      : "ทดลองเล่นแบบไม่สมัครสมาชิก"}
                   </button>
                 )}
 
@@ -260,16 +276,23 @@ export default function OnboardingClient({
                     className="auth-button google-button"
                     onClick={signInWithGoogle}
                     disabled={busy}
+                    aria-busy={busyAction === "google"}
                   >
-                    <Image
-                      className="google-sign-in-icon"
-                      src="/google-sign-in-icon.svg"
-                      width={40}
-                      height={40}
-                      alt=""
-                      unoptimized
-                    />
-                    เข้าสู่ระบบหรือสมัครด้วย GOOGLE
+                    {busyAction === "google" ? (
+                      <LoaderCircle className="spin" aria-hidden="true" />
+                    ) : (
+                      <Image
+                        className="google-sign-in-icon"
+                        src="/google-sign-in-icon.svg"
+                        width={40}
+                        height={40}
+                        alt=""
+                        unoptimized
+                      />
+                    )}
+                    {busyAction === "google"
+                      ? "กำลังเปิด Google…"
+                      : "เข้าสู่ระบบหรือสมัครด้วย GOOGLE"}
                   </button>
                 )}
 
@@ -280,7 +303,7 @@ export default function OnboardingClient({
                     onClick={showEmailForm}
                     disabled={busy}
                   >
-                    <Mail />
+                    <Mail aria-hidden="true" />
                     เข้าสู่ระบบหรือสมัครด้วย EMAIL
                   </button>
                 )}
@@ -300,19 +323,21 @@ export default function OnboardingClient({
                   onClick={showAuthChoices}
                   disabled={busy}
                 >
-                  <ArrowLeft /> ย้อนกลับ
+                  <ArrowLeft aria-hidden="true" /> ย้อนกลับ
                 </button>
                 <h3>เข้าสู่ระบบหรือสมัครด้วย EMAIL</h3>
                 <label htmlFor="auth-email">อีเมล</label>
                 <div className="auth-input-wrap">
-                  <Mail />
+                  <Mail aria-hidden="true" />
                   <input
                     id="auth-email"
+                    name="email"
                     type="email"
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
                     placeholder="you@example.com"
                     autoComplete="email"
+                    spellCheck={false}
                     disabled={otpSent || busy}
                   />
                 </div>
@@ -321,6 +346,7 @@ export default function OnboardingClient({
                     <label htmlFor="auth-otp">รหัส OTP 6 หลัก</label>
                     <input
                       id="auth-otp"
+                      name="otp"
                       className="otp-input"
                       inputMode="numeric"
                       autoComplete="one-time-code"
@@ -330,14 +356,25 @@ export default function OnboardingClient({
                         setOtp(event.target.value.replace(/\D/g, ""))
                       }
                       placeholder="000000"
+                      spellCheck={false}
                     />
                     <button
                       type="button"
                       className="auth-button primary-auth-button"
                       onClick={verifyOtp}
                       disabled={busy || otp.length !== 6}
+                      aria-busy={busyAction === "verify-otp"}
                     >
-                      ยืนยันและเริ่มเล่น <ArrowRight />
+                      {busyAction === "verify-otp" ? (
+                        <>
+                          <LoaderCircle className="spin" aria-hidden="true" />
+                          กำลังตรวจสอบรหัส…
+                        </>
+                      ) : (
+                        <>
+                          ยืนยันและเริ่มเล่น <ArrowRight aria-hidden="true" />
+                        </>
+                      )}
                     </button>
                     <button
                       type="button"
@@ -371,8 +408,18 @@ export default function OnboardingClient({
                         !email.includes("@") ||
                         Boolean(turnstileSiteKey && !captchaToken)
                       }
+                      aria-busy={busyAction === "send-otp"}
                     >
-                      ส่งรหัส OTP ทางอีเมล <ArrowRight />
+                      {busyAction === "send-otp" ? (
+                        <>
+                          <LoaderCircle className="spin" aria-hidden="true" />
+                          กำลังส่งรหัส OTP…
+                        </>
+                      ) : (
+                        <>
+                          ส่งรหัส OTP ทางอีเมล <ArrowRight aria-hidden="true" />
+                        </>
+                      )}
                     </button>
                   </>
                 )}

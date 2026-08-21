@@ -51,6 +51,10 @@ const translations: Record<string, string> = {
   ผู้จัดการทีม: "Manager",
   ศูนย์สถิติ: "Stats Centre",
   การแจ้งเตือน: "Notifications",
+  ข้ามไปยังเนื้อหาหลัก: "Skip to main content",
+  เปลี่ยนภาษาเป็นภาษาไทย: "Switch language to Thai",
+  เปลี่ยนเป็นภาษาไทย: "Switch to Thai",
+  สลับเป็นภาษาไทย: "Switch to Thai",
 
   // Authentication and onboarding
   จัดทีมไทยลีกของคุณ: "Build your Thai League squad",
@@ -78,6 +82,10 @@ const translations: Record<string, string> = {
   "การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้ แต่ยังทดลองเล่นแบบ Guest ได้":
     "Member sign-in is not enabled in this environment, but Guest play is available",
   ทดลองเล่นแบบไม่สมัครสมาชิก: "Try without creating an account",
+  "กำลังเริ่มโหมด Guest…": "Starting Guest mode…",
+  "กำลังเปิด Google…": "Opening Google…",
+  "กำลังส่งรหัส OTP…": "Sending OTP…",
+  "กำลังตรวจสอบรหัส…": "Verifying code…",
   "สามารถสมัครสมาชิกภายหลังได้ มาลองเล่นกันก่อน":
     "You can create an account later. Let's try it first",
   "เล่นแบบ Guest": "Play as Guest",
@@ -111,6 +119,17 @@ const translations: Record<string, string> = {
   นัดถัดไป: "Next Fixture",
   "ศุกร์ 21 ส.ค.": "Friday 21 Aug",
   ดูโปรแกรมทั้งหมด: "View All Fixtures",
+  วางแผน: "Plan",
+  ก่อนเดดไลน์: "before the deadline",
+  ทีมของคุณมี: "Your squad has",
+  "คน และแก้ไขได้จนถึง 90 นาทีก่อนคู่แรก":
+    "players and remains editable until 90 minutes before the first kickoff",
+  "นักเตะระดับ 1": "Tier 1 Players",
+  "โควตาสูงสุด 3 คน": "Maximum 3 players",
+  ยังไม่มีนักเตะในทีมสำหรับแสดงฟอร์ม:
+    "No squad players are available for form highlights yet",
+  "ยังไม่มีโปรแกรมที่ยืนยันสำหรับ Gameweek นี้":
+    "No confirmed fixtures are available for this Gameweek yet",
 
   // Team
   จัดทีมและซื้อขาย: "Team & Transfers",
@@ -140,6 +159,7 @@ const translations: Record<string, string> = {
   เรียงลำดับการลงสนาม: "Substitution order",
   ผู้เล่น: "Player",
   ราคา: "Price",
+  ระดับ: "Tier",
   สำรอง: "Bench",
   ภาพรวมทีม: "Team Summary",
   เฉลี่ย: "Average",
@@ -155,6 +175,18 @@ const translations: Record<string, string> = {
   เลือกผู้เล่นนี้: "Select Player",
   บันทึกการจัดทีมแล้ว: "Team saved",
   ดูข้อมูล: "View details for",
+  "กำลังบันทึกทีม…": "Saving Team…",
+  ยังไม่มีการเปลี่ยนแปลง: "No unsaved changes",
+  เลือกผู้เล่นอีกคนเพื่อสลับตำแหน่ง: "Choose another player to swap positions",
+  โควต้าระดับ: "Tier Quotas",
+  "กัปตัน ×3": "Triple Captain",
+  นับตัวสำรอง: "Bench Boost",
+  ครั้ง: "uses",
+  สลับตัว: "Swap",
+  รองกัปตัน: "Vice-captain",
+  ปิด: "Close",
+  กรองระดับ: "Filter by tier",
+  เรียงลำดับ: "Sort players",
 
   // Transfers
   ตลาดนักเตะ: "Player Market",
@@ -297,6 +329,17 @@ const translations: Record<string, string> = {
   คุณ: "You",
   "อัปเดตล่าสุด 2 นาทีที่แล้ว": "Updated 2 minutes ago",
   ดูอันดับเพิ่มเติม: "View More Rankings",
+  "อันดับเรียงจากคะแนนรวม และใช้จำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน":
+    "Rankings use total points, with fewer transfers as the tiebreaker",
+  "Classic scoring · ไม่มีบอลถ้วย": "Classic scoring · no cup competition",
+  "คะแนน Final": "Final points",
+  "คะแนนชั่วคราว — อาจเปลี่ยนเมื่อมีแมตช์ตกค้าง":
+    "Provisional points — postponed matches may change the ranking",
+  "Wildcard ไม่นับจำนวน Transfer":
+    "Wildcard transfers do not count toward the tiebreaker",
+  ยังไม่มีลีกสำหรับทีมนี้: "No leagues are available for this team yet",
+  ลีกโดยรวมและมินิลีกจะแสดงที่นี่เมื่อพร้อมใช้งาน:
+    "The overall league and mini-leagues will appear here when available",
 
   // Fixtures and stats
   ข้อมูลการแข่งขัน: "Match Centre",
@@ -318,6 +361,14 @@ const translations: Record<string, string> = {
   "5 คลีนชีต": "5 clean sheets",
   อันดับผู้เล่น: "Player Rankings",
   ทุกตำแหน่ง: "All Positions",
+  กรองตำแหน่งผู้เล่น: "Filter players by position",
+  "ยังไม่มีโปรแกรมใน Gameweek นี้":
+    "No fixtures are available for this Gameweek",
+  "ลองเลือก Gameweek อื่นเพื่อตรวจสอบโปรแกรม":
+    "Try another Gameweek to view its fixtures",
+  ไม่พบนักเตะในตำแหน่งนี้: "No players were found in this position",
+  เลือกตำแหน่งอื่นเพื่อดูอันดับผู้เล่น:
+    "Choose another position to view player rankings",
 
   // Profile and settings
   บัญชีของฉัน: "My Account",
@@ -375,6 +426,28 @@ const translations: Record<string, string> = {
   "ระบบ UI แยกจากสูตรคะแนน จึงปรับภายหลังได้โดยไม่กระทบหน้าจอ":
     "The UI is separate from the scoring engine, so rules can change without affecting the interface.",
   บันทึกการตั้งค่าแล้ว: "Settings saved",
+  "กำลังบันทึก…": "Saving…",
+  การเปลี่ยนแปลงระดับ: "Tier Changes",
+  กติกาที่ระบบใช้ตรวจทีมและคำนวณคะแนน:
+    "The rules used to validate squads and calculate points",
+  ระดับนักเตะ: "Player Tiers",
+  แมตช์ตกค้างและอันดับ: "Postponed Matches & Rankings",
+  กติกาถูกบันทึกเป็นข้อมูลรายฤดูกาล:
+    "Rules are stored separately for each season",
+  "ระดับ ตำแหน่ง และทีมในแต่ละ Gameweek เก็บแบบ snapshot เพื่อรักษาประวัติย้อนหลัง":
+    "Each Gameweek stores tier, position, and club snapshots to preserve historical results",
+  "ทีมมี 15 คน: ผู้รักษาประตู 2 กองหลัง 5 กองกลาง 5 และกองหน้า 3 คน ตัวจริงต้องมี 1 GK, อย่างน้อย 3 DEF, 2 MID และ 1 FWD สโมสรเดียวกันไม่เกิน 3 คนและต่างชาติไม่เกิน 7 คน โดยลูกครึ่งไทยนับเป็นนักเตะไทย":
+    "A squad has 15 players: 2 goalkeepers, 5 defenders, 5 midfielders, and 3 forwards. The starting XI needs 1 GK, at least 3 DEF, 2 MID, and 1 FWD. A squad may include at most 3 players from one club and 7 foreign players; dual-national Thai players count as Thai.",
+  "ระดับ 1 มี 3 ช่อง ระดับ 2 มี 7 ช่อง และระดับ 3 มี 5 ช่อง ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ว่างได้ จึงมีระดับ 1 ได้สูงสุด 3 คน และระดับ 1–2 รวมกันสูงสุด 10 คน ระดับมีผลเป็นราย Gameweek":
+    "Tier 1 has 3 slots, Tier 2 has 7, and Tier 3 has 5. Lower-tier players may use an open higher-tier slot, so a squad can have at most 3 Tier 1 players and 10 Tier 1–2 players combined. Tiers apply per Gameweek.",
+  "ได้รับ Free Transfer เพิ่ม 2 ครั้งหลังแต่ละ Deadline สะสมได้สูงสุด 4 ครั้ง ส่วนที่เกินหัก 4 คะแนนต่อครั้ง นับจากความแตกต่างสุทธิของทีม และยกเลิกได้จนถึง Deadline 90 นาทีก่อนคู่แรก":
+    "You receive 2 free transfers after each deadline and may bank up to 4. Each additional transfer costs 4 points. Transfers use the net squad difference and can be reversed until 90 minutes before the first kickoff.",
+  "มี Triple Captain, Bench Boost และ Wildcard อย่างละ 2 ครั้งตลอดฤดูกาล ใช้ได้หนึ่ง Chip ต่อ Gameweek ใช้ชนิดเดิมติดกันได้ และยกเลิกได้ก่อน Deadline โดย Wildcard เก็บ Free Transfer ที่สะสมไว้":
+    "Triple Captain, Bench Boost, and Wildcard can each be used twice per season. One chip may be active per Gameweek, the same chip may be used in consecutive Gameweeks, and it can be cancelled before the deadline. A Wildcard preserves banked free transfers.",
+  "ใช้คะแนน FPL สำหรับนาที ประตู แอสซิสต์ คลีนชีต เซฟ จุดโทษ ใบเหลือง ใบแดง และประตูตัวเอง โดยไม่มี Defensive Contributions และ Bonus/BPS ผู้เล่นที่ถูกไล่ออกไม่ถูกคิดประตูที่ทีมเสียหลังออกจากสนาม":
+    "Scoring follows FPL for minutes, goals, assists, clean sheets, saves, penalties, cards, and own goals, without Defensive Contributions or Bonus/BPS. A dismissed player is not charged for goals conceded after leaving the pitch.",
+  "แมตช์ตกค้างให้คะแนนย้อนหลังแก่ Gameweek เดิม แล้วคำนวณ Auto-sub กัปตัน Chips และอันดับใหม่ Classic League ใช้คะแนนรวมและจำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน โดยไม่นับ Wildcard":
+    "Postponed matches score back into their original Gameweek, then auto-subs, captaincy, chips, and rankings are recalculated. Classic Leagues rank by total points, using fewer transfers as the tiebreaker; Wildcard transfers are excluded.",
 
   // Player and club names
   "ชนาธิป สรงกระสินธ์": "Chanathip Songkrasin",

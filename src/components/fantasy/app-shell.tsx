@@ -78,6 +78,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <Localized>
       <div className="app-shell">
+        <a className="skip-link" href="#main-content">
+          ข้ามไปยังเนื้อหาหลัก
+        </a>
         <aside className="sidebar">
           <Brand />
           <TemporarySidebarLanguageSwitcher />
@@ -126,7 +129,12 @@ export function AppShell({ children }: { children: ReactNode }) {
           {navigation.slice(0, 4).map(({ href, shortLabel, icon: Icon }) => {
             const active = pathname === href;
             return (
-              <Link href={href} className={active ? "active" : ""} key={href}>
+              <Link
+                href={href}
+                className={active ? "active" : ""}
+                key={href}
+                aria-current={active ? "page" : undefined}
+              >
                 <Icon size={21} strokeWidth={1.8} />
                 <span>{shortLabel}</span>
               </Link>
@@ -152,18 +160,28 @@ export function AppShell({ children }: { children: ReactNode }) {
               </SheetHeader>
               <div className="mobile-more-links">
                 {navigation.slice(4).map(({ label, href, icon: Icon }) => (
-                  <SheetClose render={<Link href={href} />} key={href}>
+                  <SheetClose
+                    render={<Link href={href} />}
+                    nativeButton={false}
+                    key={href}
+                  >
                     <Icon size={20} />
                     <span>{label}</span>
                     <ChevronRight size={16} />
                   </SheetClose>
                 ))}
-                <SheetClose render={<Link href="/profile#language" />}>
+                <SheetClose
+                  render={<Link href="/profile#language" />}
+                  nativeButton={false}
+                >
                   <Settings size={20} />
                   <span>ตั้งค่า</span>
                   <ChevronRight size={16} />
                 </SheetClose>
-                <SheetClose render={<Link href="/profile#rules" />}>
+                <SheetClose
+                  render={<Link href="/profile#rules" />}
+                  nativeButton={false}
+                >
                   <CircleHelp size={20} />
                   <span>ช่วยเหลือ</span>
                   <ChevronRight size={16} />

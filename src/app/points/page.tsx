@@ -143,7 +143,7 @@ export default async function PointsPage({
 
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="คะแนน"
           title={`ผลงาน Gameweek ${String(points.fantasy.gameweek.number).padStart(2, "0")}`}

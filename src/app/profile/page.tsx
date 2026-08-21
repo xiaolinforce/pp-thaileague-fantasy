@@ -6,6 +6,7 @@ import {
   CircleHelp,
   Languages,
   Lock,
+  LoaderCircle,
   LogOut,
   Mail,
   Palette,
@@ -73,13 +74,16 @@ export default function ProfilePage() {
   const [teamName, setTeamName] = useState(identity?.teamName ?? "");
   const [saving, setSaving] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
-  const [province, setProvince] = useState("กรุงเทพมหานคร");
-  const [favouriteClub, setFavouriteClub] = useState("การท่าเรือ");
+  const [province, setProvince] = useState("bangkok");
+  const [favouriteClub, setFavouriteClub] = useState("port");
   const [notifications, setNotifications] = useState({
     deadline: true,
     price: true,
     news: false,
   });
+  const hasNameChanges =
+    managerName.trim() !== (identity?.managerName ?? "") ||
+    teamName.trim() !== (identity?.teamName ?? "");
   const save = async () => {
     setSaving(true);
     const result = await updateFantasyNamesAction({ managerName, teamName });
@@ -109,7 +113,7 @@ export default function ProfilePage() {
 
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="บัญชีของฉัน"
           title="โปรไฟล์และการตั้งค่า"
@@ -118,10 +122,15 @@ export default function ProfilePage() {
             <button
               className="primary-button"
               onClick={save}
-              disabled={saving || identity?.isGuest}
+              disabled={saving || identity?.isGuest || !hasNameChanges}
+              aria-busy={saving}
             >
-              <Save size={17} />
-              บันทึกการเปลี่ยนแปลง
+              {saving ? (
+                <LoaderCircle className="spin" size={17} aria-hidden="true" />
+              ) : (
+                <Save size={17} aria-hidden="true" />
+              )}
+              {saving ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
             </button>
           }
         />
@@ -175,8 +184,8 @@ export default function ProfilePage() {
                 <LogOut size={16} />
                 {signingOut
                   ? language === "th"
-                    ? "กำลังออกจากระบบ..."
-                    : "Signing out..."
+                    ? "กำลังออกจากระบบ…"
+                    : "Signing out…"
                   : language === "th"
                     ? "ออกจากระบบ"
                     : "Sign out"}
@@ -210,6 +219,7 @@ export default function ProfilePage() {
                 <label>
                   <span>ชื่อที่แสดง</span>
                   <input
+                    name="managerName"
                     value={managerName}
                     onChange={(event) => setManagerName(event.target.value)}
                     disabled={identity?.isGuest}
@@ -222,7 +232,13 @@ export default function ProfilePage() {
                   <div className="input-with-icon">
                     <Mail />
                     <input
-                      value={identity?.email ?? "Guest ไม่มีอีเมล"}
+                      name="email"
+                      value={
+                        identity?.email ??
+                        (language === "th"
+                          ? "Guest ไม่มีอีเมล"
+                          : "Guest has no email")
+                      }
                       disabled
                     />
                   </div>
@@ -235,15 +251,22 @@ export default function ProfilePage() {
                       value && setProvince(String(value))
                     }
                   >
-                    <SelectTrigger className="settings-select">
+                    <SelectTrigger
+                      className="settings-select"
+                      aria-label="จังหวัด"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="กรุงเทพมหานคร">
-                        กรุงเทพมหานคร
+                      <SelectItem value="bangkok">
+                        {language === "th" ? "กรุงเทพมหานคร" : "Bangkok"}
                       </SelectItem>
-                      <SelectItem value="เชียงใหม่">เชียงใหม่</SelectItem>
-                      <SelectItem value="ชลบุรี">ชลบุรี</SelectItem>
+                      <SelectItem value="chiang-mai">
+                        {language === "th" ? "เชียงใหม่" : "Chiang Mai"}
+                      </SelectItem>
+                      <SelectItem value="chonburi">
+                        {language === "th" ? "ชลบุรี" : "Chonburi"}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </label>
@@ -255,15 +278,24 @@ export default function ProfilePage() {
                       value && setFavouriteClub(String(value))
                     }
                   >
-                    <SelectTrigger className="settings-select">
+                    <SelectTrigger
+                      className="settings-select"
+                      aria-label="ทีมโปรด"
+                    >
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="การท่าเรือ">การท่าเรือ</SelectItem>
-                      <SelectItem value="บุรีรัมย์ ยูไนเต็ด">
-                        บุรีรัมย์ ยูไนเต็ด
+                      <SelectItem value="port">
+                        {language === "th" ? "การท่าเรือ" : "Port FC"}
                       </SelectItem>
-                      <SelectItem value="บีจี ปทุม">บีจี ปทุม</SelectItem>
+                      <SelectItem value="buriram">
+                        {language === "th"
+                          ? "บุรีรัมย์ ยูไนเต็ด"
+                          : "Buriram United"}
+                      </SelectItem>
+                      <SelectItem value="bg-pathum">
+                        {language === "th" ? "บีจี ปทุม" : "BG Pathum United"}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </label>
@@ -303,6 +335,7 @@ export default function ProfilePage() {
                   <label>
                     <span>ชื่อทีม</span>
                     <input
+                      name="teamName"
                       value={teamName}
                       onChange={(event) => setTeamName(event.target.value)}
                       disabled={identity?.isGuest}

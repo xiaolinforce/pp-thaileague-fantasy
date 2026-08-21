@@ -56,6 +56,9 @@ function formatMatchDate(kickoffAt: string | null, language: "th" | "en") {
 export default function FixturesClient({ data }: { data: CompetitionDataset }) {
   const [view, setView] = useState<"fixtures" | "stats">("fixtures");
   const [week, setWeek] = useState(data.matchweeks[0] ?? 1);
+  const [position, setPosition] = useState<
+    "ALL" | "GK" | "DEF" | "MID" | "FWD"
+  >("ALL");
   const { language } = useLanguage();
   const weekFixtures = data.fixtures.filter(
     (fixture) => fixture.matchweek === week,
@@ -69,6 +72,9 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
     new Map(),
   );
   const rankedPlayers = [...data.players].sort((a, b) => b.form - a.form);
+  const filteredRankedPlayers = rankedPlayers.filter(
+    (player) => position === "ALL" || player.position === position,
+  );
   const leaders = [
     rankedPlayers[0],
     rankedPlayers[1],
@@ -76,7 +82,7 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
   ].filter(Boolean);
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="ข้อมูลการแข่งขัน"
           title="โปรแกรมและสถิติ"
@@ -149,6 +155,13 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                     ))}
                   </div>
                 ))}
+                {fixturesByDate.size === 0 && (
+                  <div className="inline-empty-state large" role="status">
+                    <CalendarDays aria-hidden="true" />
+                    <strong>ยังไม่มีโปรแกรมใน Gameweek นี้</strong>
+                    <span>ลองเลือก Gameweek อื่นเพื่อตรวจสอบโปรแกรม</span>
+                  </div>
+                )}
               </section>
             </div>
           </>
@@ -206,10 +219,29 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                   <span className="eyebrow">อันดับผู้เล่น</span>
                   <h2>ฟอร์มดีที่สุด</h2>
                 </div>
-                <button className="filter-button">ทุกตำแหน่ง</button>
+                <label className="stats-position-filter">
+                  <span className="sr-only">กรองตำแหน่งผู้เล่น</span>
+                  <select
+                    className="filter-button"
+                    value={position}
+                    onChange={(event) =>
+                      setPosition(
+                        event.target.value as
+                          "ALL" | "GK" | "DEF" | "MID" | "FWD",
+                      )
+                    }
+                    aria-label="กรองตำแหน่งผู้เล่น"
+                  >
+                    <option value="ALL">ทุกตำแหน่ง</option>
+                    <option value="GK">GK</option>
+                    <option value="DEF">DEF</option>
+                    <option value="MID">MID</option>
+                    <option value="FWD">FWD</option>
+                  </select>
+                </label>
               </div>
               <div className="stats-ranking">
-                {rankedPlayers.slice(0, 8).map((player, index) => (
+                {filteredRankedPlayers.slice(0, 8).map((player, index) => (
                   <article key={player.id}>
                     <span className="player-rank">0{index + 1}</span>
                     <PlayerIdentity player={player} />
@@ -221,6 +253,12 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                     <span>ระดับ {player.tier}</span>
                   </article>
                 ))}
+                {filteredRankedPlayers.length === 0 && (
+                  <div className="inline-empty-state large" role="status">
+                    <strong>ไม่พบนักเตะในตำแหน่งนี้</strong>
+                    <span>เลือกตำแหน่งอื่นเพื่อดูอันดับผู้เล่น</span>
+                  </div>
+                )}
               </div>
             </section>
           </>

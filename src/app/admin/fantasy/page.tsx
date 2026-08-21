@@ -38,7 +38,7 @@ export default async function FantasyAdminPage() {
 
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="เครื่องมือภายใน"
           title="Fantasy Admin"

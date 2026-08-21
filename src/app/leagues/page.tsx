@@ -20,7 +20,7 @@ export default async function LeaguesPage() {
 
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="การแข่งขัน"
           title="Classic Leagues"
@@ -68,7 +68,18 @@ export default async function LeaguesPage() {
           </article>
         </div>
 
-        {fantasy.leagues
+        {fantasy.leagues.length === 0 && (
+          <section
+            className="product-card inline-empty-state large"
+            role="status"
+          >
+            <Trophy aria-hidden="true" />
+            <strong>ยังไม่มีลีกสำหรับทีมนี้</strong>
+            <span>ลีกโดยรวมและมินิลีกจะแสดงที่นี่เมื่อพร้อมใช้งาน</span>
+          </section>
+        )}
+
+        {[...fantasy.leagues]
           .sort(
             (a, b) =>
               Number(a.type === "overall") - Number(b.type === "overall"),

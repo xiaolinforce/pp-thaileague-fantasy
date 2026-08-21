@@ -7,6 +7,7 @@ import {
   Info,
   LayoutGrid,
   List,
+  LoaderCircle,
   Save,
   Shirt,
   Sparkles,
@@ -149,6 +150,25 @@ export default function TeamClient({
   const levelOne = squad.filter((item) => item.player.tier === 1).length;
   const premiumSlots = squad.filter((item) => item.player.tier <= 2).length;
   const foreignPlayers = squad.filter((item) => !item.player.isThai).length;
+  const overallLeague = fantasy.leagues.find(
+    (league) => league.type === "overall",
+  );
+  const overallStanding = overallLeague?.standings.find(
+    (standing) => standing.mine,
+  );
+  const averagePoints = overallLeague?.standings.length
+    ? Math.round(
+        overallLeague.standings.reduce(
+          (total, standing) => total + standing.gameweekPoints,
+          0,
+        ) / overallLeague.standings.length,
+      )
+    : 0;
+  const highestPoints = overallLeague?.standings.length
+    ? Math.max(
+        ...overallLeague.standings.map((standing) => standing.gameweekPoints),
+      )
+    : 0;
   const formation = (["DEF", "MID", "FWD"] as const)
     .map(
       (position) =>
@@ -162,6 +182,19 @@ export default function TeamClient({
   const remainingDays = Math.floor(remaining / 86_400_000);
   const remainingHours = Math.floor((remaining % 86_400_000) / 3_600_000);
   const remainingMinutes = Math.floor((remaining % 3_600_000) / 60_000);
+  const savedMembers = useMemo(
+    () =>
+      fantasy.selection.members.map((member) => ({
+        fantasyPlayerId: member.fantasyPlayerId,
+        lineupRole: member.lineupRole,
+        benchOrder: member.benchOrder,
+        captainRole: member.captainRole,
+      })),
+    [fantasy.selection.members],
+  );
+  const hasUnsavedChanges =
+    JSON.stringify(members) !== JSON.stringify(savedMembers) ||
+    activeChip !== fantasy.selection.activeChip;
 
   useEffect(() => {
     const deadline = new Date(fantasy.gameweek.deadlineAt).getTime();
@@ -171,6 +204,15 @@ export default function TeamClient({
     const interval = window.setInterval(updateRemaining, 30_000);
     return () => window.clearInterval(interval);
   }, [fantasy.gameweek.deadlineAt]);
+
+  useEffect(() => {
+    if (!hasUnsavedChanges) return;
+    const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+    };
+    window.addEventListener("beforeunload", warnBeforeLeaving);
+    return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
+  }, [hasUnsavedChanges]);
 
   const saveTeam = () => {
     if (!isEditable) {
@@ -236,7 +278,7 @@ export default function TeamClient({
 
   return (
     <AppShell>
-      <main className="content product-content">
+      <main id="main-content" className="content product-content">
         <PageHeader
           eyebrow="ทีมของฉัน"
           title="จัดทีมและซื้อขาย"
@@ -257,10 +299,22 @@ export default function TeamClient({
               <button
                 className="primary-button"
                 onClick={saveTeam}
-                disabled={isPending || !isEditable}
+                disabled={isPending || !isEditable || !hasUnsavedChanges}
+                aria-busy={isPending}
+                title={
+                  !isEditable
+                    ? "ปิดรับการจัดทีมแล้ว"
+                    : !hasUnsavedChanges
+                      ? "ยังไม่มีการเปลี่ยนแปลง"
+                      : undefined
+                }
               >
-                <Save size={17} />
-                บันทึกทีม
+                {isPending ? (
+                  <LoaderCircle className="spin" size={17} aria-hidden="true" />
+                ) : (
+                  <Save size={17} aria-hidden="true" />
+                )}
+                {isPending ? "กำลังบันทึกทีม…" : "บันทึกทีม"}
               </button>
             </>
           }
@@ -336,7 +390,12 @@ export default function TeamClient({
                 <Tooltip>
                   <TooltipTrigger
                     render={
-                      <ToggleGroupItem value="pitch" aria-label="มุมมองสนาม" />
+                      <ToggleGroupItem
+                        value="pitch"
+                        aria-label={
+                          language === "th" ? "มุมมองสนาม" : "Pitch view"
+                        }
+                      />
                     }
                   >
                     <LayoutGrid size={17} />
@@ -348,7 +407,9 @@ export default function TeamClient({
                     render={
                       <ToggleGroupItem
                         value="list"
-                        aria-label="มุมมองรายชื่อ"
+                        aria-label={
+                          language === "th" ? "มุมมองรายชื่อ" : "List view"
+                        }
                       />
                     }
                   >
@@ -475,27 +536,25 @@ export default function TeamClient({
                 <Info size={17} />
               </div>
               <div className="points-hero">
-                <strong>67</strong>
+                <strong>{overallStanding?.gameweekPoints ?? 0}</strong>
                 <small>คะแนน</small>
               </div>
               <div className="rank-row">
                 <span>อันดับรวม</span>
-                <strong>
-                  <i>▲</i> 18,420
-                </strong>
+                <strong>{overallStanding?.rank ?? "—"}</strong>
               </div>
               <div className="mini-stats">
                 <div>
                   <span>เฉลี่ย</span>
-                  <strong>52</strong>
+                  <strong>{averagePoints}</strong>
                 </div>
                 <div>
                   <span>สูงสุด</span>
-                  <strong>89</strong>
+                  <strong>{highestPoints}</strong>
                 </div>
                 <div>
                   <span>อันดับ GW</span>
-                  <strong>2,841</strong>
+                  <strong>{overallStanding?.rank ?? "—"}</strong>
                 </div>
               </div>
             </section>
