@@ -82,7 +82,7 @@ profiles expose sign-out and naming controls. Do not make a Guest name field
 appear editable.
 
 At 900px and below, the sidebar gives way to the bottom mobile navigation. The
-four highest-frequency destinations remain visible; Leagues, Fixtures, Profile,
+four highest-frequency destinations remain visible; Fixtures, Profile,
 Settings, and Help move into the More sheet. Do not create a second unrelated
 navigation model for a new route.
 
@@ -112,6 +112,9 @@ the screen before cards or tables begin.
 - The Team screen always represents the one Gameweek currently open for squad
   changes. Show its number and live deadline without previous/next Gameweek
   controls; historical squads belong on the Points screen.
+- Keep lineup management and player transfers as two explicit modes within the
+  Team screen. Selecting a squad player may open the transfer mode with that
+  player preselected; do not require a separate Transfers route.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a

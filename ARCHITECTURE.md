@@ -65,8 +65,7 @@ file; remove it in a deliberate cleanup once no design reference depends on it.
 | `/`              | Dynamic Email OTP, Google, and Guest onboarding; authenticated users redirect to the game.    |
 | `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google.                                      |
 | `/dashboard`     | Server-loads competition and demo fantasy summaries.                                          |
-| `/team`          | Server-loads data, then hands interactive lineup management to a Client Component.            |
-| `/transfers`     | Server-loads data, then hands search, filtering, and squad changes to a Client Component.     |
+| `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.            |
 | `/points`        | Server-renders the selected Gameweek score and its breakdown.                                 |
 | `/leagues`       | Server-renders Overall and Private Classic standings.                                         |
 | `/fixtures`      | Server-loads competition fixtures, then delegates interactive browsing to a Client Component. |

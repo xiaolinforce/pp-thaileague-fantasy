@@ -34,8 +34,7 @@ production-readiness work.
 | `/`              | Account/Guest onboarding and sign-in.                              |
 | `/upgrade`       | Upgrade the current Guest while preserving its team when possible. |
 | `/dashboard`     | Current manager and Gameweek overview.                             |
-| `/team`          | Starting lineup, bench, captaincy, and chip management.            |
-| `/transfers`     | Player discovery and squad revisions.                              |
+| `/team`          | Lineup, captaincy, chips, player discovery, and squad revisions.   |
 | `/points`        | Gameweek score and category breakdown.                             |
 | `/leagues`       | Overall and Private Classic standings.                             |
 | `/fixtures`      | Competition fixtures and supporting statistics.                    |

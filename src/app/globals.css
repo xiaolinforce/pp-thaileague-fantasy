@@ -2533,6 +2533,80 @@ button:focus-visible {
   min-height: 86px;
 }
 
+.team-hub-tabs {
+  width: fit-content;
+  margin-bottom: 20px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: #efede9;
+  display: flex;
+  gap: 4px;
+}
+
+.team-hub-tabs button {
+  min-height: 42px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: #73797c;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.team-hub-tabs button.active {
+  color: var(--orange-deep);
+  background: white;
+  box-shadow: 0 3px 10px rgba(21, 28, 31, 0.08);
+}
+
+.team-hub-tabs button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--orange) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.team-transfer-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.team-mode-panel[hidden] {
+  display: none;
+}
+
+.team-transfer-header {
+  margin-bottom: 16px;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.team-transfer-header h2 {
+  margin: 4px 0 2px;
+  font-size: 22px;
+}
+
+.team-transfer-header p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.team-transfer-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+
 .team-layout {
   display: grid;
   grid-template-columns: minmax(580px, 1fr) 294px;
@@ -4854,6 +4928,33 @@ button:focus-visible {
   .product-page-intro .intro-actions:has(.points-week-switcher) {
     width: 100%;
     max-width: none;
+  }
+
+  .team-hub-tabs {
+    width: 100%;
+  }
+
+  .team-hub-tabs button {
+    flex: 1;
+    min-width: 0;
+    padding-inline: 8px;
+  }
+
+  .team-transfer-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .team-transfer-actions {
+    flex-wrap: wrap;
+  }
+
+  .team-transfer-actions > button {
+    flex: 1;
+  }
+
+  .modal-actions {
+    flex-wrap: wrap;
   }
 
   .points-week-switcher {

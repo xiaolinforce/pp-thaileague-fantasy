@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowLeftRight,
   Check,
   Clock3,
   Info,
@@ -45,6 +46,7 @@ import {
   type FantasySelectionInput,
 } from "@/app/fantasy-actions";
 import type { FantasyChip } from "@/lib/fantasy/rules";
+import TransfersClient from "@/app/team/transfers-client";
 
 const rows = ["GK", "DEF", "MID", "FWD"] as const;
 
@@ -89,6 +91,10 @@ export default function TeamClient({
   fantasy: FantasyState;
 }) {
   const [view, setView] = useState<"pitch" | "list">("pitch");
+  const [mode, setMode] = useState<"lineup" | "transfers">("lineup");
+  const [transferOutgoingId, setTransferOutgoingId] = useState<string | null>(
+    null,
+  );
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
@@ -232,30 +238,32 @@ export default function TeamClient({
       <main className="content product-content">
         <PageHeader
           eyebrow="ทีมของฉัน"
-          title="จัดทีมลุยไทยลีก"
-          description="เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง"
+          title="จัดทีมและซื้อขาย"
+          description="จัดตัวจริง เลือกกัปตัน และปรับนักเตะให้พร้อมก่อนเดดไลน์"
           actions={
-            <>
-              <button
-                className="secondary-button"
-                onClick={() => setView(view === "pitch" ? "list" : "pitch")}
-              >
-                {view === "pitch" ? (
-                  <List size={17} />
-                ) : (
-                  <LayoutGrid size={17} />
-                )}
-                {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
-              </button>
-              <button
-                className="primary-button"
-                onClick={saveTeam}
-                disabled={isPending || !isEditable}
-              >
-                <Save size={17} />
-                บันทึกทีม
-              </button>
-            </>
+            mode === "lineup" ? (
+              <>
+                <button
+                  className="secondary-button"
+                  onClick={() => setView(view === "pitch" ? "list" : "pitch")}
+                >
+                  {view === "pitch" ? (
+                    <List size={17} />
+                  ) : (
+                    <LayoutGrid size={17} />
+                  )}
+                  {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
+                </button>
+                <button
+                  className="primary-button"
+                  onClick={saveTeam}
+                  disabled={isPending || !isEditable}
+                >
+                  <Save size={17} />
+                  บันทึกทีม
+                </button>
+              </>
+            ) : undefined
           }
         />
         <section className="gameweek-banner compact-gameweek">
@@ -307,7 +315,36 @@ export default function TeamClient({
           </div>
         </section>
 
-        <div className="team-layout">
+        <div className="team-hub-tabs" role="tablist" aria-label="จัดการทีม">
+          <button
+            id="lineup-mode-tab"
+            role="tab"
+            aria-selected={mode === "lineup"}
+            aria-controls="lineup-mode-panel"
+            className={mode === "lineup" ? "active" : ""}
+            onClick={() => setMode("lineup")}
+          >
+            <Shirt size={18} /> จัดตัวจริง
+          </button>
+          <button
+            id="transfer-mode-tab"
+            role="tab"
+            aria-selected={mode === "transfers"}
+            aria-controls="team-transfer-panel"
+            className={mode === "transfers" ? "active" : ""}
+            onClick={() => setMode("transfers")}
+          >
+            <ArrowLeftRight size={18} /> ซื้อขายนักเตะ
+          </button>
+        </div>
+
+        <div
+          className="team-layout team-mode-panel"
+          id="lineup-mode-panel"
+          role="tabpanel"
+          aria-labelledby="lineup-mode-tab"
+          hidden={mode !== "lineup"}
+        >
           <section className="product-card squad-card">
             <div className="product-card-head">
               <div>
@@ -529,6 +566,22 @@ export default function TeamClient({
             </section>
           </aside>
         </div>
+        <div
+          className="team-mode-panel"
+          id="team-transfer-panel"
+          role="tabpanel"
+          aria-labelledby="transfer-mode-tab"
+          hidden={mode !== "transfers"}
+        >
+          <TransfersClient
+            key={transferOutgoingId ?? "market"}
+            data={data}
+            fantasy={fantasy}
+            isEditable={isEditable}
+            initialOutgoingId={transferOutgoingId}
+            onSelectionChange={setMembers}
+          />
+        </div>
       </main>
 
       <Dialog
@@ -568,6 +621,17 @@ export default function TeamClient({
               </div>
             </div>
             <DialogFooter className="modal-actions">
+              <button
+                className="primary-button"
+                disabled={!isEditable}
+                onClick={() => {
+                  setTransferOutgoingId(selected.fantasyPlayerId ?? null);
+                  setSelected(null);
+                  setMode("transfers");
+                }}
+              >
+                <ArrowLeftRight size={17} /> เปลี่ยนนักเตะ
+              </button>
               <button
                 className="secondary-button"
                 disabled={!isEditable}

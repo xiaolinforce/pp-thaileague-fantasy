@@ -1,7 +1,6 @@
 "use client";
 
 import {
-  ArrowLeftRight,
   CalendarDays,
   ChevronRight,
   CircleHelp,
@@ -34,12 +33,6 @@ import { useAppIdentity } from "@/components/fantasy/identity";
 const navigation = [
   { label: "ภาพรวม", shortLabel: "หน้าแรก", href: "/dashboard", icon: Home },
   { label: "ทีมของฉัน", shortLabel: "ทีม", href: "/team", icon: Shirt },
-  {
-    label: "ซื้อขาย",
-    shortLabel: "ซื้อขาย",
-    href: "/transfers",
-    icon: ArrowLeftRight,
-  },
   { label: "คะแนน", shortLabel: "คะแนน", href: "/points", icon: ListChecks },
   { label: "ลีก", shortLabel: "ลีก", href: "/leagues", icon: Trophy },
   {

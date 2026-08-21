@@ -113,6 +113,12 @@ const translations: Record<string, string> = {
   ดูโปรแกรมทั้งหมด: "View All Fixtures",
 
   // Team
+  จัดทีมและซื้อขาย: "Team & Transfers",
+  "จัดตัวจริง เลือกกัปตัน และปรับนักเตะให้พร้อมก่อนเดดไลน์":
+    "Set your lineup, choose a captain, and improve your squad before the deadline",
+  จัดการทีม: "Manage team",
+  จัดตัวจริง: "Lineup",
+  เปลี่ยนนักเตะ: "Replace player",
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
     "Choose your starting XI, name a captain, and take your team to the top",
@@ -153,6 +159,8 @@ const translations: Record<string, string> = {
   // Transfers
   ตลาดนักเตะ: "Player Market",
   ซื้อขายนักเตะ: "Transfers",
+  "เลือกนักเตะในทีมก่อน แล้วเลือกคนตำแหน่งเดียวกันเข้ามาแทน":
+    "Choose a player from your squad, then select a replacement in the same position",
   "ค้นหา เปรียบเทียบ และปรับทีมให้พร้อมก่อนเดดไลน์":
     "Search, compare, and strengthen your squad before the deadline",
   ยืนยันการซื้อขาย: "Confirm Transfers",
