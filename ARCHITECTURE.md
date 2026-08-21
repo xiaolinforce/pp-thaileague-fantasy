@@ -112,12 +112,14 @@ session and role checks on each mutation.
 
 Anonymous users receive a 30-day sliding Better Auth session, a random manager
 and team name, and no naming controls. Expiry removes access, not Fantasy rows;
-the team remains in historical standings. Linking a Guest to a new member moves
-the manager ownership to the new auth user. Signing into an existing account
-keeps that account's team and marks the Guest manager `abandoned`, preserving
-both histories without merging selections. Initial account provisioning is
-idempotent: concurrent auth completion requests converge on one manager, team,
-15-player selection, and opening transfer revision.
+the team remains in historical standings. Guest sign-out invalidates only the
+current session, so the next anonymous sign-in creates a new Guest identity and
+team instead of reclaiming the prior Guest. Linking a Guest to a new member
+moves the manager ownership to the new auth user. Signing into an existing
+account keeps that account's team and marks the Guest manager `abandoned`,
+preserving both histories without merging selections. Initial account
+provisioning is idempotent: concurrent auth completion requests converge on one
+manager, team, 15-player selection, and opening transfer revision.
 
 Email OTP values are hashed in the verification table, expire after five
 minutes, allow three attempts, and rotate on resend. Turnstile protects every

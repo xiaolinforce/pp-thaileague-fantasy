@@ -6,6 +6,7 @@ import {
   CircleHelp,
   Languages,
   Lock,
+  LogOut,
   Mail,
   Palette,
   Save,
@@ -71,6 +72,7 @@ export default function ProfilePage() {
   const [managerName, setManagerName] = useState(identity?.managerName ?? "");
   const [teamName, setTeamName] = useState(identity?.teamName ?? "");
   const [saving, setSaving] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
   const [province, setProvince] = useState("กรุงเทพมหานคร");
   const [favouriteClub, setFavouriteClub] = useState("การท่าเรือ");
   const [notifications, setNotifications] = useState({
@@ -90,8 +92,18 @@ export default function ProfilePage() {
     }
   };
   const signOut = async () => {
-    await authClient.signOut();
-    router.push("/");
+    setSigningOut(true);
+    const result = await authClient.signOut();
+    if (result.error) {
+      toast.error(
+        language === "th"
+          ? "ออกจากระบบไม่สำเร็จ กรุณาลองอีกครั้ง"
+          : "Could not sign out. Please try again.",
+      );
+      setSigningOut(false);
+      return;
+    }
+    router.replace("/");
     router.refresh();
   };
 
@@ -148,15 +160,28 @@ export default function ProfilePage() {
                 ความเป็นส่วนตัว <ChevronRight />
               </a>
             </nav>
-            {identity?.isGuest ? (
-              <Link href="/upgrade" className="primary-button">
-                สมัครสมาชิกเพื่อเก็บทีม
-              </Link>
-            ) : (
-              <button className="secondary-button" onClick={signOut}>
-                ออกจากระบบ
+            <div className="profile-account-actions">
+              {identity?.isGuest ? (
+                <Link href="/upgrade" className="primary-button">
+                  สมัครสมาชิกเพื่อเก็บทีม
+                </Link>
+              ) : null}
+              <button
+                className="secondary-button"
+                onClick={signOut}
+                disabled={signingOut}
+                aria-busy={signingOut}
+              >
+                <LogOut size={16} />
+                {signingOut
+                  ? language === "th"
+                    ? "กำลังออกจากระบบ..."
+                    : "Signing out..."
+                  : language === "th"
+                    ? "ออกจากระบบ"
+                    : "Sign out"}
               </button>
-            )}
+            </div>
           </aside>
           <div className="profile-sections">
             <section className="product-card settings-card" id="account">

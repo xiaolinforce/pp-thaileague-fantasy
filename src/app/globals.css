@@ -4090,6 +4090,17 @@ button:focus-visible {
   background: #fff1e7;
 }
 
+.profile-account-actions {
+  display: grid;
+  gap: 8px;
+  padding: 0 9px 9px;
+}
+
+.profile-account-actions .primary-button,
+.profile-account-actions .secondary-button {
+  width: 100%;
+}
+
 .profile-sections {
   display: flex;
   flex-direction: column;
