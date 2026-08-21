@@ -120,10 +120,6 @@ button:focus-visible {
   color: #fff;
   background: linear-gradient(135deg, var(--orange), var(--orange-deep));
 }
-.onboarding-language-switcher:hover span:not(.is-active) {
-  color: var(--orange);
-  background: var(--orange-soft);
-}
 .onboarding-language-switcher:focus-visible {
   outline: 2px solid rgba(245, 102, 23, 0.4);
   outline-offset: 2px;
