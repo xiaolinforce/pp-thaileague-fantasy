@@ -164,26 +164,26 @@ export default function OnboardingClient({
   return (
     <Localized>
       <main className="onboarding-page">
-        <button
-          type="button"
-          className="onboarding-language-switcher"
-          role="switch"
-          aria-checked={language === "en"}
-          aria-label={
-            language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"
-          }
-          title={language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"}
-          onClick={toggleLanguage}
-        >
-          <span className={language === "th" ? "is-active" : undefined}>
-            TH
-          </span>
-          <span className={language === "en" ? "is-active" : undefined}>
-            EN
-          </span>
-        </button>
-
         <section className="onboarding-hero">
+          <button
+            type="button"
+            className="onboarding-language-switcher"
+            role="switch"
+            aria-checked={language === "en"}
+            aria-label={
+              language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"
+            }
+            title={language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"}
+            onClick={toggleLanguage}
+          >
+            <span className={language === "th" ? "is-active" : undefined}>
+              TH
+            </span>
+            <span className={language === "en" ? "is-active" : undefined}>
+              EN
+            </span>
+          </button>
+
           <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
           <h1>
             {upgradeMode

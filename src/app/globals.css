@@ -89,7 +89,7 @@ button:focus-visible {
   font-family: var(--font-mitr), "Leelawadee UI", Tahoma, Arial, sans-serif;
 }
 .onboarding-language-switcher {
-  position: fixed;
+  position: absolute;
   top: 22px;
   right: 24px;
   z-index: 20;
