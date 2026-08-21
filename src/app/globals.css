@@ -94,9 +94,9 @@ button:focus-visible {
   z-index: 20;
   display: flex;
   padding: 3px;
-  border: 1px solid rgba(24, 32, 38, 0.12);
+  border: 1px solid rgba(245, 102, 23, 0.28);
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.94);
   box-shadow: 0 8px 24px rgba(24, 32, 38, 0.1);
   backdrop-filter: blur(12px);
 }
@@ -105,15 +105,24 @@ button:focus-visible {
   min-height: 30px;
   border: 0;
   border-radius: 999px;
-  color: var(--muted);
+  color: #bb5a0f;
   background: transparent;
   font-size: 12px;
   font-weight: 800;
+  transition: background-color 150ms ease, color 150ms ease;
   cursor: pointer;
 }
 .onboarding-language-switcher button.is-active {
   color: #fff;
-  background: var(--navy);
+  background: linear-gradient(135deg, var(--orange), var(--orange-deep));
+}
+.onboarding-language-switcher button:hover:not(.is-active) {
+  color: var(--orange);
+  background: var(--orange-soft);
+}
+.onboarding-language-switcher button:focus-visible {
+  outline: 2px solid rgba(245, 102, 23, 0.4);
+  outline-offset: 1px;
 }
 .onboarding-hero {
   position: relative;
