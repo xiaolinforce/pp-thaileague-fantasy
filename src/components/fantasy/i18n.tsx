@@ -159,6 +159,25 @@ const translations: Record<string, string> = {
   // Transfers
   ตลาดนักเตะ: "Player Market",
   ซื้อขายนักเตะ: "Transfers",
+  ซื้อขายในมุมมองเดียว: "Transfers in the same view",
+  "เลือกคนในทีม แล้วเลือกนักเตะตำแหน่งเดียวกันเข้ามาแทน":
+    "Choose a squad player, then select a replacement in the same position",
+  โควต้าผ่าน: "Quotas valid",
+  เกินโควต้า: "Over quota",
+  ฟรี: "Free",
+  รอบันทึก: "Pending save",
+  ต่างชาติ: "Foreign",
+  "L1 / พรีเมียม": "L1 / premium",
+  ยกเลิก: "Cancel",
+  ทุกระดับ: "All tiers",
+  ระดับสูงสุด: "Highest tier",
+  ทีมปัจจุบัน: "Current squad",
+  กดบันทึกทีมด้านบนเมื่อพร้อม: "Save your team above when ready",
+  เลือกนักเตะจากสนามหรือตลาด: "Choose a player from the pitch or market",
+  นักเตะในทีมจะแสดงก่อนในรายการด้านล่าง:
+    "Squad players appear first in the list below",
+  กดบันทึกทีมเพื่อยืนยันการเปลี่ยนแปลง: "Save your team to confirm the change",
+  ค้นหานักเตะหรือสโมสร: "Search player or club",
   "เลือกนักเตะในทีมก่อน แล้วเลือกคนตำแหน่งเดียวกันเข้ามาแทน":
     "Choose a player from your squad, then select a replacement in the same position",
   "ค้นหา เปรียบเทียบ และปรับทีมให้พร้อมก่อนเดดไลน์":

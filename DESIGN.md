@@ -112,9 +112,10 @@ the screen before cards or tables begin.
 - The Team screen always represents the one Gameweek currently open for squad
   changes. Show its number and live deadline without previous/next Gameweek
   controls; historical squads belong on the Points screen.
-- Keep lineup management and player transfers as two explicit modes within the
-  Team screen. Selecting a squad player may open the transfer mode with that
-  player preselected; do not require a separate Transfers route.
+- Keep lineup management and player transfers visible in one Team workspace,
+  without mode tabs. On desktop, show the pitch and market side by side; stack
+  the market after the pitch on narrow screens. Selecting a squad player should
+  filter the market to compatible replacements without leaving the page.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a

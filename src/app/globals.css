@@ -2533,85 +2533,218 @@ button:focus-visible {
   min-height: 86px;
 }
 
-.team-hub-tabs {
-  width: fit-content;
-  margin-bottom: 20px;
-  padding: 4px;
-  border: 1px solid var(--line);
-  border-radius: 13px;
-  background: #efede9;
-  display: flex;
-  gap: 4px;
-}
-
-.team-hub-tabs button {
-  min-height: 42px;
-  padding: 0 18px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: #73797c;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.team-hub-tabs button.active {
-  color: var(--orange-deep);
-  background: white;
-  box-shadow: 0 3px 10px rgba(21, 28, 31, 0.08);
-}
-
-.team-hub-tabs button:focus-visible {
-  outline: 3px solid color-mix(in srgb, var(--orange) 35%, transparent);
-  outline-offset: 2px;
-}
-
-.team-transfer-panel {
-  display: flex;
-  flex-direction: column;
-}
-
-.team-mode-panel[hidden] {
-  display: none;
-}
-
-.team-transfer-header {
-  margin-bottom: 16px;
-  padding: 18px 20px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+.unified-team-workspace {
+  display: grid;
+  grid-template-columns: minmax(560px, 1.2fr) minmax(360px, 0.8fr);
   gap: 20px;
+  align-items: start;
 }
 
-.team-transfer-header h2 {
-  margin: 4px 0 2px;
-  font-size: 22px;
+.compact-transfer-market {
+  position: sticky;
+  top: 94px;
+  overflow: hidden;
 }
 
-.team-transfer-header p {
+.compact-market-head {
+  padding: 17px 18px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.compact-market-head h2 {
+  margin: 3px 0;
+  font-size: 20px;
+}
+
+.compact-market-head p {
+  max-width: 330px;
   margin: 0;
   color: var(--muted);
 }
 
-.team-transfer-actions {
-  display: flex;
-  gap: 8px;
-  flex: 0 0 auto;
+.quota-status {
+  min-height: 32px;
+  padding: 0 9px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  font-weight: 800;
 }
 
-.team-layout {
+.quota-status.valid {
+  color: #17745a;
+  background: #e8f6f1;
+}
+
+.quota-status.invalid {
+  color: #9b4017;
+  background: var(--orange-soft);
+}
+
+.compact-transfer-stats {
   display: grid;
-  grid-template-columns: minmax(580px, 1fr) 294px;
-  gap: 20px;
-  align-items: start;
+  grid-template-columns: repeat(4, 1fr);
+  border-bottom: 1px solid var(--line);
+}
+
+.compact-transfer-stats > div {
+  min-width: 0;
+  padding: 11px 9px;
+  display: flex;
+  flex-direction: column;
+}
+
+.compact-transfer-stats > div + div {
+  border-left: 1px solid var(--line);
+}
+
+.compact-transfer-stats span {
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.compact-transfer-stats strong {
+  margin-top: 2px;
+}
+
+.compact-transfer-guide {
+  margin: 12px;
+  padding: 11px 12px;
+  border-radius: 10px;
+  color: #dfe7ea;
+  background: var(--navy);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.compact-transfer-guide.active {
+  box-shadow: inset 3px 0 0 var(--orange);
+}
+
+.compact-transfer-guide strong,
+.compact-transfer-guide span {
+  display: block;
+}
+
+.compact-transfer-guide span {
+  margin-top: 2px;
+  color: #98a4aa;
+}
+
+.compact-clear-player {
+  border: 0;
+  color: #fff;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.compact-market-toolbar {
+  padding: 0 12px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.compact-market-search {
+  width: 100%;
+  min-width: 0;
+}
+
+.compact-position-filter {
+  width: 100%;
+}
+
+.compact-position-filter button {
+  min-width: 0;
+  flex: 1;
+  padding-inline: 5px;
+}
+
+.compact-market-selects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.compact-market-selects [data-slot="select-trigger"] {
+  width: 100%;
+  height: 38px;
+}
+
+.compact-market-list {
+  max-height: 650px;
+  border-top: 1px solid var(--line);
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.compact-market-row {
+  min-height: 68px;
+  padding: 7px 11px;
+  border-bottom: 1px solid #f0eeeb;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 32px;
+  align-items: center;
+  gap: 8px;
+}
+
+.compact-market-row:hover,
+.compact-market-row.selected-transfer-player {
+  background: #fff8f3;
+}
+
+.compact-market-meta {
+  text-align: right;
+}
+
+.compact-market-meta span,
+.compact-market-meta strong {
+  display: block;
+  white-space: nowrap;
+}
+
+.compact-market-meta span {
+  color: var(--muted);
+}
+
+.compact-market-meta strong {
+  margin-top: 2px;
+  color: var(--orange-deep);
+}
+
+.compact-market-row .transfer-player-action {
+  width: 30px;
+  height: 30px;
+}
+
+.compact-market-empty {
+  min-height: 180px;
+}
+
+.compact-market-footer {
+  padding: 10px 12px;
+  color: var(--muted);
+  background: #faf9f7;
+  text-align: center;
+}
+
+.team-overview-grid {
+  grid-column: 1 / -1;
+  position: static;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
 }
 
 .squad-card {
@@ -2720,6 +2853,12 @@ button:focus-visible {
 
 .squad-token:hover {
   transform: translateY(-4px);
+}
+
+.squad-token.selected-for-transfer {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.16);
+  box-shadow: inset 0 0 0 2px #ffb184;
 }
 
 .squad-shirt {
@@ -2843,11 +2982,7 @@ button:focus-visible {
 }
 
 .team-summary {
-  display: flex;
-  flex-direction: column;
   gap: 14px;
-  position: sticky;
-  top: 94px;
 }
 
 .roster-table {
@@ -2884,6 +3019,11 @@ button:focus-visible {
 
 .roster-row:hover {
   background: #fff8f3;
+}
+
+.roster-row.selected-for-transfer {
+  background: var(--orange-soft);
+  box-shadow: inset 3px 0 0 var(--orange);
 }
 
 .roster-identity,
@@ -4743,6 +4883,10 @@ button:focus-visible {
     display: none;
   }
 
+  .unified-team-workspace {
+    grid-template-columns: minmax(480px, 1fr) minmax(340px, 0.75fr);
+  }
+
   .team-layout,
   .points-layout,
   .fixtures-layout {
@@ -4800,11 +4944,16 @@ button:focus-visible {
   }
 
   .overview-grid,
+  .unified-team-workspace,
   .team-layout,
   .points-layout,
   .fixtures-layout,
   .profile-layout {
     grid-template-columns: 1fr;
+  }
+
+  .compact-transfer-market {
+    position: static;
   }
 
   .team-summary {
@@ -4928,29 +5077,6 @@ button:focus-visible {
   .product-page-intro .intro-actions:has(.points-week-switcher) {
     width: 100%;
     max-width: none;
-  }
-
-  .team-hub-tabs {
-    width: 100%;
-  }
-
-  .team-hub-tabs button {
-    flex: 1;
-    min-width: 0;
-    padding-inline: 8px;
-  }
-
-  .team-transfer-header {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .team-transfer-actions {
-    flex-wrap: wrap;
-  }
-
-  .team-transfer-actions > button {
-    flex: 1;
   }
 
   .modal-actions {

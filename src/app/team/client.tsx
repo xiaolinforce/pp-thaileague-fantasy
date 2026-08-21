@@ -54,16 +54,18 @@ function SquadPlayer({
   player,
   onSelect,
   captain,
+  transferSelected,
 }: {
   player: CompetitionPlayerView;
   onSelect: (player: CompetitionPlayerView) => void;
   captain?: "C" | "V";
+  transferSelected?: boolean;
 }) {
   const { language } = useLanguage();
   return (
     <Localized>
       <button
-        className="squad-token"
+        className={`squad-token ${transferSelected ? "selected-for-transfer" : ""}`}
         onClick={() => onSelect(player)}
         aria-label={`ดูข้อมูล ${localize(player.name, language)}`}
       >
@@ -91,7 +93,6 @@ export default function TeamClient({
   fantasy: FantasyState;
 }) {
   const [view, setView] = useState<"pitch" | "list">("pitch");
-  const [mode, setMode] = useState<"lineup" | "transfers">("lineup");
   const [transferOutgoingId, setTransferOutgoingId] = useState<string | null>(
     null,
   );
@@ -241,29 +242,27 @@ export default function TeamClient({
           title="จัดทีมและซื้อขาย"
           description="จัดตัวจริง เลือกกัปตัน และปรับนักเตะให้พร้อมก่อนเดดไลน์"
           actions={
-            mode === "lineup" ? (
-              <>
-                <button
-                  className="secondary-button"
-                  onClick={() => setView(view === "pitch" ? "list" : "pitch")}
-                >
-                  {view === "pitch" ? (
-                    <List size={17} />
-                  ) : (
-                    <LayoutGrid size={17} />
-                  )}
-                  {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
-                </button>
-                <button
-                  className="primary-button"
-                  onClick={saveTeam}
-                  disabled={isPending || !isEditable}
-                >
-                  <Save size={17} />
-                  บันทึกทีม
-                </button>
-              </>
-            ) : undefined
+            <>
+              <button
+                className="secondary-button"
+                onClick={() => setView(view === "pitch" ? "list" : "pitch")}
+              >
+                {view === "pitch" ? (
+                  <List size={17} />
+                ) : (
+                  <LayoutGrid size={17} />
+                )}
+                {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
+              </button>
+              <button
+                className="primary-button"
+                onClick={saveTeam}
+                disabled={isPending || !isEditable}
+              >
+                <Save size={17} />
+                บันทึกทีม
+              </button>
+            </>
           }
         />
         <section className="gameweek-banner compact-gameweek">
@@ -315,36 +314,7 @@ export default function TeamClient({
           </div>
         </section>
 
-        <div className="team-hub-tabs" role="tablist" aria-label="จัดการทีม">
-          <button
-            id="lineup-mode-tab"
-            role="tab"
-            aria-selected={mode === "lineup"}
-            aria-controls="lineup-mode-panel"
-            className={mode === "lineup" ? "active" : ""}
-            onClick={() => setMode("lineup")}
-          >
-            <Shirt size={18} /> จัดตัวจริง
-          </button>
-          <button
-            id="transfer-mode-tab"
-            role="tab"
-            aria-selected={mode === "transfers"}
-            aria-controls="team-transfer-panel"
-            className={mode === "transfers" ? "active" : ""}
-            onClick={() => setMode("transfers")}
-          >
-            <ArrowLeftRight size={18} /> ซื้อขายนักเตะ
-          </button>
-        </div>
-
-        <div
-          className="team-layout team-mode-panel"
-          id="lineup-mode-panel"
-          role="tabpanel"
-          aria-labelledby="lineup-mode-tab"
-          hidden={mode !== "lineup"}
-        >
+        <div className="unified-team-workspace">
           <section className="product-card squad-card">
             <div className="product-card-head">
               <div>
@@ -416,6 +386,9 @@ export default function TeamClient({
                                     ? "V"
                                     : undefined
                               }
+                              transferSelected={
+                                player.fantasyPlayerId === transferOutgoingId
+                              }
                             />
                           ))}
                       </div>
@@ -434,7 +407,13 @@ export default function TeamClient({
                     {bench.map((player, index) => (
                       <div className="bench-item" key={player.id}>
                         <b>{index === 0 ? "GK" : index}</b>
-                        <SquadPlayer player={player} onSelect={selectPlayer} />
+                        <SquadPlayer
+                          player={player}
+                          onSelect={selectPlayer}
+                          transferSelected={
+                            player.fantasyPlayerId === transferOutgoingId
+                          }
+                        />
                       </div>
                     ))}
                   </div>
@@ -450,7 +429,7 @@ export default function TeamClient({
                 </div>
                 {[...starters, ...bench].map((player, index) => (
                   <button
-                    className="roster-row"
+                    className={`roster-row ${player.fantasyPlayerId === transferOutgoingId ? "selected-for-transfer" : ""}`}
                     key={player.id}
                     onClick={() => selectPlayer(player)}
                   >
@@ -477,7 +456,17 @@ export default function TeamClient({
             )}
           </section>
 
-          <aside className="team-summary">
+          <TransfersClient
+            data={data}
+            fantasy={fantasy}
+            isEditable={isEditable}
+            members={members}
+            onMembersChange={setMembers}
+            selectedOutgoing={transferOutgoingId}
+            onSelectedOutgoingChange={setTransferOutgoingId}
+          />
+
+          <aside className="team-summary team-overview-grid">
             <section className="summary-card accent-card">
               <div className="card-title">
                 <span>
@@ -566,22 +555,6 @@ export default function TeamClient({
             </section>
           </aside>
         </div>
-        <div
-          className="team-mode-panel"
-          id="team-transfer-panel"
-          role="tabpanel"
-          aria-labelledby="transfer-mode-tab"
-          hidden={mode !== "transfers"}
-        >
-          <TransfersClient
-            key={transferOutgoingId ?? "market"}
-            data={data}
-            fantasy={fantasy}
-            isEditable={isEditable}
-            initialOutgoingId={transferOutgoingId}
-            onSelectionChange={setMembers}
-          />
-        </div>
       </main>
 
       <Dialog
@@ -627,7 +600,11 @@ export default function TeamClient({
                 onClick={() => {
                   setTransferOutgoingId(selected.fantasyPlayerId ?? null);
                   setSelected(null);
-                  setMode("transfers");
+                  window.requestAnimationFrame(() =>
+                    document
+                      .getElementById("team-transfer-market")
+                      ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+                  );
                 }}
               >
                 <ArrowLeftRight size={17} /> เปลี่ยนนักเตะ
