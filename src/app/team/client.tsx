@@ -2,8 +2,6 @@
 
 import {
   Check,
-  ChevronLeft,
-  ChevronRight,
   Clock3,
   Info,
   LayoutGrid,
@@ -14,7 +12,7 @@ import {
   Wallet,
   Zap,
 } from "lucide-react";
-import { useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
@@ -91,7 +89,6 @@ export default function TeamClient({
   fantasy: FantasyState;
 }) {
   const [view, setView] = useState<"pitch" | "list">("pitch");
-  const [week, setWeek] = useState(fantasy.gameweek.number);
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
@@ -106,6 +103,7 @@ export default function TeamClient({
     })),
   );
   const [isPending, startTransition] = useTransition();
+  const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const router = useRouter();
   const { language } = useLanguage();
   const playersByFantasyId = useMemo(
@@ -150,8 +148,28 @@ export default function TeamClient({
         starters.filter((player) => player.position === position).length,
     )
     .join(" · ");
+  const isEditable =
+    fantasy.gameweek.status === "open" &&
+    (remainingMs === null || remainingMs > 0);
+  const remaining = Math.max(0, remainingMs ?? 0);
+  const remainingDays = Math.floor(remaining / 86_400_000);
+  const remainingHours = Math.floor((remaining % 86_400_000) / 3_600_000);
+  const remainingMinutes = Math.floor((remaining % 3_600_000) / 60_000);
+
+  useEffect(() => {
+    const deadline = new Date(fantasy.gameweek.deadlineAt).getTime();
+    const updateRemaining = () =>
+      setRemainingMs(Math.max(0, deadline - Date.now()));
+    updateRemaining();
+    const interval = window.setInterval(updateRemaining, 30_000);
+    return () => window.clearInterval(interval);
+  }, [fantasy.gameweek.deadlineAt]);
 
   const saveTeam = () => {
+    if (!isEditable) {
+      toast.error("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว");
+      return;
+    }
     startTransition(async () => {
       const result = await saveFantasySelectionAction({ members, activeChip });
       if (result.ok) {
@@ -232,7 +250,7 @@ export default function TeamClient({
               <button
                 className="primary-button"
                 onClick={saveTeam}
-                disabled={isPending}
+                disabled={isPending || !isEditable}
               >
                 <Save size={17} />
                 บันทึกทีม
@@ -241,23 +259,16 @@ export default function TeamClient({
           }
         />
         <section className="gameweek-banner compact-gameweek">
-          <button
-            className="week-arrow"
-            onClick={() => setWeek(Math.max(1, week - 1))}
-            disabled={week === 1}
-          >
-            <ChevronLeft />
-          </button>
           <div className="gameweek-main">
-            <span>GAMEWEEK</span>
-            <strong>{String(week).padStart(2, "0")}</strong>
+            <span>GAMEWEEK สำหรับจัดทีม</span>
+            <strong>{String(fantasy.gameweek.number).padStart(2, "0")}</strong>
           </div>
           <div className="deadline">
             <span>
               <Clock3 size={16} /> เดดไลน์จัดทีม
             </span>
             <strong>
-              {new Intl.DateTimeFormat("th-TH", {
+              {new Intl.DateTimeFormat(language === "th" ? "th-TH" : "en-GB", {
                 dateStyle: "medium",
                 timeStyle: "short",
                 timeZone: "Asia/Bangkok",
@@ -265,29 +276,35 @@ export default function TeamClient({
             </strong>
           </div>
           <div className="countdown">
-            <span>
-              <b>05</b>
-              <small>วัน</small>
-            </span>
-            <i>:</i>
-            <span>
-              <b>14</b>
-              <small>ชม.</small>
-            </span>
-            <i>:</i>
-            <span>
-              <b>28</b>
-              <small>นาที</small>
-            </span>
+            {isEditable ? (
+              <>
+                <span>
+                  <b>{remainingMs === null ? "--" : remainingDays}</b>
+                  <small>วัน</small>
+                </span>
+                <i>:</i>
+                <span>
+                  <b>
+                    {remainingMs === null
+                      ? "--"
+                      : String(remainingHours).padStart(2, "0")}
+                  </b>
+                  <small>ชม.</small>
+                </span>
+                <i>:</i>
+                <span>
+                  <b>
+                    {remainingMs === null
+                      ? "--"
+                      : String(remainingMinutes).padStart(2, "0")}
+                  </b>
+                  <small>นาที</small>
+                </span>
+              </>
+            ) : (
+              <strong className="deadline-closed">ปิดรับการจัดทีมแล้ว</strong>
+            )}
           </div>
-          <button
-            className="week-arrow"
-            onClick={() =>
-              setWeek(Math.min(data.matchweeks.at(-1) ?? 30, week + 1))
-            }
-          >
-            <ChevronRight />
-          </button>
         </section>
 
         <div className="team-layout">
@@ -497,6 +514,7 @@ export default function TeamClient({
                   <button
                     key={chip}
                     className={activeChip === chip ? "active" : ""}
+                    disabled={!isEditable}
                     onClick={() =>
                       setActiveChip((current) =>
                         current === chip ? null : chip,
@@ -552,6 +570,7 @@ export default function TeamClient({
             <DialogFooter className="modal-actions">
               <button
                 className="secondary-button"
+                disabled={!isEditable}
                 onClick={() => {
                   if (selected.fantasyPlayerId)
                     setSwapFrom(selected.fantasyPlayerId);
@@ -562,7 +581,9 @@ export default function TeamClient({
               </button>
               <button
                 className="secondary-button"
-                disabled={selectedMember?.lineupRole !== "starter"}
+                disabled={
+                  !isEditable || selectedMember?.lineupRole !== "starter"
+                }
                 onClick={() => {
                   if (!selected.fantasyPlayerId) return;
                   setMembers((current) => {
@@ -594,7 +615,9 @@ export default function TeamClient({
               </button>
               <button
                 className="secondary-button"
-                disabled={selectedMember?.lineupRole !== "starter"}
+                disabled={
+                  !isEditable || selectedMember?.lineupRole !== "starter"
+                }
                 onClick={() => {
                   if (!selected.fantasyPlayerId) return;
                   setMembers((current) => {

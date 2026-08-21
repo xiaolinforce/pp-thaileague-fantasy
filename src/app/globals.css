@@ -859,6 +859,11 @@ button:focus-visible {
   font-size: 18px;
 }
 
+.deadline-closed {
+  color: white;
+  font-size: 14px;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: minmax(580px, 1fr) 294px;
@@ -3442,6 +3447,269 @@ button:focus-visible {
   margin: 0;
 }
 
+.points-week-switcher {
+  min-height: 44px;
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(22, 30, 34, 0.05);
+}
+
+.points-week-switcher > button {
+  width: 42px;
+  border: 0;
+  background: #faf9f7;
+  color: var(--ink);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.points-week-switcher > button:hover:not(:disabled) {
+  color: var(--orange);
+  background: #fff5ee;
+}
+
+.points-week-switcher > button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.points-week-switcher label {
+  min-width: 190px;
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.points-week-switcher label > span {
+  color: #9a9ea0;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.points-week-switcher select {
+  width: 100%;
+  border: 0;
+  outline: 0;
+  color: var(--ink);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.points-pitch-layout {
+  grid-template-columns: minmax(600px, 1.45fr) minmax(280px, 0.65fr);
+}
+
+.points-pitch-card {
+  overflow: hidden;
+}
+
+.points-pitch {
+  min-height: 610px;
+  margin: 0 14px;
+  border-radius: 13px;
+  color: white;
+  background: repeating-linear-gradient(
+    0deg,
+    #17614d 0,
+    #17614d 61px,
+    #155b49 61px,
+    #155b49 122px
+  );
+  position: relative;
+  overflow: hidden;
+}
+
+.points-pitch::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at 50% 30%,
+    rgba(255, 255, 255, 0.08),
+    transparent 45%
+  );
+}
+
+.points-pitch-rows {
+  min-height: 610px;
+  padding: 31px 10px;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+.points-pitch-row {
+  min-height: 125px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.points-player-token {
+  width: clamp(56px, 8vw, 82px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  text-align: center;
+}
+
+.points-player-kit {
+  position: relative;
+  filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.2));
+}
+
+.points-player-kit > i {
+  width: 19px;
+  height: 19px;
+  position: absolute;
+  right: -7px;
+  top: -4px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  background: white;
+  border-radius: 50%;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.points-player-name,
+.points-player-token > strong,
+.points-player-state {
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.points-player-name {
+  margin-top: 2px;
+  padding: 4px 4px 2px;
+  color: #1d2b26;
+  background: white;
+  border-radius: 6px 6px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.points-player-token > strong {
+  padding: 2px 4px 4px;
+  color: white;
+  background: rgba(10, 46, 37, 0.94);
+  border-radius: 0 0 6px 6px;
+  font-size: 14px;
+}
+
+.points-player-token > strong small {
+  margin-left: 3px;
+  color: #d6e8e1;
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.points-player-state {
+  min-height: 18px;
+  margin-top: 3px;
+  color: #d6e8e1;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.points-player-token.is-sub-in .points-player-state {
+  color: #bfffdc;
+}
+
+.points-player-token.is-sub-out .points-player-state,
+.points-player-token.is-uncounted .points-player-state {
+  color: #8b8f91;
+}
+
+.points-bench-panel {
+  padding: 20px 22px;
+}
+
+.points-bench-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.points-bench-grid .points-player-token {
+  width: 100%;
+  min-height: 128px;
+  padding: 12px 5px 7px;
+  justify-content: center;
+  background: #faf9f7;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.points-bench-grid .points-player-token.is-uncounted {
+  opacity: 0.65;
+}
+
+.points-bench-grid .points-player-token > strong {
+  background: #e9e7e2;
+  color: var(--ink);
+}
+
+.points-bench-grid .points-player-token > strong small {
+  color: #73787a;
+}
+
+.auto-sub-summary {
+  margin: 0 22px 20px;
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #17614d;
+  background: #e9f7f1;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.live-score.pending i {
+  background: #a7abad;
+  box-shadow: 0 0 0 4px #eceeed;
+}
+
+.points-detail-card {
+  margin-top: 17px;
+  overflow: hidden;
+}
+
+.points-detail-card summary {
+  padding: 17px 20px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.points-detail-card[open] summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.chip-options button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Leagues */
 .league-cards {
   display: grid;
@@ -4480,6 +4748,10 @@ button:focus-visible {
     grid-template-columns: 1fr 1fr;
   }
 
+  .points-pitch-layout {
+    grid-template-columns: 1fr;
+  }
+
   .profile-nav-card {
     position: static;
   }
@@ -4575,6 +4847,24 @@ button:focus-visible {
     max-width: 46%;
   }
 
+  .product-page-intro:has(.points-week-switcher) {
+    flex-direction: column;
+  }
+
+  .product-page-intro .intro-actions:has(.points-week-switcher) {
+    width: 100%;
+    max-width: none;
+  }
+
+  .points-week-switcher {
+    width: 100%;
+  }
+
+  .points-week-switcher label {
+    min-width: 0;
+    flex: 1;
+  }
+
   .dashboard-hero {
     min-height: 330px;
     padding: 30px 24px;
@@ -4639,6 +4929,57 @@ button:focus-visible {
   .squad-pitch,
   .squad-rows {
     min-height: 565px;
+  }
+
+  .compact-gameweek {
+    padding: 0 12px 10px;
+  }
+
+  .compact-gameweek .gameweek-main {
+    min-width: 115px;
+  }
+
+  .points-pitch,
+  .points-pitch-rows {
+    min-height: 535px;
+  }
+
+  .points-pitch {
+    margin: 0 6px;
+  }
+
+  .points-pitch-rows {
+    padding: 22px 2px;
+  }
+
+  .points-pitch-row {
+    min-height: 108px;
+  }
+
+  .points-player-token {
+    width: clamp(54px, 16vw, 68px);
+  }
+
+  .points-player-kit .kit-medium svg {
+    width: 36px;
+    height: 36px;
+  }
+
+  .points-bench-panel {
+    padding: 18px 8px;
+  }
+
+  .points-bench-grid {
+    gap: 4px;
+  }
+
+  .points-bench-grid .points-player-token {
+    min-height: 120px;
+    padding-inline: 2px;
+  }
+
+  .auto-sub-summary {
+    margin-inline: 8px;
   }
 
   .squad-pitch {

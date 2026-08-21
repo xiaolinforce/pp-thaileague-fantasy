@@ -109,6 +109,13 @@ the screen before cards or tables begin.
 
 ## Fantasy-specific presentation
 
+- The Team screen always represents the one Gameweek currently open for squad
+  changes. Show its number and live deadline without previous/next Gameweek
+  controls; historical squads belong on the Points screen.
+- The Points screen uses URL-backed Gameweek selection and defaults to the most
+  recent Gameweek with provisional or final scoring. Its pitch is read-only and
+  shows the counted lineup after automatic substitutions, while preserving a
+  detailed player-points view for review.
 - Always pair a player name with enough identity to distinguish position and
   club. Tier and Thai/foreign status should be visible wherever they affect a
   selection decision.
