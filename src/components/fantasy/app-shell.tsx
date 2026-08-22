@@ -15,10 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import {
-  Localized,
-  TemporarySidebarLanguageSwitcher,
-} from "@/components/fantasy/i18n";
+import { Localized } from "@/components/fantasy/i18n";
 import {
   Sheet,
   SheetClose,
@@ -83,7 +80,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         </a>
         <aside className="sidebar">
           <Brand />
-          <TemporarySidebarLanguageSwitcher />
           <nav className="side-nav" aria-label="เมนูหลัก">
             {navigation.map(({ label, href, icon: Icon }) => {
               const active = pathname === href;

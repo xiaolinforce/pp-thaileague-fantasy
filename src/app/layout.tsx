@@ -50,7 +50,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
             3 - current.team.nameChangesUsed,
           ),
           managerNameChangeAvailableAt:
-            current.manager.nameChangeAvailableAt?.toISOString() ?? null,
+            current.manager.nameChangeAvailableAt &&
+            current.manager.nameChangeAvailableAt > new Date()
+              ? current.manager.nameChangeAvailableAt.toISOString()
+              : null,
         }
       : null;
   return (

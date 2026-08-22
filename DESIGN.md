@@ -147,7 +147,8 @@ This implementation is a prototype convenience, not a route-level i18n system:
 - there are no locale-prefixed URLs or localized server metadata;
 - the first server render is Thai before the client restores a preference;
 - dictionary replacement depends on the exact Thai source copy; and
-- `TemporarySidebarLanguageSwitcher` is explicitly a testing shortcut.
+- the persistent language control lives in Profile settings; the application
+  shell does not duplicate it with a testing shortcut.
 
 Until the localization architecture changes, add Thai source copy and its
 English dictionary entry in the same change. Never rely on automatic partial

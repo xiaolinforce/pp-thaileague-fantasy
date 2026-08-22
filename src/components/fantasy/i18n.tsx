@@ -375,6 +375,10 @@ const translations: Record<string, string> = {
   โปรไฟล์และการตั้งค่า: "Profile & Settings",
   "จัดการข้อมูลทีม การแจ้งเตือน และอ่านกติกาของเกม":
     "Manage your team details, notifications, and game rules",
+  "จัดการชื่อบัญชีและทีม เลือกภาษา และตรวจสอบกติกาที่ใช้งานจริง":
+    "Manage your account and team names, choose a language, and review the active rules",
+  ข้อมูลผู้เล่นปัจจุบัน: "Current player details",
+  "ส่วนต่าง ๆ ของโปรไฟล์": "Profile sections",
   บันทึกการเปลี่ยนแปลง: "Save Changes",
   "เข้าร่วมเมื่อ ส.ค. 2026": "Joined August 2026",
   ข้อมูลบัญชี: "Account Details",
@@ -384,6 +388,14 @@ const translations: Record<string, string> = {
   ข้อมูลที่ใช้แสดงในเกม: "Information shown in the game",
   ชื่อที่แสดง: "Display Name",
   อีเมล: "Email",
+  "Guest ใช้ชื่อสุ่มและเปลี่ยนชื่อไม่ได้":
+    "Guests use a generated name that cannot be changed",
+  "เปลี่ยนชื่อผู้จัดการได้ โดยจะเปลี่ยนครั้งถัดไปได้ใน 30 วัน":
+    "You can change the manager name; the next change will be available in 30 days",
+  เปลี่ยนชื่อผู้จัดการได้อีกครั้งหลัง:
+    "Manager name can be changed again after",
+  "ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–30 ตัวอักษร":
+    "Use 3–30 Thai or English letters, numbers, spaces, and . _ -",
   จังหวัด: "Province",
   กรุงเทพมหานคร: "Bangkok",
   เชียงใหม่: "Chiang Mai",
@@ -391,6 +403,13 @@ const translations: Record<string, string> = {
   ทีมโปรด: "Favourite Club",
   ชื่อและอัตลักษณ์ทีมแฟนตาซี: "Your fantasy team's name and identity",
   ชื่อทีม: "Team Name",
+  "Guest ใช้ชื่อทีมแบบสุ่มและเปลี่ยนไม่ได้":
+    "Guests use a generated team name that cannot be changed",
+  ใช้สิทธิ์เปลี่ยนชื่อทีมครบแล้วสำหรับฤดูกาลนี้:
+    "All team-name changes have been used for this season",
+  เปลี่ยนชื่อทีมได้อีก: "Team-name changes remaining:",
+  ครั้งในฤดูกาลนี้: "this season",
+  บันทึกชื่อบัญชีและทีม: "Save Account & Team Names",
   "เปลี่ยนชื่อทีมได้ไม่เกิน 3 ครั้งต่อฤดูกาล":
     "You can rename your team up to three times per season",
   เปลี่ยนตราทีม: "Change Crest",
@@ -427,6 +446,19 @@ const translations: Record<string, string> = {
     "The UI is separate from the scoring engine, so rules can change without affecting the interface.",
   บันทึกการตั้งค่าแล้ว: "Settings saved",
   "กำลังบันทึก…": "Saving…",
+  "กำลังออกจากระบบ…": "Signing out…",
+  บันทึกชื่อเรียบร้อยแล้ว: "Names saved",
+  "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อได้ กรุณาสมัครสมาชิกก่อน":
+    "Guest players cannot change names. Create an account first.",
+  "ชื่อต้องมี 3–30 ตัวอักษร": "Names must contain 3–30 characters",
+  "ใช้ได้เฉพาะภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ -":
+    "Use only Thai or English letters, numbers, spaces, and . _ -",
+  ชื่อนี้อาจทำให้เข้าใจผิดว่าเป็นทีมงานหรือบัญชีทางการ:
+    "This name could be mistaken for staff or an official account",
+  ชื่อนี้มีคำที่ไม่อนุญาต: "This name contains a prohibited term",
+  "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว":
+    "All 3 team-name changes have already been used",
+  ชื่อไม่ถูกต้อง: "The name is invalid",
   การเปลี่ยนแปลงระดับ: "Tier Changes",
   กติกาที่ระบบใช้ตรวจทีมและคำนวณคะแนน:
     "The rules used to validate squads and calculate points",
@@ -448,6 +480,49 @@ const translations: Record<string, string> = {
     "Scoring follows FPL for minutes, goals, assists, clean sheets, saves, penalties, cards, and own goals, without Defensive Contributions or Bonus/BPS. A dismissed player is not charged for goals conceded after leaving the pitch.",
   "แมตช์ตกค้างให้คะแนนย้อนหลังแก่ Gameweek เดิม แล้วคำนวณ Auto-sub กัปตัน Chips และอันดับใหม่ Classic League ใช้คะแนนรวมและจำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน โดยไม่นับ Wildcard":
     "Postponed matches score back into their original Gameweek, then auto-subs, captaincy, chips, and rankings are recalculated. Classic Leagues rank by total points, using fewer transfers as the tiebreaker; Wildcard transfers are excluded.",
+  "ขนาดทีม 15 คน: ผู้รักษาประตู 2 กองหลัง 5 กองกลาง 5 และกองหน้า 3 คน":
+    "Squad size: 15 players — 2 goalkeepers, 5 defenders, 5 midfielders, and 3 forwards",
+  "ตัวจริง 11 คนต้องมี 1 GK, อย่างน้อย 3 DEF, 2 MID และ 1 FWD":
+    "The starting XI needs 1 GK, at least 3 DEF, 2 MID, and 1 FWD",
+  "เลือกนักเตะจากสโมสรเดียวกันได้สูงสุด 3 คน":
+    "Select at most 3 players from one club",
+  "มีนักเตะต่างชาติได้สูงสุด 7 คน โดยผู้เล่นที่ระบบจัดประเภทเป็นไทยนับในโควตานักเตะไทย":
+    "Select at most 7 foreign players; players classified as Thai count toward the Thai-player quota",
+  "ระดับ 1 มี 3 ช่อง ระดับ 2 มี 7 ช่อง และระดับ 3 มี 5 ช่อง":
+    "Tier 1 has 3 slots, Tier 2 has 7 slots, and Tier 3 has 5 slots",
+  ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ยังว่างได้:
+    "A lower-tier player may use an available higher-tier slot",
+  "มีผู้เล่นระดับ 1 ได้สูงสุด 3 คน และระดับ 1–2 รวมกันสูงสุด 10 คน":
+    "A squad may have at most 3 Tier 1 players and 10 Tier 1–2 players combined",
+  "ระดับนักเตะมีผลแยกตาม Gameweek":
+    "Player tiers apply separately to each Gameweek",
+  "ได้รับ Free Transfer เพิ่ม 2 ครั้งหลังแต่ละ Deadline และสะสมได้สูงสุด 4 ครั้ง":
+    "Receive 2 free transfers after each deadline and bank up to 4",
+  "Transfer ที่เกินโควต้าฟรีหัก 4 คะแนนต่อครั้ง โดยนับจากความแตกต่างสุทธิของทีม":
+    "Each transfer beyond the free allowance costs 4 points, based on the net squad difference",
+  "ยกเลิกการเปลี่ยนแปลงได้ถึง Deadline ซึ่งปิดก่อนคู่แรก 90 นาที":
+    "Changes can be reversed until the deadline, 90 minutes before the first kickoff",
+  "Triple Captain, Bench Boost และ Wildcard ใช้ได้อย่างละ 2 ครั้งต่อฤดูกาล":
+    "Triple Captain, Bench Boost, and Wildcard can each be used twice per season",
+  "ใช้ได้ 1 Chip ต่อ Gameweek และใช้ชนิดเดิมใน Gameweek ติดกันได้":
+    "Use 1 chip per Gameweek; the same chip may be used in consecutive Gameweeks",
+  "ยกเลิก Chip ได้ก่อน Deadline โดย Wildcard ทำให้ Transfer ไม่มีค่าใช้จ่ายและคง Free Transfer ที่สะสมไว้":
+    "Cancel a chip before the deadline; Wildcard makes transfers free and preserves banked free transfers",
+  "คิดคะแนนจากนาทีลงสนาม ประตู แอสซิสต์ คลีนชีต การเซฟ จุดโทษ ใบเหลือง ใบแดง และประตูตัวเอง":
+    "Points cover minutes played, goals, assists, clean sheets, saves, penalties, cards, and own goals",
+  "ไม่มี Defensive Contributions และ Bonus/BPS":
+    "Defensive Contributions and Bonus/BPS are not used",
+  ผู้เล่นที่ถูกไล่ออกไม่ถูกคิดประตูที่ทีมเสียหลังออกจากสนาม:
+    "A dismissed player is not charged for goals conceded after leaving the pitch",
+  "แมตช์ตกค้างให้คะแนนย้อนหลังใน Gameweek เดิม":
+    "Postponed matches score back into their original Gameweek",
+  "ระบบคำนวณ Auto-sub กัปตัน Chips และอันดับใหม่หลังอัปเดตคะแนน":
+    "Auto-subs, captaincy, chips, and rankings are recalculated after points update",
+  "Classic League จัดอันดับจากคะแนนรวม แล้วใช้จำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน โดยไม่นับ Wildcard":
+    "Classic Leagues rank by total points, then fewer transfers; Wildcard transfers are excluded",
+  ผลย้อนหลังของคุณจะคงเดิม: "Your historical results stay unchanged",
+  "ระบบเก็บระดับ ตำแหน่ง สโมสร และสถานะนักเตะไทยของแต่ละ Gameweek ไว้แยกกัน เพื่อให้คะแนนและประวัติเดิมตรวจสอบได้เสมอ":
+    "Tier, position, club, and Thai-player status are stored separately for each Gameweek so historical points remain verifiable",
 
   // Player and club names
   "ชนาธิป สรงกระสินธ์": "Chanathip Songkrasin",
@@ -647,31 +722,5 @@ export function LanguageSwitcher() {
         </span>
       </label>
     </RadioGroup>
-  );
-}
-
-/**
- * Temporary shortcut for switching language while the product is in testing.
- * Keep this separate from LanguageSwitcher so it can be removed without
- * changing the Settings control.
- */
-export function TemporarySidebarLanguageSwitcher() {
-  const { language, setLanguage } = useLanguage();
-  const nextLanguage: Language = language === "th" ? "en" : "th";
-
-  return (
-    <button
-      type="button"
-      className="sidebar-language-test-switch"
-      onClick={() => setLanguage(nextLanguage)}
-      aria-label={
-        language === "th"
-          ? "Switch language to English"
-          : "เปลี่ยนภาษาเป็นภาษาไทย"
-      }
-      title={language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย"}
-    >
-      {language === "th" ? "TH" : "EN"}
-    </button>
   );
 }
