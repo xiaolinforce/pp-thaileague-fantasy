@@ -335,12 +335,8 @@
           "name": "competition_entries_competition_season_id_competition_seasons_id_fk",
           "tableFrom": "competition_entries",
           "tableTo": "competition_seasons",
-          "columnsFrom": [
-            "competition_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -348,12 +344,8 @@
           "name": "competition_entries_club_id_clubs_id_fk",
           "tableFrom": "competition_entries",
           "tableTo": "clubs",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -361,12 +353,8 @@
           "name": "competition_entries_home_venue_id_venues_id_fk",
           "tableFrom": "competition_entries",
           "tableTo": "venues",
-          "columnsFrom": [
-            "home_venue_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["home_venue_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -535,12 +523,8 @@
           "name": "competition_seasons_competition_id_competitions_id_fk",
           "tableFrom": "competition_seasons",
           "tableTo": "competitions",
-          "columnsFrom": [
-            "competition_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -548,12 +532,8 @@
           "name": "competition_seasons_season_id_seasons_id_fk",
           "tableFrom": "competition_seasons",
           "tableTo": "seasons",
-          "columnsFrom": [
-            "season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -969,12 +949,8 @@
           "name": "fixtures_competition_season_id_competition_seasons_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "competition_seasons",
-          "columnsFrom": [
-            "competition_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -982,12 +958,8 @@
           "name": "fixtures_home_entry_id_competition_entries_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "competition_entries",
-          "columnsFrom": [
-            "home_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["home_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -995,12 +967,8 @@
           "name": "fixtures_away_entry_id_competition_entries_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "competition_entries",
-          "columnsFrom": [
-            "away_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["away_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -1008,12 +976,8 @@
           "name": "fixtures_venue_id_venues_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "venues",
-          "columnsFrom": [
-            "venue_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["venue_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -1218,12 +1182,8 @@
           "name": "player_registrations_competition_entry_id_competition_entries_id_fk",
           "tableFrom": "player_registrations",
           "tableTo": "competition_entries",
-          "columnsFrom": [
-            "competition_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1231,12 +1191,8 @@
           "name": "player_registrations_player_id_players_id_fk",
           "tableFrom": "player_registrations",
           "tableTo": "players",
-          "columnsFrom": [
-            "player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["player_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1690,20 +1646,12 @@
     "public.competition_season_status": {
       "name": "competition_season_status",
       "schema": "public",
-      "values": [
-        "planned",
-        "active",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["planned", "active", "completed", "cancelled"]
     },
     "public.competition_type": {
       "name": "competition_type",
       "schema": "public",
-      "values": [
-        "league",
-        "cup"
-      ]
+      "values": ["league", "cup"]
     },
     "public.fixture_status": {
       "name": "fixture_status",
@@ -1720,21 +1668,12 @@
     "public.player_position": {
       "name": "player_position",
       "schema": "public",
-      "values": [
-        "goalkeeper",
-        "defender",
-        "midfielder",
-        "forward",
-        "unknown"
-      ]
+      "values": ["goalkeeper", "defender", "midfielder", "forward", "unknown"]
     },
     "public.player_registration_status": {
       "name": "player_registration_status",
       "schema": "public",
-      "values": [
-        "active",
-        "inactive"
-      ]
+      "values": ["active", "inactive"]
     }
   },
   "schemas": {},

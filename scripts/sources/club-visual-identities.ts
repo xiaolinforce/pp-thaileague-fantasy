@@ -8,12 +8,7 @@ export type ClubVisualIdentitySource = {
 const alternate = (
   first: string,
   second: string,
-): readonly [string, string, string, string] => [
-  first,
-  second,
-  second,
-  first,
-];
+): readonly [string, string, string, string] => [first, second, second, first];
 
 const solid = (color: string): readonly [string, string, string, string] => [
   color,

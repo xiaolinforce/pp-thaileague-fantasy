@@ -12,5 +12,7 @@ export const clubNameEnOverrides = {
 } as const;
 
 export function normalizeClubName(nameEn: string): string {
-  return clubNameEnOverrides[nameEn as keyof typeof clubNameEnOverrides] ?? nameEn;
+  return (
+    clubNameEnOverrides[nameEn as keyof typeof clubNameEnOverrides] ?? nameEn
+  );
 }

@@ -77,12 +77,8 @@
           "name": "club_visual_identities_club_id_clubs_id_fk",
           "tableFrom": "club_visual_identities",
           "tableTo": "clubs",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -441,12 +437,8 @@
           "name": "competition_entries_competition_season_id_competition_seasons_id_fk",
           "tableFrom": "competition_entries",
           "tableTo": "competition_seasons",
-          "columnsFrom": [
-            "competition_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -454,12 +446,8 @@
           "name": "competition_entries_club_id_clubs_id_fk",
           "tableFrom": "competition_entries",
           "tableTo": "clubs",
-          "columnsFrom": [
-            "club_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -467,12 +455,8 @@
           "name": "competition_entries_home_venue_id_venues_id_fk",
           "tableFrom": "competition_entries",
           "tableTo": "venues",
-          "columnsFrom": [
-            "home_venue_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["home_venue_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -641,12 +625,8 @@
           "name": "competition_seasons_competition_id_competitions_id_fk",
           "tableFrom": "competition_seasons",
           "tableTo": "competitions",
-          "columnsFrom": [
-            "competition_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -654,12 +634,8 @@
           "name": "competition_seasons_season_id_seasons_id_fk",
           "tableFrom": "competition_seasons",
           "tableTo": "seasons",
-          "columnsFrom": [
-            "season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1036,12 +1012,8 @@
           "name": "fantasy_gameweeks_fantasy_season_id_fantasy_seasons_id_fk",
           "tableFrom": "fantasy_gameweeks",
           "tableTo": "fantasy_seasons",
-          "columnsFrom": [
-            "fantasy_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1145,12 +1117,8 @@
           "name": "fantasy_league_members_fantasy_league_id_fantasy_leagues_id_fk",
           "tableFrom": "fantasy_league_members",
           "tableTo": "fantasy_leagues",
-          "columnsFrom": [
-            "fantasy_league_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_league_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1158,12 +1126,8 @@
           "name": "fantasy_league_members_fantasy_team_id_fantasy_teams_id_fk",
           "tableFrom": "fantasy_league_members",
           "tableTo": "fantasy_teams",
-          "columnsFrom": [
-            "fantasy_team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1275,12 +1239,8 @@
           "name": "fantasy_leagues_fantasy_season_id_fantasy_seasons_id_fk",
           "tableFrom": "fantasy_leagues",
           "tableTo": "fantasy_seasons",
-          "columnsFrom": [
-            "fantasy_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1427,12 +1387,8 @@
           "name": "fantasy_player_match_points_player_match_stats_id_fantasy_player_match_stats_id_fk",
           "tableFrom": "fantasy_player_match_points",
           "tableTo": "fantasy_player_match_stats",
-          "columnsFrom": [
-            "player_match_stats_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["player_match_stats_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1632,12 +1588,8 @@
           "name": "fantasy_player_match_stats_fixture_id_fixtures_id_fk",
           "tableFrom": "fantasy_player_match_stats",
           "tableTo": "fixtures",
-          "columnsFrom": [
-            "fixture_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fixture_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1645,12 +1597,8 @@
           "name": "fantasy_player_match_stats_fantasy_player_id_fantasy_players_id_fk",
           "tableFrom": "fantasy_player_match_stats",
           "tableTo": "fantasy_players",
-          "columnsFrom": [
-            "fantasy_player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_player_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1765,12 +1713,8 @@
           "name": "fantasy_player_tiers_fantasy_player_id_fantasy_players_id_fk",
           "tableFrom": "fantasy_player_tiers",
           "tableTo": "fantasy_players",
-          "columnsFrom": [
-            "fantasy_player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_player_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1778,12 +1722,8 @@
           "name": "fantasy_player_tiers_effective_gameweek_id_fantasy_gameweeks_id_fk",
           "tableFrom": "fantasy_player_tiers",
           "tableTo": "fantasy_gameweeks",
-          "columnsFrom": [
-            "effective_gameweek_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["effective_gameweek_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -1913,12 +1853,8 @@
           "name": "fantasy_players_fantasy_season_id_fantasy_seasons_id_fk",
           "tableFrom": "fantasy_players",
           "tableTo": "fantasy_seasons",
-          "columnsFrom": [
-            "fantasy_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1926,12 +1862,8 @@
           "name": "fantasy_players_player_id_players_id_fk",
           "tableFrom": "fantasy_players",
           "tableTo": "players",
-          "columnsFrom": [
-            "player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["player_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -2085,12 +2017,8 @@
           "name": "fantasy_seasons_competition_season_id_competition_seasons_id_fk",
           "tableFrom": "fantasy_seasons",
           "tableTo": "competition_seasons",
-          "columnsFrom": [
-            "competition_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2204,12 +2132,8 @@
           "name": "fantasy_stat_overrides_player_match_stats_id_fantasy_player_match_stats_id_fk",
           "tableFrom": "fantasy_stat_overrides",
           "tableTo": "fantasy_player_match_stats",
-          "columnsFrom": [
-            "player_match_stats_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["player_match_stats_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2346,12 +2270,8 @@
           "name": "fantasy_team_gameweek_scores_selection_id_fantasy_team_selections_id_fk",
           "tableFrom": "fantasy_team_gameweek_scores",
           "tableTo": "fantasy_team_selections",
-          "columnsFrom": [
-            "selection_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["selection_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2495,12 +2415,8 @@
           "name": "fantasy_team_selection_players_selection_id_fantasy_team_selections_id_fk",
           "tableFrom": "fantasy_team_selection_players",
           "tableTo": "fantasy_team_selections",
-          "columnsFrom": [
-            "selection_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["selection_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2508,12 +2424,8 @@
           "name": "fantasy_team_selection_players_fantasy_player_id_fantasy_players_id_fk",
           "tableFrom": "fantasy_team_selection_players",
           "tableTo": "fantasy_players",
-          "columnsFrom": [
-            "fantasy_player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_player_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -2521,12 +2433,8 @@
           "name": "fantasy_team_selection_players_club_id_snapshot_clubs_id_fk",
           "tableFrom": "fantasy_team_selection_players",
           "tableTo": "clubs",
-          "columnsFrom": [
-            "club_id_snapshot"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["club_id_snapshot"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         }
@@ -2687,12 +2595,8 @@
           "name": "fantasy_team_selections_fantasy_team_id_fantasy_teams_id_fk",
           "tableFrom": "fantasy_team_selections",
           "tableTo": "fantasy_teams",
-          "columnsFrom": [
-            "fantasy_team_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_team_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2700,12 +2604,8 @@
           "name": "fantasy_team_selections_fantasy_gameweek_id_fantasy_gameweeks_id_fk",
           "tableFrom": "fantasy_team_selections",
           "tableTo": "fantasy_gameweeks",
-          "columnsFrom": [
-            "fantasy_gameweek_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_gameweek_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2828,12 +2728,8 @@
           "name": "fantasy_teams_fantasy_season_id_fantasy_seasons_id_fk",
           "tableFrom": "fantasy_teams",
           "tableTo": "fantasy_seasons",
-          "columnsFrom": [
-            "fantasy_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -2841,12 +2737,8 @@
           "name": "fantasy_teams_manager_id_fantasy_managers_id_fk",
           "tableFrom": "fantasy_teams",
           "tableTo": "fantasy_managers",
-          "columnsFrom": [
-            "manager_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["manager_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -2946,12 +2838,8 @@
           "name": "fantasy_tier_definitions_fantasy_season_id_fantasy_seasons_id_fk",
           "tableFrom": "fantasy_tier_definitions",
           "tableTo": "fantasy_seasons",
-          "columnsFrom": [
-            "fantasy_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["fantasy_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3074,12 +2962,8 @@
           "name": "fantasy_transfer_revisions_selection_id_fantasy_team_selections_id_fk",
           "tableFrom": "fantasy_transfer_revisions",
           "tableTo": "fantasy_team_selections",
-          "columnsFrom": [
-            "selection_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["selection_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -3361,12 +3245,8 @@
           "name": "fixtures_competition_season_id_competition_seasons_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "competition_seasons",
-          "columnsFrom": [
-            "competition_season_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_season_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3374,12 +3254,8 @@
           "name": "fixtures_home_entry_id_competition_entries_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "competition_entries",
-          "columnsFrom": [
-            "home_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["home_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -3387,12 +3263,8 @@
           "name": "fixtures_away_entry_id_competition_entries_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "competition_entries",
-          "columnsFrom": [
-            "away_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["away_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "restrict",
           "onUpdate": "no action"
         },
@@ -3400,12 +3272,8 @@
           "name": "fixtures_venue_id_venues_id_fk",
           "tableFrom": "fixtures",
           "tableTo": "venues",
-          "columnsFrom": [
-            "venue_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["venue_id"],
+          "columnsTo": ["id"],
           "onDelete": "set null",
           "onUpdate": "no action"
         }
@@ -3610,12 +3478,8 @@
           "name": "player_registrations_competition_entry_id_competition_entries_id_fk",
           "tableFrom": "player_registrations",
           "tableTo": "competition_entries",
-          "columnsFrom": [
-            "competition_entry_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["competition_entry_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -3623,12 +3487,8 @@
           "name": "player_registrations_player_id_players_id_fk",
           "tableFrom": "player_registrations",
           "tableTo": "players",
-          "columnsFrom": [
-            "player_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["player_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -4082,98 +3942,57 @@
     "public.competition_season_status": {
       "name": "competition_season_status",
       "schema": "public",
-      "values": [
-        "planned",
-        "active",
-        "completed",
-        "cancelled"
-      ]
+      "values": ["planned", "active", "completed", "cancelled"]
     },
     "public.competition_type": {
       "name": "competition_type",
       "schema": "public",
-      "values": [
-        "league",
-        "cup"
-      ]
+      "values": ["league", "cup"]
     },
     "public.fantasy_captain_role": {
       "name": "fantasy_captain_role",
       "schema": "public",
-      "values": [
-        "none",
-        "captain",
-        "vice_captain"
-      ]
+      "values": ["none", "captain", "vice_captain"]
     },
     "public.fantasy_chip": {
       "name": "fantasy_chip",
       "schema": "public",
-      "values": [
-        "triple_captain",
-        "bench_boost",
-        "wildcard"
-      ]
+      "values": ["triple_captain", "bench_boost", "wildcard"]
     },
     "public.fantasy_gameweek_status": {
       "name": "fantasy_gameweek_status",
       "schema": "public",
-      "values": [
-        "planned",
-        "open",
-        "locked",
-        "provisional",
-        "final"
-      ]
+      "values": ["planned", "open", "locked", "provisional", "final"]
     },
     "public.fantasy_league_type": {
       "name": "fantasy_league_type",
       "schema": "public",
-      "values": [
-        "overall",
-        "private"
-      ]
+      "values": ["overall", "private"]
     },
     "public.fantasy_lineup_role": {
       "name": "fantasy_lineup_role",
       "schema": "public",
-      "values": [
-        "starter",
-        "bench"
-      ]
+      "values": ["starter", "bench"]
     },
     "public.fantasy_revision_status": {
       "name": "fantasy_revision_status",
       "schema": "public",
-      "values": [
-        "confirmed",
-        "cancelled"
-      ]
+      "values": ["confirmed", "cancelled"]
     },
     "public.fantasy_score_status": {
       "name": "fantasy_score_status",
       "schema": "public",
-      "values": [
-        "provisional",
-        "final"
-      ]
+      "values": ["provisional", "final"]
     },
     "public.fantasy_selection_status": {
       "name": "fantasy_selection_status",
       "schema": "public",
-      "values": [
-        "draft",
-        "locked"
-      ]
+      "values": ["draft", "locked"]
     },
     "public.fantasy_stats_status": {
       "name": "fantasy_stats_status",
       "schema": "public",
-      "values": [
-        "imported",
-        "reviewed",
-        "corrected"
-      ]
+      "values": ["imported", "reviewed", "corrected"]
     },
     "public.fixture_status": {
       "name": "fixture_status",
@@ -4190,21 +4009,12 @@
     "public.player_position": {
       "name": "player_position",
       "schema": "public",
-      "values": [
-        "goalkeeper",
-        "defender",
-        "midfielder",
-        "forward",
-        "unknown"
-      ]
+      "values": ["goalkeeper", "defender", "midfielder", "forward", "unknown"]
     },
     "public.player_registration_status": {
       "name": "player_registration_status",
       "schema": "public",
-      "values": [
-        "active",
-        "inactive"
-      ]
+      "values": ["active", "inactive"]
     }
   },
   "schemas": {},

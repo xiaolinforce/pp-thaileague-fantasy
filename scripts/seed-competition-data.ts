@@ -297,7 +297,11 @@ async function seedCompetitionData() {
   }
 
   const clubRecords = await db
-    .select({ id: clubs.id, externalId: clubs.externalId, nameEn: clubs.nameEn })
+    .select({
+      id: clubs.id,
+      externalId: clubs.externalId,
+      nameEn: clubs.nameEn,
+    })
     .from(clubs)
     .where(
       and(
@@ -310,7 +314,10 @@ async function seedCompetitionData() {
     );
 
   const visualIdentityByClubName = new Map(
-    clubVisualIdentitySources.map((identity) => [identity.clubNameEn, identity]),
+    clubVisualIdentitySources.map((identity) => [
+      identity.clubNameEn,
+      identity,
+    ]),
   );
   const missingVisualIdentities = clubRecords.filter(
     (club) => !visualIdentityByClubName.has(club.nameEn),
