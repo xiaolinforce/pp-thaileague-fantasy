@@ -329,8 +329,8 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
         );
         if (opponent) {
           next = {
-            th: `${opponent.abbreviation} (${isHome ? "H" : "A"})`,
-            en: `${opponent.abbreviation} (${isHome ? "H" : "A"})`,
+            th: `${opponent.shortName.th} (${isHome ? "H" : "A"})`,
+            en: `${opponent.shortName.en} (${isHome ? "H" : "A"})`,
           };
         }
       }

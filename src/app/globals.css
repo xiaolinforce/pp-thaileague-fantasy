@@ -3037,6 +3037,9 @@ textarea:focus-visible {
   border-radius: 0 0 6px 6px;
   padding: 3px 6px;
   font-size: 12px;
+  line-height: 1.2;
+  text-wrap: balance;
+  white-space: normal;
 }
 
 .bench-panel {
