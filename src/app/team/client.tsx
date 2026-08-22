@@ -220,13 +220,23 @@ export default function TeamClient({
       return;
     }
     startTransition(async () => {
-      const result = await saveFantasySelectionAction({ members, activeChip });
-      if (result.ok) {
-        toast.success(result.message);
-        router.refresh();
-      } else {
-        toast.error(result.message, {
-          description: result.violations?.join(" · "),
+      try {
+        const result = await saveFantasySelectionAction({
+          members,
+          activeChip,
+        });
+        if (result.ok) {
+          toast.success(result.message);
+          router.refresh();
+        } else {
+          toast.error(result.message, {
+            description: result.violations?.join(" · "),
+          });
+        }
+      } catch {
+        toast.error("บันทึกทีมไม่สำเร็จ", {
+          description:
+            "การเปลี่ยนแปลงยังไม่ถูกบันทึก กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
         });
       }
     });
@@ -286,6 +296,7 @@ export default function TeamClient({
           actions={
             <>
               <button
+                type="button"
                 className="secondary-button"
                 onClick={() => setView(view === "pitch" ? "list" : "pitch")}
               >
@@ -297,6 +308,7 @@ export default function TeamClient({
                 {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
               </button>
               <button
+                type="button"
                 className="primary-button"
                 onClick={saveTeam}
                 disabled={isPending || !isEditable || !hasUnsavedChanges}

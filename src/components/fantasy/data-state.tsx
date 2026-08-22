@@ -4,17 +4,21 @@ import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AppShell } from "@/components/fantasy/app-shell";
 
-export function CompetitionLoading() {
+export function CompetitionLoading({
+  label = "กำลังโหลดข้อมูล",
+}: {
+  label?: string;
+} = {}) {
   return (
     <AppShell>
       <main
         id="main-content"
-        className="competition-state"
-        aria-label="กำลังโหลดข้อมูล"
+        className="content product-content competition-state"
+        aria-label={label}
         aria-busy="true"
         aria-live="polite"
       >
-        <span className="sr-only">กำลังโหลดข้อมูล…</span>
+        <span className="sr-only">{label}…</span>
         <Skeleton className="h-9 w-56" />
         <Skeleton className="h-4 w-80 max-w-full" />
         <div className="competition-skeleton-grid" aria-hidden="true">
@@ -27,7 +31,15 @@ export function CompetitionLoading() {
   );
 }
 
-export function CompetitionError({ reset }: { reset: () => void }) {
+export function CompetitionError({
+  reset,
+  title = "โหลดข้อมูลการแข่งขันไม่สำเร็จ",
+  description = "กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูลแล้วลองอีกครั้ง",
+}: {
+  reset: () => void;
+  title?: string;
+  description?: string;
+}) {
   return (
     <AppShell>
       <main
@@ -38,8 +50,8 @@ export function CompetitionError({ reset }: { reset: () => void }) {
         <span aria-hidden="true">
           <AlertTriangle />
         </span>
-        <h1>โหลดข้อมูลการแข่งขันไม่สำเร็จ</h1>
-        <p>กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูลแล้วลองอีกครั้ง</p>
+        <h1>{title}</h1>
+        <p>{description}</p>
         <button className="primary-button" onClick={reset}>
           <RefreshCw size={16} aria-hidden="true" /> ลองอีกครั้ง
         </button>

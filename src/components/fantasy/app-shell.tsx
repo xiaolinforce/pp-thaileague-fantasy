@@ -71,6 +71,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const moreActive = navigation.slice(4).some((item) => item.href === pathname);
 
   return (
     <Localized>
@@ -90,7 +91,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={href}
                   aria-current={active ? "page" : undefined}
                 >
-                  <Icon size={20} strokeWidth={1.8} />
+                  <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
                   <span>{label}</span>
                   {active && <span className="nav-pip" />}
                 </Link>
@@ -99,11 +100,11 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
           <div className="sidebar-bottom">
             <Link href="/profile#rules">
-              <CircleHelp size={20} />
+              <CircleHelp size={20} aria-hidden="true" />
               <span>ช่วยเหลือ</span>
             </Link>
             <Link href="/profile#language">
-              <Settings size={20} />
+              <Settings size={20} aria-hidden="true" />
               <span>ตั้งค่า</span>
             </Link>
             <Link href="/profile" className="manager-card">
@@ -114,7 +115,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   {identity?.isGuest ? "ผู้เล่น Guest" : "ผู้จัดการทีม"}
                 </small>
               </span>
-              <ChevronRight size={16} />
+              <ChevronRight size={16} aria-hidden="true" />
             </Link>
           </div>
         </aside>
@@ -131,20 +132,17 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={href}
                 aria-current={active ? "page" : undefined}
               >
-                <Icon size={21} strokeWidth={1.8} />
+                <Icon size={21} strokeWidth={1.8} aria-hidden="true" />
                 <span>{shortLabel}</span>
               </Link>
             );
           })}
           <Sheet>
             <SheetTrigger
-              className={
-                navigation.slice(4).some((item) => item.href === pathname)
-                  ? "active"
-                  : ""
-              }
+              className={moreActive ? "active" : ""}
+              aria-current={moreActive ? "page" : undefined}
             >
-              <MoreHorizontal size={21} strokeWidth={1.8} />
+              <MoreHorizontal size={21} strokeWidth={1.8} aria-hidden="true" />
               <span>เพิ่มเติม</span>
             </SheetTrigger>
             <SheetContent side="bottom" className="mobile-more-sheet">
@@ -161,26 +159,26 @@ export function AppShell({ children }: { children: ReactNode }) {
                     nativeButton={false}
                     key={href}
                   >
-                    <Icon size={20} />
+                    <Icon size={20} aria-hidden="true" />
                     <span>{label}</span>
-                    <ChevronRight size={16} />
+                    <ChevronRight size={16} aria-hidden="true" />
                   </SheetClose>
                 ))}
                 <SheetClose
                   render={<Link href="/profile#language" />}
                   nativeButton={false}
                 >
-                  <Settings size={20} />
+                  <Settings size={20} aria-hidden="true" />
                   <span>ตั้งค่า</span>
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} aria-hidden="true" />
                 </SheetClose>
                 <SheetClose
                   render={<Link href="/profile#rules" />}
                   nativeButton={false}
                 >
-                  <CircleHelp size={20} />
+                  <CircleHelp size={20} aria-hidden="true" />
                   <span>ช่วยเหลือ</span>
-                  <ChevronRight size={16} />
+                  <ChevronRight size={16} aria-hidden="true" />
                 </SheetClose>
               </div>
             </SheetContent>

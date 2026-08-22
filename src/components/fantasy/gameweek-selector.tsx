@@ -20,6 +20,7 @@ export function GameweekSelector({
   return (
     <div className="fixture-week-bar" aria-label={`Gameweek ${week}`}>
       <button
+        type="button"
         onClick={() => onChange(Math.max(min, week - 1))}
         disabled={week <= min}
         aria-label={
@@ -34,6 +35,7 @@ export function GameweekSelector({
         {subtitle && <small>{subtitle}</small>}
       </div>
       <button
+        type="button"
         onClick={() => onChange(Math.min(max, week + 1))}
         disabled={week >= max}
         aria-label={language === "th" ? "Gameweek ถัดไป" : "Next Gameweek"}

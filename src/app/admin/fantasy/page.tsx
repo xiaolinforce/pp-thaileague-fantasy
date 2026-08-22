@@ -48,11 +48,11 @@ export default async function FantasyAdminPage() {
         <section className="market-insight admin-notice">
           <div>
             <span className="insight-icon">
-              <ShieldCheck />
+              <ShieldCheck aria-hidden="true" />
             </span>
             <div>
               <span className="eyebrow">Admin only</span>
-              <h3>เฉพาะบัญชีที่มีสิทธิ์ผู้ดูแลระบบ</h3>
+              <h2>เฉพาะบัญชีที่มีสิทธิ์ผู้ดูแลระบบ</h2>
               <p>
                 Server Action ทุกตัวตรวจ session และ role
                 จากฐานข้อมูลใหม่ก่อนเขียนข้อมูล อย่างตั้งใจ

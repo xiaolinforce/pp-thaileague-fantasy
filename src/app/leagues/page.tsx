@@ -27,7 +27,10 @@ export default async function LeaguesPage() {
           description="อันดับเรียงจากคะแนนรวม และใช้จำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน"
         />
 
-        <div className="league-cards">
+        <section className="league-cards" aria-labelledby="my-leagues-heading">
+          <h2 id="my-leagues-heading" className="sr-only">
+            ลีกของฉัน
+          </h2>
           <article className="league-feature-card active">
             <span className="league-icon">
               <Crown />
@@ -66,7 +69,7 @@ export default async function LeaguesPage() {
               <p>Classic scoring · ไม่มีบอลถ้วย</p>
             </div>
           </article>
-        </div>
+        </section>
 
         {fantasy.leagues.length === 0 && (
           <section

@@ -162,12 +162,14 @@ export default function OnboardingClient({
   const signInWithGoogle = async () => {
     setBusyAction("google");
     setError("");
-    const result = await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/auth/complete",
-    });
-    if (result?.error) {
-      setError(errorMessage(result.error));
+    try {
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/auth/complete",
+      });
+      if (result?.error) throw result.error;
+    } catch (requestError) {
+      setError(errorMessage(requestError));
       setBusyAction(null);
     }
   };

@@ -255,12 +255,13 @@ export default function TransfersClient({
 
         <div className="compact-market-toolbar">
           <label className="search-field compact-market-search">
-            <Search size={17} />
+            <Search size={17} aria-hidden="true" />
             <Input
               className="market-search-input"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="ค้นหานักเตะหรือสโมสร"
+              aria-label="ค้นหานักเตะหรือสโมสร"
             />
             {query && (
               <button
@@ -268,7 +269,7 @@ export default function TransfersClient({
                 onClick={() => setQuery("")}
                 aria-label="ล้างคำค้น"
               >
-                <X size={15} />
+                <X size={15} aria-hidden="true" />
               </button>
             )}
           </label>

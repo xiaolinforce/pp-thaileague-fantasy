@@ -36,10 +36,29 @@ const translations: Record<string, string> = {
   "เข้าถึงการแข่งขัน โปรแกรม และการตั้งค่าของคุณ":
     "Access competitions, fixtures, and your settings",
   กำลังโหลดข้อมูล: "Loading data",
+  กำลังโหลดคะแนน: "Loading points",
+  กำลังโหลดตารางอันดับ: "Loading standings",
+  กำลังโหลดโปรไฟล์: "Loading profile",
+  กำลังโหลดเครื่องมือผู้ดูแล: "Loading admin tools",
   โหลดข้อมูลการแข่งขันไม่สำเร็จ: "Unable to load competition data",
+  โหลดคะแนนไม่สำเร็จ: "Unable to load points",
+  โหลดตารางอันดับไม่สำเร็จ: "Unable to load standings",
+  โหลดโปรไฟล์ไม่สำเร็จ: "Unable to load profile",
+  โหลดเครื่องมือผู้ดูแลไม่สำเร็จ: "Unable to load admin tools",
   กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูลแล้วลองอีกครั้ง:
     "Please check the database connection and try again",
+  "ลองโหลดคะแนน Gameweek นี้อีกครั้ง หากปัญหายังอยู่ให้กลับมาตรวจสอบภายหลัง":
+    "Try loading this Gameweek again. If the problem continues, check back later",
+  "ลองโหลดลีกและอันดับล่าสุดอีกครั้ง โดยคะแนนที่บันทึกไว้จะไม่สูญหาย":
+    "Try loading the latest leagues and standings again. Your saved points are safe",
+  "ลองโหลดข้อมูลบัญชี ทีม ภาษา และกติกาของคุณอีกครั้ง":
+    "Try loading your account, team, language, and rules again",
+  "ตรวจสอบสิทธิ์และการเชื่อมต่อข้อมูล แล้วลองเปิดเครื่องมือผู้ดูแลอีกครั้ง":
+    "Check your access and data connection, then try opening the admin tools again",
   ลองอีกครั้ง: "Try again",
+  บันทึกทีมไม่สำเร็จ: "Unable to save your team",
+  "การเปลี่ยนแปลงยังไม่ถูกบันทึก กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง":
+    "Your changes were not saved. Check your connection and try again",
   ช่วยเหลือ: "Help",
   ตั้งค่า: "Settings",
   ภาษา: "Language",
