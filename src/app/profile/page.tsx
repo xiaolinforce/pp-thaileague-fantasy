@@ -292,9 +292,7 @@ export default function ProfilePage() {
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="บัญชีของฉัน"
-          title="โปรไฟล์และการตั้งค่า"
-          description="จัดการชื่อบัญชีและทีม เลือกภาษา และตรวจสอบกติกาที่ใช้งานจริง"
+          title="โปรไฟล์และกติกา"
         />
 
         <div className="profile-layout">

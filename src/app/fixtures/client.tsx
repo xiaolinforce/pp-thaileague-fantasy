@@ -84,9 +84,7 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="ข้อมูลการแข่งขัน"
           title="โปรแกรมและสถิติ"
-          description="วิเคราะห์โปรแกรม ฟอร์ม และตัวเลขสำคัญก่อนจัดทีม"
           actions={
             <Tabs
               value={view}

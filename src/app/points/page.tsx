@@ -145,9 +145,7 @@ export default async function PointsPage({
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="คะแนน"
-          title={`ผลงาน Gameweek ${String(points.fantasy.gameweek.number).padStart(2, "0")}`}
-          description="ดูคะแนนบนสนามตามทีมที่บันทึกไว้ พร้อม Auto-sub กัปตัน Chips และรายละเอียดคะแนน"
+          title="คะแนน"
           actions={
             <PointsGameweekSwitcher
               gameweeks={points.gameweeks}

@@ -69,18 +69,7 @@ export default function DashboardClient({
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="ภาพรวม"
-          title={
-            language === "th"
-              ? `สวัสดี ${fantasy.team.name}`
-              : `Welcome, ${fantasy.team.name}`
-          }
-          titleClassName="dashboard-page-title"
-          description={
-            language === "th"
-              ? `ทีมพร้อมสำหรับ Gameweek ${fantasy.gameweek.number} — ตรวจรายชื่อก่อนเดดไลน์`
-              : `Your squad is ready for Gameweek ${fantasy.gameweek.number} — review it before the deadline`
-          }
+          title="ภาพรวม"
           actions={
             <Link href="/team" className="primary-button">
               จัดทีมตอนนี้ <ArrowRight size={17} />

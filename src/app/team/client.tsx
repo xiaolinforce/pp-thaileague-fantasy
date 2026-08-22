@@ -290,9 +290,7 @@ export default function TeamClient({
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="ทีมของฉัน"
-          title="จัดทีมและซื้อขาย"
-          description="จัดตัวจริง เลือกกัปตัน และปรับนักเตะให้พร้อมก่อนเดดไลน์"
+          title="ทีมของฉัน"
           actions={
             <>
               <button

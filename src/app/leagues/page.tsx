@@ -22,9 +22,7 @@ export default async function LeaguesPage() {
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="การแข่งขัน"
-          title="Classic Leagues"
-          description="อันดับเรียงจากคะแนนรวม และใช้จำนวน Transfer ที่น้อยกว่าเป็นตัวตัดสิน"
+          title="ลีก"
         />
 
         <section className="league-cards" aria-labelledby="my-leagues-heading">

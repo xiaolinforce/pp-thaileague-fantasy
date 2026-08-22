@@ -196,19 +196,21 @@ export function PageHeader({
   description,
   actions,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
   titleClassName?: string;
-  description: string;
+  description?: string;
   actions?: ReactNode;
 }) {
   return (
     <Localized>
       <section className="page-intro product-page-intro">
         <div>
-          <span className="eyebrow orange">{eyebrow}</span>
-          <h1 className={titleClassName}>{title}</h1>
-          <p>{description}</p>
+          {eyebrow ? <span className="eyebrow orange">{eyebrow}</span> : null}
+          <h1 className={titleClassName ? `page-title ${titleClassName}` : "page-title"}>
+            {title}
+          </h1>
+          {description ? <p>{description}</p> : null}
         </div>
         {actions && <div className="intro-actions">{actions}</div>}
       </section>

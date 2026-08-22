@@ -717,6 +717,7 @@ textarea:focus-visible {
   color: var(--orange);
 }
 .page-intro h1 {
+  color: var(--orange);
   margin: 7px 0 4px;
   font-size: clamp(27px, 3vw, 38px);
   letter-spacing: -0.04em;

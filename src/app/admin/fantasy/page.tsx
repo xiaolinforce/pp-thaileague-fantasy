@@ -40,9 +40,7 @@ export default async function FantasyAdminPage() {
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
-          eyebrow="เครื่องมือภายใน"
           title="Fantasy Admin"
-          description="ข้อมูลต้นทางถูกเก็บแยกจากคำตัดสินแฟนตาซี และทุกการแก้ไขมี Audit log"
         />
 
         <section className="market-insight admin-notice">
