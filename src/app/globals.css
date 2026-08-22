@@ -33,6 +33,10 @@
   --orange-action: #c54808;
   --orange-action-hover: #a83a04;
   --orange-soft: #fff0e5;
+  --blue: #356caf;
+  --blue-soft: #e9f1fc;
+  --purple: #7751af;
+  --purple-soft: #f0eaf9;
   --ink: #182026;
   --muted: #687078;
   --line: #e7e4df;
@@ -41,6 +45,7 @@
   --navy: #151d24;
   --green: #17614d;
   --green-dark: #114c3c;
+  --green-soft: #e5f5ef;
   --radius: 18px;
   --background: var(--paper);
   --foreground: var(--ink);
@@ -520,6 +525,34 @@ textarea:focus-visible {
   letter-spacing: 0.28em;
   margin-top: 5px;
 }
+.sidebar-language-button {
+  position: absolute;
+  top: 31px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 11px;
+  color: #ffd1b4;
+  background: rgba(255, 255, 255, 0.07);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease;
+}
+.sidebar-language-button:hover {
+  color: white;
+  border-color: rgba(245, 102, 23, 0.5);
+  background: rgba(245, 102, 23, 0.18);
+}
+.sidebar-language-button:focus-visible {
+  outline: 3px solid rgba(245, 102, 23, 0.42);
+  outline-offset: 2px;
+}
 .side-nav {
   display: flex;
   flex-direction: column;
@@ -848,13 +881,13 @@ textarea:focus-visible {
   letter-spacing: -0.05em;
 }
 .deadline {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  padding: 0 34px;
-  flex: 1;
-  z-index: 2;
-}
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 34px;
+    flex: 1;
+    z-index: 2;
+  }
 .deadline span {
   display: flex;
   gap: 7px;
@@ -926,29 +959,6 @@ textarea:focus-visible {
   font-size: 17px;
   font-weight: 900;
 }
-.view-toggle {
-  display: flex;
-  background: var(--warm);
-  padding: 3px;
-  border-radius: 9px;
-}
-.view-toggle button {
-  border: 0;
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
-  color: #9a9da0;
-  background: transparent;
-  border-radius: 7px;
-  cursor: pointer;
-}
-.view-toggle button.active {
-  color: var(--orange);
-  background: #fff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
-
 .pitch {
   margin: 0 15px;
   min-height: 670px;
@@ -1536,10 +1546,15 @@ textarea:focus-visible {
 
 [data-slot="dialog-content"].accessible-player-modal {
   position: fixed;
-  width: min(440px, calc(100% - 32px));
-  max-width: 440px;
+  width: min(620px, calc(100% - 32px));
+  max-width: 620px;
   gap: 18px;
   padding: 26px;
+  overflow: hidden;
+}
+
+.accessible-player-modal > * {
+  min-width: 0;
 }
 
 .accessible-player-modal [data-slot="dialog-title"] {
@@ -1615,9 +1630,9 @@ textarea:focus-visible {
 }
 .player-detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin: 20px 0;
+  margin: 4px 0;
 }
 .player-detail-grid div {
   border: 1px solid var(--line);
@@ -1632,12 +1647,24 @@ textarea:focus-visible {
 }
 .player-detail-grid strong {
   font-size: 12px;
+  line-height: 1.4;
   margin-top: 4px;
+  overflow-wrap: anywhere;
 }
 .modal-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
+  min-width: 0;
+  margin: 0 -26px -26px;
+  padding: 16px 26px 26px;
+  border-radius: 0 0 22px 22px;
+  flex-wrap: wrap;
+}
+
+.modal-actions > button {
+  min-width: 0;
+  white-space: nowrap;
 }
 .toast {
   position: fixed;
@@ -1692,6 +1719,18 @@ textarea:focus-visible {
   .manager-card > span:nth-child(2),
   .manager-card svg {
     display: none;
+  }
+  .sidebar > .brand {
+    align-self: flex-start;
+    margin-left: -7px;
+  }
+  .sidebar-language-button {
+    top: 35px;
+    right: 5px;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 11px;
   }
   .side-nav button,
   .sidebar-bottom > button {
@@ -1959,9 +1998,13 @@ textarea:focus-visible {
   .list-player {
     min-width: 570px;
   }
-  .player-modal {
-    padding: 22px 17px;
+  [data-slot="dialog-content"].accessible-player-modal {
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 24px);
+    gap: 16px;
+    padding: 20px;
     border-radius: 20px;
+    overflow-y: auto;
   }
   .modal-shirt {
     width: 68px;
@@ -1977,9 +2020,21 @@ textarea:focus-visible {
   .player-detail-grid div {
     padding: 9px;
   }
+  .player-detail-grid > div:last-child {
+    grid-column: 1 / -1;
+  }
   .modal-actions {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    margin: 0 -20px -20px;
+    padding: 16px 20px 20px;
+    border-radius: 0 0 20px 20px;
+  }
+  .modal-actions > button {
+    width: 100%;
+  }
+  .modal-actions > button:first-child {
+    grid-column: 1 / -1;
   }
 }
 
@@ -2607,71 +2662,48 @@ textarea:focus-visible {
 }
 
 .compact-transfer-market {
-  position: sticky;
-  top: 94px;
+  position: static;
   overflow: hidden;
 }
 
 .compact-market-head {
-  padding: 17px 18px;
-  border-bottom: 1px solid var(--line);
+  padding: 14px 18px;
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
+  align-items: center;
+  color: var(--orange-deep);
 }
 
 .compact-market-head h2 {
-  margin: 3px 0;
-  font-size: 20px;
-}
-
-.compact-market-head p {
-  max-width: 330px;
   margin: 0;
-  color: var(--muted);
-}
-
-.quota-status {
-  min-height: 32px;
-  padding: 0 9px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-  font-weight: 800;
-}
-
-.quota-status.valid {
-  color: #17745a;
-  background: #e8f6f1;
-}
-
-.quota-status.invalid {
-  color: #9b4017;
-  background: var(--orange-soft);
+  font-size: 20px;
 }
 
 .compact-transfer-stats {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
 }
 
 .compact-transfer-stats > div {
   min-width: 0;
-  padding: 11px 9px;
+  padding: 8px 9px 11px;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: var(--orange-deep);
+  background: var(--orange-soft);
 }
 
 .compact-transfer-stats > div + div {
-  border-left: 1px solid var(--line);
+  border-left: 1px solid rgba(189, 67, 6, 0.24);
 }
 
 .compact-transfer-stats span {
-  color: var(--muted);
+  color: currentColor;
+  font-size: 11px;
+  line-height: 1.35;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2679,6 +2711,9 @@ textarea:focus-visible {
 
 .compact-transfer-stats strong {
   margin-top: 2px;
+  font-size: 16px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
 }
 
 .compact-transfer-guide {
@@ -2721,6 +2756,10 @@ textarea:focus-visible {
   padding: 0 12px 12px;
   display: grid;
   gap: 8px;
+}
+
+.compact-transfer-stats + .compact-market-toolbar {
+  padding-top: 14px;
 }
 
 .compact-market-search {
@@ -2806,20 +2845,40 @@ textarea:focus-visible {
   text-align: center;
 }
 
-.team-overview-grid {
-  grid-column: 1 / -1;
-  position: static;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-}
-
 .squad-card {
   overflow: hidden;
 }
 
+.squad-chip-toolbar {
+  margin: 14px 14px 0;
+  padding: 12px;
+  border-radius: 12px;
+  color: var(--orange-deep);
+  background: var(--orange-soft);
+  display: flex;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.squad-chip-title {
+  width: 100%;
+  min-width: 78px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  font-weight: 800;
+  text-align: center;
+}
+
+.squad-chip-title svg {
+  flex: 0 0 auto;
+}
+
 .squad-pitch {
   min-height: 650px;
-  margin: 0 14px;
+  margin: 14px 14px 0;
   border-radius: 13px;
   color: white;
   background: repeating-linear-gradient(
@@ -3045,76 +3104,6 @@ textarea:focus-visible {
 .bench-item .squad-fixture {
   color: #707678;
   background: #ebe9e5;
-}
-
-.team-summary {
-  gap: 14px;
-}
-
-.roster-table {
-  padding: 0 20px 22px;
-  min-height: 650px;
-}
-
-.roster-head,
-.roster-row {
-  display: grid;
-  grid-template-columns: minmax(220px, 1.5fr) minmax(100px, 0.8fr) 65px 55px;
-  align-items: center;
-  gap: 10px;
-}
-
-.roster-head {
-  color: #95999c;
-  border-bottom: 1px solid var(--line);
-  padding: 10px 12px;
-  font-size: 12px;
-}
-
-.roster-row {
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid #f0eeeb;
-  background: transparent;
-  padding: 9px 12px;
-  text-align: left;
-  color: #666d70;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.roster-row:hover {
-  background: #fff8f3;
-}
-
-.roster-row.selected-for-transfer {
-  background: var(--orange-soft);
-  box-shadow: inset 3px 0 0 var(--orange);
-}
-
-.roster-identity,
-.roster-identity > span {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-}
-
-.roster-identity > span {
-  align-items: flex-start;
-  flex-direction: column;
-}
-
-.roster-identity strong {
-  color: var(--ink);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.roster-identity small {
-  color: #9b9fa1;
-  font-size: 12px;
-  margin-top: 2px;
 }
 
 /* Transfers */
@@ -5382,16 +5371,6 @@ textarea:focus-visible {
     position: static;
   }
 
-  .team-summary {
-    position: static;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .team-summary .auto-pick {
-    display: none;
-  }
-
   .points-aside {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -5432,8 +5411,7 @@ textarea:focus-visible {
   .points-table,
   .league-table,
   .fixture-list-card,
-  .stats-ranking-card,
-  .roster-table {
+  .stats-ranking-card {
     overflow-x: auto;
   }
 
@@ -5695,7 +5673,6 @@ textarea:focus-visible {
     min-height: 105px;
   }
 
-  .team-summary,
   .points-aside {
     grid-template-columns: 1fr;
   }
@@ -5943,7 +5920,6 @@ textarea:focus-visible {
 .market-player strong,
 .compact-fixture strong,
 .squad-name,
-.roster-row,
 .market-row,
 .points-row,
 .league-row,
@@ -5960,7 +5936,6 @@ textarea:focus-visible {
 .market-head,
 .points-head,
 .league-head,
-.roster-head,
 .match-day,
 .difficulty-legend {
   font-size: 16px;
@@ -6046,37 +6021,69 @@ textarea:focus-visible {
     transform: rotate(360deg);
   }
 }
-.swap-hint {
-  display: inline-block;
-  margin-top: 6px;
+.squad-action-hint {
+  margin: 14px 14px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
   color: #c2410c;
-  font-weight: 800;
+  background: var(--orange-soft);
 }
 .chip-options {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
-  margin-top: 12px;
+  flex: 1;
 }
 .chip-options button {
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  flex-direction: column;
+  gap: 2px;
+  text-align: center;
   padding: 10px 12px;
-  border: 1px solid #e7e5e4;
-  border-radius: 12px;
+  border: 1px solid rgba(189, 67, 6, 0.2);
+  border-radius: 10px;
   color: #292524;
-  background: #fafaf9;
+  background: var(--paper);
   cursor: pointer;
 }
-.chip-options button b {
+.chip-options button span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+}
+
+.chip-options button p {
+  margin: 0;
   color: #78716c;
   font-size: 12px;
+  line-height: 1.25;
 }
 .chip-options button.active {
-  border-color: #f56617;
+  border-color: var(--orange);
   color: #9a3412;
   background: #fff7ed;
-  box-shadow: inset 3px 0 #f56617;
+  box-shadow: inset 0 -3px var(--orange);
+}
+
+@media (max-width: 640px) {
+  .squad-chip-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .chip-options button {
+    min-height: 58px;
+    padding: 8px;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+  }
 }
 .admin-fantasy-grid {
   display: grid;
@@ -6208,7 +6215,7 @@ body {
 .transfer-button,
 .filter-button,
 .toast,
-.swap-hint,
+.squad-action-hint,
 .profile-nav-card nav a,
 .profile-section-nav a,
 .rules-list [data-slot="accordion-trigger"] {
@@ -6225,7 +6232,6 @@ body {
 .market-head,
 .points-head,
 .league-head,
-.roster-head,
 .fixture-week-bar span,
 .position-chip,
 .position-badge,
@@ -6268,7 +6274,6 @@ body {
 .player-identity-component strong,
 .player-label strong,
 .squad-name,
-.roster-identity strong,
 .list-identity strong,
 .league-row > div strong,
 .leader-player h3 {
@@ -6281,7 +6286,6 @@ body {
 .player-rank,
 .week-switcher span,
 .rank-number,
-.roster-row,
 .market-row,
 .points-row,
 .league-row,
@@ -6301,7 +6305,6 @@ body {
   font-weight: 400;
 }
 
-.roster-row > b,
 .market-row > strong,
 .points-row > strong,
 .league-row > strong,

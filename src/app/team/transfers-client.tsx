@@ -4,7 +4,6 @@ import {
   ArrowDownUp,
   ArrowRight,
   Search,
-  ShieldCheck,
   UserRoundMinus,
   UserRoundPlus,
   X,
@@ -70,16 +69,6 @@ export default function TransfersClient({
     () => new Set(members.map((member) => member.fantasyPlayerId)),
     [members],
   );
-  const originalIds = useMemo(
-    () =>
-      new Set(
-        fantasy.selection.members.map((member) => member.fantasyPlayerId),
-      ),
-    [fantasy.selection.members],
-  );
-  const localTransferCount = [...ownedIds].filter(
-    (id) => !originalIds.has(id),
-  ).length;
   const selectedOutgoingPlayer = selectedOutgoing
     ? playersByFantasyId.get(selectedOutgoing)
     : null;
@@ -129,17 +118,8 @@ export default function TransfersClient({
     return player ? [player] : [];
   });
   const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
-  const premiumSlots = squadPlayers.filter((player) => player.tier <= 2).length;
+  const levelTwo = squadPlayers.filter((player) => player.tier === 2).length;
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
-  const clubCounts = new Map<string, number>();
-  for (const player of squadPlayers) {
-    clubCounts.set(player.clubId, (clubCounts.get(player.clubId) ?? 0) + 1);
-  }
-  const quotaValid =
-    levelOne <= 3 &&
-    premiumSlots <= 10 &&
-    foreignPlayers <= 7 &&
-    ![...clubCounts.values()].some((count) => count > 3);
 
   function choosePlayer(player: CompetitionPlayerView) {
     if (!isEditable) {
@@ -190,30 +170,21 @@ export default function TransfersClient({
         aria-label="ตลาดนักเตะ"
       >
         <div className="compact-market-head">
-          <div>
-            <span className="eyebrow">ตลาดนักเตะ</span>
-            <h2>ซื้อขายในมุมมองเดียว</h2>
-            <p>เลือกคนในทีม แล้วเลือกนักเตะตำแหน่งเดียวกันเข้ามาแทน</p>
-          </div>
-          <span className={`quota-status ${quotaValid ? "valid" : "invalid"}`}>
-            <ShieldCheck size={16} />
-            {quotaValid ? "โควต้าผ่าน" : "เกินโควต้า"}
-          </span>
+          <h2>ตลาดนักเตะ</h2>
         </div>
-
         <div className="compact-transfer-stats">
           <div>
-            <span>ฟรี</span>
+            <span>เปลี่ยนตัวได้อีก</span>
             <strong>{fantasy.team.freeTransfers}</strong>
           </div>
           <div>
-            <span>รอบันทึก</span>
-            <strong>{localTransferCount}</strong>
+            <span>ผู้เล่นระดับ 1</span>
+            <strong>{levelOne}/3</strong>
           </div>
           <div>
-            <span>L1 / พรีเมียม</span>
+            <span>ผู้เล่นระดับ 2</span>
             <strong>
-              {levelOne}/3 · {premiumSlots}/10
+              {levelTwo}/{10 - levelOne}
             </strong>
           </div>
           <div>
@@ -222,27 +193,20 @@ export default function TransfersClient({
           </div>
         </div>
 
-        <div
-          className={`compact-transfer-guide ${selectedOutgoingPlayer ? "active" : ""}`}
-          aria-live="polite"
-        >
-          <div>
-            <strong>
-              {selectedOutgoingPlayer
-                ? language === "th"
+        {selectedOutgoingPlayer && (
+          <div className="compact-transfer-guide active" aria-live="polite">
+            <div>
+              <strong>
+                {language === "th"
                   ? `เลือก ${selectedOutgoingPlayer.position} คนใหม่`
-                  : `Choose a new ${selectedOutgoingPlayer.position}`
-                : "เลือกนักเตะจากสนามหรือตลาด"}
-            </strong>
-            <span>
-              {selectedOutgoingPlayer
-                ? language === "th"
+                  : `Choose a new ${selectedOutgoingPlayer.position}`}
+              </strong>
+              <span>
+                {language === "th"
                   ? `กำลังเปลี่ยน ${localize(selectedOutgoingPlayer.name, language)}`
-                  : `Replacing ${localize(selectedOutgoingPlayer.name, language)}`
-                : "นักเตะในทีมจะแสดงก่อนในรายการด้านล่าง"}
-            </span>
-          </div>
-          {selectedOutgoingPlayer && (
+                  : `Replacing ${localize(selectedOutgoingPlayer.name, language)}`}
+              </span>
+            </div>
             <button
               type="button"
               className="compact-clear-player"
@@ -250,8 +214,8 @@ export default function TransfersClient({
             >
               <X size={15} /> ยกเลิก
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         <div className="compact-market-toolbar">
           <label className="search-field compact-market-search">

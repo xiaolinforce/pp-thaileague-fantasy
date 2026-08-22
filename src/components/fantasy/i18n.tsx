@@ -160,10 +160,7 @@ const translations: Record<string, string> = {
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
     "Choose your starting XI, name a captain, and take your team to the top",
-  มุมมองรายชื่อ: "List View",
-  มุมมองสนาม: "Pitch View",
   บันทึกทีม: "Save Team",
-  "GAMEWEEK สำหรับจัดทีม": "GAMEWEEK TO EDIT",
   เดดไลน์จัดทีม: "Team Deadline",
   ปิดรับการจัดทีมแล้ว: "Team selection is closed",
   "ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว":
@@ -172,7 +169,6 @@ const translations: Record<string, string> = {
   วัน: "days",
   "ชม.": "hrs",
   นาที: "mins",
-  "แผนการเล่น 4 · 4 · 2": "Formation 4 · 4 · 2",
   ตัวสำรอง: "Substitutes",
   ม้านั่งสำรอง: "Bench",
   เรียงลำดับการลงสนาม: "Substitution order",
@@ -201,11 +197,13 @@ const translations: Record<string, string> = {
   "กัปตัน ×3": "Triple Captain",
   นับตัวสำรอง: "Bench Boost",
   ครั้ง: "uses",
+  "เหลือใช้ {count} ครั้ง": "Remaining {count} times",
   สลับตัว: "Swap",
   รองกัปตัน: "Vice-captain",
   ปิด: "Close",
   กรองระดับ: "Filter by tier",
   เรียงลำดับ: "Sort players",
+  ตัวช่วยพิเศษ: "Chips",
 
   // Transfers
   ตลาดนักเตะ: "Player Market",
@@ -216,6 +214,9 @@ const translations: Record<string, string> = {
   โควต้าผ่าน: "Quotas valid",
   เกินโควต้า: "Over quota",
   ฟรี: "Free",
+  "เปลี่ยนตัวได้อีก": "Transfers left",
+  "ผู้เล่นระดับ 1": "Tier 1 Players",
+  "ผู้เล่นระดับ 2": "Tier 2 Players",
   รอบันทึก: "Pending save",
   ต่างชาติ: "Foreign",
   "L1 / พรีเมียม": "L1 / premium",
@@ -741,5 +742,24 @@ export function LanguageSwitcher() {
         </span>
       </label>
     </RadioGroup>
+  );
+}
+
+export function SidebarLanguageButton() {
+  const { language, setLanguage } = useLanguage();
+  const nextLanguage = language === "th" ? "en" : "th";
+  const label =
+    language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย";
+
+  return (
+    <button
+      type="button"
+      className="sidebar-language-button"
+      onClick={() => setLanguage(nextLanguage)}
+      aria-label={label}
+      title={label}
+    >
+      {nextLanguage.toUpperCase()}
+    </button>
   );
 }

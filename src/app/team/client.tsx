@@ -3,15 +3,9 @@
 import {
   ArrowLeftRight,
   Check,
-  Clock3,
-  Info,
-  LayoutGrid,
-  List,
   LoaderCircle,
   Save,
   Shirt,
-  Sparkles,
-  Wallet,
   Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -35,12 +29,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import type { FantasyState } from "@/data/fantasy";
 import {
   saveFantasySelectionAction,
@@ -93,7 +81,7 @@ export default function TeamClient({
   data: CompetitionDataset;
   fantasy: FantasyState;
 }) {
-  const [view, setView] = useState<"pitch" | "list">("pitch");
+  const { language, translate } = useLanguage();
   const [transferOutgoingId, setTransferOutgoingId] = useState<string | null>(
     null,
   );
@@ -113,7 +101,6 @@ export default function TeamClient({
   const [isPending, startTransition] = useTransition();
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const router = useRouter();
-  const { language } = useLanguage();
   const playersByFantasyId = useMemo(
     () =>
       new Map(
@@ -147,34 +134,6 @@ export default function TeamClient({
         (member) => member.fantasyPlayerId === selected.fantasyPlayerId,
       )
     : null;
-  const levelOne = squad.filter((item) => item.player.tier === 1).length;
-  const premiumSlots = squad.filter((item) => item.player.tier <= 2).length;
-  const foreignPlayers = squad.filter((item) => !item.player.isThai).length;
-  const overallLeague = fantasy.leagues.find(
-    (league) => league.type === "overall",
-  );
-  const overallStanding = overallLeague?.standings.find(
-    (standing) => standing.mine,
-  );
-  const averagePoints = overallLeague?.standings.length
-    ? Math.round(
-        overallLeague.standings.reduce(
-          (total, standing) => total + standing.gameweekPoints,
-          0,
-        ) / overallLeague.standings.length,
-      )
-    : 0;
-  const highestPoints = overallLeague?.standings.length
-    ? Math.max(
-        ...overallLeague.standings.map((standing) => standing.gameweekPoints),
-      )
-    : 0;
-  const formation = (["DEF", "MID", "FWD"] as const)
-    .map(
-      (position) =>
-        starters.filter((player) => player.position === position).length,
-    )
-    .join(" · ");
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
@@ -292,58 +251,66 @@ export default function TeamClient({
         <PageHeader
           title="ทีมของฉัน"
           actions={
-            <>
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setView(view === "pitch" ? "list" : "pitch")}
-              >
-                {view === "pitch" ? (
-                  <List size={17} />
-                ) : (
-                  <LayoutGrid size={17} />
-                )}
-                {view === "pitch" ? "มุมมองรายชื่อ" : "มุมมองสนาม"}
-              </button>
-              <button
-                type="button"
-                className="primary-button"
-                onClick={saveTeam}
-                disabled={isPending || !isEditable || !hasUnsavedChanges}
-                aria-busy={isPending}
-                title={
-                  !isEditable
-                    ? "ปิดรับการจัดทีมแล้ว"
-                    : !hasUnsavedChanges
-                      ? "ยังไม่มีการเปลี่ยนแปลง"
-                      : undefined
-                }
-              >
-                {isPending ? (
-                  <LoaderCircle className="spin" size={17} aria-hidden="true" />
-                ) : (
-                  <Save size={17} aria-hidden="true" />
-                )}
-                {isPending ? "กำลังบันทึกทีม…" : "บันทึกทีม"}
-              </button>
-            </>
+            <button
+              type="button"
+              className="primary-button"
+              onClick={saveTeam}
+              disabled={isPending || !isEditable || !hasUnsavedChanges}
+              aria-busy={isPending}
+              title={
+                !isEditable
+                  ? "ปิดรับการจัดทีมแล้ว"
+                  : !hasUnsavedChanges
+                    ? "ยังไม่มีการเปลี่ยนแปลง"
+                    : undefined
+              }
+            >
+              {isPending ? (
+                <LoaderCircle className="spin" size={17} aria-hidden="true" />
+              ) : (
+                <Save size={17} aria-hidden="true" />
+              )}
+              {isPending ? "กำลังบันทึกทีม…" : "บันทึกทีม"}
+            </button>
           }
         />
         <section className="gameweek-banner compact-gameweek">
           <div className="gameweek-main">
-            <span>GAMEWEEK สำหรับจัดทีม</span>
+            <span>GAMEWEEK</span>
             <strong>{String(fantasy.gameweek.number).padStart(2, "0")}</strong>
           </div>
           <div className="deadline">
-            <span>
-              <Clock3 size={16} /> เดดไลน์จัดทีม
-            </span>
+            <span>เดดไลน์จัดทีม</span>
             <strong>
-              {new Intl.DateTimeFormat(language === "th" ? "th-TH" : "en-GB", {
-                dateStyle: "medium",
-                timeStyle: "short",
-                timeZone: "Asia/Bangkok",
-              }).format(new Date(fantasy.gameweek.deadlineAt))}
+              {language === "th"
+                ? (() => {
+                    const parts = new Intl.DateTimeFormat("th-TH", {
+                      weekday: "short",
+                      day: "numeric",
+                      month: "short",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hourCycle: "h23",
+                      timeZone: "Asia/Bangkok",
+                    }).formatToParts(new Date(fantasy.gameweek.deadlineAt));
+                    const weekday = parts.find(
+                      (part) => part.type === "weekday",
+                    )?.value;
+                    const day = parts.find((part) => part.type === "day")?.value;
+                    const month = parts.find(
+                      (part) => part.type === "month",
+                    )?.value;
+                    const hour = parts.find((part) => part.type === "hour")?.value;
+                    const minute = parts.find(
+                      (part) => part.type === "minute",
+                    )?.value;
+                    return `${weekday}ที่ ${day} ${month} ${hour}:${minute}`;
+                  })()
+                : new Intl.DateTimeFormat("en-GB", {
+                    dateStyle: "medium",
+                    timeStyle: "short",
+                    timeZone: "Asia/Bangkok",
+                  }).format(new Date(fantasy.gameweek.deadlineAt))}
             </strong>
           </div>
           <div className="countdown">
@@ -379,153 +346,108 @@ export default function TeamClient({
         </section>
 
         <div className="unified-team-workspace">
-          <section className="product-card squad-card">
-            <div className="product-card-head">
-              <div>
-                <span className="eyebrow">แผนการเล่น {formation}</span>
-                <h2>{fantasy.team.name}</h2>
-                {swapFrom && (
-                  <small className="swap-hint">
-                    เลือกผู้เล่นอีกคนเพื่อสลับตำแหน่ง
-                  </small>
-                )}
+          <div className="product-card squad-card">
+            <section className="squad-chip-toolbar" aria-labelledby="chip-title">
+              <div className="squad-chip-title" id="chip-title">
+                <Zap size={18} aria-hidden="true" />
+                <span>{translate("ตัวช่วยพิเศษ")}</span>
               </div>
-              <ToggleGroup
-                className="view-toggle"
-                value={[view]}
-                onValueChange={(values) =>
-                  values[0] && setView(values[0] as "pitch" | "list")
-                }
-              >
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <ToggleGroupItem
-                        value="pitch"
-                        aria-label={
-                          language === "th" ? "มุมมองสนาม" : "Pitch view"
-                        }
-                      />
-                    }
+              <div className="chip-options">
+                {(
+                  [
+                    ["triple_captain", "กัปตัน ×3"],
+                    ["bench_boost", "นับตัวสำรอง"],
+                    ["wildcard", "เปลี่ยนตัวไม่จำกัด"],
+                  ] as const
+                ).map(([chip, label]) => {
+                  const isActive = activeChip === chip;
+                  return (
+                    <button
+                      type="button"
+                      key={chip}
+                      className={isActive ? "active" : ""}
+                      disabled={!isEditable}
+                      aria-pressed={isActive}
+                      onClick={() =>
+                        setActiveChip((current) =>
+                          current === chip ? null : chip,
+                        )
+                      }
+                    >
+                      <span>{label}</span>
+                      <p>
+                        {translate("เหลือใช้ {count} ครั้ง").replace(
+                          "{count}",
+                          String(fantasy.chipsRemaining[chip]),
+                        )}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+            {swapFrom && (
+              <div className="squad-action-hint" role="status">
+                เลือกผู้เล่นอีกคนเพื่อสลับตำแหน่ง
+              </div>
+            )}
+            <div className="squad-pitch">
+              <div className="field-lines">
+                <span />
+                <i />
+                <b />
+              </div>
+              <div className="squad-rows">
+                {rows.map((position) => (
+                  <div
+                    className={`squad-row squad-${position.toLowerCase()}`}
+                    key={position}
                   >
-                    <LayoutGrid size={17} />
-                  </TooltipTrigger>
-                  <TooltipContent>มุมมองสนาม</TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger
-                    render={
-                      <ToggleGroupItem
-                        value="list"
-                        aria-label={
-                          language === "th" ? "มุมมองรายชื่อ" : "List view"
-                        }
-                      />
-                    }
-                  >
-                    <List size={17} />
-                  </TooltipTrigger>
-                  <TooltipContent>มุมมองรายชื่อ</TooltipContent>
-                </Tooltip>
-              </ToggleGroup>
-            </div>
-            {view === "pitch" ? (
-              <>
-                <div className="squad-pitch">
-                  <div className="field-lines">
-                    <span />
-                    <i />
-                    <b />
-                  </div>
-                  <div className="squad-rows">
-                    {rows.map((position) => (
-                      <div
-                        className={`squad-row squad-${position.toLowerCase()}`}
-                        key={position}
-                      >
-                        {starters
-                          .filter((player) => player.position === position)
-                          .map((player) => (
-                            <SquadPlayer
-                              key={player.id}
-                              player={player}
-                              onSelect={selectPlayer}
-                              captain={
-                                player.fantasyPlayerId === captainId
-                                  ? "C"
-                                  : player.fantasyPlayerId === viceCaptainId
-                                    ? "V"
-                                    : undefined
-                              }
-                              transferSelected={
-                                player.fantasyPlayerId === transferOutgoingId
-                              }
-                            />
-                          ))}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="bench-panel">
-                  <div className="bench-title">
-                    <div>
-                      <span className="eyebrow">ตัวสำรอง</span>
-                      <h3>ม้านั่งสำรอง</h3>
-                    </div>
-                    <span>เรียงลำดับการลงสนาม</span>
-                  </div>
-                  <div className="bench-grid">
-                    {bench.map((player, index) => (
-                      <div className="bench-item" key={player.id}>
-                        <b>{index === 0 ? "GK" : index}</b>
+                    {starters
+                      .filter((player) => player.position === position)
+                      .map((player) => (
                         <SquadPlayer
+                          key={player.id}
                           player={player}
                           onSelect={selectPlayer}
+                          captain={
+                            player.fantasyPlayerId === captainId
+                              ? "C"
+                              : player.fantasyPlayerId === viceCaptainId
+                                ? "V"
+                                : undefined
+                          }
                           transferSelected={
                             player.fantasyPlayerId === transferOutgoingId
                           }
                         />
-                      </div>
-                    ))}
+                      ))}
                   </div>
-                </div>
-              </>
-            ) : (
-              <div className="roster-table">
-                <div className="roster-head">
-                  <span>ผู้เล่น</span>
-                  <span>นัดถัดไป</span>
-                  <span>ระดับ</span>
-                  <span>คะแนน</span>
-                </div>
-                {[...starters, ...bench].map((player, index) => (
-                  <button
-                    className={`roster-row ${player.fantasyPlayerId === transferOutgoingId ? "selected-for-transfer" : ""}`}
-                    key={player.id}
-                    onClick={() => selectPlayer(player)}
-                  >
-                    <span className="roster-identity">
-                      <PlayerKit
-                        color={player.color}
-                        accent={player.accent}
-                        size="small"
-                      />
-                      <span>
-                        <strong>{localize(player.name, language)}</strong>
-                        <small>
-                          {localize(player.club, language)} · {player.position}
-                          {index > 10 ? " · สำรอง" : ""}
-                        </small>
-                      </span>
-                    </span>
-                    <span>{localize(player.next, language)}</span>
-                    <span>ระดับ {player.tier}</span>
-                    <b>{player.points}</b>
-                  </button>
                 ))}
               </div>
-            )}
-          </section>
+            </div>
+            <div className="bench-panel">
+              <div className="bench-title">
+                <div>
+                  <h3>ม้านั่งสำรอง</h3>
+                </div>
+              </div>
+              <div className="bench-grid">
+                {bench.map((player, index) => (
+                  <div className="bench-item" key={player.id}>
+                    <b>{index === 0 ? "GK" : index}</b>
+                    <SquadPlayer
+                      player={player}
+                      onSelect={selectPlayer}
+                      transferSelected={
+                        player.fantasyPlayerId === transferOutgoingId
+                      }
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
 
           <TransfersClient
             data={data}
@@ -536,93 +458,6 @@ export default function TeamClient({
             selectedOutgoing={transferOutgoingId}
             onSelectedOutgoingChange={setTransferOutgoingId}
           />
-
-          <aside className="team-summary team-overview-grid">
-            <section className="summary-card accent-card">
-              <div className="card-title">
-                <span>
-                  <Sparkles size={18} /> ภาพรวมทีม
-                </span>
-                <Info size={17} />
-              </div>
-              <div className="points-hero">
-                <strong>{overallStanding?.gameweekPoints ?? 0}</strong>
-                <small>คะแนน</small>
-              </div>
-              <div className="rank-row">
-                <span>อันดับรวม</span>
-                <strong>{overallStanding?.rank ?? "—"}</strong>
-              </div>
-              <div className="mini-stats">
-                <div>
-                  <span>เฉลี่ย</span>
-                  <strong>{averagePoints}</strong>
-                </div>
-                <div>
-                  <span>สูงสุด</span>
-                  <strong>{highestPoints}</strong>
-                </div>
-                <div>
-                  <span>อันดับ GW</span>
-                  <strong>{overallStanding?.rank ?? "—"}</strong>
-                </div>
-              </div>
-            </section>
-            <section className="summary-card">
-              <div className="card-title">
-                <span>
-                  <Wallet size={18} /> โควต้าระดับ
-                </span>
-              </div>
-              <div className="budget-number">
-                <strong>{levelOne}/3</strong>
-                <span>ระดับ 1</span>
-              </div>
-              <div className="budget-bar">
-                <span
-                  style={{ width: `${Math.min(100, (levelOne / 3) * 100)}%` }}
-                />
-              </div>
-              <div className="budget-split">
-                <span>
-                  L1 + L2 <b>{premiumSlots}/10</b>
-                </span>
-                <span>
-                  ต่างชาติ <b className="orange-text">{foreignPlayers}/7</b>
-                </span>
-              </div>
-            </section>
-            <section className="summary-card chip-card">
-              <div className="card-title">
-                <span>
-                  <Zap size={18} /> Chips
-                </span>
-              </div>
-              <div className="chip-options">
-                {(
-                  [
-                    ["triple_captain", "กัปตัน ×3"],
-                    ["bench_boost", "นับตัวสำรอง"],
-                    ["wildcard", "Wildcard"],
-                  ] as const
-                ).map(([chip, label]) => (
-                  <button
-                    key={chip}
-                    className={activeChip === chip ? "active" : ""}
-                    disabled={!isEditable}
-                    onClick={() =>
-                      setActiveChip((current) =>
-                        current === chip ? null : chip,
-                      )
-                    }
-                  >
-                    <span>{label}</span>
-                    <b>{fantasy.chipsRemaining[chip]} ครั้ง</b>
-                  </button>
-                ))}
-              </div>
-            </section>
-          </aside>
         </div>
       </main>
 
@@ -756,7 +591,7 @@ export default function TeamClient({
               >
                 รองกัปตัน
               </button>
-              <DialogClose render={<button className="primary-button" />}>
+              <DialogClose render={<button className="secondary-button" />}>
                 <Check size={17} /> ปิด
               </DialogClose>
             </DialogFooter>

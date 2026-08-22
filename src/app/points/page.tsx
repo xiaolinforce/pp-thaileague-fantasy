@@ -255,14 +255,10 @@ export default async function PointsPage({
             <div className="points-bench-panel">
               <div className="bench-title">
                 <div>
-                  <span className="eyebrow">ตัวสำรอง</span>
                   <h3>
-                    {points.fantasy.selection.activeChip === "bench_boost"
-                      ? "Bench Boost — นับคะแนนทุกคน"
-                      : "ม้านั่งสำรองหลัง Auto-sub"}
+                    ม้านั่งสำรอง
                   </h3>
                 </div>
-                <span>ผู้เล่นสำรอง {benchMembers.length}</span>
               </div>
               <div className="points-bench-grid">
                 {benchMembers.map((member) => (
