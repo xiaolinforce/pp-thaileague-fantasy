@@ -723,6 +723,9 @@ textarea:focus-visible {
   line-height: 1.15;
   font-weight: 900;
 }
+.dashboard-page-title {
+  text-wrap: balance;
+}
 .page-intro p {
   margin: 0;
   color: var(--muted);

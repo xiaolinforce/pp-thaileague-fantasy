@@ -72,9 +72,10 @@ export default function DashboardClient({
           eyebrow="ภาพรวม"
           title={
             language === "th"
-              ? `สวัสดี ผู้จัดการ ${fantasy.team.name}`
-              : `Welcome, ${fantasy.team.name} Manager`
+              ? `สวัสดี ${fantasy.team.name}`
+              : `Welcome, ${fantasy.team.name}`
           }
+          titleClassName="dashboard-page-title"
           description={
             language === "th"
               ? `ทีมพร้อมสำหรับ Gameweek ${fantasy.gameweek.number} — ตรวจรายชื่อก่อนเดดไลน์`

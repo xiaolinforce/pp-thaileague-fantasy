@@ -192,11 +192,13 @@ export function AppShell({ children }: { children: ReactNode }) {
 export function PageHeader({
   eyebrow,
   title,
+  titleClassName,
   description,
   actions,
 }: {
   eyebrow: string;
   title: string;
+  titleClassName?: string;
   description: string;
   actions?: ReactNode;
 }) {
@@ -205,7 +207,7 @@ export function PageHeader({
       <section className="page-intro product-page-intro">
         <div>
           <span className="eyebrow orange">{eyebrow}</span>
-          <h1>{title}</h1>
+          <h1 className={titleClassName}>{title}</h1>
           <p>{description}</p>
         </div>
         {actions && <div className="intro-actions">{actions}</div>}
