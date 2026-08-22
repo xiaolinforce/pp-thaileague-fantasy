@@ -3014,38 +3014,34 @@ textarea:focus-visible {
 
 .squad-name,
 .squad-fixture {
+  width: 72px;
   max-width: 85px;
-  min-width: 64px;
+  min-width: 72px;
+  min-height: 24px;
+  max-height: 24px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
+  line-height: 1.2;
+  box-sizing: border-box;
 }
 
 .squad-name {
   color: #1d2b26;
   background: white;
   border-radius: 6px 6px 0 0;
-  padding: 4px 6px 3px;
+  padding: 3px 5px 2px;
   font-size: 12px;
   font-weight: 800;
-  line-height: 1.2;
-  overflow: visible;
-  overflow-wrap: anywhere;
-  text-overflow: clip;
-  text-wrap: balance;
-  white-space: normal;
 }
 
 .squad-fixture {
   color: #e7f3ee;
   background: rgba(10, 46, 37, 0.92);
   border-radius: 0 0 6px 6px;
-  padding: 3px 6px;
+  padding: 3px 5px 2px;
   font-size: 12px;
-  line-height: 1.2;
-  text-wrap: balance;
-  white-space: normal;
 }
 
 .bench-panel {
@@ -5661,6 +5657,8 @@ textarea:focus-visible {
   .squad-fixture {
     min-width: 54px;
     max-width: 68px;
+    min-height: 24px;
+    max-height: 24px;
     font-size: 12px;
     padding-left: 3px;
     padding-right: 3px;

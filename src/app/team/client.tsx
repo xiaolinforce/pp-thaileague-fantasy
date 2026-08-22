@@ -68,7 +68,9 @@ function SquadPlayer({
         <span className="squad-name">
           {localize(player.shortName, language)}
         </span>
-        <span className="squad-fixture">{localize(player.next, language)}</span>
+        <span className="squad-fixture">
+          {localize(player.clubShort, language)}
+        </span>
       </button>
     </Localized>
   );
