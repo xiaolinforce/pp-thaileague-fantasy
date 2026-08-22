@@ -2877,7 +2877,7 @@ textarea:focus-visible {
 }
 
 .squad-pitch {
-  min-height: 650px;
+  min-height: 560px;
   margin: 14px 14px 0;
   border-radius: 13px;
   color: white;
@@ -2948,10 +2948,10 @@ textarea:focus-visible {
 }
 
 .squad-rows {
-  min-height: 650px;
+  min-height: 560px;
   position: relative;
   z-index: 3;
-  padding: 35px 18px;
+  padding: 30px 18px;
   display: flex;
   justify-content: space-between;
   flex-direction: column;
@@ -2961,7 +2961,7 @@ textarea:focus-visible {
   display: flex;
   align-items: center;
   justify-content: space-around;
-  min-height: 110px;
+  min-height: 96px;
 }
 
 .squad-token {
@@ -5578,7 +5578,7 @@ textarea:focus-visible {
 
   .squad-pitch,
   .squad-rows {
-    min-height: 565px;
+    min-height: 510px;
   }
 
   .compact-gameweek {
@@ -5637,11 +5637,11 @@ textarea:focus-visible {
   }
 
   .squad-rows {
-    padding: 28px 2px;
+    padding: 24px 2px;
   }
 
   .squad-row {
-    min-height: 90px;
+    min-height: 86px;
   }
 
   .squad-token {
