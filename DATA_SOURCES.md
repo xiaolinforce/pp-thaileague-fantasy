@@ -106,9 +106,9 @@ profile does not publish Thai script, the command may use a reviewed
 stable-Transfermarkt-ID exception from
 `scripts/sources/player-short-name-overrides.ts`. The command aborts before
 writing if any such player has neither a valid source value nor an exception.
-English short names are derived from the final non-suffix token of
-`full_name_en`; players not classified as Thai deliberately retain a null Thai
-short name.
+English short names use the first token of `full_name_en` for players classified
+as Thai, and the final non-suffix token for other players. Players not
+classified as Thai deliberately retain a null Thai short name.
 
 Player identity is currently derived from Transfermarkt external IDs. Do not
 fall back to display-name matching for updates because names are not stable

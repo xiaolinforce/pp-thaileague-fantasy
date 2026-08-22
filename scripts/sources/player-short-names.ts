@@ -2,9 +2,13 @@ function compact(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
 
-export function getEnglishPlayerShortName(fullNameEn: string) {
+export function getEnglishPlayerShortName(
+  fullNameEn: string,
+  useGivenName = false,
+) {
   const parts = compact(fullNameEn).split(" ").filter(Boolean);
   if (parts.length <= 1) return parts[0] ?? fullNameEn;
+  if (useGivenName) return parts[0];
   const suffixes = new Set(["jr.", "jr", "ii", "iii", "iv"]);
   const last = parts.at(-1)!;
   return suffixes.has(last.toLocaleLowerCase("en"))

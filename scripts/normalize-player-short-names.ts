@@ -121,7 +121,10 @@ async function normalizePlayerShortNames() {
   const updates = rows.map((row) => ({
     id: row.player.id,
     fullNameEn: row.player.fullNameEn,
-    shortNameEn: getEnglishPlayerShortName(row.player.fullNameEn),
+    shortNameEn: getEnglishPlayerShortName(
+      row.player.fullNameEn,
+      row.fantasyPlayer.isThai,
+    ),
     shortNameTh: row.fantasyPlayer.isThai
       ? (thaiShortNameById.get(row.player.id) ?? null)
       : null,
