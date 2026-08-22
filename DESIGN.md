@@ -116,6 +116,10 @@ the screen before cards or tables begin.
   without mode tabs. On desktop, show the pitch and market side by side; stack
   the market after the pitch on narrow screens. Selecting a squad player should
   filter the market to compatible replacements without leaving the page.
+- Expose swap and remove as compact, icon-only actions on every pitch and bench
+  player, with accessible names. Removing a player keeps that lineup slot as a
+  visible position-locked vacancy; saving stays disabled until the manager fills
+  every vacancy with a compatible player from the market.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a

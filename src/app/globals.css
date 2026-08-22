@@ -814,6 +814,18 @@ textarea:focus-visible {
   border-color: #c7c2bc;
 }
 
+.secondary-button.danger-button {
+  color: #b42318;
+  border-color: #f0c4c0;
+  background: #fff8f7;
+}
+
+.secondary-button.danger-button:hover:not(:disabled) {
+  color: #912018;
+  border-color: #e39c95;
+  background: #fff1ef;
+}
+
 .primary-button:active:not(:disabled),
 .secondary-button:active:not(:disabled) {
   transform: translateY(0);
@@ -2964,6 +2976,14 @@ textarea:focus-visible {
   min-height: 96px;
 }
 
+.squad-token-shell {
+  position: relative;
+  min-width: 78px;
+  display: grid;
+  place-items: center;
+  transition: transform 0.18s ease;
+}
+
 .squad-token {
   border: 0;
   background: transparent;
@@ -2973,49 +2993,155 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   cursor: pointer;
-  transition: transform 0.18s ease;
 }
 
-.squad-token:hover {
+.squad-token-shell:hover {
   transform: translateY(-4px);
 }
 
-.squad-token.selected-for-transfer {
+.squad-token-shell.selected-for-transfer .squad-token {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.16);
   box-shadow: inset 0 0 0 2px #ffb184;
 }
 
-.squad-token.swap-source,
-.squad-token.swap-available {
+.squad-token-shell.swap-source .squad-token,
+.squad-token-shell.swap-available .squad-token {
   border-radius: 12px;
 }
 
-.squad-token.swap-source {
+.squad-token-shell.swap-source .squad-token {
   background: rgba(255, 255, 255, 0.14);
   box-shadow: inset 0 0 0 2px rgba(255, 177, 132, 0.95);
 }
 
-.squad-token.swap-available {
+.squad-token-shell.swap-available .squad-token {
   background: rgba(255, 255, 255, 0.18);
   box-shadow:
     0 0 0 2px rgba(255, 255, 255, 0.92),
     0 0 0 5px var(--orange);
+}
+
+.squad-token-shell.swap-available {
   transform: translateY(-2px);
 }
 
-.squad-token.swap-available:hover {
+.squad-token-shell.swap-available:hover {
   transform: translateY(-6px);
 }
 
-.squad-token.swap-unavailable:disabled {
+.squad-token-shell.swap-unavailable .squad-token:disabled {
   opacity: 0.4;
   filter: saturate(0.45);
   cursor: default;
 }
 
-.squad-token.swap-unavailable:hover {
+.squad-token-shell.swap-unavailable:hover {
   transform: none;
+}
+
+.squad-token-action {
+  position: absolute;
+  z-index: 5;
+  bottom: 52px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid #d8d5cf;
+  border-radius: 5px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #42504b;
+  box-shadow: 0 2px 5px rgba(13, 35, 28, 0.14);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.squad-token-action:hover:not(:disabled) {
+  color: var(--orange-action);
+  border-color: #f0a373;
+  transform: scale(1.08);
+}
+
+.squad-token-action:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.squad-swap-action {
+  left: calc(50% - 34px);
+}
+
+.squad-swap-action:hover:not(:disabled) {
+  transform: scale(1.08);
+}
+
+.squad-remove-action {
+  right: calc(50% - 34px);
+  color: #b42318;
+}
+
+.squad-remove-action:hover:not(:disabled) {
+  color: #912018;
+  border-color: #e39c95;
+  background: #fff1ef;
+  transform: scale(1.08);
+}
+
+.vacant-squad-slot {
+  min-width: 78px;
+  border: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.18s ease;
+}
+
+.vacant-squad-slot:hover:not(:disabled) {
+  transform: translateY(-4px);
+}
+
+.vacant-squad-slot.selected {
+  border-radius: 12px;
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 0 0 5px var(--orange);
+}
+
+.vacant-squad-slot:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.vacant-squad-icon {
+  width: 46px;
+  height: 46px;
+  margin-bottom: 2px;
+  border: 2px dashed rgba(255, 255, 255, 0.72);
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 54, 40, 0.35);
+}
+
+.vacant-squad-slot .squad-name {
+  border: 1px dashed #d8d5cf;
+  color: #6a716e;
+  background: #fbfaf8;
+}
+
+.vacant-squad-slot .squad-fixture {
+  color: #d9e7e2;
+  background: rgba(10, 46, 37, 0.72);
 }
 
 .squad-shirt {
@@ -3140,7 +3266,9 @@ textarea:focus-visible {
   font-size: 12px;
 }
 
-.bench-item .squad-token {
+.bench-item .squad-token-shell,
+.bench-item .squad-token,
+.bench-item .vacant-squad-slot {
   min-width: 0;
 }
 
@@ -3157,6 +3285,14 @@ textarea:focus-visible {
 .bench-item .squad-fixture {
   color: #707678;
   background: #ebe9e5;
+}
+
+.bench-item .vacant-squad-icon {
+  width: 36px;
+  height: 36px;
+  color: var(--green);
+  border-color: #a6bdb5;
+  background: #edf4f1;
 }
 
 /* Transfers */
@@ -5692,13 +5828,39 @@ textarea:focus-visible {
     min-height: 86px;
   }
 
-  .squad-token {
+  .squad-token-shell,
+  .squad-token,
+  .vacant-squad-slot {
     min-width: 58px;
   }
 
   .squad-shirt svg {
     width: 38px;
     height: 38px;
+  }
+
+  .vacant-squad-icon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .squad-swap-action {
+    left: calc(50% - 32px);
+  }
+
+  .squad-remove-action {
+    right: calc(50% - 32px);
+  }
+
+  .squad-token-action {
+    bottom: 52px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .squad-token-action svg {
+    width: 11px;
+    height: 11px;
   }
 
   .squad-position-badge {

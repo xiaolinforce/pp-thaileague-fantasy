@@ -157,6 +157,16 @@ const translations: Record<string, string> = {
   จัดการทีม: "Manage team",
   จัดตัวจริง: "Lineup",
   เปลี่ยนนักเตะ: "Replace player",
+  ลบ: "Remove",
+  ว่าง: "Vacant",
+  "เติมนักเตะให้ครบ 15 คนก่อน": "Complete your 15-player squad first",
+  "เติมนักเตะให้ครบ 15 คนก่อนบันทึกทีม":
+    "Complete your 15-player squad before saving",
+  ลบนักเตะออกจากตำแหน่งแล้ว: "Player removed from the slot",
+  เลือกนักเตะตำแหน่งเดียวกันจากตลาดเพื่อเติมช่องว่าง:
+    "Choose a player in the same position from the market to fill the vacancy",
+  เลือกนักเตะในทีมที่ต้องการขายหรือเลือกช่องว่างก่อน:
+    "Choose a squad player to sell or select a vacant slot first",
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
     "Choose your starting XI, name a captain, and take your team to the top",
