@@ -14,6 +14,8 @@
 - Provisional and final Gameweek recalculation.
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,
   stat overrides, transfer revisions, and application-level admin audit entries.
+- Versioned preseason player ranking with contiguous overall/position ranks,
+  source confidence, review CSV, and deterministic 50/100/remaining tiers.
 - Overall and Private Classic demo standings.
 - Idempotent competition and Fantasy seed workflows with database verification.
 
@@ -50,8 +52,10 @@ substitute for those authorization checks.
 - Move season/tournament IDs and Fantasy season selection into a central season
   registry rather than repeating a slug or identifier across scripts/actions.
 - Replace or remove the unused static `src/lib/fantasy-data.ts` prototype.
-- Strengthen `db:verify:fantasy` from row-count visibility into invariant
-  assertions for squads, selections, tiers, leagues, and Gameweeks.
+- Extend `db:verify:fantasy` beyond published-ranking assertions to cover every
+  squad, selection, league, and Gameweek invariant.
+- Review low-confidence preseason projections and add stable-ID source matches
+  or approved manual adjustments before production entry opens.
 - Add import fixtures and adapter tests so upstream schema drift fails before a
   database write.
 - Separate admin correction services from the App Router action file as the

@@ -110,6 +110,17 @@ export const fantasyManagerStatusEnum = pgEnum("fantasy_manager_status", [
   "abandoned",
 ]);
 
+export const fantasyRankingStatusEnum = pgEnum("fantasy_ranking_status", [
+  "draft",
+  "published",
+  "superseded",
+]);
+
+export const fantasyRankingConfidenceEnum = pgEnum(
+  "fantasy_ranking_confidence",
+  ["low", "medium", "high"],
+);
+
 export const authEmailProviderEnum = pgEnum("auth_email_provider", [
   "resend",
   "brevo",
@@ -765,6 +776,121 @@ export const fantasyPlayerTiers = pgTable(
     ),
     index("fantasy_player_tiers_gameweek_idx").on(table.effectiveGameweekId),
     check("fantasy_player_tiers_level_check", sql`${table.level} > 0`),
+  ],
+);
+
+export const fantasyRankingRuns = pgTable(
+  "fantasy_ranking_runs",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    effectiveGameweekId: uuid("effective_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "restrict" }),
+    version: varchar("version", { length: 80 }).notNull(),
+    status: fantasyRankingStatusEnum("status").default("draft").notNull(),
+    modelVersion: varchar("model_version", { length: 80 }).notNull(),
+    dataCutoff: date("data_cutoff", { mode: "string" }).notNull(),
+    totalPlayers: integer("total_players").notNull(),
+    levelOneCount: integer("level_one_count").notNull(),
+    levelTwoCount: integer("level_two_count").notNull(),
+    sourceName: text("source_name").notNull(),
+    sourceUrls: jsonb("source_urls").$type<string[]>().default([]).notNull(),
+    configuration: jsonb("configuration")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    notes: text("notes"),
+    publishedAt: timestamp("published_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_ranking_runs_season_version_unique").on(
+      table.fantasySeasonId,
+      table.version,
+    ),
+    index("fantasy_ranking_runs_season_status_idx").on(
+      table.fantasySeasonId,
+      table.status,
+    ),
+    index("fantasy_ranking_runs_effective_gameweek_idx").on(
+      table.effectiveGameweekId,
+    ),
+    check(
+      "fantasy_ranking_runs_counts_check",
+      sql`${table.totalPlayers} > 0 and ${table.levelOneCount} >= 0 and ${table.levelTwoCount} >= 0 and ${table.levelOneCount} + ${table.levelTwoCount} <= ${table.totalPlayers}`,
+    ),
+    check(
+      "fantasy_ranking_runs_published_at_check",
+      sql`(${table.status} = 'published' and ${table.publishedAt} is not null) or (${table.status} <> 'published')`,
+    ),
+  ],
+);
+
+export const fantasyPlayerRankings = pgTable(
+  "fantasy_player_rankings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    rankingRunId: uuid("ranking_run_id")
+      .notNull()
+      .references(() => fantasyRankingRuns.id, { onDelete: "cascade" }),
+    fantasyPlayerId: uuid("fantasy_player_id")
+      .notNull()
+      .references(() => fantasyPlayers.id, { onDelete: "cascade" }),
+    overallRank: integer("overall_rank").notNull(),
+    positionRank: integer("position_rank").notNull(),
+    positionSnapshot: playerPositionEnum("position_snapshot").notNull(),
+    tierLevel: smallint("tier_level").notNull(),
+    modelProjectedPoints: doublePrecision("model_projected_points").notNull(),
+    manualAdjustment: doublePrecision("manual_adjustment").default(0).notNull(),
+    projectedPoints: doublePrecision("projected_points").notNull(),
+    projectedMinutes: integer("projected_minutes").notNull(),
+    previousSeasonPoints: doublePrecision("previous_season_points").notNull(),
+    previousSeasonMinutes: integer("previous_season_minutes").notNull(),
+    marketValueEur: integer("market_value_eur"),
+    confidence: fantasyRankingConfidenceEnum("confidence").notNull(),
+    matchMethod: varchar("match_method", { length: 32 }).notNull(),
+    matchScore: doublePrecision("match_score"),
+    sourcePlayerIds: jsonb("source_player_ids")
+      .$type<Array<Record<string, string | number>>>()
+      .default([])
+      .notNull(),
+    sourceFacts: jsonb("source_facts")
+      .$type<Record<string, unknown>>()
+      .default({})
+      .notNull(),
+    modelComponents: jsonb("model_components")
+      .$type<Record<string, number>>()
+      .default({})
+      .notNull(),
+    reason: text("reason").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_player_rankings_run_player_unique").on(
+      table.rankingRunId,
+      table.fantasyPlayerId,
+    ),
+    uniqueIndex("fantasy_player_rankings_run_rank_unique").on(
+      table.rankingRunId,
+      table.overallRank,
+    ),
+    uniqueIndex("fantasy_player_rankings_run_position_rank_unique").on(
+      table.rankingRunId,
+      table.positionSnapshot,
+      table.positionRank,
+    ),
+    index("fantasy_player_rankings_player_idx").on(table.fantasyPlayerId),
+    index("fantasy_player_rankings_run_tier_idx").on(
+      table.rankingRunId,
+      table.tierLevel,
+    ),
+    check(
+      "fantasy_player_rankings_values_check",
+      sql`${table.overallRank} > 0 and ${table.positionRank} > 0 and ${table.tierLevel} > 0 and ${table.projectedMinutes} >= 0 and ${table.previousSeasonMinutes} >= 0 and ${table.projectedPoints} >= 0 and ${table.modelProjectedPoints} >= 0 and ${table.previousSeasonPoints} >= 0 and (${table.marketValueEur} is null or ${table.marketValueEur} >= 0) and (${table.matchScore} is null or (${table.matchScore} >= 0 and ${table.matchScore} <= 1))`,
+    ),
   ],
 );
 

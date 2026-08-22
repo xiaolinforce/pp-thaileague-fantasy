@@ -353,7 +353,7 @@ export async function saveFantasySelectionAction(
 }
 
 export async function cancelFantasyChangesAction(): Promise<FantasyActionResult> {
-  const { gameweek, selection } = await requireFantasyProfile();
+  const { season, gameweek, selection } = await requireFantasyProfile();
   if (!isBeforeDeadline(gameweek.deadlineAt)) {
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
@@ -371,16 +371,17 @@ export async function cancelFantasyChangesAction(): Promise<FantasyActionResult>
   }
   const allowedRoles = new Set(["starter", "bench"]);
   const allowedCaptainRoles = new Set(["none", "captain", "vice_captain"]);
-  const restored: Array<typeof fantasyTeamSelectionPlayers.$inferInsert> = [];
+  const baselineLineup: Array<{
+    fantasyPlayerId: string;
+    lineupRole: "starter" | "bench";
+    benchOrder: number | null;
+    captainRole: CaptainRole;
+  }> = [];
   for (const value of baselineMembers) {
     if (!value || typeof value !== "object") continue;
     const member = value as Record<string, unknown>;
     if (
       typeof member.fantasyPlayerId !== "string" ||
-      typeof member.clubIdSnapshot !== "string" ||
-      typeof member.positionSnapshot !== "string" ||
-      typeof member.tierSnapshot !== "number" ||
-      typeof member.isThaiSnapshot !== "boolean" ||
       typeof member.lineupRole !== "string" ||
       !allowedRoles.has(member.lineupRole) ||
       typeof member.captainRole !== "string" ||
@@ -388,21 +389,66 @@ export async function cancelFantasyChangesAction(): Promise<FantasyActionResult>
     ) {
       continue;
     }
-    restored.push({
-      selectionId: selection.id,
+    baselineLineup.push({
       fantasyPlayerId: member.fantasyPlayerId,
-      clubIdSnapshot: member.clubIdSnapshot,
-      positionSnapshot: member.positionSnapshot as FantasyPosition,
-      tierSnapshot: member.tierSnapshot,
-      isThaiSnapshot: member.isThaiSnapshot,
       lineupRole: member.lineupRole as "starter" | "bench",
       benchOrder:
         typeof member.benchOrder === "number" ? member.benchOrder : null,
       captainRole: member.captainRole as CaptainRole,
     });
   }
-  if (restored.length !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
+  if (baselineLineup.length !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
     return { ok: false, message: "ข้อมูลทีมตั้งต้นไม่ครบ 15 คน" };
+  }
+
+  const snapshots = await getCurrentPlayerSnapshots(
+    baselineLineup.map((member) => member.fantasyPlayerId),
+    season,
+    gameweek,
+  );
+  const restored = baselineLineup.flatMap<
+    typeof fantasyTeamSelectionPlayers.$inferInsert
+  >((member) => {
+    const snapshot = snapshots.get(member.fantasyPlayerId);
+    if (!snapshot) return [];
+    return [
+      {
+        selectionId: selection.id,
+        fantasyPlayerId: member.fantasyPlayerId,
+        clubIdSnapshot: snapshot.clubId,
+        positionSnapshot: snapshot.position,
+        tierSnapshot: snapshot.tier,
+        isThaiSnapshot: snapshot.isThai,
+        lineupRole: member.lineupRole,
+        benchOrder: member.benchOrder,
+        captainRole: member.captainRole,
+      },
+    ];
+  });
+  if (restored.length !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
+    return {
+      ok: false,
+      message: "นักเตะในทีมตั้งต้นบางคนไม่พร้อมให้เลือกแล้ว",
+    };
+  }
+  const violations = validateLineup(
+    restored.map((member) => ({
+      id: member.fantasyPlayerId,
+      clubId: member.clubIdSnapshot,
+      position: member.positionSnapshot as FantasyPosition,
+      tier: member.tierSnapshot,
+      isThai: member.isThaiSnapshot,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder ?? null,
+      captainRole: member.captainRole ?? "none",
+    })),
+  );
+  if (violations.length > 0) {
+    return {
+      ok: false,
+      message: "ทีมตั้งต้นไม่ผ่านกติกาปัจจุบัน",
+      violations: violations.map((violation) => violation.message),
+    };
   }
 
   await db

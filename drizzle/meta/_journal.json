@@ -29,6 +29,13 @@
       "when": 1787131868194,
       "tag": "0003_violet_scarlet_witch",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1787400954615,
+      "tag": "0004_curvy_namora",
+      "breakpoints": true
     }
   ]
 }

@@ -50,6 +50,7 @@ npm run db:migrate
 npm run db:seed:competition
 npm run db:verify:competition
 npm run db:seed:fantasy
+npm run db:rank:players -- --publish
 npm run db:verify:fantasy
 npm run dev
 ```
@@ -58,27 +59,29 @@ Open `http://localhost:3006`.
 
 ## Commands
 
-| Command                         | Purpose                                                         |
-| ------------------------------- | --------------------------------------------------------------- |
-| `npm run dev`                   | Start the development server on port 3006.                      |
-| `npm run build`                 | Create a production Next.js build.                              |
-| `npm run start`                 | Serve an existing production build.                             |
-| `npm run lint`                  | Run ESLint.                                                     |
-| `npm run types`                 | Run TypeScript without emitting files.                          |
-| `npm run test:email`            | Run transactional email routing and fallback tests.             |
-| `npm run test:rules`            | Run squad, transfer, deadline, scoring, and substitution tests. |
-| `npm run format:check`          | Check repository formatting with Prettier.                      |
-| `npm run format`                | Rewrite formatting across the repository; use intentionally.    |
-| `npm run db:check`              | Verify that the configured database can be reached.             |
-| `npm run db:generate`           | Generate a new Drizzle migration from schema changes.           |
-| `npm run db:migrate`            | Apply committed Drizzle migrations.                             |
-| `npm run db:studio`             | Open Drizzle Studio for the configured database.                |
-| `npm run db:seed:competition`   | Fetch, normalize, and upsert competition data.                  |
-| `npm run db:seed:fantasy`       | Create or refresh Fantasy configuration and demo state.         |
-| `npm run db:seed:club-colors`   | Reapply the curated club visual identity registry.              |
-| `npm run db:normalize:clubs`    | Apply explicit club display-name normalization.                 |
-| `npm run db:verify:competition` | Assert expected source/import structure.                        |
-| `npm run db:verify:fantasy`     | Print main Fantasy table row counts.                            |
+| Command                                 | Purpose                                                         |
+| --------------------------------------- | --------------------------------------------------------------- |
+| `npm run dev`                           | Start the development server on port 3006.                      |
+| `npm run build`                         | Create a production Next.js build.                              |
+| `npm run start`                         | Serve an existing production build.                             |
+| `npm run lint`                          | Run ESLint.                                                     |
+| `npm run types`                         | Run TypeScript without emitting files.                          |
+| `npm run test:email`                    | Run transactional email routing and fallback tests.             |
+| `npm run test:rules`                    | Run squad, transfer, deadline, scoring, and substitution tests. |
+| `npm run format:check`                  | Check repository formatting with Prettier.                      |
+| `npm run format`                        | Rewrite formatting across the repository; use intentionally.    |
+| `npm run db:check`                      | Verify that the configured database can be reached.             |
+| `npm run db:generate`                   | Generate a new Drizzle migration from schema changes.           |
+| `npm run db:migrate`                    | Apply committed Drizzle migrations.                             |
+| `npm run db:studio`                     | Open Drizzle Studio for the configured database.                |
+| `npm run db:seed:competition`           | Fetch, normalize, and upsert competition data.                  |
+| `npm run db:seed:fantasy`               | Create or refresh Fantasy configuration and demo state.         |
+| `npm run db:rank:players`               | Preview or explicitly publish a versioned player ranking.       |
+| `npm run db:seed:club-colors`           | Reapply the curated club visual identity registry.              |
+| `npm run db:normalize:clubs`            | Apply explicit club display-name normalization.                 |
+| `npm run db:normalize:club-short-names` | Apply curated Thai/English club short names.                    |
+| `npm run db:verify:competition`         | Assert expected source/import structure.                        |
+| `npm run db:verify:fantasy`             | Print main Fantasy table row counts.                            |
 
 Database commands use a small Windows Node user-info compatibility shim. Keep
 the wrapper in package scripts unless the underlying Windows issue is confirmed
@@ -102,6 +105,23 @@ experimentation environment.
 The project currently uses one `DATABASE_URL` for runtime and migrations.
 Environment isolation therefore depends on selecting the correct Neon branch.
 Confirm the target before any migration, import, normalization, or seed command.
+
+### Ranking workflow
+
+Run the ranking command without `--publish` first and retain a CSV for review.
+The default version targets the 2026/27 preseason, Gameweek 1, Level 1 count
+`50`, and Level 2 count `100`. When changing any assumption, pass all values
+explicitly and use a new version:
+
+```bash
+npm run db:rank:players -- --version=preseason-2026-27-v2 --effective-gameweek=1 --l1=50 --l2=100 --output=ranking-v2.csv
+npm run db:rank:players -- --publish --version=preseason-2026-27-v2 --effective-gameweek=1 --l1=50 --l2=100
+npm run db:verify:fantasy
+```
+
+Confirm the Neon branch before both commands because preview reads current
+players and publication writes ranking runs, rankings, effective tiers, draft
+snapshots, and an audit row. Published versions are not rebuilt in place.
 
 ## Working conventions
 

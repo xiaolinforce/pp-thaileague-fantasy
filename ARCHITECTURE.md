@@ -37,22 +37,23 @@ Seeded managers remain ranking fixtures and are not sign-in identities.
 
 ## Main boundaries
 
-| Area                     | Location                             | Responsibility                                                                                   |
-| ------------------------ | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| Routes and screens       | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                 |
-| Fantasy UI               | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components. |
-| UI primitives            | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                  |
-| Read models              | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                               |
-| Game rules               | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
-| Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
-| Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, valid opening squad, Overall membership, and Guest upgrade behavior.      |
-| Transactional email      | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
-| Scoring                  | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
-| Score persistence        | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
-| Persistence              | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
-| Migrations               | `drizzle`                            | Generated, ordered SQL migrations and Drizzle snapshots.                                         |
-| Imports and operations   | `scripts`                            | Competition import, fantasy seed, normalization, club identities, and database verification.     |
-| External-source adapters | `scripts/sources`                    | Thai League API, Transfermarkt, and curated normalization/visual identity records.               |
+| Area                     | Location                             | Responsibility                                                                                      |
+| ------------------------ | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| Routes and screens       | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                    |
+| Fantasy UI               | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components.    |
+| UI primitives            | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                     |
+| Read models              | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                                  |
+| Game rules               | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                             |
+| Player ranking           | `src/lib/fantasy/ranking.ts`         | Pure preseason projection, deterministic ordering, confidence, and tier-boundary derivation.        |
+| Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                      |
+| Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, valid opening squad, Overall membership, and Guest upgrade behavior.         |
+| Transactional email      | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                      |
+| Scoring                  | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                      |
+| Score persistence        | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                               |
+| Persistence              | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                           |
+| Migrations               | `drizzle`                            | Generated, ordered SQL migrations and Drizzle snapshots.                                            |
+| Imports and operations   | `scripts`                            | Competition import, fantasy seed, player ranking, normalization, club identities, and verification. |
+| External-source adapters | `scripts/sources`                    | Thai League API, Transfermarkt, and curated normalization/visual identity records.                  |
 
 `src/lib/fantasy-data.ts` is an unused static prototype dataset. Runtime routes
 read from `src/data` and the database. Do not build new behavior on the static
@@ -159,14 +160,22 @@ The schema is organized into four related groups:
 - Competition: competitions, seasons, competition seasons, venues, clubs,
   visual identities, entries, players, registrations, and fixtures.
 - Fantasy configuration and play: Fantasy seasons, Gameweeks, tier definitions,
-  player classifications, managers, teams, selections, selection snapshots,
-  transfer revisions, leagues, and memberships.
+  player classifications, versioned ranking runs and player projections,
+  managers, teams, selections, selection snapshots, transfer revisions,
+  leagues, and memberships.
 - Scoring and review: match stats, stat overrides, player match points, team
   Gameweek scores, and the fantasy admin audit log.
 
 Selection-player rows intentionally snapshot club, position, tier, and Thai
 status. Historical squads and scores must not silently change when the current
 player classification changes.
+
+Ranking is an explicit server-side operation, never a runtime page dependency.
+The script fetches source data, builds a complete draft run, and validates open
+draft squads. A final database batch updates effective tiers and current draft
+snapshots, supersedes the prior published run, publishes the new run, and adds
+audit context. Locked selections, calculated scores, and prior Gameweeks are
+never rewritten.
 
 ## Architectural conventions
 

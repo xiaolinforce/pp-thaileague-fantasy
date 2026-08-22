@@ -41,15 +41,6 @@ const demoTeams = [
   ["Methas K.", "Chonburi Sharks"],
 ] as const;
 
-function stableNumber(value: string) {
-  let result = 2166136261;
-  for (let index = 0; index < value.length; index += 1) {
-    result ^= value.charCodeAt(index);
-    result = Math.imul(result, 16777619);
-  }
-  return Math.abs(result >>> 0);
-}
-
 function isThaiRegistration(nationality: string | null) {
   if (!nationality) return false;
   const normalized = nationality.trim().toLocaleLowerCase();
@@ -278,21 +269,15 @@ async function seedFantasyGame() {
     .select()
     .from(fantasyPlayers)
     .where(eq(fantasyPlayers.fantasySeasonId, fantasySeason.id));
-  const rankedPlayers = [...fantasyPlayerRows].sort(
-    (a, b) => stableNumber(a.playerId) - stableNumber(b.playerId),
-  );
-  const levelOneEnd = Math.ceil(rankedPlayers.length * 0.15);
-  const levelTwoEnd = Math.ceil(rankedPlayers.length * 0.5);
-  for (const [index, fantasyPlayer] of rankedPlayers.entries()) {
-    const level = index < levelOneEnd ? 1 : index < levelTwoEnd ? 2 : 3;
+  for (const fantasyPlayer of fantasyPlayerRows) {
     await db
       .insert(fantasyPlayerTiers)
       .values({
         fantasyPlayerId: fantasyPlayer.id,
         effectiveGameweekId: firstGameweek.id,
-        level,
+        level: 3,
         sourceName: "initial-seed",
-        reason: "Initial test tier",
+        reason: "Fallback Tier 3 until a reviewed ranking is published",
       })
       .onConflictDoNothing();
   }

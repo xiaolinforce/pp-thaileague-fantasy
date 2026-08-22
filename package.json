@@ -17,11 +17,13 @@
     "db:migrate": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs migrate",
     "db:seed:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/seed-competition-data.ts",
     "db:seed:fantasy": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/seed-fantasy-game.ts",
+    "db:rank:players": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/rank-fantasy-players.ts",
     "db:seed:club-colors": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/seed-club-visual-identities.ts",
     "db:studio": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs studio",
     "db:verify:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-competition-data.ts",
     "db:verify:fantasy": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-game.ts",
-    "db:normalize:clubs": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-club-display-names.ts"
+    "db:normalize:clubs": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-club-display-names.ts",
+    "db:normalize:club-short-names": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-club-short-names.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -21,6 +21,7 @@ import {
   TRANSFERMARKT_SOURCE,
 } from "./sources/thai-league-2026-27";
 import { normalizeClubName } from "./sources/club-name-normalization";
+import { getClubShortNames } from "./sources/club-short-name-overrides";
 import {
   CLUB_COLOR_SOURCE_NAME,
   clubVisualIdentitySources,
@@ -256,13 +257,17 @@ async function seedCompetitionData() {
 
   const clubRows: (typeof clubs.$inferInsert)[] = source.teams.map((team) => {
     const nameEn = normalizeClubName(team.name_en);
+    const shortNames = getClubShortNames(team.club.toString(), {
+      th: team.name,
+      en: nameEn,
+    });
 
     return {
       slug: slugify(nameEn),
       nameTh: team.name,
       nameEn,
-      shortNameTh: team.name,
-      shortNameEn: nameEn,
+      shortNameTh: shortNames.th,
+      shortNameEn: shortNames.en,
       abbreviation: aliases.get(team.id) ?? null,
       logoUrl: team.logo,
       websiteUrl: normalizeWebsite(team.website),

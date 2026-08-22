@@ -60,6 +60,7 @@ npm run db:migrate
 npm run db:seed:competition
 npm run db:verify:competition
 npm run db:seed:fantasy
+npm run db:rank:players -- --publish
 npm run db:verify:fantasy
 npm run dev
 ```
@@ -81,7 +82,9 @@ the imported database during normal runtime.
 - Inspect the configured database with `npm run db:studio`.
 
 The Fantasy seed is idempotent for the configured season. It creates Gameweeks,
-seeded league opponents, two Classic leagues, and effective tier metadata. A
+seeded league opponents, two Classic leagues, and safe fallback tier metadata.
+The ranking command publishes a versioned 1-to-all player order and derives
+Level 1/2/3 as the top 50, next 100, and remaining players. A
 real account or Guest receives a deterministic valid 15-player opening squad.
 All player mutations derive the team from the current server session; admin
 mutations additionally require `role=admin`.

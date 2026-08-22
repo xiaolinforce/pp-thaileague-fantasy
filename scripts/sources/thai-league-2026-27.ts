@@ -109,6 +109,7 @@ export type TransfermarktPlayer = {
   positionDetail: string;
   nationality: string | null;
   shirtNumber: number | null;
+  marketValueEur: number | null;
   photoUrl: string | null;
   sourceUrl: string;
 };
@@ -222,6 +223,20 @@ function toPosition(value: string): SourcePlayerPosition {
   return "unknown";
 }
 
+function parseMarketValueEur(value: string | null) {
+  if (!value) return null;
+  const normalized = decodeHtml(value)
+    .replace(/<[^>]+>/g, "")
+    .replace(/\s+/g, "")
+    .toLocaleLowerCase();
+  const match = normalized.match(/€([0-9]+(?:[.,][0-9]+)?)([mk])?/);
+  if (!match) return null;
+  const amount = Number.parseFloat(match[1].replace(",", "."));
+  const multiplier =
+    match[2] === "m" ? 1_000_000 : match[2] === "k" ? 1_000 : 1;
+  return Number.isFinite(amount) ? Math.round(amount * multiplier) : null;
+}
+
 export function parseTransfermarktSquad(html: string): TransfermarktPlayer[] {
   const tableStart = html.indexOf('<table class="items">');
   const tableEnd = tableStart >= 0 ? html.indexOf("</tbody>", tableStart) : -1;
@@ -257,6 +272,10 @@ export function parseTransfermarktSquad(html: string): TransfermarktPlayer[] {
       row.match(
         /<img[^>]+data-src="([^"]+)"[^>]+class="bilderrahmen-fixed[^"]*"[^>]*>/,
       )?.[1] ?? null;
+    const marketValueText =
+      row.match(
+        /class="rechts hauptlink"[^>]*>\s*<a[^>]*>([\s\S]*?)<\/a>/,
+      )?.[1] ?? null;
     const profilePath = playerMatch[1];
 
     players.push({
@@ -268,6 +287,7 @@ export function parseTransfermarktSquad(html: string): TransfermarktPlayer[] {
         ? decodeHtml(nationalityMatches[0][1])
         : null,
       shirtNumber,
+      marketValueEur: parseMarketValueEur(marketValueText),
       photoUrl:
         photoUrl && !photoUrl.includes("/default.jpg")
           ? decodeHtml(photoUrl)
@@ -318,6 +338,16 @@ async function fetchSquads(
       players: parseTransfermarktSquad(html),
     };
   });
+}
+
+export async function fetchCurrentTransfermarktSquads() {
+  const teams = await fetchJson<OfficialTeam[]>(
+    `${OFFICIAL_API_BASE}tournament-team-public/?tournament=${TOURNAMENT_ID}`,
+  );
+  if (teams.length !== 16) {
+    throw new Error(`Expected 16 current teams, received ${teams.length}.`);
+  }
+  return fetchSquads(teams);
 }
 
 function validateSourceData(data: ThaiLeagueSourceData) {

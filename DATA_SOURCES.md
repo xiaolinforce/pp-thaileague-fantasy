@@ -28,13 +28,15 @@ not reuse the identifiers for another season.
 
 ## Source inventory
 
-| Source                           | Used for                                                                                         | Adapter or registry                               |
-| -------------------------------- | ------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| Thai League official API         | Season, tournament, clubs, venues, fixtures, kickoff, status, scores, penalties, and attendance. | `scripts/sources/thai-league-2026-27.ts`          |
-| Transfermarkt public squad pages | Players, positions, shirt numbers, nationality text, and active squad registration.              | `scripts/sources/thai-league-2026-27.ts`          |
-| Curated kit/club research URLs   | Four-color club visual identity palettes and explanatory notes.                                  | `scripts/sources/club-visual-identities.ts`       |
-| Explicit club-name overrides     | Normal English display casing for selected all-cap source names.                                 | `scripts/sources/club-name-normalization.ts`      |
-| Fantasy administrator            | Reviewed match-stat corrections, Fantasy assists, Thai status, and effective tier changes.       | `/admin/fantasy` and `src/app/fantasy-actions.ts` |
+| Source                             | Used for                                                                                            | Adapter or registry                                   |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Thai League official API           | Season, tournament, clubs, venues, fixtures, kickoff, status, scores, penalties, and attendance.    | `scripts/sources/thai-league-2026-27.ts`              |
+| Thai League 2025/26 API            | Prior-season TL1 (`207`) and TL2 (`208`) player aggregates and club context for preseason ranking.  | `scripts/sources/thai-league-2025-26-player-stats.ts` |
+| Transfermarkt public squad pages   | Players, positions, shirt numbers, nationality text, active registration, and current market value. | `scripts/sources/thai-league-2026-27.ts`              |
+| Curated kit/club research URLs     | Four-color club visual identity palettes and explanatory notes.                                     | `scripts/sources/club-visual-identities.ts`           |
+| Explicit club-name overrides       | Normal English display casing for selected all-cap source names.                                    | `scripts/sources/club-name-normalization.ts`          |
+| Explicit club short-name overrides | Curated Thai and English compact club labels for product UI.                                        | `scripts/sources/club-short-name-overrides.ts`        |
+| Fantasy administrator              | Reviewed match-stat corrections, Fantasy assists, Thai status, and effective tier changes.          | `/admin/fantasy` and `src/app/fantasy-actions.ts`     |
 
 Club visual palettes are presentation metadata, not official crests or a claim
 of trademark ownership. Retain the cited source URL and note when changing a
@@ -64,11 +66,14 @@ npm run db:migrate
 npm run db:seed:competition
 npm run db:verify:competition
 npm run db:seed:fantasy
+npm run db:rank:players -- --publish
 npm run db:verify:fantasy
 ```
 
 The Fantasy seed depends on the imported competition season, entries, player
-registrations, and fixtures. It must not be run first.
+registrations, and fixtures. It must not be run first. A fresh seed assigns a
+safe Level 3 fallback; the reviewed ranking publication then derives the
+effective 50/100/remaining level distribution.
 
 ## Competition normalization
 
@@ -104,6 +109,41 @@ initial value only. Reviewed Thai-status and tier corrections belong in the
 Fantasy classification records and admin audit log; they must not be written
 back into the external competition source.
 
+## Preseason player ranking
+
+`npm run db:rank:players` is preview-only. It fetches official 2025/26 TL1 and
+TL2 aggregate rows plus current Transfermarkt squad values, matches prior rows
+to the current imported player pool, calculates a deterministic projection, and
+prints the top ranks and tier/position distribution. Use `--output=path.csv` to
+retain the review report.
+
+The prior-season aggregates provide minutes, appearances, starts, goals,
+assists, clean sheets, goals conceded, penalties, cards, and own goals. The
+projection applies current Fantasy scoring where the facts support it. The
+official aggregate does not supply goalkeeper saves or every player visible in
+other leaderboards, so those components are not invented. Unmatched players use
+market value, position priors, and conservative expected minutes with low
+confidence.
+
+Automatic matching accepts unique normalized names and conservative unambiguous
+fuzzy matches. Reviewed exceptions belong in
+`scripts/sources/fantasy-ranking-overrides.ts`, keyed by stable Transfermarkt
+player ID. Each published run stores source facts, match method and score,
+confidence, model components, projection, overall/position rank, and tier.
+
+Publishing requires an explicit version and confirmed development database:
+
+```bash
+npm run db:rank:players -- --version=preseason-2026-27-v1 --effective-gameweek=1 --l1=50 --l2=100 --output=ranking.csv
+npm run db:rank:players -- --publish --version=preseason-2026-27-v1 --effective-gameweek=1 --l1=50 --l2=100
+```
+
+Publication refuses a passed deadline, locked selection, score, duplicate
+published version, or draft squad that would become invalid. Tier upserts,
+current draft snapshots, ranking status, and audit entry are committed in one
+database batch. Earlier effective tiers and historical selection snapshots are
+preserved.
+
 Do not document a fixed Gameweek count unless the imported fixture schedule is
 itself fixed. The current competition verification expects 240 fixtures across
 30 matchweeks, eight fixtures per matchweek, and 30 appearances per club.
@@ -132,10 +172,10 @@ still joins the intended club.
 - eight fixtures in every matchweek; and
 - 30 fixtures for every club.
 
-`npm run db:verify:fantasy` reports row counts for the main Fantasy tables. It is
-a visibility check rather than a complete invariant test; keep rule invariants
-covered by `npm run test:rules` and add stricter database assertions as the
-production workflow matures.
+`npm run db:verify:fantasy` reports row counts and verifies every published
+ranking has complete contiguous ranks, exact configured tier totals, and tier
+rows consistent with its effective Gameweek. Keep pure rule and ranking
+invariants covered by `npm run test:rules`.
 
 ## Adding a season
 

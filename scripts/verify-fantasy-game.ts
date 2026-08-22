@@ -1,5 +1,5 @@
 import { loadEnvConfig } from "@next/env";
-import { count } from "drizzle-orm";
+import { and, asc, count, eq, ne } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
 import {
@@ -8,7 +8,9 @@ import {
   fantasyLeagues,
   fantasyManagers,
   fantasyPlayers,
+  fantasyPlayerRankings,
   fantasyPlayerTiers,
+  fantasyRankingRuns,
   fantasySeasons,
   fantasyTeams,
   fantasyTeamSelectionPlayers,
@@ -25,6 +27,8 @@ const tables = {
   fantasyGameweeks,
   fantasyPlayers,
   fantasyPlayerTiers,
+  fantasyRankingRuns,
+  fantasyPlayerRankings,
   fantasyManagers,
   fantasyTeams,
   fantasyTeamSelections,
@@ -37,6 +41,128 @@ async function verifyFantasyGame() {
   for (const [name, table] of Object.entries(tables)) {
     const result = await db.select({ count: count() }).from(table);
     console.log(`${name}: ${result[0].count}`);
+  }
+
+  const publishedRuns = await db
+    .select()
+    .from(fantasyRankingRuns)
+    .where(eq(fantasyRankingRuns.status, "published"));
+  const publishedBySeason = new Map<string, number>();
+  for (const run of publishedRuns) {
+    publishedBySeason.set(
+      run.fantasySeasonId,
+      (publishedBySeason.get(run.fantasySeasonId) ?? 0) + 1,
+    );
+  }
+  if ([...publishedBySeason.values()].some((runCount) => runCount > 1)) {
+    throw new Error("A Fantasy season has multiple published ranking runs.");
+  }
+  for (const run of publishedRuns) {
+    const rankings = await db
+      .select()
+      .from(fantasyPlayerRankings)
+      .where(eq(fantasyPlayerRankings.rankingRunId, run.id))
+      .orderBy(asc(fantasyPlayerRankings.overallRank));
+    if (rankings.length !== run.totalPlayers) {
+      throw new Error(
+        `Ranking ${run.version} has ${rankings.length}/${run.totalPlayers} rows.`,
+      );
+    }
+    if (rankings.some((ranking, index) => ranking.overallRank !== index + 1)) {
+      throw new Error(`Ranking ${run.version} is not contiguous from 1.`);
+    }
+    const tierOne = rankings.filter(
+      (ranking) => ranking.tierLevel === 1,
+    ).length;
+    const tierTwo = rankings.filter(
+      (ranking) => ranking.tierLevel === 2,
+    ).length;
+    const tierThree = rankings.filter(
+      (ranking) => ranking.tierLevel === 3,
+    ).length;
+    if (
+      tierOne !== run.levelOneCount ||
+      tierTwo !== run.levelTwoCount ||
+      tierOne + tierTwo + tierThree !== run.totalPlayers
+    ) {
+      throw new Error(
+        `Ranking ${run.version} tier totals do not match its run.`,
+      );
+    }
+    const effectiveTierRows = await db
+      .select({ count: count() })
+      .from(fantasyPlayerRankings)
+      .innerJoin(
+        fantasyPlayerTiers,
+        and(
+          eq(
+            fantasyPlayerRankings.fantasyPlayerId,
+            fantasyPlayerTiers.fantasyPlayerId,
+          ),
+          eq(fantasyPlayerTiers.effectiveGameweekId, run.effectiveGameweekId),
+        ),
+      )
+      .where(eq(fantasyPlayerRankings.rankingRunId, run.id));
+    if (effectiveTierRows[0].count !== rankings.length) {
+      throw new Error(`Ranking ${run.version} is missing effective tier rows.`);
+    }
+    const inconsistentTiers = await db
+      .select({ count: count() })
+      .from(fantasyPlayerRankings)
+      .innerJoin(
+        fantasyPlayerTiers,
+        and(
+          eq(
+            fantasyPlayerRankings.fantasyPlayerId,
+            fantasyPlayerTiers.fantasyPlayerId,
+          ),
+          eq(fantasyPlayerTiers.effectiveGameweekId, run.effectiveGameweekId),
+        ),
+      )
+      .where(
+        and(
+          eq(fantasyPlayerRankings.rankingRunId, run.id),
+          ne(fantasyPlayerRankings.tierLevel, fantasyPlayerTiers.level),
+        ),
+      );
+    if (inconsistentTiers[0].count !== 0) {
+      throw new Error(`Ranking ${run.version} disagrees with effective tiers.`);
+    }
+    const staleDraftSnapshots = await db
+      .select({ count: count() })
+      .from(fantasyTeamSelectionPlayers)
+      .innerJoin(
+        fantasyTeamSelections,
+        eq(fantasyTeamSelectionPlayers.selectionId, fantasyTeamSelections.id),
+      )
+      .innerJoin(
+        fantasyPlayerRankings,
+        and(
+          eq(
+            fantasyTeamSelectionPlayers.fantasyPlayerId,
+            fantasyPlayerRankings.fantasyPlayerId,
+          ),
+          eq(fantasyPlayerRankings.rankingRunId, run.id),
+        ),
+      )
+      .where(
+        and(
+          eq(fantasyTeamSelections.fantasyGameweekId, run.effectiveGameweekId),
+          eq(fantasyTeamSelections.status, "draft"),
+          ne(
+            fantasyTeamSelectionPlayers.tierSnapshot,
+            fantasyPlayerRankings.tierLevel,
+          ),
+        ),
+      );
+    if (staleDraftSnapshots[0].count !== 0) {
+      throw new Error(
+        `Ranking ${run.version} left stale tier snapshots in draft selections.`,
+      );
+    }
+    console.log(
+      `publishedRanking ${run.version}: ranks 1-${rankings.length}; L1=${tierOne}, L2=${tierTwo}, L3=${tierThree}`,
+    );
   }
 }
 

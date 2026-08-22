@@ -27,7 +27,6 @@ async function normalizeClubDisplayNames() {
       .update(clubs)
       .set({
         nameEn: displayName,
-        shortNameEn: displayName,
         updatedAt: now,
       })
       .where(eq(clubs.nameEn, sourceName));

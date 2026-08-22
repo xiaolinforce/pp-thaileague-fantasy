@@ -25,6 +25,7 @@ truth and must change together with this guide and their tests.
 | Transfer revision  | An ordered record of confirmed or cancelled pre-deadline squad revisions.                                                      |
 | Player match stats | Imported or reviewed match facts used by the points engine.                                                                    |
 | Fantasy assist     | An optional reviewed assist value that overrides the source assist count for scoring.                                          |
+| Player ranking     | A versioned preseason projection ordered from rank 1 (highest expected points) through the full active player pool.            |
 | Classic league     | A season-long ranking by total points with transfer count and team name as tie-breakers.                                       |
 
 ## Squad and lineup rules
@@ -75,6 +76,34 @@ Validation is cumulative. A lower-ranked player may occupy a remaining
 higher-level slot, but a Level 1 player cannot overflow into Level 2 or 3. Tier
 records are effective from a Gameweek so later changes do not alter earlier
 selection snapshots.
+
+## Player ranking and tier derivation
+
+The canonical preseason ranking is a versioned, immutable-after-publication
+projection. Rank `1` is the player with the highest projected Fantasy points;
+ranks continue without gaps through every active Fantasy player. Position rank
+is also stored for review, but the tier boundary uses overall rank only.
+
+For the 2026/27 preseason publication:
+
+| Overall rank | Level |       Players |
+| -----------: | ----: | ------------: |
+|         1–50 |     1 |            50 |
+|       51–150 |     2 |           100 |
+|     151–last |     3 | all remaining |
+
+The projection combines prior-season minutes and events, the project scoring
+rules, competition strength, club attack/defence context, current market value,
+position priors, expected minutes, and a confidence penalty when source history
+is unavailable. Stable source IDs and reviewed manual adjustments may resolve
+exceptional cases. Display names alone never constitute a manual identity
+override.
+
+Changing future tier proportions does not require recalculating player order:
+publish a new ranking version or derive new boundaries from the stored overall
+ranks. A published run records the model version, cutoff date, sources,
+configuration, confidence, and per-player reasons. It cannot be applied to a
+Gameweek that already has locked selections or scores.
 
 ## Deadlines and Gameweeks
 

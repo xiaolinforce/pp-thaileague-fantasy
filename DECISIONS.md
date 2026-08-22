@@ -65,6 +65,24 @@ mapping needs a stable external identifier and verification. A future scheduler
 must invoke the same controlled import boundary rather than bypass it from page
 code.
 
+## 2026-08-22 — Player order is canonical and tiers are derived boundaries
+
+**Decision:** Store a complete versioned player ranking where rank 1 represents
+the highest projected Fantasy points. Derive Level 1 from ranks 1–50, Level 2
+from 51–150, and Level 3 from all remaining ranks for the 2026/27 preseason.
+Published runs retain model/source facts and are never rebuilt in place.
+
+**Context:** Tier proportions may change later, so tier alone is insufficient
+as the durable evaluation. Prior-season official data has partial coverage of
+the current squad pool and must be combined with current market value, expected
+minutes, position priors, club context, and explicit confidence.
+
+**Consequences:** A new proportion can reuse the stored order and publish new
+effective boundaries. Source matching is conservative; manual exceptions use a
+stable Transfermarkt ID, never a display name alone. Publication is blocked
+after selection lock/scoring, preserves historical snapshots, and records an
+admin audit entry.
+
 ## 2026-08-17 — Production demo mutations default to disabled
 
 **Decision:** Server Actions reject demo writes in production unless
