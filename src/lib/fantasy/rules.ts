@@ -20,6 +20,11 @@ export type LineupPlayer = SquadPlayer & {
   captainRole: CaptainRole;
 };
 
+export type LineupAssignmentPlayer = Pick<
+  LineupPlayer,
+  "id" | "position" | "lineupRole" | "benchOrder" | "captainRole"
+>;
+
 export type TierSlot = {
   level: number;
   slots: number;
@@ -207,11 +212,52 @@ export function isValidStartingFormation(
   ).every(([position, minimum]) => (positions.get(position) ?? 0) >= minimum);
 }
 
-export function validateLineup(
-  lineup: LineupPlayer[],
+export function swapLineupAssignments(
+  lineup: LineupAssignmentPlayer[],
+  fromId: string,
+  toId: string,
+): LineupAssignmentPlayer[] | null {
+  const from = lineup.find((player) => player.id === fromId);
+  const to = lineup.find((player) => player.id === toId);
+  if (!from || !to || from.id === to.id) return null;
+
+  const swapped = lineup.map((player) => {
+    if (player.id === from.id) {
+      return {
+        ...player,
+        lineupRole: to.lineupRole,
+        benchOrder: to.benchOrder,
+        captainRole: to.lineupRole === "starter" ? player.captainRole : "none",
+      };
+    }
+    if (player.id === to.id) {
+      return {
+        ...player,
+        lineupRole: from.lineupRole,
+        benchOrder: from.benchOrder,
+        captainRole:
+          from.lineupRole === "starter" ? player.captainRole : "none",
+      };
+    }
+    return player;
+  });
+
+  const hasAssignmentChange = swapped.some((player, index) => {
+    const previous = lineup[index];
+    return (
+      player.lineupRole !== previous.lineupRole ||
+      player.benchOrder !== previous.benchOrder ||
+      player.captainRole !== previous.captainRole
+    );
+  });
+  return hasAssignmentChange ? swapped : null;
+}
+
+export function validateLineupAssignment(
+  lineup: LineupAssignmentPlayer[],
   rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
 ): RuleViolation[] {
-  const violations = validateSquad(lineup, rules);
+  const violations: RuleViolation[] = [];
   const starters = lineup.filter((player) => player.lineupRole === "starter");
   const bench = lineup.filter((player) => player.lineupRole === "bench");
 
@@ -265,6 +311,31 @@ export function validateLineup(
   }
 
   return violations;
+}
+
+export function getValidLineupSwapTargetIds(
+  lineup: LineupAssignmentPlayer[],
+  fromId: string,
+  rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
+) {
+  const targetIds = new Set<string>();
+  for (const candidate of lineup) {
+    const swapped = swapLineupAssignments(lineup, fromId, candidate.id);
+    if (swapped && validateLineupAssignment(swapped, rules).length === 0) {
+      targetIds.add(candidate.id);
+    }
+  }
+  return targetIds;
+}
+
+export function validateLineup(
+  lineup: LineupPlayer[],
+  rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
+): RuleViolation[] {
+  return [
+    ...validateSquad(lineup, rules),
+    ...validateLineupAssignment(lineup, rules),
+  ];
 }
 
 export function getNetTransfers(

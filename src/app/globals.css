@@ -2986,6 +2986,38 @@ textarea:focus-visible {
   box-shadow: inset 0 0 0 2px #ffb184;
 }
 
+.squad-token.swap-source,
+.squad-token.swap-available {
+  border-radius: 12px;
+}
+
+.squad-token.swap-source {
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(255, 177, 132, 0.95);
+}
+
+.squad-token.swap-available {
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 0 0 5px var(--orange);
+  transform: translateY(-2px);
+}
+
+.squad-token.swap-available:hover {
+  transform: translateY(-6px);
+}
+
+.squad-token.swap-unavailable:disabled {
+  opacity: 0.4;
+  filter: saturate(0.45);
+  cursor: default;
+}
+
+.squad-token.swap-unavailable:hover {
+  transform: none;
+}
+
 .squad-shirt {
   position: relative;
   filter: drop-shadow(0 6px 6px rgba(0, 0, 0, 0.2));

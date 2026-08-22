@@ -3,9 +3,12 @@ import test from "node:test";
 import {
   getDeadline,
   getNetTransfers,
+  getValidLineupSwapTargetIds,
   settleTransfers,
+  swapLineupAssignments,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
+  validateLineupAssignment,
   validateSquad,
   type LineupPlayer,
   type SquadPlayer,
@@ -40,6 +43,41 @@ function makeSquad(tiers = [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]) {
   }));
 }
 
+function makeValidLineup() {
+  const starters = new Set([
+    "p1",
+    "p3",
+    "p4",
+    "p5",
+    "p8",
+    "p9",
+    "p10",
+    "p11",
+    "p13",
+    "p14",
+    "p15",
+  ]);
+  const benchOrder = new Map([
+    ["p2", 0],
+    ["p6", 1],
+    ["p7", 2],
+    ["p12", 3],
+  ]);
+  return makeSquad().map<LineupPlayer>((player) => ({
+    ...player,
+    lineupRole: starters.has(player.id) ? "starter" : "bench",
+    benchOrder: starters.has(player.id)
+      ? null
+      : (benchOrder.get(player.id) ?? null),
+    captainRole:
+      player.id === "p8"
+        ? "captain"
+        : player.id === "p13"
+          ? "vice_captain"
+          : "none",
+  }));
+}
+
 test("accepts the agreed level-B tier slots", () => {
   assert.deepEqual(validateSquad(makeSquad()), []);
   const tenLevelTwo = makeSquad([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]);
@@ -66,40 +104,48 @@ test("rejects more than seven foreign players", () => {
 });
 
 test("validates formation, captain and ordered bench", () => {
-  const squad = makeSquad();
-  const starters = new Set([
-    "p1",
-    "p3",
-    "p4",
-    "p5",
-    "p8",
-    "p9",
-    "p10",
-    "p11",
-    "p13",
-    "p14",
-    "p15",
-  ]);
-  const benchOrder = new Map([
-    ["p2", 0],
-    ["p6", 1],
-    ["p7", 2],
-    ["p12", 3],
-  ]);
-  const lineup: LineupPlayer[] = squad.map((player) => ({
-    ...player,
-    lineupRole: starters.has(player.id) ? "starter" : "bench",
-    benchOrder: starters.has(player.id)
-      ? null
-      : (benchOrder.get(player.id) ?? null),
-    captainRole:
-      player.id === "p8"
-        ? "captain"
-        : player.id === "p13"
-          ? "vice_captain"
-          : "none",
-  }));
-  assert.deepEqual(validateLineup(lineup), []);
+  assert.deepEqual(validateLineup(makeValidLineup()), []);
+});
+
+test("rejects swaps that put two goalkeepers in the starting eleven", () => {
+  const swapped = swapLineupAssignments(makeValidLineup(), "p3", "p2");
+  assert.ok(swapped);
+  const violationCodes = validateLineupAssignment(swapped).map(
+    (violation) => violation.code,
+  );
+  assert.ok(violationCodes.includes("formation"));
+  assert.ok(violationCodes.includes("bench_order"));
+});
+
+test("accepts valid starter and bench swaps", () => {
+  const outfieldSwap = swapLineupAssignments(makeValidLineup(), "p3", "p6");
+  assert.ok(outfieldSwap);
+  assert.deepEqual(validateLineupAssignment(outfieldSwap), []);
+
+  const goalkeeperSwap = swapLineupAssignments(makeValidLineup(), "p1", "p2");
+  assert.ok(goalkeeperSwap);
+  assert.deepEqual(validateLineupAssignment(goalkeeperSwap), []);
+});
+
+test("returns only meaningful valid swap targets", () => {
+  const defenderTargets = getValidLineupSwapTargetIds(makeValidLineup(), "p3");
+  assert.ok(defenderTargets.has("p6"));
+  assert.ok(defenderTargets.has("p7"));
+  assert.equal(defenderTargets.has("p2"), false);
+  assert.equal(defenderTargets.has("p4"), false);
+
+  const captainTargets = getValidLineupSwapTargetIds(makeValidLineup(), "p8");
+  assert.deepEqual([...captainTargets], []);
+});
+
+test("rejects swaps that move the captain to the bench", () => {
+  const swapped = swapLineupAssignments(makeValidLineup(), "p8", "p12");
+  assert.ok(swapped);
+  assert.ok(
+    validateLineupAssignment(swapped).some(
+      (violation) => violation.code === "captain",
+    ),
+  );
 });
 
 test("counts transfers by the net squad difference", () => {

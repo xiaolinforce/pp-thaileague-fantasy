@@ -193,6 +193,23 @@ const translations: Record<string, string> = {
   "กำลังบันทึกทีม…": "Saving Team…",
   ยังไม่มีการเปลี่ยนแปลง: "No unsaved changes",
   เลือกผู้เล่นอีกคนเพื่อสลับตำแหน่ง: "Choose another player to swap positions",
+  "เลือกนักเตะที่ไฮไลท์เพื่อสลับ หรือกดคนเดิมเพื่อยกเลิก":
+    "Choose a highlighted player to swap, or select the same player to cancel",
+  ยกเลิกการสลับ: "Cancel swap for",
+  สลับกับ: "Swap with",
+  ไม่สามารถสลับกับ: "Cannot swap with",
+  สลับตัวไม่ได้: "Unable to swap players",
+  สลับตำแหน่งในทีมแล้ว: "Players swapped",
+  ไม่พบข้อมูลตำแหน่งของผู้เล่นในทีม:
+    "A squad player's position information is missing",
+  "ตัวจริงต้องมี 1 GK, อย่างน้อย 3 DEF, 2 MID และ 1 FWD":
+    "The starting XI needs 1 GK, at least 3 DEF, 2 MID, and 1 FWD",
+  "ผู้รักษาประตูสำรองต้องเป็นลำดับ 0 และตัวสำรองเอาต์ฟิลด์เป็น 1–3":
+    "The reserve goalkeeper must be in slot 0 and outfield substitutes in slots 1–3",
+  ต้องเลือกกัปตันจากตัวจริงหนึ่งคน:
+    "Choose exactly one captain from the starting XI",
+  ต้องเลือกรองกัปตันจากตัวจริงหนึ่งคน:
+    "Choose exactly one vice-captain from the starting XI",
   โควต้าระดับ: "Tier Quotas",
   "กัปตัน ×3": "Triple Captain",
   นับตัวสำรอง: "Bench Boost",
@@ -214,7 +231,7 @@ const translations: Record<string, string> = {
   โควต้าผ่าน: "Quotas valid",
   เกินโควต้า: "Over quota",
   ฟรี: "Free",
-  "เปลี่ยนตัวได้อีก": "Transfers left",
+  เปลี่ยนตัวได้อีก: "Transfers left",
   "ผู้เล่นระดับ 1": "Tier 1 Players",
   "ผู้เล่นระดับ 2": "Tier 2 Players",
   รอบันทึก: "Pending save",
@@ -748,8 +765,7 @@ export function LanguageSwitcher() {
 export function SidebarLanguageButton() {
   const { language, setLanguage } = useLanguage();
   const nextLanguage = language === "th" ? "en" : "th";
-  const label =
-    language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย";
+  const label = language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย";
 
   return (
     <button

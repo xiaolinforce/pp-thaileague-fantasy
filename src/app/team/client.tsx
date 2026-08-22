@@ -34,31 +34,62 @@ import {
   saveFantasySelectionAction,
   type FantasySelectionInput,
 } from "@/app/fantasy-actions";
-import type { FantasyChip } from "@/lib/fantasy/rules";
+import {
+  getValidLineupSwapTargetIds,
+  swapLineupAssignments,
+  validateLineupAssignment,
+  type FantasyChip,
+  type FantasyPosition,
+  type LineupAssignmentPlayer,
+} from "@/lib/fantasy/rules";
 import TransfersClient from "@/app/team/transfers-client";
 
 const rows = ["GK", "DEF", "MID", "FWD"] as const;
+const fantasyPositions: Record<
+  CompetitionPlayerView["position"],
+  FantasyPosition
+> = {
+  GK: "goalkeeper",
+  DEF: "defender",
+  MID: "midfielder",
+  FWD: "forward",
+};
+
+type PlayerSwapState = "source" | "available" | "unavailable";
 
 function SquadPlayer({
   player,
   onSelect,
   captain,
+  swapState,
   transferSelected,
   showPositionBadgeOnShirt,
 }: {
   player: CompetitionPlayerView;
   onSelect: (player: CompetitionPlayerView) => void;
   captain?: "C" | "V";
+  swapState?: PlayerSwapState;
   transferSelected?: boolean;
   showPositionBadgeOnShirt?: boolean;
 }) {
   const { language } = useLanguage();
+  const playerName = localize(player.name, language);
+  const ariaLabel =
+    swapState === "source"
+      ? `ยกเลิกการสลับ ${playerName}`
+      : swapState === "available"
+        ? `สลับกับ ${playerName}`
+        : swapState === "unavailable"
+          ? `ไม่สามารถสลับกับ ${playerName}`
+          : `ดูข้อมูล ${playerName}`;
   return (
     <Localized>
       <button
-        className={`squad-token ${transferSelected ? "selected-for-transfer" : ""}`}
+        className={`squad-token${transferSelected ? " selected-for-transfer" : ""}${swapState ? ` swap-${swapState}` : ""}`}
         onClick={() => onSelect(player)}
-        aria-label={`ดูข้อมูล ${localize(player.name, language)}`}
+        aria-label={ariaLabel}
+        aria-pressed={swapState === "source" ? true : undefined}
+        disabled={swapState === "unavailable"}
       >
         <span className="squad-shirt">
           <Shirt
@@ -121,6 +152,31 @@ export default function TeamClient({
       ),
     [data.players],
   );
+  const lineupAssignments = useMemo<LineupAssignmentPlayer[]>(
+    () =>
+      members.flatMap((member) => {
+        const squadPlayer = playersByFantasyId.get(member.fantasyPlayerId);
+        return squadPlayer
+          ? [
+              {
+                id: member.fantasyPlayerId,
+                position: fantasyPositions[squadPlayer.position],
+                lineupRole: member.lineupRole,
+                benchOrder: member.benchOrder,
+                captainRole: member.captainRole,
+              },
+            ]
+          : [];
+      }),
+    [members, playersByFantasyId],
+  );
+  const validSwapTargetIds = useMemo(
+    () =>
+      swapFrom && lineupAssignments.length === members.length
+        ? getValidLineupSwapTargetIds(lineupAssignments, swapFrom)
+        : new Set<string>(),
+    [lineupAssignments, members.length, swapFrom],
+  );
   const squad = members.flatMap((member) => {
     const player = playersByFantasyId.get(member.fantasyPlayerId);
     return player ? [{ player, member }] : [];
@@ -163,6 +219,16 @@ export default function TeamClient({
   const hasUnsavedChanges =
     JSON.stringify(members) !== JSON.stringify(savedMembers) ||
     activeChip !== fantasy.selection.activeChip;
+
+  const getSwapState = (
+    fantasyPlayerId: string | null,
+  ): PlayerSwapState | undefined => {
+    if (!swapFrom || !fantasyPlayerId) return undefined;
+    if (fantasyPlayerId === swapFrom) return "source";
+    return validSwapTargetIds.has(fantasyPlayerId)
+      ? "available"
+      : "unavailable";
+  };
 
   useEffect(() => {
     const deadline = new Date(fantasy.gameweek.deadlineAt).getTime();
@@ -220,38 +286,31 @@ export default function TeamClient({
       setSwapFrom(null);
       return;
     }
-    setMembers((current) => {
-      const from = current.find(
-        (member) => member.fantasyPlayerId === swapFrom,
-      );
-      const to = current.find(
-        (member) => member.fantasyPlayerId === player.fantasyPlayerId,
-      );
-      if (!from || !to) return current;
-      return current.map((member) => {
-        if (member.fantasyPlayerId === from.fantasyPlayerId) {
-          return {
-            ...member,
-            lineupRole: to.lineupRole,
-            benchOrder: to.benchOrder,
-            captainRole:
-              to.lineupRole === "starter" ? member.captainRole : "none",
-          };
-        }
-        if (member.fantasyPlayerId === to.fantasyPlayerId) {
-          return {
-            ...member,
-            lineupRole: from.lineupRole,
-            benchOrder: from.benchOrder,
-            captainRole:
-              from.lineupRole === "starter" ? member.captainRole : "none",
-          };
-        }
-        return member;
-      });
-    });
+    if (!validSwapTargetIds.has(player.fantasyPlayerId)) return;
+    const swapped = swapLineupAssignments(
+      lineupAssignments,
+      swapFrom,
+      player.fantasyPlayerId,
+    );
+    if (!swapped) return;
+    const violations = validateLineupAssignment(swapped);
+    if (violations.length > 0) return;
+    const swappedById = new Map(swapped.map((member) => [member.id, member]));
+    setMembers((current) =>
+      current.map((member) => {
+        const swappedMember = swappedById.get(member.fantasyPlayerId);
+        return swappedMember
+          ? {
+              ...member,
+              lineupRole: swappedMember.lineupRole,
+              benchOrder: swappedMember.benchOrder,
+              captainRole: swappedMember.captainRole,
+            }
+          : member;
+      }),
+    );
     setSwapFrom(null);
-    toast.success("สลับตำแหน่งในทีมแล้ว");
+    toast.success(translate("สลับตำแหน่งในทีมแล้ว"));
   };
 
   return (
@@ -404,7 +463,7 @@ export default function TeamClient({
             </section>
             {swapFrom && (
               <div className="squad-action-hint" role="status">
-                เลือกผู้เล่นอีกคนเพื่อสลับตำแหน่ง
+                เลือกนักเตะที่ไฮไลท์เพื่อสลับ หรือกดคนเดิมเพื่อยกเลิก
               </div>
             )}
             <div className="squad-pitch">
@@ -426,6 +485,7 @@ export default function TeamClient({
                           key={player.id}
                           player={player}
                           onSelect={selectPlayer}
+                          swapState={getSwapState(player.fantasyPlayerId)}
                           captain={
                             player.fantasyPlayerId === captainId
                               ? "C"
@@ -456,6 +516,7 @@ export default function TeamClient({
                     <SquadPlayer
                       player={player}
                       onSelect={selectPlayer}
+                      swapState={getSwapState(player.fantasyPlayerId)}
                       showPositionBadgeOnShirt
                       transferSelected={
                         player.fantasyPlayerId === transferOutgoingId
