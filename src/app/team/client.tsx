@@ -44,11 +44,13 @@ function SquadPlayer({
   onSelect,
   captain,
   transferSelected,
+  showPositionBadgeOnShirt,
 }: {
   player: CompetitionPlayerView;
   onSelect: (player: CompetitionPlayerView) => void;
   captain?: "C" | "V";
   transferSelected?: boolean;
+  showPositionBadgeOnShirt?: boolean;
 }) {
   const { language } = useLanguage();
   return (
@@ -63,6 +65,11 @@ function SquadPlayer({
             style={{ color: player.accent, fill: player.color }}
             strokeWidth={1.6}
           />
+          {showPositionBadgeOnShirt && player.position !== "GK" && (
+            <span className="squad-position-badge">
+              <PositionBadge position={player.position} />
+            </span>
+          )}
           {captain && <i>{captain}</i>}
         </span>
         <span className="squad-name">
@@ -429,6 +436,7 @@ export default function TeamClient({
                           transferSelected={
                             player.fantasyPlayerId === transferOutgoingId
                           }
+                          showPositionBadgeOnShirt={false}
                         />
                       ))}
                   </div>
@@ -448,6 +456,7 @@ export default function TeamClient({
                     <SquadPlayer
                       player={player}
                       onSelect={selectPlayer}
+                      showPositionBadgeOnShirt
                       transferSelected={
                         player.fantasyPlayerId === transferOutgoingId
                       }
