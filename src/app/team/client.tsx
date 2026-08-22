@@ -66,7 +66,7 @@ function SquadPlayer({
           {captain && <i>{captain}</i>}
         </span>
         <span className="squad-name">
-          {localize(player.name, language).split(" ")[0]}
+          {localize(player.shortName, language)}
         </span>
         <span className="squad-fixture">{localize(player.next, language)}</span>
       </button>
@@ -296,11 +296,15 @@ export default function TeamClient({
                     const weekday = parts.find(
                       (part) => part.type === "weekday",
                     )?.value;
-                    const day = parts.find((part) => part.type === "day")?.value;
+                    const day = parts.find(
+                      (part) => part.type === "day",
+                    )?.value;
                     const month = parts.find(
                       (part) => part.type === "month",
                     )?.value;
-                    const hour = parts.find((part) => part.type === "hour")?.value;
+                    const hour = parts.find(
+                      (part) => part.type === "hour",
+                    )?.value;
                     const minute = parts.find(
                       (part) => part.type === "minute",
                     )?.value;
@@ -347,7 +351,10 @@ export default function TeamClient({
 
         <div className="unified-team-workspace">
           <div className="product-card squad-card">
-            <section className="squad-chip-toolbar" aria-labelledby="chip-title">
+            <section
+              className="squad-chip-toolbar"
+              aria-labelledby="chip-title"
+            >
               <div className="squad-chip-title" id="chip-title">
                 <Zap size={18} aria-hidden="true" />
                 <span>{translate("ตัวช่วยพิเศษ")}</span>

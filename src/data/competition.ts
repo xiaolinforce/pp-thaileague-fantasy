@@ -356,6 +356,11 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
             player.fullNameEn,
             player.fullNameEn,
           ),
+          shortName: localized(
+            player.shortNameTh,
+            player.shortNameEn,
+            player.fullNameEn,
+          ),
           club: club.name,
           clubShort: club.shortName,
           position,

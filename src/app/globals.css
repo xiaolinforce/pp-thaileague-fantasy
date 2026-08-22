@@ -881,13 +881,13 @@ textarea:focus-visible {
   letter-spacing: -0.05em;
 }
 .deadline {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 0 34px;
-    flex: 1;
-    z-index: 2;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 34px;
+  flex: 1;
+  z-index: 2;
+}
 .deadline span {
   display: flex;
   gap: 7px;
@@ -3029,6 +3029,12 @@ textarea:focus-visible {
   padding: 4px 6px 3px;
   font-size: 12px;
   font-weight: 800;
+  line-height: 1.2;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  text-wrap: balance;
+  white-space: normal;
 }
 
 .squad-fixture {
@@ -5664,6 +5670,10 @@ textarea:focus-visible {
     font-size: 12px;
   }
 
+  .squad-name {
+    font-size: 10px;
+  }
+
   .bench-panel {
     padding: 18px 8px;
   }
@@ -6318,4 +6328,16 @@ body {
 .transfer-overview strong,
 .score-legend strong {
   font-weight: 600;
+}
+
+/* Pitch labels stay compact enough for the fixed player-slot spacing. */
+.squad-name {
+  font-size: 12px;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .squad-name {
+    font-size: 10px;
+  }
 }

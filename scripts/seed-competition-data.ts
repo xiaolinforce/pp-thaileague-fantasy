@@ -22,6 +22,7 @@ import {
 } from "./sources/thai-league-2026-27";
 import { normalizeClubName } from "./sources/club-name-normalization";
 import { getClubShortNames } from "./sources/club-short-name-overrides";
+import { getEnglishPlayerShortName } from "./sources/player-short-names";
 import {
   CLUB_COLOR_SOURCE_NAME,
   clubVisualIdentitySources,
@@ -439,6 +440,8 @@ async function seedCompetitionData() {
       uniquePlayers.set(player.externalId, {
         fullNameTh: null,
         fullNameEn: player.fullNameEn,
+        shortNameTh: null,
+        shortNameEn: getEnglishPlayerShortName(player.fullNameEn),
         knownAs: null,
         birthDate: null,
         nationality: player.nationality,

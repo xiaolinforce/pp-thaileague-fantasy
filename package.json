@@ -23,7 +23,8 @@
     "db:verify:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-competition-data.ts",
     "db:verify:fantasy": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-game.ts",
     "db:normalize:clubs": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-club-display-names.ts",
-    "db:normalize:club-short-names": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-club-short-names.ts"
+    "db:normalize:club-short-names": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-club-short-names.ts",
+    "db:normalize:player-short-names": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/normalize-player-short-names.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

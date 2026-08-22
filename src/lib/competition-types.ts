@@ -15,6 +15,7 @@ export type CompetitionPlayerView = {
   clubId: string;
   photoUrl: string | null;
   name: LocalizedText;
+  shortName: LocalizedText;
   club: LocalizedText;
   clubShort: LocalizedText;
   position: CompetitionPosition;

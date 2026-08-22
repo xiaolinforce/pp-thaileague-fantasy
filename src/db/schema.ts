@@ -497,6 +497,8 @@ export const players = pgTable(
     id: uuid("id").defaultRandom().primaryKey(),
     fullNameTh: text("full_name_th"),
     fullNameEn: text("full_name_en").notNull(),
+    shortNameTh: text("short_name_th"),
+    shortNameEn: text("short_name_en"),
     knownAs: text("known_as"),
     birthDate: date("birth_date", { mode: "string" }),
     nationality: text("nationality"),

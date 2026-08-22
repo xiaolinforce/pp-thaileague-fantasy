@@ -58,6 +58,7 @@ the database:
 npm run db:check
 npm run db:migrate
 npm run db:seed:competition
+npm run db:normalize:player-short-names -- --apply
 npm run db:verify:competition
 npm run db:seed:fantasy
 npm run db:rank:players -- --publish

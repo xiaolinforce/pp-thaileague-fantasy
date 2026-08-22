@@ -28,15 +28,17 @@ not reuse the identifiers for another season.
 
 ## Source inventory
 
-| Source                             | Used for                                                                                            | Adapter or registry                                   |
-| ---------------------------------- | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Thai League official API           | Season, tournament, clubs, venues, fixtures, kickoff, status, scores, penalties, and attendance.    | `scripts/sources/thai-league-2026-27.ts`              |
-| Thai League 2025/26 API            | Prior-season TL1 (`207`) and TL2 (`208`) player aggregates and club context for preseason ranking.  | `scripts/sources/thai-league-2025-26-player-stats.ts` |
-| Transfermarkt public squad pages   | Players, positions, shirt numbers, nationality text, active registration, and current market value. | `scripts/sources/thai-league-2026-27.ts`              |
-| Curated kit/club research URLs     | Four-color club visual identity palettes and explanatory notes.                                     | `scripts/sources/club-visual-identities.ts`           |
-| Explicit club-name overrides       | Normal English display casing for selected all-cap source names.                                    | `scripts/sources/club-name-normalization.ts`          |
-| Explicit club short-name overrides | Curated Thai and English compact club labels for product UI.                                        | `scripts/sources/club-short-name-overrides.ts`        |
-| Fantasy administrator              | Reviewed match-stat corrections, Fantasy assists, Thai status, and effective tier changes.          | `/admin/fantasy` and `src/app/fantasy-actions.ts`     |
+| Source                               | Used for                                                                                            | Adapter or registry                                   |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Thai League official API             | Season, tournament, clubs, venues, fixtures, kickoff, status, scores, penalties, and attendance.    | `scripts/sources/thai-league-2026-27.ts`              |
+| Thai League 2025/26 API              | Prior-season TL1 (`207`) and TL2 (`208`) player aggregates and club context for preseason ranking.  | `scripts/sources/thai-league-2025-26-player-stats.ts` |
+| Transfermarkt public squad pages     | Players, positions, shirt numbers, nationality text, active registration, and current market value. | `scripts/sources/thai-league-2026-27.ts`              |
+| Transfermarkt public player profiles | Thai home-country names for the roster records classified as Thai.                                  | `scripts/normalize-player-short-names.ts`             |
+| Player short-name exception registry | Reviewed Thai labels for Thai-classified profiles that do not publish a Thai-script home name.      | `scripts/sources/player-short-name-overrides.ts`      |
+| Curated kit/club research URLs       | Four-color club visual identity palettes and explanatory notes.                                     | `scripts/sources/club-visual-identities.ts`           |
+| Explicit club-name overrides         | Normal English display casing for selected all-cap source names.                                    | `scripts/sources/club-name-normalization.ts`          |
+| Explicit club short-name overrides   | Curated Thai and English compact club labels for product UI.                                        | `scripts/sources/club-short-name-overrides.ts`        |
+| Fantasy administrator                | Reviewed match-stat corrections, Fantasy assists, Thai status, and effective tier changes.          | `/admin/fantasy` and `src/app/fantasy-actions.ts`     |
 
 Club visual palettes are presentation metadata, not official crests or a claim
 of trademark ownership. Retain the cited source URL and note when changing a
@@ -52,6 +54,8 @@ Transfermarkt squad pages ------------+--> seed-competition-data.ts
 Curated name and color registries ----+             v
                                                 competition tables
                                                      |
+Transfermarkt player profiles ----------------> normalize-player-short-names.ts
+                                                     |
                                                      v
                                            seed-fantasy-game.ts
                                                      |
@@ -64,6 +68,7 @@ Run the workflow in this order:
 ```bash
 npm run db:migrate
 npm run db:seed:competition
+npm run db:normalize:player-short-names -- --apply
 npm run db:verify:competition
 npm run db:seed:fantasy
 npm run db:rank:players -- --publish
@@ -92,6 +97,18 @@ The seed then:
 - marks previous Transfermarkt registrations inactive before upserting the
   currently observed active squad; and
 - applies explicit English club-name casing instead of generic title casing.
+
+`npm run db:normalize:player-short-names` is preview-only unless `--apply` is
+passed. It reads each existing Transfermarkt player-profile URL for the
+`Name in home country` value, then stores its first Thai name token only for
+records currently classified as Thai in `fantasy_players`. If that public
+profile does not publish Thai script, the command may use a reviewed
+stable-Transfermarkt-ID exception from
+`scripts/sources/player-short-name-overrides.ts`. The command aborts before
+writing if any such player has neither a valid source value nor an exception.
+English short names are derived from the final non-suffix token of
+`full_name_en`; players not classified as Thai deliberately retain a null Thai
+short name.
 
 Player identity is currently derived from Transfermarkt external IDs. Do not
 fall back to display-name matching for updates because names are not stable
