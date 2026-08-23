@@ -2,18 +2,37 @@
 
 import { useLanguage } from "@/components/fantasy/i18n";
 import { PlayerKit } from "@/components/fantasy/player-kit";
+import { PositionBadge } from "@/components/fantasy/position-badge";
 import { localize, type CompetitionPlayerView } from "@/lib/competition-types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function PlayerIdentity({ player }: { player: CompetitionPlayerView }) {
+export function PlayerIdentity({
+  player,
+  useShortName = false,
+  showMarketCompact = false,
+  showPositionBadge = false,
+}: {
+  player: CompetitionPlayerView;
+  useShortName?: boolean;
+  showMarketCompact?: boolean;
+  showPositionBadge?: boolean;
+}) {
   const { language } = useLanguage();
+  const playerName = useShortName
+    ? localize(player.shortName, language)
+    : localize(player.name, language);
+  const teamName = useShortName
+    ? localize(player.clubShort, language)
+    : localize(player.club, language);
   return (
-    <div className="market-player player-identity-component">
+    <div
+      className={`market-player player-identity-component${showMarketCompact ? " market-player--compact" : ""}`}
+    >
       <Avatar className="player-photo" size="lg">
         {player.photoUrl && (
           <AvatarImage
             src={player.photoUrl}
-            alt={localize(player.name, language)}
+            alt={playerName}
           />
         )}
         <AvatarFallback>
@@ -21,10 +40,15 @@ export function PlayerIdentity({ player }: { player: CompetitionPlayerView }) {
         </AvatarFallback>
       </Avatar>
       <div>
-        <strong>{localize(player.name, language)}</strong>
-        <span>
-          {localize(player.club, language)} · {player.position}
+        <strong>{playerName}</strong>
+        <span className={showMarketCompact ? "market-compact-team" : ""}>
+          {teamName}
         </span>
+        {showPositionBadge && (
+          <span className="market-position-badge-wrap">
+            <PositionBadge position={player.position} />
+          </span>
+        )}
       </div>
     </div>
   );

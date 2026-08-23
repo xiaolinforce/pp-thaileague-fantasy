@@ -2581,10 +2581,34 @@ textarea:focus-visible {
 }
 
 .top-player-name span,
-.market-player span {
+.market-player span:not(.position-badge) {
   color: #969a9c;
   font-size: 12px;
   margin-top: 3px;
+}
+
+.market-player--compact {
+  align-items: center;
+}
+
+.market-player--compact strong {
+  margin-bottom: 0px;
+}
+
+.compact-market-list .market-player--compact .market-compact-team {
+  font-size: 11px;
+  margin-top: -4px;
+}
+
+.market-player--compact .market-position-badge-wrap {
+  margin-top: 2px;
+}
+
+.market-player--compact .market-position-badge-wrap .position-badge {
+  padding: 2px 6px;
+  font-size: 10px;
+  border-radius: 999px;
+  font-weight: 800;
 }
 
 .form-chip {
@@ -2682,12 +2706,12 @@ textarea:focus-visible {
   padding: 14px 18px;
   display: flex;
   align-items: center;
-  color: var(--orange-deep);
 }
 
 .compact-market-head h2 {
   margin: 0;
   font-size: 20px;
+  color: #000000;
 }
 
 .compact-transfer-stats {
@@ -2845,6 +2869,7 @@ textarea:focus-visible {
   width: 34px;
   height: 34px;
   border-radius: 8px;
+  justify-self: end;
 }
 
 .compact-market-empty {

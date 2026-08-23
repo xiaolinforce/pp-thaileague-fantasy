@@ -300,13 +300,17 @@ export default function TransfersClient({
 
         <div className="compact-market-list">
           {players.map((player) => {
-            const compatible =
-              !vacancyPosition || player.position === vacancyPosition;
+              const compatible =
+                !vacancyPosition || player.position === vacancyPosition;
             return (
               <article className="compact-market-row" key={player.id}>
-                <PlayerIdentity player={player} />
+                <PlayerIdentity
+                  player={player}
+                  useShortName
+                  showMarketCompact
+                  showPositionBadge
+                />
                 <div className="compact-market-meta">
-                  <span>{localize(player.next, language)}</span>
                   <strong>
                     L{player.tier} · {player.points}{" "}
                     {language === "th" ? "คะแนน" : "points"}
