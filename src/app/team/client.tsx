@@ -325,13 +325,7 @@ export default function TeamClient({
       })
       .slice(0, 3);
   }, [data.fixtures, selected]);
-  const selectedPlayerName = selected
-    ? language === "th" &&
-      selected.name.th === selected.name.en &&
-      selected.shortName.th !== selected.shortName.en
-      ? selected.shortName.th
-      : localize(selected.name, language)
-    : "";
+  const selectedPlayerName = selected ? localize(selected.name, language) : "";
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
@@ -793,13 +787,15 @@ export default function TeamClient({
                 size="large"
               />
               <div className="modal-player-identity">
-                <PositionBadge position={selected.position} />
                 <DialogHeader className="modal-player-heading">
                   <DialogTitle>{selectedPlayerName}</DialogTitle>
                   <DialogDescription>
                     {localize(selected.club, language)}
                   </DialogDescription>
                 </DialogHeader>
+                <div className="modal-player-position-badge">
+                  <PositionBadge position={selected.position} />
+                </div>
               </div>
             </div>
             <div className="player-detail-grid">
@@ -853,7 +849,7 @@ export default function TeamClient({
                 <p className="player-fixtures-empty">ยังไม่มีโปรแกรมถัดไป</p>
               )}
             </section>
-            <DialogFooter className="modal-actions">
+            <DialogFooter className="modal-actions border-t-0">
               {selectedMember && (
                 <>
                   <button
