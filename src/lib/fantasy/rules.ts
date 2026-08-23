@@ -221,13 +221,29 @@ export function swapLineupAssignments(
   const to = lineup.find((player) => player.id === toId);
   if (!from || !to || from.id === to.id) return null;
 
+  const swapsStarterAndBench = from.lineupRole !== to.lineupRole;
+  const outgoingStarter = swapsStarterAndBench
+    ? from.lineupRole === "starter"
+      ? from
+      : to
+    : null;
+  const incomingStarter = swapsStarterAndBench
+    ? from.lineupRole === "bench"
+      ? from
+      : to
+    : null;
+
   const swapped = lineup.map((player) => {
     if (player.id === from.id) {
       return {
         ...player,
         lineupRole: to.lineupRole,
         benchOrder: to.benchOrder,
-        captainRole: to.lineupRole === "starter" ? player.captainRole : "none",
+        captainRole: swapsStarterAndBench
+          ? player.id === incomingStarter?.id
+            ? (outgoingStarter?.captainRole ?? "none")
+            : "none"
+          : player.captainRole,
       };
     }
     if (player.id === to.id) {
@@ -235,8 +251,11 @@ export function swapLineupAssignments(
         ...player,
         lineupRole: from.lineupRole,
         benchOrder: from.benchOrder,
-        captainRole:
-          from.lineupRole === "starter" ? player.captainRole : "none",
+        captainRole: swapsStarterAndBench
+          ? player.id === incomingStarter?.id
+            ? (outgoingStarter?.captainRole ?? "none")
+            : "none"
+          : player.captainRole,
       };
     }
     return player;

@@ -135,16 +135,60 @@ test("returns only meaningful valid swap targets", () => {
   assert.equal(defenderTargets.has("p4"), false);
 
   const captainTargets = getValidLineupSwapTargetIds(makeValidLineup(), "p8");
-  assert.deepEqual([...captainTargets], []);
+  assert.ok(captainTargets.has("p6"));
+  assert.ok(captainTargets.has("p7"));
+  assert.ok(captainTargets.has("p12"));
+  assert.equal(captainTargets.has("p2"), false);
+
+  const viceCaptainTargets = getValidLineupSwapTargetIds(
+    makeValidLineup(),
+    "p13",
+  );
+  assert.ok(viceCaptainTargets.has("p6"));
+  assert.ok(viceCaptainTargets.has("p7"));
+  assert.ok(viceCaptainTargets.has("p12"));
 });
 
-test("rejects swaps that move the captain to the bench", () => {
-  const swapped = swapLineupAssignments(makeValidLineup(), "p8", "p12");
-  assert.ok(swapped);
-  assert.ok(
-    validateLineupAssignment(swapped).some(
-      (violation) => violation.code === "captain",
-    ),
+test("passes captaincy to the substitute who replaces the captain", () => {
+  const captainSwap = swapLineupAssignments(makeValidLineup(), "p8", "p12");
+  assert.ok(captainSwap);
+  assert.deepEqual(validateLineupAssignment(captainSwap), []);
+  assert.equal(
+    captainSwap.find((player) => player.id === "p8")?.captainRole,
+    "none",
+  );
+  assert.equal(
+    captainSwap.find((player) => player.id === "p12")?.captainRole,
+    "captain",
+  );
+});
+
+test("passes vice-captaincy when a bench player initiates the swap", () => {
+  const viceCaptainSwap = swapLineupAssignments(makeValidLineup(), "p6", "p13");
+  assert.ok(viceCaptainSwap);
+  assert.deepEqual(validateLineupAssignment(viceCaptainSwap), []);
+  assert.equal(
+    viceCaptainSwap.find((player) => player.id === "p13")?.captainRole,
+    "none",
+  );
+  assert.equal(
+    viceCaptainSwap.find((player) => player.id === "p6")?.captainRole,
+    "vice_captain",
+  );
+});
+
+test("keeps captaincy with each player when both players are starters", () => {
+  const lineup = makeValidLineup();
+  const swapped = swapLineupAssignments(lineup, "p8", "p13");
+
+  assert.equal(swapped, null);
+  assert.equal(
+    lineup.find((player) => player.id === "p8")?.captainRole,
+    "captain",
+  );
+  assert.equal(
+    lineup.find((player) => player.id === "p13")?.captainRole,
+    "vice_captain",
   );
 });
 

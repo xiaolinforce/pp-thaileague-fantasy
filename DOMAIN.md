@@ -47,6 +47,11 @@ fixed squad composition. The bench contains one goalkeeper at order `0` and
 three outfield players at orders `1` through `3`. Exactly one starter must be
 captain and one different starter must be vice-captain.
 
+When a starter is manually swapped with a bench player before the deadline,
+the incoming starter inherits the outgoing starter's captain or vice-captain
+role. Swapping players who are both in the starting eleven keeps each role with
+its existing player.
+
 An unavailable player cannot be added to a newly validated squad. Existing
 selection rows retain their snapshots so later availability or classification
 changes do not rewrite history.

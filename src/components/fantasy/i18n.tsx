@@ -538,6 +538,8 @@ const translations: Record<string, string> = {
     "Select at most 3 players from one club",
   "มีนักเตะต่างชาติได้สูงสุด 7 คน โดยผู้เล่นที่ระบบจัดประเภทเป็นไทยนับในโควตานักเตะไทย":
     "Select at most 7 foreign players; players classified as Thai count toward the Thai-player quota",
+  "เมื่อสลับกัปตันหรือรองกัปตันกับตัวสำรอง นักเตะที่ขึ้นมาเป็นตัวจริงจะรับบทบาทนั้นแทน ส่วนการสลับผู้เล่นที่เป็นตัวจริงทั้งคู่จะคงบทบาทไว้กับผู้เล่นเดิม":
+    "When a captain or vice-captain is swapped with a substitute, the incoming starter inherits that role. Swapping two starters keeps each role with its existing player",
   "ระดับ 1 มี 3 ช่อง ระดับ 2 มี 7 ช่อง และระดับ 3 มี 5 ช่อง":
     "Tier 1 has 3 slots, Tier 2 has 7 slots, and Tier 3 has 5 slots",
   ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ยังว่างได้:
