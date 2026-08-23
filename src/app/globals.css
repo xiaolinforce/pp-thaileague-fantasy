@@ -2920,12 +2920,16 @@ textarea:focus-visible {
   display: grid;
   grid-template-columns: minmax(560px, 1.2fr) minmax(360px, 0.8fr);
   gap: 20px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .compact-transfer-market {
   position: static;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  contain: size;
 }
 
 .compact-market-head {
@@ -3051,7 +3055,8 @@ textarea:focus-visible {
 }
 
 .compact-market-list {
-  max-height: 650px;
+  flex: 1;
+  min-height: 0;
   border-top: 1px solid var(--line);
   overflow-y: auto;
   scrollbar-width: thin;
@@ -3125,14 +3130,8 @@ textarea:focus-visible {
   min-height: 180px;
 }
 
-.compact-market-footer {
-  padding: 10px 12px;
-  color: var(--muted);
-  background: #faf9f7;
-  text-align: center;
-}
-
 .squad-card {
+  align-self: start;
   overflow: hidden;
 }
 
@@ -5847,6 +5846,12 @@ textarea:focus-visible {
 
   .compact-transfer-market {
     position: static;
+    display: block;
+    contain: none;
+  }
+
+  .compact-market-list {
+    max-height: 650px;
   }
 
   .points-aside {

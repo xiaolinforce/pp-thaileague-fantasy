@@ -127,7 +127,7 @@ export default function TransfersClient({
           ? b.form - a.form
           : b.points - a.points,
     )
-    .slice(0, 18);
+    .slice(0, 50);
 
   const squadPlayers = members.flatMap((member) => {
     const player = member.fantasyPlayerId
@@ -349,11 +349,6 @@ export default function TransfersClient({
               <p>ลองเปลี่ยนคำค้นหาหรือตัวกรอง</p>
             </div>
           )}
-        </div>
-        <div className="compact-market-footer">
-          {language === "th"
-            ? `แสดง ${players.length} คน · ทีมปัจจุบัน ${ownedIds.size}/15 · กดบันทึกทีมด้านบนเมื่อพร้อม`
-            : `Showing ${players.length} players · Current squad ${ownedIds.size}/15 · Save your team above when ready`}
         </div>
       </aside>
     </Localized>
