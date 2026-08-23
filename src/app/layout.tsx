@@ -63,7 +63,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           <IdentityProvider identity={identity}>
             <TooltipProvider>{children}</TooltipProvider>
           </IdentityProvider>
-          <Toaster position="bottom-center" richColors />
+          <Toaster position="bottom-center" />
         </LanguageProvider>
       </body>
     </html>

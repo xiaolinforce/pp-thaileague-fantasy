@@ -33,7 +33,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
 import { saveFantasySelectionAction } from "@/app/fantasy-actions";
 import {

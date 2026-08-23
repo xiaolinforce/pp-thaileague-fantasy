@@ -21,10 +21,10 @@ import {
   type FormEvent,
   type SetStateAction,
 } from "react";
-import { toast } from "sonner";
 
 import { updateFantasyNamesAction } from "@/app/fantasy-actions";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { toast } from "@/components/ui/sonner";
 import { useAppIdentity } from "@/components/fantasy/identity";
 import { LanguageSwitcher, useLanguage } from "@/components/fantasy/i18n";
 import {

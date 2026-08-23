@@ -2,10 +2,10 @@
 
 import { ArrowDownUp, Search, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
-import { toast } from "sonner";
 
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { PlayerIdentity } from "@/components/fantasy/player-identity";
+import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import {
   Select,

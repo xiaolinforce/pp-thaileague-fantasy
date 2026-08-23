@@ -1,12 +1,13 @@
 "use client";
 
-import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { toast, Toaster as Sonner, type ToasterProps } from "sonner";
 import {
   CircleCheckIcon,
   InfoIcon,
   TriangleAlertIcon,
   OctagonXIcon,
   Loader2Icon,
+  XIcon,
 } from "lucide-react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
@@ -14,12 +15,19 @@ const Toaster = ({ ...props }: ToasterProps) => {
     <Sonner
       theme="light"
       className="toaster group"
+      closeButton
+      duration={4500}
+      gap={10}
+      visibleToasts={3}
+      offset={{ bottom: 24 }}
+      mobileOffset={{ bottom: 92 }}
       icons={{
-        success: <CircleCheckIcon className="size-4" />,
-        info: <InfoIcon className="size-4" />,
-        warning: <TriangleAlertIcon className="size-4" />,
-        error: <OctagonXIcon className="size-4" />,
-        loading: <Loader2Icon className="size-4 animate-spin" />,
+        success: <CircleCheckIcon size={18} strokeWidth={2.2} />,
+        info: <InfoIcon size={18} strokeWidth={2.2} />,
+        warning: <TriangleAlertIcon size={18} strokeWidth={2.2} />,
+        error: <OctagonXIcon size={18} strokeWidth={2.2} />,
+        loading: <Loader2Icon className="animate-spin" size={18} />,
+        close: <XIcon size={14} strokeWidth={2.2} />,
       }}
       style={
         {
@@ -30,8 +38,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
         } as React.CSSProperties
       }
       toastOptions={{
+        closeButtonAriaLabel: "ปิดการแจ้งเตือน / Dismiss notification",
         classNames: {
           toast: "cn-toast",
+          title: "cn-toast-title",
+          description: "cn-toast-description",
+          content: "cn-toast-content",
+          icon: "cn-toast-icon",
+          closeButton: "cn-toast-close",
         },
       }}
       {...props}
@@ -39,4 +53,4 @@ const Toaster = ({ ...props }: ToasterProps) => {
   );
 };
 
-export { Toaster };
+export { Toaster, toast };
