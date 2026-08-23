@@ -16,6 +16,13 @@ import { PlayerIdentity } from "@/components/fantasy/player-identity";
 import { GameweekSelector } from "@/components/fantasy/gameweek-selector";
 import { localize, type CompetitionDataset } from "@/lib/competition-types";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 function formatMatchDate(kickoffAt: string | null, language: "th" | "en") {
   if (!kickoffAt) return language === "th" ? "วันแข่งขันรอยืนยัน" : "Date TBC";
@@ -217,26 +224,32 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                   <span className="eyebrow">อันดับผู้เล่น</span>
                   <h2>ฟอร์มดีที่สุด</h2>
                 </div>
-                <label className="stats-position-filter">
+                <div className="stats-position-filter">
                   <span className="sr-only">กรองตำแหน่งผู้เล่น</span>
-                  <select
-                    className="filter-button"
+                  <Select
                     value={position}
-                    onChange={(event) =>
+                    onValueChange={(value) => {
+                      if (!value) return;
                       setPosition(
-                        event.target.value as
-                          "ALL" | "GK" | "DEF" | "MID" | "FWD",
-                      )
-                    }
-                    aria-label="กรองตำแหน่งผู้เล่น"
+                        value as "ALL" | "GK" | "DEF" | "MID" | "FWD",
+                      );
+                    }}
                   >
-                    <option value="ALL">ทุกตำแหน่ง</option>
-                    <option value="GK">GK</option>
-                    <option value="DEF">DEF</option>
-                    <option value="MID">MID</option>
-                    <option value="FWD">FWD</option>
-                  </select>
-                </label>
+                    <SelectTrigger
+                      className="filter-button"
+                      aria-label="กรองตำแหน่งผู้เล่น"
+                    >
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="ALL">ทุกตำแหน่ง</SelectItem>
+                      <SelectItem value="GK">GK</SelectItem>
+                      <SelectItem value="DEF">DEF</SelectItem>
+                      <SelectItem value="MID">MID</SelectItem>
+                      <SelectItem value="FWD">FWD</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="stats-ranking">
                 {filteredRankedPlayers.slice(0, 8).map((player, index) => (

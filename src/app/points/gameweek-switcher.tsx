@@ -5,6 +5,13 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 import { useLanguage } from "@/components/fantasy/i18n";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { FantasyPointsGameweek } from "@/data/fantasy";
 
 export function PointsGameweekSwitcher({
@@ -41,23 +48,27 @@ export function PointsGameweekSwitcher({
       </button>
       <label>
         <span>{translate("เลือก Gameweek")}</span>
-        <select
-          value={selected}
-          onChange={(event) => goToGameweek(Number(event.target.value))}
+        <Select
+          value={String(selected)}
+          onValueChange={(value) => value && goToGameweek(Number(value))}
           disabled={isPending}
-          aria-label={translate("เลือก Gameweek")}
         >
-          {gameweeks.map((gameweek) => (
-            <option value={gameweek.number} key={gameweek.number}>
-              Gameweek {String(gameweek.number).padStart(2, "0")}
-              {gameweek.scoreComplete
-                ? " · Final"
-                : gameweek.hasScore
-                  ? " · Provisional"
-                  : ` · ${translate("ยังไม่มีคะแนน")}`}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger aria-label={translate("เลือก Gameweek")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="points-week-select-content">
+            {gameweeks.map((gameweek) => (
+              <SelectItem value={String(gameweek.number)} key={gameweek.number}>
+                Gameweek {String(gameweek.number).padStart(2, "0")}
+                {gameweek.scoreComplete
+                  ? " · Final"
+                  : gameweek.hasScore
+                    ? " · Provisional"
+                    : ` · ${translate("ยังไม่มีคะแนน")}`}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </label>
       <button
         type="button"

@@ -7,6 +7,13 @@ import {
   updateFantasyPlayerClassificationAction,
 } from "@/app/fantasy-actions";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { getCompetitionDataset } from "@/data/competition";
 import { getFantasyState, getFantasyAdminGameweeks } from "@/data/fantasy";
 import { requireAdmin } from "@/lib/auth/context";
@@ -73,43 +80,70 @@ export default async function FantasyAdminPage() {
               >
                 <label>
                   <span>นักเตะ</span>
-                  <select name="fantasyPlayerId" required>
-                    {players.map((player) => (
-                      <option value={player.fantasyPlayerId!} key={player.id}>
-                        {player.name.th} · {player.clubShort.th} · ปัจจุบัน L
-                        {player.tier}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    name="fantasyPlayerId"
+                    required
+                    defaultValue={players[0]?.fantasyPlayerId}
+                  >
+                    <SelectTrigger aria-label="นักเตะ">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {players.map((player) => (
+                        <SelectItem
+                          value={player.fantasyPlayerId!}
+                          key={player.id}
+                        >
+                          {player.name.th} · {player.clubShort.th} · ปัจจุบัน L
+                          {player.tier}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
                 <div className="admin-stat-fields">
                   <label>
                     <span>มีผลตั้งแต่ Gameweek</span>
-                    <select
+                    <Select
                       name="effectiveGameweekId"
                       defaultValue={fantasy.gameweek.id}
                     >
-                      {gameweeks.map((gameweek) => (
-                        <option value={gameweek.id} key={gameweek.id}>
-                          GW {gameweek.number}
-                        </option>
-                      ))}
-                    </select>
+                      <SelectTrigger aria-label="มีผลตั้งแต่ Gameweek">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {gameweeks.map((gameweek) => (
+                          <SelectItem value={gameweek.id} key={gameweek.id}>
+                            GW {gameweek.number}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </label>
                   <label>
                     <span>ระดับ</span>
-                    <select name="level" defaultValue="3">
-                      <option value="1">ระดับ 1</option>
-                      <option value="2">ระดับ 2</option>
-                      <option value="3">ระดับ 3</option>
-                    </select>
+                    <Select name="level" defaultValue="3">
+                      <SelectTrigger aria-label="ระดับ">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1">ระดับ 1</SelectItem>
+                        <SelectItem value="2">ระดับ 2</SelectItem>
+                        <SelectItem value="3">ระดับ 3</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </label>
                   <label>
                     <span>สถานะสัญชาติ</span>
-                    <select name="isThai" defaultValue="true">
-                      <option value="true">ไทย/ลูกครึ่งไทย</option>
-                      <option value="false">ต่างชาติ</option>
-                    </select>
+                    <Select name="isThai" defaultValue="true">
+                      <SelectTrigger aria-label="สถานะสัญชาติ">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="true">ไทย/ลูกครึ่งไทย</SelectItem>
+                        <SelectItem value="false">ต่างชาติ</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </label>
                 </div>
                 <label>
@@ -139,25 +173,46 @@ export default async function FantasyAdminPage() {
               >
                 <label>
                   <span>การแข่งขัน</span>
-                  <select name="fixtureId" required>
-                    {data.fixtures.map((fixture) => (
-                      <option value={fixture.id} key={fixture.id}>
-                        GW{fixture.matchweek} · {fixture.home.name.th} พบ{" "}
-                        {fixture.away.name.th}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    name="fixtureId"
+                    required
+                    defaultValue={data.fixtures[0]?.id}
+                  >
+                    <SelectTrigger aria-label="การแข่งขัน">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {data.fixtures.map((fixture) => (
+                        <SelectItem value={fixture.id} key={fixture.id}>
+                          GW{fixture.matchweek} · {fixture.home.name.th} พบ{" "}
+                          {fixture.away.name.th}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
                 <label>
                   <span>นักเตะ</span>
-                  <select name="fantasyPlayerId" required>
-                    {players.map((player) => (
-                      <option value={player.fantasyPlayerId!} key={player.id}>
-                        {player.name.th} · {player.clubShort.th} · L
-                        {player.tier}
-                      </option>
-                    ))}
-                  </select>
+                  <Select
+                    name="fantasyPlayerId"
+                    required
+                    defaultValue={players[0]?.fantasyPlayerId}
+                  >
+                    <SelectTrigger aria-label="นักเตะ">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {players.map((player) => (
+                        <SelectItem
+                          value={player.fantasyPlayerId!}
+                          key={player.id}
+                        >
+                          {player.name.th} · {player.clubShort.th} · L
+                          {player.tier}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </label>
                 <div className="admin-stat-fields">
                   {statFields.map(([name, label]) => (

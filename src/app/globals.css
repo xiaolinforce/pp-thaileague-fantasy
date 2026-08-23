@@ -105,6 +105,7 @@ select,
 textarea {
   font: inherit;
 }
+
 input,
 textarea {
   caret-color: var(--orange-deep);
@@ -4239,7 +4240,7 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
-.points-week-switcher select {
+.points-week-switcher [data-slot="select-trigger"] {
   width: 100%;
   border: 0;
   outline: 0;
@@ -4249,6 +4250,10 @@ textarea:focus-visible {
   font-size: 12px;
   font-weight: 800;
   cursor: pointer;
+}
+
+.points-week-select-content {
+  width: min(270px, calc(100vw - 24px));
 }
 
 .points-pitch-layout {
@@ -4743,7 +4748,7 @@ textarea:focus-visible {
   display: inline-flex;
 }
 
-.stats-position-filter select.filter-button {
+.stats-position-filter [data-slot="select-trigger"].filter-button {
   min-height: 40px;
   padding-right: 34px;
   color: var(--ink);
@@ -6629,7 +6634,7 @@ textarea:focus-visible {
   font-weight: 500;
 }
 .admin-stat-form input,
-.admin-stat-form select {
+.admin-stat-form [data-slot="select-trigger"] {
   min-height: 42px;
   width: 100%;
   padding: 8px 11px;
