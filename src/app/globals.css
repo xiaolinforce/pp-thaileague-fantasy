@@ -1123,7 +1123,7 @@ textarea:focus-visible {
   color: var(--ink);
   font-size: 12px;
   font-weight: 900;
-  border: 2px solid var(--green);
+  border: none;
 }
 .status-dot {
   background: #f6bf3e;
@@ -3434,16 +3434,24 @@ textarea:focus-visible {
   font-style: normal;
 }
 
+.squad-shirt i.captain-badge,
+.points-player-kit > i.captain-badge {
+  width: 21px;
+  height: 21px;
+  border: none;
+  color: var(--ink);
+  line-height: 1;
+  box-shadow: 0 2px 5px rgba(10, 31, 26, 0.34);
+}
+
 .squad-shirt i.captain-badge--captain,
 .points-player-kit > i.captain-badge--captain {
   background: var(--orange);
-  color: #fff;
 }
 
 .squad-shirt i.captain-badge--vice-captain,
 .points-player-kit > i.captain-badge--vice-captain {
-  background: var(--orange-soft);
-  color: var(--orange-deep);
+  background: color-mix(in srgb, var(--orange) 38%, var(--paper));
 }
 
 .squad-name,
