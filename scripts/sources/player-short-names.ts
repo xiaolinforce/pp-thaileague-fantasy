@@ -17,10 +17,12 @@ export function getEnglishPlayerShortName(
 }
 
 export function getThaiPlayerShortName(homeCountryName: string | null) {
-  if (!homeCountryName || !/[\u0e00-\u0e7f]/.test(homeCountryName)) {
-    return null;
-  }
-  return compact(homeCountryName).split(" ")[0] || null;
+  return getThaiPlayerFullName(homeCountryName)?.split(" ")[0] ?? null;
+}
+
+export function getThaiPlayerFullName(homeCountryName: string | null) {
+  if (!homeCountryName || !/[\u0e00-\u0e7f]/.test(homeCountryName)) return null;
+  return compact(homeCountryName) || null;
 }
 
 export function extractTransfermarktHomeCountryName(html: string) {

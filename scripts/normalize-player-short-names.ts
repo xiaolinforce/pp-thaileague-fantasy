@@ -6,9 +6,10 @@ import { fantasyPlayers, fantasySeasons, players } from "../src/db/schema";
 import {
   extractTransfermarktHomeCountryName,
   getEnglishPlayerShortName,
+  getThaiPlayerFullName,
   getThaiPlayerShortName,
 } from "./sources/player-short-names";
-import { PLAYER_SHORT_NAME_TH_OVERRIDES } from "./sources/player-short-name-overrides";
+import { PLAYER_THAI_NAME_OVERRIDES } from "./sources/player-thai-name-overrides";
 import { TRANSFERMARKT_SOURCE } from "./sources/thai-league-2026-27";
 
 loadEnvConfig(process.cwd());
@@ -50,7 +51,7 @@ async function mapWithConcurrency<T, R>(
   return results;
 }
 
-async function fetchThaiShortName(sourceUrl: string, externalId: string) {
+async function fetchThaiNames(sourceUrl: string, externalId: string) {
   if (!sourceUrl.startsWith("https://www.transfermarkt.com/")) {
     throw new Error(`Unexpected player source URL: ${sourceUrl}`);
   }
@@ -67,13 +68,13 @@ async function fetchThaiShortName(sourceUrl: string, externalId: string) {
       `Transfermarkt returned ${response.status} for ${sourceUrl}`,
     );
   }
-  return (
-    getThaiPlayerShortName(
+  const fullNameTh =
+    getThaiPlayerFullName(
       extractTransfermarktHomeCountryName(await response.text()),
     ) ??
-    PLAYER_SHORT_NAME_TH_OVERRIDES[externalId] ??
-    null
-  );
+    PLAYER_THAI_NAME_OVERRIDES[externalId] ??
+    null;
+  return { fullNameTh, shortNameTh: getThaiPlayerShortName(fullNameTh) };
 }
 
 async function normalizePlayerShortNames() {
@@ -99,18 +100,13 @@ async function normalizePlayerShortNames() {
     throw new Error("No active Fantasy players were found.");
 
   const thaiRows = rows.filter((row) => row.fantasyPlayer.isThai);
-  const thaiShortNames = await mapWithConcurrency(thaiRows, async (row) => ({
+  const thaiNames = await mapWithConcurrency(thaiRows, async (row) => ({
     id: row.player.id,
-    shortNameTh: await fetchThaiShortName(
-      row.player.sourceUrl,
-      row.player.externalId,
-    ),
+    ...(await fetchThaiNames(row.player.sourceUrl, row.player.externalId)),
   }));
-  const thaiShortNameById = new Map(
-    thaiShortNames.map((row) => [row.id, row.shortNameTh]),
-  );
+  const thaiNameById = new Map(thaiNames.map((row) => [row.id, row]));
   const missingThaiNames = thaiRows.filter(
-    (row) => !thaiShortNameById.get(row.player.id),
+    (row) => !thaiNameById.get(row.player.id)?.fullNameTh,
   );
   if (missingThaiNames.length > 0) {
     throw new Error(
@@ -121,18 +117,22 @@ async function normalizePlayerShortNames() {
   const updates = rows.map((row) => ({
     id: row.player.id,
     fullNameEn: row.player.fullNameEn,
+    fullNameTh: row.fantasyPlayer.isThai
+      ? (thaiNameById.get(row.player.id)?.fullNameTh ?? null)
+      : null,
     shortNameEn: getEnglishPlayerShortName(
       row.player.fullNameEn,
       row.fantasyPlayer.isThai,
     ),
     shortNameTh: row.fantasyPlayer.isThai
-      ? (thaiShortNameById.get(row.player.id) ?? null)
+      ? (thaiNameById.get(row.player.id)?.shortNameTh ?? null)
       : null,
   }));
   console.table(
     updates.slice(0, 20).map((row) => ({
       player: row.fullNameEn,
-      th: row.shortNameTh,
+      fullTh: row.fullNameTh,
+      shortTh: row.shortNameTh,
       en: row.shortNameEn,
     })),
   );
@@ -151,6 +151,7 @@ async function normalizePlayerShortNames() {
       .set({
         shortNameTh: update.shortNameTh,
         shortNameEn: update.shortNameEn,
+        fullNameTh: update.fullNameTh,
         updatedAt: now,
       })
       .where(eq(players.id, update.id));
