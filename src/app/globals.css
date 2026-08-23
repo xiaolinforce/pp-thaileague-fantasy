@@ -1610,11 +1610,6 @@ textarea:focus-visible {
   gap: 6px;
 }
 
-.modal-player-position-badge .position-badge {
-  padding: 2px 6px;
-  font-size: 10px;
-}
-
 .modal-player-heading {
   gap: 2px;
 }
