@@ -28,17 +28,22 @@ export function PlayerIdentity({
     <div
       className={`market-player player-identity-component${showMarketCompact ? " market-player--compact" : ""}`}
     >
-      <Avatar className="player-photo" size="lg">
-        {player.photoUrl && (
-          <AvatarImage
-            src={player.photoUrl}
-            alt={playerName}
-          />
-        )}
-        <AvatarFallback>
-          <PlayerKit color={player.color} accent={player.accent} size="small" />
-        </AvatarFallback>
-      </Avatar>
+      {showMarketCompact ? (
+        <PlayerKit color={player.color} accent={player.accent} />
+      ) : (
+        <Avatar className="player-photo" size="lg">
+          {player.photoUrl && (
+            <AvatarImage src={player.photoUrl} alt={playerName} />
+          )}
+          <AvatarFallback>
+            <PlayerKit
+              color={player.color}
+              accent={player.accent}
+              size="small"
+            />
+          </AvatarFallback>
+        </Avatar>
+      )}
       <div>
         <strong>{playerName}</strong>
         <span className={showMarketCompact ? "market-compact-team" : ""}>
