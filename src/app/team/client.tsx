@@ -92,7 +92,7 @@ function SquadPlayer({
   swapState?: PlayerSwapState;
   showPositionBadgeOnShirt?: boolean;
 }) {
-  const { language, translate } = useLanguage();
+  const { language } = useLanguage();
   const playerName = localize(player.name, language);
   const ariaLabel =
     swapState === "source"
@@ -456,7 +456,7 @@ export default function TeamClient({
       ),
     );
     setSwapFrom(null);
-    setSelectedVacancySlotId(member.slotId);
+    setSelectedVacancySlotId(null);
     setSelected(null);
     toast.success(
       language === "th"
@@ -465,11 +465,10 @@ export default function TeamClient({
       {
         description:
           language === "th"
-            ? "เลือกนักเตะตำแหน่งเดียวกันจากตลาดเพื่อเติมช่องว่าง"
-            : "Choose a player in the same position from the market to fill the vacancy",
+            ? "เพิ่มนักเตะตำแหน่งเดียวกันจากตลาดได้ทันที"
+            : "Add a player in the same position directly from the market",
       },
     );
-    scrollToMarket();
   };
 
   const selectPlayer = (player: CompetitionPlayerView) => {

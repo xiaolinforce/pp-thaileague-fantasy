@@ -163,8 +163,6 @@ const translations: Record<string, string> = {
   "เติมนักเตะให้ครบ 15 คนก่อนบันทึกทีม":
     "Complete your 15-player squad before saving",
   ลบนักเตะออกจากตำแหน่งแล้ว: "Player removed from the slot",
-  เลือกนักเตะตำแหน่งเดียวกันจากตลาดเพื่อเติมช่องว่าง:
-    "Choose a player in the same position from the market to fill the vacancy",
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
     "Choose your starting XI, name a captain, and take your team to the top",

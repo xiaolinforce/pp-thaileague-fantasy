@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   fillDraftVacancy,
+  fillFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
   removePlayerFromDraft,
   type DraftLineupMember,
@@ -58,4 +59,42 @@ test("filling a vacancy restores a complete server-safe selection", () => {
       captainRole: "none",
     },
   ]);
+});
+
+test("fills the first matching vacancy without requiring a selected slot", () => {
+  const vacancies: DraftLineupMember[] = [
+    {
+      slotId: "starter-def",
+      fantasyPlayerId: null,
+      vacancyPosition: "defender",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      slotId: "bench-mid",
+      fantasyPlayerId: null,
+      vacancyPosition: "midfielder",
+      lineupRole: "bench",
+      benchOrder: 2,
+      captainRole: "none",
+    },
+    {
+      slotId: "bench-def",
+      fantasyPlayerId: null,
+      vacancyPosition: "defender",
+      lineupRole: "bench",
+      benchOrder: 1,
+      captainRole: "none",
+    },
+  ];
+
+  const next = fillFirstMatchingDraftVacancy(vacancies, "defender", "def-3");
+  assert.equal(next?.[0].fantasyPlayerId, "def-3");
+  assert.equal(next?.[1].fantasyPlayerId, null);
+  assert.equal(next?.[2].fantasyPlayerId, null);
+  assert.equal(
+    fillFirstMatchingDraftVacancy(vacancies, "forward", "fwd-1"),
+    null,
+  );
 });

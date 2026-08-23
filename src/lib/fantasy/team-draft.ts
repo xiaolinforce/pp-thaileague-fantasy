@@ -49,6 +49,20 @@ export function fillDraftVacancy(
   );
 }
 
+export function fillFirstMatchingDraftVacancy(
+  members: DraftLineupMember[],
+  position: FantasyPosition,
+  fantasyPlayerId: string,
+) {
+  const vacancy = members.find(
+    (member) =>
+      member.fantasyPlayerId === null && member.vacancyPosition === position,
+  );
+  return vacancy
+    ? fillDraftVacancy(members, vacancy.slotId, fantasyPlayerId)
+    : null;
+}
+
 export function getCompleteSelectionMembers(
   members: DraftLineupMember[],
 ): CompleteSelectionMember[] | null {

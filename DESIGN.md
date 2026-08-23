@@ -120,8 +120,10 @@ the screen before cards or tables begin.
   player becomes eligible for the market again while the change is unsaved.
 - Expose swap and remove as compact, icon-only actions on every pitch and bench
   player, with accessible names. Removing a player keeps that lineup slot as a
-  visible position-locked vacancy; saving stays disabled until the manager fills
-  every vacancy with a compatible player from the market.
+  visible position-locked vacancy without selecting it or moving focus to the
+  market. A compatible market player fills the first matching vacancy directly;
+  selecting a specific vacancy remains an optional way to narrow the market when
+  several slots are open. Saving stays disabled until every vacancy is filled.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a

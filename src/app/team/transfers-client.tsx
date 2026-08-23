@@ -24,6 +24,7 @@ import {
 } from "@/lib/competition-types";
 import {
   fillDraftVacancy,
+  fillFirstMatchingDraftVacancy,
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
 import type { FantasyPosition } from "@/lib/fantasy/rules";
@@ -33,6 +34,12 @@ const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
   defender: "DEF",
   midfielder: "MID",
   forward: "FWD",
+};
+const fantasyPositions: Record<CompetitionPosition, FantasyPosition> = {
+  GK: "goalkeeper",
+  DEF: "defender",
+  MID: "midfielder",
+  FWD: "forward",
 };
 
 export default function TransfersClient({
@@ -86,6 +93,13 @@ export default function TransfersClient({
           member.fantasyPlayerId === null,
       )
     : null;
+  const vacancies = members.filter(
+    (member) =>
+      member.fantasyPlayerId === null && member.vacancyPosition !== null,
+  );
+  const vacantPositions = new Set(
+    vacancies.map((member) => competitionPositions[member.vacancyPosition!]),
+  );
   const vacancyPosition = selectedVacancy?.vacancyPosition
     ? competitionPositions[selectedVacancy.vacancyPosition]
     : null;
@@ -132,37 +146,34 @@ export default function TransfersClient({
     }
     if (!player.fantasyPlayerId) return;
     if (ownedIds.has(player.fantasyPlayerId)) return;
-    if (selectedVacancy && vacancyPosition) {
-      if (player.position !== vacancyPosition) return;
-      onMembersChange(
-        fillDraftVacancy(
-          members,
-          selectedVacancy.slotId,
-          player.fantasyPlayerId,
-        ),
-      );
-      toast.success(
-        language === "th"
-          ? `เพิ่ม ${localize(player.name, language)} เข้าทีมแล้ว`
-          : `${localize(player.name, language)} added to the squad`,
-        {
-          description:
-            language === "th"
-              ? "ตรวจสอบทีมและกดบันทึกเมื่อพร้อม"
-              : "Review your squad and save when ready",
-        },
-      );
-      onSelectedVacancySlotChange(null);
-      return;
-    }
-    if (!selectedVacancy || !vacancyPosition) {
-      toast.info(
-        language === "th"
-          ? "เลือกช่องว่างในทีมก่อนเพิ่มนักเตะ"
-          : "Select a vacant squad slot before adding a player",
-      );
-      return;
-    }
+    const nextMembers =
+      selectedVacancy && vacancyPosition
+        ? player.position === vacancyPosition
+          ? fillDraftVacancy(
+              members,
+              selectedVacancy.slotId,
+              player.fantasyPlayerId,
+            )
+          : null
+        : fillFirstMatchingDraftVacancy(
+            members,
+            fantasyPositions[player.position],
+            player.fantasyPlayerId,
+          );
+    if (!nextMembers) return;
+    onMembersChange(nextMembers);
+    toast.success(
+      language === "th"
+        ? `เพิ่ม ${localize(player.name, language)} เข้าทีมแล้ว`
+        : `${localize(player.name, language)} added to the squad`,
+      {
+        description:
+          language === "th"
+            ? "ตรวจสอบทีมและกดบันทึกเมื่อพร้อม"
+            : "Review your squad and save when ready",
+      },
+    );
+    onSelectedVacancySlotChange(null);
   }
 
   return (
@@ -298,7 +309,9 @@ export default function TransfersClient({
         <div className="compact-market-list">
           {players.map((player) => {
             const compatible =
-              !vacancyPosition || player.position === vacancyPosition;
+              vacancyPosition !== null
+                ? player.position === vacancyPosition
+                : vacantPositions.has(player.position);
             return (
               <article className="compact-market-row" key={player.id}>
                 <button
