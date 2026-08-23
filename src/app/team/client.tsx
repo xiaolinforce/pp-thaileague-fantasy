@@ -8,7 +8,6 @@ import {
   LoaderCircle,
   Save,
   ShieldCheck,
-  Shirt,
   Trash2,
   UserRoundPlus,
   Zap,
@@ -115,10 +114,7 @@ function SquadPlayer({
           disabled={swapState === "unavailable"}
         >
           <span className="squad-shirt">
-            <Shirt
-              style={{ color: player.accent, fill: player.color }}
-              strokeWidth={1.6}
-            />
+            <PlayerKit color={player.color} accent={player.accent} />
             {showPositionBadgeOnShirt && player.position !== "GK" && (
               <span className="squad-position-badge">
                 <PositionBadge position={player.position} />
