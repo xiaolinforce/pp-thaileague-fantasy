@@ -3,11 +3,8 @@
 import {
   ArrowLeftRight,
   CalendarDays,
-  Check,
-  Crown,
   LoaderCircle,
   Save,
-  ShieldCheck,
   Trash2,
   UserRoundPlus,
   Zap,
@@ -26,7 +23,6 @@ import {
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -893,7 +889,13 @@ export default function TeamClient({
                       setSelected(null);
                     }}
                   >
-                    <Crown size={17} aria-hidden="true" /> กัปตัน
+                    <i
+                      className="captain-badge captain-badge--captain dialog-captain-icon"
+                      aria-hidden="true"
+                    >
+                      C
+                    </i>
+                    กัปตัน
                   </button>
                   <button
                     type="button"
@@ -928,13 +930,16 @@ export default function TeamClient({
                       setSelected(null);
                     }}
                   >
-                    <ShieldCheck size={17} aria-hidden="true" /> รองกัปตัน
+                    <i
+                      className="captain-badge captain-badge--vice-captain dialog-captain-icon"
+                      aria-hidden="true"
+                    >
+                      V
+                    </i>
+                    รองกัปตัน
                   </button>
                 </>
               )}
-              <DialogClose render={<button className="secondary-button" />}>
-                <Check size={17} aria-hidden="true" /> ปิด
-              </DialogClose>
             </DialogFooter>
           </DialogContent>
         )}

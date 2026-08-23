@@ -1777,7 +1777,7 @@ textarea:focus-visible {
   gap: 8px;
   min-width: 0;
   margin: 0 -26px -26px;
-  padding: 16px 26px 26px;
+  padding: 21px 26px;
   border-radius: 0 0 22px 22px;
   flex-wrap: wrap;
 }
@@ -1785,6 +1785,26 @@ textarea:focus-visible {
 .modal-actions > button {
   min-width: 0;
   white-space: nowrap;
+  align-items: center;
+}
+
+.dialog-captain-icon {
+  position: static;
+  align-self: center;
+  flex: 0 0 21px;
+  width: 21px;
+  height: 21px;
+  color: var(--ink);
+  font-style: normal;
+  line-height: 1;
+}
+
+.dialog-captain-icon.captain-badge--captain {
+  background: var(--orange);
+}
+
+.dialog-captain-icon.captain-badge--vice-captain {
+  background: color-mix(in srgb, var(--orange) 38%, var(--paper));
 }
 .cn-toast[data-sonner-toast][data-styled="true"] {
   --toast-status: var(--orange-deep);
@@ -2244,14 +2264,11 @@ textarea:focus-visible {
     display: grid;
     grid-template-columns: 1fr 1fr;
     margin: 0 -20px -20px;
-    padding: 16px 20px 20px;
+    padding: 18px 20px;
     border-radius: 0 0 20px 20px;
   }
   .modal-actions > button {
     width: 100%;
-  }
-  .modal-actions > button:first-child {
-    grid-column: 1 / -1;
   }
 }
 
