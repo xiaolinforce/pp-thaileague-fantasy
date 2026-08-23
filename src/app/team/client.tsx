@@ -79,7 +79,6 @@ function SquadPlayer({
   swapDisabled,
   captain,
   swapState,
-  transferSelected,
   showPositionBadgeOnShirt,
 }: {
   player: CompetitionPlayerView;
@@ -90,7 +89,6 @@ function SquadPlayer({
   swapDisabled: boolean;
   captain?: "C" | "V";
   swapState?: PlayerSwapState;
-  transferSelected?: boolean;
   showPositionBadgeOnShirt?: boolean;
 }) {
   const { language } = useLanguage();
@@ -106,7 +104,7 @@ function SquadPlayer({
   return (
     <Localized>
       <div
-        className={`squad-token-shell${transferSelected ? " selected-for-transfer" : ""}${swapState ? ` swap-${swapState}` : ""}`}
+        className={`squad-token-shell${swapState ? ` swap-${swapState}` : ""}`}
       >
         <button
           className="squad-token"
@@ -206,9 +204,6 @@ export default function TeamClient({
   fantasy: FantasyState;
 }) {
   const { language, translate } = useLanguage();
-  const [transferOutgoingId, setTransferOutgoingId] = useState<string | null>(
-    null,
-  );
   const [selectedVacancySlotId, setSelectedVacancySlotId] = useState<
     string | null
   >(null);
@@ -409,7 +404,6 @@ export default function TeamClient({
   const startSwap = (player: CompetitionPlayerView) => {
     if (!isEditable || !player.fantasyPlayerId) return;
     if (!swappableSourceIds.has(player.fantasyPlayerId)) return;
-    setTransferOutgoingId(null);
     setSelectedVacancySlotId(null);
     setSwapFrom(player.fantasyPlayerId);
     setSelected(null);
@@ -418,7 +412,6 @@ export default function TeamClient({
   const selectVacancy = (slotId: string) => {
     if (!isEditable) return;
     setSwapFrom(null);
-    setTransferOutgoingId(null);
     setSelectedVacancySlotId(slotId);
     scrollToMarket();
   };
@@ -437,7 +430,6 @@ export default function TeamClient({
       ),
     );
     setSwapFrom(null);
-    setTransferOutgoingId(null);
     setSelectedVacancySlotId(member.slotId);
     setSelected(null);
     toast.success(
@@ -689,9 +681,6 @@ export default function TeamClient({
                                   ? "V"
                                   : undefined
                             }
-                            transferSelected={
-                              slot.player.fantasyPlayerId === transferOutgoingId
-                            }
                             showPositionBadgeOnShirt={false}
                           />
                         ) : (
@@ -733,9 +722,6 @@ export default function TeamClient({
                         }
                         swapState={getSwapState(slot.player.fantasyPlayerId)}
                         showPositionBadgeOnShirt
-                        transferSelected={
-                          slot.player.fantasyPlayerId === transferOutgoingId
-                        }
                       />
                     ) : (
                       <VacantSquadSlot
@@ -757,8 +743,6 @@ export default function TeamClient({
             isEditable={isEditable}
             members={members}
             onMembersChange={setMembers}
-            selectedOutgoing={transferOutgoingId}
-            onSelectedOutgoingChange={setTransferOutgoingId}
             selectedVacancySlotId={selectedVacancySlotId}
             onSelectedVacancySlotChange={setSelectedVacancySlotId}
           />

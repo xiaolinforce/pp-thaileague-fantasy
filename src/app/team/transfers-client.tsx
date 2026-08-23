@@ -2,10 +2,8 @@
 
 import {
   ArrowDownUp,
-  ArrowRight,
   Search,
-  UserRoundMinus,
-  UserRoundPlus,
+  Plus,
   X,
 } from "lucide-react";
 import { useMemo, useState } from "react";
@@ -48,8 +46,6 @@ export default function TransfersClient({
   isEditable,
   members,
   onMembersChange,
-  selectedOutgoing,
-  onSelectedOutgoingChange,
   selectedVacancySlotId,
   onSelectedVacancySlotChange,
 }: {
@@ -58,8 +54,6 @@ export default function TransfersClient({
   isEditable: boolean;
   members: DraftLineupMember[];
   onMembersChange: (members: DraftLineupMember[]) => void;
-  selectedOutgoing: string | null;
-  onSelectedOutgoingChange: (fantasyPlayerId: string | null) => void;
   selectedVacancySlotId: string | null;
   onSelectedVacancySlotChange: (slotId: string | null) => void;
 }) {
@@ -88,9 +82,6 @@ export default function TransfersClient({
       ),
     [members],
   );
-  const selectedOutgoingPlayer = selectedOutgoing
-    ? playersByFantasyId.get(selectedOutgoing)
-    : null;
   const selectedVacancy = selectedVacancySlotId
     ? members.find(
         (member) =>
@@ -101,11 +92,13 @@ export default function TransfersClient({
   const vacancyPosition = selectedVacancy?.vacancyPosition
     ? competitionPositions[selectedVacancy.vacancyPosition]
     : null;
-  const targetPosition = vacancyPosition ?? selectedOutgoingPlayer?.position;
-  const effectivePosition = targetPosition ?? position;
+  const effectivePosition = vacancyPosition ?? position;
 
   const players = data.players
-    .filter((player) => player.fantasyPlayerId)
+    .filter(
+      (player) =>
+        player.fantasyPlayerId && !ownedIds.has(player.fantasyPlayerId),
+    )
     .filter(
       (player) =>
         effectivePosition === "ALL" || player.position === effectivePosition,
@@ -116,19 +109,13 @@ export default function TransfersClient({
         .toLowerCase()
         .includes(query.toLowerCase()),
     )
-    .sort((a, b) => {
-      const ownedDifference =
-        Number(Boolean(b.fantasyPlayerId && ownedIds.has(b.fantasyPlayerId))) -
-        Number(Boolean(a.fantasyPlayerId && ownedIds.has(a.fantasyPlayerId)));
-      if (ownedDifference !== 0 && !targetPosition) {
-        return ownedDifference;
-      }
-      return sort === "tier"
+    .sort((a, b) =>
+      sort === "tier"
         ? a.tier - b.tier
         : sort === "form"
           ? b.form - a.form
-          : b.points - a.points;
-    })
+          : b.points - a.points,
+    )
     .slice(0, 18);
 
   const squadPlayers = members.flatMap((member) => {
@@ -147,15 +134,7 @@ export default function TransfersClient({
       return;
     }
     if (!player.fantasyPlayerId) return;
-    if (ownedIds.has(player.fantasyPlayerId)) {
-      onSelectedVacancySlotChange(null);
-      onSelectedOutgoingChange(
-        selectedOutgoing === player.fantasyPlayerId
-          ? null
-          : player.fantasyPlayerId,
-      );
-      return;
-    }
+    if (ownedIds.has(player.fantasyPlayerId)) return;
     if (selectedVacancy && vacancyPosition) {
       if (player.position !== vacancyPosition) return;
       onMembersChange(
@@ -179,39 +158,14 @@ export default function TransfersClient({
       onSelectedVacancySlotChange(null);
       return;
     }
-    if (!selectedOutgoing || !selectedOutgoingPlayer) {
+    if (!selectedVacancy || !vacancyPosition) {
       toast.info(
         language === "th"
-          ? "เลือกนักเตะในทีมที่ต้องการขายหรือเลือกช่องว่างก่อน"
-          : "Choose a squad player to sell or select a vacant slot first",
+          ? "เลือกช่องว่างในทีมก่อนเพิ่มนักเตะ"
+          : "Select a vacant squad slot before adding a player",
       );
       return;
     }
-    if (player.position !== selectedOutgoingPlayer.position) {
-      toast.error("นักเตะที่ซื้อเข้าต้องอยู่ตำแหน่งเดียวกับนักเตะที่ขาย");
-      return;
-    }
-    onMembersChange(
-      members.map((member) =>
-        member.fantasyPlayerId === selectedOutgoing
-          ? {
-              ...member,
-              fantasyPlayerId: player.fantasyPlayerId,
-              vacancyPosition: null,
-            }
-          : member,
-      ),
-    );
-    toast.success(
-      `${localize(selectedOutgoingPlayer.name, language)} → ${localize(player.name, language)}`,
-      {
-        description:
-          language === "th"
-            ? "กดบันทึกทีมเพื่อยืนยันการเปลี่ยนแปลง"
-            : "Save your team to confirm the change",
-      },
-    );
-    onSelectedOutgoingChange(null);
   }
 
   return (
@@ -245,39 +199,30 @@ export default function TransfersClient({
           </div>
         </div>
 
-        {(selectedOutgoingPlayer || selectedVacancy) && (
+        {selectedVacancy && (
           <div className="compact-transfer-guide active" aria-live="polite">
             <div>
               <strong>
-                {selectedVacancy && vacancyPosition
+                {vacancyPosition
                   ? language === "th"
                     ? `เลือก ${vacancyPosition} เพื่อเติมช่องว่าง`
                     : `Choose a ${vacancyPosition} for the vacant slot`
-                  : language === "th"
-                    ? `เลือก ${selectedOutgoingPlayer?.position} คนใหม่`
-                    : `Choose a new ${selectedOutgoingPlayer?.position}`}
+                  : null}
               </strong>
               <span>
-                {selectedVacancy
-                  ? language === "th"
-                    ? selectedVacancy.lineupRole === "starter"
-                      ? "กำลังเติมช่องตัวจริง"
-                      : `กำลังเติมม้านั่งลำดับ ${selectedVacancy.benchOrder}`
-                    : selectedVacancy.lineupRole === "starter"
-                      ? "Filling a starting-XI slot"
-                      : `Filling bench slot ${selectedVacancy.benchOrder}`
-                  : language === "th"
-                    ? `กำลังเปลี่ยน ${localize(selectedOutgoingPlayer!.name, language)}`
-                    : `Replacing ${localize(selectedOutgoingPlayer!.name, language)}`}
+                {language === "th"
+                  ? selectedVacancy.lineupRole === "starter"
+                    ? "กำลังเติมช่องตัวจริง"
+                    : `กำลังเติมม้านั่งลำดับ ${selectedVacancy.benchOrder}`
+                  : selectedVacancy.lineupRole === "starter"
+                    ? "Filling a starting-XI slot"
+                    : `Filling bench slot ${selectedVacancy.benchOrder}`}
               </span>
             </div>
             <button
               type="button"
               className="compact-clear-player"
-              onClick={() => {
-                onSelectedOutgoingChange(null);
-                onSelectedVacancySlotChange(null);
-              }}
+              onClick={() => onSelectedVacancySlotChange(null)}
             >
               <X size={15} /> ยกเลิก
             </button>
@@ -308,17 +253,14 @@ export default function TransfersClient({
             className="position-filter compact-position-filter"
             value={[effectivePosition]}
             onValueChange={(values) => {
-              if (!selectedOutgoingPlayer && values[0]) {
-                if (selectedVacancy) return;
-                setPosition(String(values[0]));
-              }
+              if (!selectedVacancy && values[0]) setPosition(String(values[0]));
             }}
           >
             {(["ALL", "GK", "DEF", "MID", "FWD"] as const).map((item) => (
               <ToggleGroupItem
                 value={item}
                 key={item}
-                disabled={Boolean(targetPosition) && item !== targetPosition}
+                disabled={Boolean(vacancyPosition) && item !== vacancyPosition}
               >
                 {item === "ALL" ? "ทั้งหมด" : item}
               </ToggleGroupItem>
@@ -358,17 +300,10 @@ export default function TransfersClient({
 
         <div className="compact-market-list">
           {players.map((player) => {
-            const owned = Boolean(
-              player.fantasyPlayerId && ownedIds.has(player.fantasyPlayerId),
-            );
-            const selling = player.fantasyPlayerId === selectedOutgoing;
             const compatible =
-              !targetPosition || player.position === targetPosition;
+              !vacancyPosition || player.position === vacancyPosition;
             return (
-              <article
-                className={`compact-market-row ${selling ? "selected-transfer-player" : ""}`}
-                key={player.id}
-              >
+              <article className="compact-market-row" key={player.id}>
                 <PlayerIdentity player={player} />
                 <div className="compact-market-meta">
                   <span>{localize(player.next, language)}</span>
@@ -379,26 +314,16 @@ export default function TransfersClient({
                 </div>
                 <button
                   type="button"
-                  className={`transfer-player-action ${owned ? "owned" : ""}`}
-                  disabled={!isEditable || (!owned && !compatible)}
+                  className="transfer-player-action"
+                  disabled={!isEditable || !compatible}
                   onClick={() => choosePlayer(player)}
                   aria-label={
-                    owned
-                      ? language === "th"
-                        ? `เลือก ${localize(player.name, language)} ที่จะขาย`
-                        : `Select ${localize(player.name, language)} to sell`
-                      : language === "th"
-                        ? `ซื้อ ${localize(player.name, language)} เข้าทีม`
-                        : `Transfer ${localize(player.name, language)} into the squad`
+                    language === "th"
+                      ? `ซื้อ ${localize(player.name, language)} เข้าทีม`
+                      : `Transfer ${localize(player.name, language)} into the squad`
                   }
                 >
-                  {owned ? (
-                    <UserRoundMinus size={17} />
-                  ) : selectedOutgoing || selectedVacancy ? (
-                    <ArrowRight size={17} />
-                  ) : (
-                    <UserRoundPlus size={17} />
-                  )}
+                  <Plus size={13} />
                 </button>
               </article>
             );

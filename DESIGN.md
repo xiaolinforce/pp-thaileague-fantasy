@@ -114,8 +114,10 @@ the screen before cards or tables begin.
   controls; historical squads belong on the Points screen.
 - Keep lineup management and player transfers visible in one Team workspace,
   without mode tabs. On desktop, show the pitch and market side by side; stack
-  the market after the pitch on narrow screens. Selecting a squad player should
-  filter the market to compatible replacements without leaving the page.
+  the market after the pitch on narrow screens. Selecting a vacant squad slot
+  should filter the market to compatible replacements without leaving the page.
+  Do not list players who are already in the current draft squad; a removed
+  player becomes eligible for the market again while the change is unsaved.
 - Expose swap and remove as compact, icon-only actions on every pitch and bench
   player, with accessible names. Removing a player keeps that lineup slot as a
   visible position-locked vacancy; saving stays disabled until the manager fills

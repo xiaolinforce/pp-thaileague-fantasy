@@ -2842,8 +2842,9 @@ textarea:focus-visible {
 }
 
 .compact-market-row .transfer-player-action {
-  width: 44px;
-  height: 44px;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
 }
 
 .compact-market-empty {
@@ -2997,12 +2998,6 @@ textarea:focus-visible {
 
 .squad-token-shell:hover {
   transform: translateY(-4px);
-}
-
-.squad-token-shell.selected-for-transfer .squad-token {
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.16);
-  box-shadow: inset 0 0 0 2px #ffb184;
 }
 
 .squad-token-shell.swap-source .squad-token,
