@@ -292,9 +292,7 @@ export default function ProfilePage() {
   return (
     <AppShell>
       <main id="main-content" className="content product-content">
-        <PageHeader
-          title="โปรไฟล์และกติกา"
-        />
+        <PageHeader title="โปรไฟล์และกติกา" />
 
         <div className="profile-layout">
           <section

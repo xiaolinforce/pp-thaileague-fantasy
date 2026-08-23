@@ -15,10 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import {
-  Localized,
-  SidebarLanguageButton,
-} from "@/components/fantasy/i18n";
+import { Localized, SidebarLanguageButton } from "@/components/fantasy/i18n";
 import {
   Sheet,
   SheetClose,
@@ -211,7 +208,11 @@ export function PageHeader({
       <section className="page-intro product-page-intro">
         <div>
           {eyebrow ? <span className="eyebrow orange">{eyebrow}</span> : null}
-          <h1 className={titleClassName ? `page-title ${titleClassName}` : "page-title"}>
+          <h1
+            className={
+              titleClassName ? `page-title ${titleClassName}` : "page-title"
+            }
+          >
             {title}
           </h1>
           {description ? <p>{description}</p> : null}

@@ -255,9 +255,7 @@ export default async function PointsPage({
             <div className="points-bench-panel">
               <div className="bench-title">
                 <div>
-                  <h3>
-                    ม้านั่งสำรอง
-                  </h3>
+                  <h3>ม้านั่งสำรอง</h3>
                 </div>
               </div>
               <div className="points-bench-grid">

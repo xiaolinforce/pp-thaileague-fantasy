@@ -21,9 +21,7 @@ export default async function LeaguesPage() {
   return (
     <AppShell>
       <main id="main-content" className="content product-content">
-        <PageHeader
-          title="ลีก"
-        />
+        <PageHeader title="ลีก" />
 
         <section className="league-cards" aria-labelledby="my-leagues-heading">
           <h2 id="my-leagues-heading" className="sr-only">

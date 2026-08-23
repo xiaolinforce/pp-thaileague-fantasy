@@ -1839,11 +1839,7 @@ textarea:focus-visible {
 
 .cn-toast[data-sonner-toast][data-styled="true"][data-type="error"] {
   --toast-status: var(--color-destructive);
-  --toast-status-soft: color-mix(
-    in srgb,
-    var(--color-destructive) 10%,
-    white
-  );
+  --toast-status-soft: color-mix(in srgb, var(--color-destructive) 10%, white);
 }
 
 .cn-toast[data-sonner-toast][data-styled="true"][data-type="info"] {
@@ -1910,8 +1906,7 @@ textarea:focus-visible {
   color: var(--ink);
 }
 
-.cn-toast[data-sonner-toast][data-styled="true"]
-  .cn-toast-close:focus-visible {
+.cn-toast[data-sonner-toast][data-styled="true"] .cn-toast-close:focus-visible {
   outline: 2px solid var(--orange);
   outline-offset: 2px;
   box-shadow: none;

@@ -39,9 +39,7 @@ export default async function FantasyAdminPage() {
   return (
     <AppShell>
       <main id="main-content" className="content product-content">
-        <PageHeader
-          title="Fantasy Admin"
-        />
+        <PageHeader title="Fantasy Admin" />
 
         <section className="market-insight admin-notice">
           <div>
