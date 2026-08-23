@@ -6539,13 +6539,6 @@ textarea:focus-visible {
     transform: rotate(360deg);
   }
 }
-.squad-action-hint {
-  margin: 14px 14px 0;
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #c2410c;
-  background: var(--orange-soft);
-}
 .chip-options {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -6732,7 +6725,6 @@ body {
 .auto-pick,
 .transfer-button,
 .filter-button,
-.squad-action-hint,
 .profile-nav-card nav a,
 .profile-section-nav a,
 .rules-list [data-slot="accordion-trigger"] {

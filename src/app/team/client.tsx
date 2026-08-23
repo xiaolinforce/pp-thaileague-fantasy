@@ -73,6 +73,7 @@ function SquadPlayer({
   onSwap,
   onRemove,
   actionsDisabled,
+  hideActions,
   swapDisabled,
   captain,
   swapState,
@@ -83,6 +84,7 @@ function SquadPlayer({
   onSwap: (player: CompetitionPlayerView) => void;
   onRemove: (player: CompetitionPlayerView) => void;
   actionsDisabled: boolean;
+  hideActions: boolean;
   swapDisabled: boolean;
   captain?: "C" | "V";
   swapState?: PlayerSwapState;
@@ -136,26 +138,30 @@ function SquadPlayer({
             {localize(player.clubShort, language)}
           </span>
         </button>
-        <button
-          type="button"
-          className="squad-token-action squad-swap-action"
-          onClick={() => onSwap(player)}
-          disabled={actionsDisabled || swapDisabled}
-          aria-label={`${translateAction(language, "สลับตัว", "Swap")} ${playerName}`}
-          title={language === "th" ? "สลับตัว" : "Swap"}
-        >
-          <ArrowLeftRight size={13} aria-hidden="true" />
-        </button>
-        <button
-          type="button"
-          className="squad-token-action squad-remove-action"
-          onClick={() => onRemove(player)}
-          disabled={actionsDisabled}
-          aria-label={`${translateAction(language, "ลบ", "Remove")} ${playerName}`}
-          title={language === "th" ? "ลบ" : "Remove"}
-        >
-          <Trash2 size={13} aria-hidden="true" />
-        </button>
+        {!hideActions && (
+          <>
+            <button
+              type="button"
+              className="squad-token-action squad-swap-action"
+              onClick={() => onSwap(player)}
+              disabled={actionsDisabled || swapDisabled}
+              aria-label={`${translateAction(language, "สลับตัว", "Swap")} ${playerName}`}
+              title={language === "th" ? "สลับตัว" : "Swap"}
+            >
+              <ArrowLeftRight size={13} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              className="squad-token-action squad-remove-action"
+              onClick={() => onRemove(player)}
+              disabled={actionsDisabled}
+              aria-label={`${translateAction(language, "ลบ", "Remove")} ${playerName}`}
+              title={language === "th" ? "ลบ" : "Remove"}
+            >
+              <Trash2 size={13} aria-hidden="true" />
+            </button>
+          </>
+        )}
       </div>
     </Localized>
   );
@@ -664,11 +670,6 @@ export default function TeamClient({
                 })}
               </div>
             </section>
-            {swapFrom && (
-              <div className="squad-action-hint" role="status">
-                เลือกนักเตะที่ไฮไลท์เพื่อสลับ หรือกดคนเดิมเพื่อยกเลิก
-              </div>
-            )}
             <div className="squad-pitch">
               <div className="field-lines">
                 <span />
@@ -691,7 +692,8 @@ export default function TeamClient({
                             onSelect={selectPlayer}
                             onSwap={startSwap}
                             onRemove={removePlayer}
-                            actionsDisabled={!isEditable || Boolean(swapFrom)}
+                            actionsDisabled={!isEditable}
+                            hideActions={Boolean(swapFrom)}
                             swapDisabled={
                               !slot.player.fantasyPlayerId ||
                               !swappableSourceIds.has(
@@ -742,7 +744,8 @@ export default function TeamClient({
                         onSelect={selectPlayer}
                         onSwap={startSwap}
                         onRemove={removePlayer}
-                        actionsDisabled={!isEditable || Boolean(swapFrom)}
+                        actionsDisabled={!isEditable}
+                        hideActions={Boolean(swapFrom)}
                         swapDisabled={
                           !slot.player.fantasyPlayerId ||
                           !swappableSourceIds.has(slot.player.fantasyPlayerId)
