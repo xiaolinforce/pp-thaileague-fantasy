@@ -384,14 +384,7 @@ export default function TeamClient({
       toast.error("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว");
       return;
     }
-    if (!completeSelectionMembers) {
-      toast.error(
-        language === "th"
-          ? "เติมนักเตะให้ครบ 15 คนก่อนบันทึกทีม"
-          : "Complete your 15-player squad before saving",
-      );
-      return;
-    }
+    if (!completeSelectionMembers) return;
     startTransition(async () => {
       try {
         const result = await saveFantasySelectionAction({
@@ -454,17 +447,6 @@ export default function TeamClient({
     setSwapFrom(null);
     setSelectedVacancySlotId(null);
     setSelected(null);
-    toast.success(
-      language === "th"
-        ? "ลบนักเตะออกจากตำแหน่งแล้ว"
-        : "Player removed from the slot",
-      {
-        description:
-          language === "th"
-            ? "เพิ่มนักเตะตำแหน่งเดียวกันจากตลาดได้ทันที"
-            : "Add a player in the same position directly from the market",
-      },
-    );
   };
 
   const selectPlayer = (player: CompetitionPlayerView) => {
@@ -503,7 +485,6 @@ export default function TeamClient({
       }),
     );
     setSwapFrom(null);
-    toast.success(translate("สลับตำแหน่งในทีมแล้ว"));
   };
 
   return (

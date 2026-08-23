@@ -162,17 +162,6 @@ export default function TransfersClient({
           );
     if (!nextMembers) return;
     onMembersChange(nextMembers);
-    toast.success(
-      language === "th"
-        ? `เพิ่ม ${localize(player.name, language)} เข้าทีมแล้ว`
-        : `${localize(player.name, language)} added to the squad`,
-      {
-        description:
-          language === "th"
-            ? "ตรวจสอบทีมและกดบันทึกเมื่อพร้อม"
-            : "Review your squad and save when ready",
-      },
-    );
     onSelectedVacancySlotChange(null);
   }
 
