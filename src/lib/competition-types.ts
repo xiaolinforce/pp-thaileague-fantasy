@@ -26,6 +26,11 @@ export type CompetitionPlayerView = {
   form: number;
   selected: number;
   next: LocalizedText;
+  recentMatches: Array<{
+    fixtureId: string;
+    matchweek: number;
+    points: number;
+  }>;
   color: string;
   accent: string;
 };

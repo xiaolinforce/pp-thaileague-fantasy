@@ -206,7 +206,7 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
   }
   const pointsByFantasyPlayer = new Map<
     string,
-    Array<{ matchweek: number; points: number }>
+    Array<{ fixtureId: string; matchweek: number; points: number }>
   >();
   const fixtureById = new Map(
     fixtureRows.map((fixture) => [fixture.id, fixture]),
@@ -215,6 +215,7 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
     const fixture = fixtureById.get(row.stats.fixtureId);
     const list = pointsByFantasyPlayer.get(row.stats.fantasyPlayerId) ?? [];
     list.push({
+      fixtureId: row.stats.fixtureId,
       matchweek: fixture?.matchweek ?? 0,
       points: row.points.totalPoints,
     });
@@ -345,6 +346,24 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
           )
         : [];
       const recentPoints = matchPoints.slice(0, 5);
+      const pointsByFixtureId = new Map(
+        matchPoints.map((match) => [match.fixtureId, match.points]),
+      );
+      const recentMatches = [
+        ...(fixturesByEntry.get(registration.competitionEntryId) ?? []),
+      ]
+        .filter((fixture) => fixture.status === "finished")
+        .sort((fixtureA, fixtureB) => {
+          const kickoffA = fixtureA.kickoffAt?.getTime() ?? 0;
+          const kickoffB = fixtureB.kickoffAt?.getTime() ?? 0;
+          return kickoffB - kickoffA || fixtureB.matchweek - fixtureA.matchweek;
+        })
+        .slice(0, 5)
+        .map((fixture) => ({
+          fixtureId: fixture.id,
+          matchweek: fixture.matchweek,
+          points: pointsByFixtureId.get(fixture.id) ?? 0,
+        }));
       return [
         {
           id: player.id,
@@ -389,6 +408,7 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
           tier,
           isThai: fantasyPlayer?.isThai ?? false,
           next,
+          recentMatches,
           color,
           accent,
         },

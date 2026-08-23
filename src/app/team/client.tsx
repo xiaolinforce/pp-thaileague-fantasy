@@ -3,6 +3,7 @@
 import {
   ArrowLeftRight,
   CalendarDays,
+  History,
   LoaderCircle,
   Save,
   Trash2,
@@ -325,7 +326,25 @@ export default function TeamClient({
           : Number.POSITIVE_INFINITY;
         return kickoffA - kickoffB || fixtureA.matchweek - fixtureB.matchweek;
       })
-      .slice(0, 3);
+      .slice(0, 5);
+  }, [data.fixtures, selected]);
+  const selectedRecentMatches = useMemo(() => {
+    if (!selected) return [];
+    const fixturesById = new Map(
+      data.fixtures.map((fixture) => [fixture.id, fixture]),
+    );
+
+    return selected.recentMatches.flatMap((match) => {
+      const fixture = fixturesById.get(match.fixtureId);
+      if (!fixture) return [];
+      const isHome = fixture.home.id === selected.clubId;
+      return [
+        {
+          ...match,
+          opponent: isHome ? fixture.away : fixture.home,
+        },
+      ];
+    });
   }, [data.fixtures, selected]);
   const selectedPlayerName = selected
     ? translate(localize(selected.name, language))
@@ -796,43 +815,77 @@ export default function TeamClient({
                 <strong>{selected.form}</strong>
               </div>
             </div>
-            <section
-              className="player-upcoming-fixtures"
-              aria-labelledby="player-upcoming-fixtures-title"
-            >
-              <div className="player-upcoming-fixtures-heading">
-                <CalendarDays size={18} aria-hidden="true" />
-                <h3 id="player-upcoming-fixtures-title">3 โปรแกรมถัดไป</h3>
-              </div>
-              {selectedFixtures.length > 0 ? (
-                <div className="player-upcoming-fixtures-list">
-                  {selectedFixtures.map((fixture) => {
-                    const isHome = fixture.home.id === selected.clubId;
-                    const opponent = isHome ? fixture.away : fixture.home;
-                    return (
-                      <article key={fixture.id}>
-                        <div className="player-fixture-gameweek">
-                          <span>GW</span>
-                          <strong>{fixture.matchweek}</strong>
-                        </div>
-                        <div className="player-fixture-opponent">
-                          <strong>{localize(opponent.name, language)}</strong>
-                          <span>
-                            {isHome ? "เหย้า" : "เยือน"} ·{" "}
-                            {localize(fixture.dateLabel, language)}
-                          </span>
-                        </div>
-                        <time dateTime={fixture.kickoffAt ?? undefined}>
-                          {localize(fixture.timeLabel, language)}
-                        </time>
-                      </article>
-                    );
-                  })}
+            <div className="player-match-sections">
+              <section
+                className="player-match-section"
+                aria-labelledby="player-recent-matches-title"
+              >
+                <div className="player-match-section-heading">
+                  <History size={18} aria-hidden="true" />
+                  <h3 id="player-recent-matches-title">5 นัดล่าสุด</h3>
                 </div>
-              ) : (
-                <p className="player-fixtures-empty">ยังไม่มีโปรแกรมถัดไป</p>
-              )}
-            </section>
+                {selectedRecentMatches.length > 0 ? (
+                  <div className="player-match-strip">
+                    {selectedRecentMatches.map((match) => (
+                      <article
+                        className="player-match-card"
+                        key={match.fixtureId}
+                      >
+                        <span className="player-match-gameweek">
+                          GW <strong>{match.matchweek}</strong>
+                        </span>
+                        <strong
+                          className="player-match-opponent"
+                          title={localize(match.opponent.name, language)}
+                        >
+                          {localize(match.opponent.shortName, language)}
+                        </strong>
+                        <span className="player-match-points">
+                          <strong>{match.points}</strong> <span>คะแนน</span>
+                        </span>
+                      </article>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="player-fixtures-empty">ยังไม่มีผลการแข่งขัน</p>
+                )}
+              </section>
+              <section
+                className="player-match-section"
+                aria-labelledby="player-upcoming-fixtures-title"
+              >
+                <div className="player-match-section-heading">
+                  <CalendarDays size={18} aria-hidden="true" />
+                  <h3 id="player-upcoming-fixtures-title">5 โปรแกรมถัดไป</h3>
+                </div>
+                {selectedFixtures.length > 0 ? (
+                  <div className="player-match-strip">
+                    {selectedFixtures.map((fixture) => {
+                      const isHome = fixture.home.id === selected.clubId;
+                      const opponent = isHome ? fixture.away : fixture.home;
+                      return (
+                        <article
+                          className="player-match-card player-match-card--upcoming"
+                          key={fixture.id}
+                        >
+                          <span className="player-match-gameweek">
+                            GW <strong>{fixture.matchweek}</strong>
+                          </span>
+                          <strong
+                            className="player-match-opponent"
+                            title={localize(opponent.name, language)}
+                          >
+                            {localize(opponent.shortName, language)}
+                          </strong>
+                        </article>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="player-fixtures-empty">ยังไม่มีโปรแกรมถัดไป</p>
+                )}
+              </section>
+            </div>
             <DialogFooter className="modal-actions border-t-0">
               {selectedMember && (
                 <>

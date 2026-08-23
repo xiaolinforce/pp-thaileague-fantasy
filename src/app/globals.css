@@ -1680,12 +1680,17 @@ textarea:focus-visible {
   overflow-wrap: anywhere;
 }
 
-.player-upcoming-fixtures {
-  border-top: 1px solid var(--line);
+.player-match-sections {
+  display: grid;
+  gap: 16px;
   padding-top: 16px;
 }
 
-.player-upcoming-fixtures-heading {
+.player-match-section {
+  min-width: 0;
+}
+
+.player-match-section-heading {
   margin-bottom: 8px;
   color: var(--ink);
   display: flex;
@@ -1693,83 +1698,88 @@ textarea:focus-visible {
   gap: 8px;
 }
 
-.player-upcoming-fixtures-heading svg {
+.player-match-section-heading svg {
+  flex: 0 0 auto;
   color: var(--orange-deep);
 }
 
-.player-upcoming-fixtures-heading h3 {
+.player-match-section-heading h3 {
   margin: 0;
-  font-size: 17px;
-  line-height: 1.4;
-}
-
-.player-upcoming-fixtures-list {
-  border-top: 1px solid #f0eeeb;
-}
-
-.player-upcoming-fixtures-list article {
-  min-height: 64px;
-  border-bottom: 1px solid #f0eeeb;
-  display: grid;
-  grid-template-columns: 48px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 12px;
-}
-
-.player-fixture-gameweek {
-  color: var(--orange-deep);
-  display: flex;
-  align-items: baseline;
-  gap: 3px;
-  font-variant-numeric: tabular-nums;
-}
-
-.player-fixture-gameweek span {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.player-fixture-gameweek strong {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.player-fixture-opponent {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.player-fixture-opponent strong {
-  overflow: hidden;
   font-size: 16px;
-  line-height: 1.35;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.player-fixture-opponent span {
-  overflow: hidden;
-  color: var(--muted);
-  font-size: 14px;
   line-height: 1.4;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.player-upcoming-fixtures-list time {
-  color: var(--ink);
-  font-size: 15px;
+.player-match-strip {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.player-match-card {
+  min-width: 0;
+  min-height: 82px;
+  padding: 9px 8px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--paper);
+  display: grid;
+  align-content: space-between;
+  gap: 5px;
+  text-align: center;
+}
+
+.player-match-card--upcoming {
+  align-content: center;
+  gap: 7px;
+}
+
+.player-match-gameweek {
+  color: var(--orange-deep);
+  font-size: 11px;
   font-weight: 600;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+.player-match-gameweek strong {
+  font-size: 14px;
+}
+
+.player-match-opponent {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-match-points {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.player-match-points > strong {
+  color: var(--ink);
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
 }
 
 .player-fixtures-empty {
   margin: 0;
-  padding: 16px 0;
+  min-height: 82px;
+  padding: 16px;
+  border: 1px dashed var(--line);
+  border-radius: 11px;
   color: var(--muted);
-  font-size: 15px;
+  font-size: 14px;
+  display: grid;
+  place-items: center;
+  text-align: center;
 }
 .modal-actions {
   display: flex;
@@ -2249,16 +2259,15 @@ textarea:focus-visible {
   .player-detail-grid > div:last-child {
     grid-column: 1 / -1;
   }
-  .player-upcoming-fixtures-list article {
-    min-height: 68px;
-    grid-template-columns: 42px minmax(0, 1fr) auto;
-    gap: 8px;
+  .player-match-strip {
+    grid-template-columns: repeat(5, 92px);
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
   }
-  .player-fixture-opponent span {
-    white-space: normal;
-  }
-  .player-upcoming-fixtures-list time {
-    font-size: 14px;
+  .player-match-card {
+    min-height: 78px;
   }
   .modal-actions {
     display: grid;
