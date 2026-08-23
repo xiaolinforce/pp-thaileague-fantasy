@@ -120,13 +120,7 @@ export default function TransfersClient({
         .toLowerCase()
         .includes(query.toLowerCase()),
     )
-    .sort((a, b) =>
-      sort === "tier"
-        ? a.tier - b.tier
-        : sort === "form"
-          ? b.form - a.form
-          : b.points - a.points,
-    )
+    .sort((a, b) => (sort === "form" ? b.form - a.form : b.points - a.points))
     .slice(0, 50);
 
   const squadPlayers = members.flatMap((member) => {
@@ -289,7 +283,6 @@ export default function TransfersClient({
               <SelectContent>
                 <SelectItem value="points">คะแนนสูงสุด</SelectItem>
                 <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
-                <SelectItem value="tier">ระดับสูงสุด</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -301,6 +294,16 @@ export default function TransfersClient({
               vacancyPosition !== null
                 ? player.position === vacancyPosition
                 : vacantPositions.has(player.position);
+            const metricValue =
+              sort === "form" ? player.form.toFixed(1) : String(player.points);
+            const metricLabel =
+              sort === "form"
+                ? language === "th"
+                  ? `ฟอร์ม ${metricValue}`
+                  : `Form ${metricValue}`
+                : language === "th"
+                  ? `${metricValue} คะแนน`
+                  : `${metricValue} points`;
             return (
               <article className="compact-market-row" key={player.id}>
                 <button
@@ -318,13 +321,13 @@ export default function TransfersClient({
                     useShortName
                     showMarketCompact
                     showPositionBadge
+                    showTierBadge
                   />
                 </button>
-                <div className="compact-market-meta">
-                  <strong>
-                    L{player.tier} · {player.points}{" "}
-                    {language === "th" ? "คะแนน" : "points"}
-                  </strong>
+                <div className="compact-market-meta" aria-label={metricLabel}>
+                  <span className="market-player-points">
+                    <strong>{metricValue}</strong>
+                  </span>
                 </div>
                 <button
                   type="button"

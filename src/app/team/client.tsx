@@ -6,6 +6,7 @@ import {
   History,
   LoaderCircle,
   Save,
+  TriangleAlert,
   Trash2,
   UserRoundPlus,
   Zap,
@@ -36,10 +37,12 @@ import { saveFantasySelectionAction } from "@/app/fantasy-actions";
 import {
   getValidLineupSwapTargetIds,
   swapLineupAssignments,
+  validateLineup,
   validateLineupAssignment,
   type FantasyChip,
   type FantasyPosition,
-  type LineupAssignmentPlayer,
+  type LineupPlayer,
+  type RuleViolation,
 } from "@/lib/fantasy/rules";
 import {
   getCompleteSelectionMembers,
@@ -66,6 +69,62 @@ const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
 };
 
 type PlayerSwapState = "source" | "available" | "unavailable";
+
+function formatClientViolation(
+  violation: RuleViolation,
+  translate: (text: string) => string,
+  clubNameById: ReadonlyMap<string, string>,
+) {
+  const format = (
+    template: string,
+    values: Record<string, string | number | boolean | undefined>,
+  ) =>
+    Object.entries(values).reduce(
+      (message, [key, value]) =>
+        message.replaceAll(
+          `{${key}}`,
+          value === undefined ? "" : String(value),
+        ),
+      translate(template),
+    );
+
+  switch (violation.code) {
+    case "squad_size":
+    case "position_quota":
+    case "unknown_tier":
+    case "unavailable_player":
+      return translate("เกิดข้อผิดพลาด โปรด Refresh หน้านี้");
+    case "duplicate_player":
+    case "starter_count":
+    case "formation":
+    case "bench_order":
+    case "captain":
+    case "vice_captain":
+      return null;
+    case "club_quota": {
+      const clubId = violation.details?.clubId;
+      const clubName =
+        typeof clubId === "string"
+          ? (clubNameById.get(clubId) ?? translate("สโมสรนี้"))
+          : translate("สโมสรนี้");
+      return format("คุณเลือกผู้เล่นจากสโมสร {club} เกิน {count} คน", {
+        club: clubName,
+        count: violation.details?.limit,
+      });
+    }
+    case "foreign_quota":
+      return format("คุณเลือกผู้เล่นต่างชาติเกิน {count} คน", {
+        count: violation.details?.limit,
+      });
+    case "tier_quota":
+      return format("ผู้เล่นระดับ {level} ขึ้นไปใช้ได้ไม่เกิน {count} ช่อง", {
+        level: violation.details?.level,
+        count: violation.details?.limit,
+      });
+    default:
+      return translate(violation.message);
+  }
+}
 
 function SquadPlayer({
   player,
@@ -246,7 +305,17 @@ export default function TeamClient({
       ),
     [data.players],
   );
-  const lineupAssignments = useMemo<LineupAssignmentPlayer[]>(
+  const clubNameById = useMemo(
+    () =>
+      new Map(
+        data.players.map((player) => [
+          player.clubId,
+          translate(localize(player.club, language)),
+        ]),
+      ),
+    [data.players, language, translate],
+  );
+  const lineupAssignments = useMemo<LineupPlayer[]>(
     () =>
       members.flatMap((member) => {
         const fantasyPlayerId = member.fantasyPlayerId;
@@ -257,7 +326,11 @@ export default function TeamClient({
           ? [
               {
                 id: fantasyPlayerId,
+                clubId: squadPlayer.clubId,
                 position: fantasyPositions[squadPlayer.position],
+                tier: squadPlayer.tier,
+                isThai: squadPlayer.isThai,
+                isAvailable: true,
                 lineupRole: member.lineupRole,
                 benchOrder: member.benchOrder,
                 captainRole: member.captainRole,
@@ -377,6 +450,35 @@ export default function TeamClient({
     [members],
   );
   const hasVacancies = completeSelectionMembers === null;
+  const lineupValidationViolations = useMemo(
+    () => (hasVacancies ? [] : validateLineup(lineupAssignments)),
+    [hasVacancies, lineupAssignments],
+  );
+  const clientValidationMessages = useMemo(() => {
+    return [
+      ...new Set(
+        lineupValidationViolations.flatMap((violation) => {
+          const message = formatClientViolation(
+            violation,
+            translate,
+            clubNameById,
+          );
+          return message ? [message] : [];
+        }),
+      ),
+    ];
+  }, [clubNameById, lineupValidationViolations, translate]);
+  const captaincyValidationMessages = useMemo(
+    () =>
+      lineupValidationViolations
+        .filter(
+          (violation) =>
+            violation.code === "captain" || violation.code === "vice_captain",
+        )
+        .map((violation) => translate(violation.message)),
+    [lineupValidationViolations, translate],
+  );
+  const hasClientValidationErrors = clientValidationMessages.length > 0;
   const hasUnsavedChanges =
     hasVacancies ||
     JSON.stringify(completeSelectionMembers) !== JSON.stringify(savedMembers) ||
@@ -416,6 +518,12 @@ export default function TeamClient({
       return;
     }
     if (!completeSelectionMembers) return;
+    if (captaincyValidationMessages.length > 0) {
+      toast.error("บันทึกทีมไม่ได้", {
+        description: captaincyValidationMessages.join(" · "),
+      });
+      return;
+    }
     startTransition(async () => {
       try {
         const result = await saveFantasySelectionAction({
@@ -529,14 +637,18 @@ export default function TeamClient({
               className="primary-button"
               onClick={saveTeam}
               disabled={
-                isPending || !isEditable || !hasUnsavedChanges || hasVacancies
+                isPending ||
+                !isEditable ||
+                !hasUnsavedChanges ||
+                hasVacancies ||
+                hasClientValidationErrors
               }
               aria-busy={isPending}
               title={
                 !isEditable
                   ? "ปิดรับการจัดทีมแล้ว"
-                  : hasVacancies
-                    ? "เติมนักเตะให้ครบ 15 คนก่อน"
+                  : hasClientValidationErrors
+                    ? clientValidationMessages[0]
                     : !hasUnsavedChanges
                       ? "ยังไม่มีการเปลี่ยนแปลง"
                       : undefined
@@ -670,6 +782,20 @@ export default function TeamClient({
                 })}
               </div>
             </section>
+            {hasClientValidationErrors && (
+              <>
+                {clientValidationMessages.map((message) => (
+                  <div
+                    className="squad-validation-alert"
+                    key={message}
+                    role="alert"
+                  >
+                    <TriangleAlert size={18} aria-hidden="true" />
+                    <span>{message}</span>
+                  </div>
+                ))}
+              </>
+            )}
             <div className="squad-pitch">
               <div className="field-lines">
                 <span />

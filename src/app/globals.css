@@ -2827,8 +2827,11 @@ textarea:focus-visible {
   margin-top: -4px;
 }
 
-.market-player--compact .market-position-badge-wrap {
+.market-player--compact span.market-position-badge-wrap {
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .market-player--compact .market-position-badge-wrap .position-badge {
@@ -2836,6 +2839,35 @@ textarea:focus-visible {
   font-size: 10px;
   border-radius: 999px;
   font-weight: 800;
+}
+
+.market-player--compact span.market-tier-badge {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+  margin-top: 0;
+}
+
+.market-player--compact span.market-tier-1 {
+  color: #b8410c;
+  background: #ffe9df;
+}
+
+.market-player--compact span.market-tier-2 {
+  color: #866200;
+  background: #fff3cf;
+}
+
+.market-player--compact span.market-tier-3 {
+  color: #36566f;
+  background: #e8edf2;
 }
 
 .form-chip {
@@ -3102,21 +3134,27 @@ textarea:focus-visible {
 }
 
 .compact-market-meta {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.market-player-points {
+  min-width: 24px;
   text-align: right;
+  line-height: 1;
 }
 
-.compact-market-meta span,
-.compact-market-meta strong {
-  display: block;
-  white-space: nowrap;
+.market-player-points strong {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.compact-market-meta span {
-  color: var(--muted);
-}
-
-.compact-market-meta strong {
-  margin-top: 2px;
+.compact-market-row:hover .market-player-points strong {
   color: var(--orange-deep);
 }
 
@@ -3161,6 +3199,29 @@ textarea:focus-visible {
 
 .squad-chip-title svg {
   flex: 0 0 auto;
+}
+
+.squad-validation-alert {
+  margin: 14px 14px 0;
+  padding: 11px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  color: #991b1b;
+  background: #fff7f7;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.squad-validation-alert > svg {
+  flex: 0 0 auto;
+}
+
+.squad-validation-alert + .squad-validation-alert {
+  margin-top: 8px;
 }
 
 .squad-pitch {

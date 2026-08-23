@@ -11,11 +11,13 @@ export function PlayerIdentity({
   useShortName = false,
   showMarketCompact = false,
   showPositionBadge = false,
+  showTierBadge = false,
 }: {
   player: CompetitionPlayerView;
   useShortName?: boolean;
   showMarketCompact?: boolean;
   showPositionBadge?: boolean;
+  showTierBadge?: boolean;
 }) {
   const { language } = useLanguage();
   const playerName = useShortName
@@ -52,6 +54,18 @@ export function PlayerIdentity({
         {showPositionBadge && (
           <span className="market-position-badge-wrap">
             <PositionBadge position={player.position} />
+            {showTierBadge && (
+              <span
+                className={`market-tier-badge market-tier-${player.tier}`}
+                aria-label={
+                  language === "th"
+                    ? `ระดับ ${player.tier}`
+                    : `Tier ${player.tier}`
+                }
+              >
+                {player.tier}
+              </span>
+            )}
           </span>
         )}
       </div>

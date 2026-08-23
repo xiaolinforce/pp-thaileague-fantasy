@@ -57,6 +57,7 @@ const translations: Record<string, string> = {
     "Check your access and data connection, then try opening the admin tools again",
   ลองอีกครั้ง: "Try again",
   บันทึกทีมไม่สำเร็จ: "Unable to save your team",
+  บันทึกทีมไม่ได้: "Unable to save team",
   "การเปลี่ยนแปลงยังไม่ถูกบันทึก กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง":
     "Your changes were not saved. Check your connection and try again",
   ช่วยเหลือ: "Help",
@@ -162,6 +163,15 @@ const translations: Record<string, string> = {
   "เติมนักเตะให้ครบ 15 คนก่อน": "Complete your 15-player squad first",
   "เติมนักเตะให้ครบ 15 คนก่อนบันทึกทีม":
     "Complete your 15-player squad before saving",
+  "เกิดข้อผิดพลาด โปรด Refresh หน้านี้":
+    "An error occurred. Please refresh this page.",
+  "คุณเลือกผู้เล่นจากสโมสร {club} เกิน {count} คน":
+    "You have selected more than {count} players from {club}",
+  สโมสรนี้: "this club",
+  "คุณเลือกผู้เล่นต่างชาติเกิน {count} คน":
+    "You have selected more than {count} foreign players",
+  "ผู้เล่นระดับ {level} ขึ้นไปใช้ได้ไม่เกิน {count} ช่อง":
+    "You can use no more than {count} slots at Tier {level} or above",
   ลบนักเตะออกจากตำแหน่งแล้ว: "Player removed from the slot",
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
