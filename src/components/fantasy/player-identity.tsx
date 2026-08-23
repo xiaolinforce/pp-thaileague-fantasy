@@ -2,7 +2,7 @@
 
 import { useLanguage } from "@/components/fantasy/i18n";
 import { PlayerKit } from "@/components/fantasy/player-kit";
-import { PositionBadge } from "@/components/fantasy/position-badge";
+import { PlayerMetaBadges } from "@/components/fantasy/player-meta-badges";
 import { localize, type CompetitionPlayerView } from "@/lib/competition-types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
@@ -54,37 +54,11 @@ export function PlayerIdentity({
           {teamName}
         </span>
         {showPositionBadge && (
-          <span className="market-position-badge-wrap">
-            <PositionBadge position={player.position} />
-            {showTierBadge && (
-              <span
-                className={`market-tier-badge market-tier-${player.tier}`}
-                aria-label={
-                  language === "th"
-                    ? `ระดับ ${player.tier}`
-                    : `Tier ${player.tier}`
-                }
-              >
-                {player.tier}
-              </span>
-            )}
-            {showNationalityBadge &&
-              (player.isThai ? (
-                <span
-                  className="market-nationality-badge market-nationality-thai"
-                  aria-label={language === "th" ? "นักเตะไทย" : "Thai player"}
-                />
-              ) : (
-                <span
-                  className="market-nationality-badge market-nationality-foreign"
-                  aria-label={
-                    language === "th" ? "นักเตะต่างชาติ" : "Foreign player"
-                  }
-                >
-                  F
-                </span>
-              ))}
-          </span>
+          <PlayerMetaBadges
+            player={player}
+            showTier={showTierBadge}
+            showNationality={showNationalityBadge}
+          />
         )}
       </div>
     </div>

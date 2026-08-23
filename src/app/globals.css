@@ -1657,7 +1657,7 @@ textarea:focus-visible {
 }
 .player-detail-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin: 4px 0;
 }
@@ -2252,9 +2252,6 @@ textarea:focus-visible {
   .player-detail-grid div {
     padding: 9px;
   }
-  .player-detail-grid > div:last-child {
-    grid-column: 1 / -1;
-  }
   .player-match-strip {
     grid-template-columns: repeat(5, 92px);
     overflow-x: auto;
@@ -2808,7 +2805,10 @@ textarea:focus-visible {
 }
 
 .top-player-name span,
-.market-player span:not(.position-badge) {
+.market-player
+  span:not(.position-badge):not(.player-meta-badges):not(
+    .player-tier-badge
+  ):not(.player-nationality-badge) {
   color: #969a9c;
   font-size: 12px;
   margin-top: 3px;
@@ -2827,21 +2827,26 @@ textarea:focus-visible {
   margin-top: -4px;
 }
 
-.market-player--compact span.market-position-badge-wrap {
+.player-meta-badges {
   margin-top: 2px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 4px;
 }
 
-.market-player--compact .market-position-badge-wrap .position-badge {
-  padding: 2px 6px;
+.player-meta-badges .position-badge {
+  width: 34px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 10px;
-  border-radius: 999px;
   font-weight: 800;
 }
 
-.market-player--compact span.market-tier-badge {
+.player-meta-badges .player-tier-badge {
   width: 18px;
   height: 18px;
   padding: 0;
@@ -2855,22 +2860,22 @@ textarea:focus-visible {
   margin-top: 0;
 }
 
-.market-player--compact span.market-tier-1 {
+.player-meta-badges .player-tier-badge--1 {
   color: #b8410c;
   background: #ffe9df;
 }
 
-.market-player--compact span.market-tier-2 {
+.player-meta-badges .player-tier-badge--2 {
   color: #866200;
   background: #fff3cf;
 }
 
-.market-player--compact span.market-tier-3 {
+.player-meta-badges .player-tier-badge--3 {
   color: #36566f;
   background: #e8edf2;
 }
 
-.market-player--compact span.market-nationality-badge {
+.player-meta-badges .player-nationality-badge {
   width: 18px;
   height: 18px;
   flex: 0 0 18px;
@@ -2883,7 +2888,7 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
-.market-player--compact span.market-nationality-thai {
+.player-meta-badges .player-nationality-badge--thai {
   background: linear-gradient(
     to bottom,
     #a51931 0 16.67%,
@@ -2894,7 +2899,7 @@ textarea:focus-visible {
   );
 }
 
-.market-player--compact span.market-nationality-foreign {
+.player-meta-badges .player-nationality-badge--foreign {
   color: #fff;
   background: #6f42a7;
   font-size: 10px;

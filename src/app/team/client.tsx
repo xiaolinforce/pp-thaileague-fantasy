@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
+import { PlayerMetaBadges } from "@/components/fantasy/player-meta-badges";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import {
   localize,
@@ -926,15 +927,11 @@ export default function TeamClient({
                   </DialogDescription>
                 </DialogHeader>
                 <div className="modal-player-position-badge">
-                  <PositionBadge position={selected.position} />
+                  <PlayerMetaBadges player={selected} />
                 </div>
               </div>
             </div>
             <div className="player-detail-grid">
-              <div>
-                <span>ระดับ</span>
-                <strong>{selected.tier}</strong>
-              </div>
               <div>
                 <span>คะแนนล่าสุด</span>
                 <strong>{selected.points}</strong>
