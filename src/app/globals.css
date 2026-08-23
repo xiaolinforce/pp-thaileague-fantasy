@@ -3434,6 +3434,18 @@ textarea:focus-visible {
   font-style: normal;
 }
 
+.squad-shirt i.captain-badge--captain,
+.points-player-kit > i.captain-badge--captain {
+  background: var(--orange);
+  color: #fff;
+}
+
+.squad-shirt i.captain-badge--vice-captain,
+.points-player-kit > i.captain-badge--vice-captain {
+  background: var(--orange-soft);
+  color: var(--orange-deep);
+}
+
 .squad-name,
 .squad-fixture {
   width: 72px;

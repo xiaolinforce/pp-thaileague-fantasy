@@ -44,7 +44,17 @@ export function PointsPlayerToken({
     >
       <span className="points-player-kit">
         <PlayerKit color={member.color} accent={member.accent} size="medium" />
-        {captain && <i>{captain}</i>}
+        {captain && (
+          <i
+            className={`captain-badge ${
+              captain === "C"
+                ? "captain-badge--captain"
+                : "captain-badge--vice-captain"
+            }`}
+          >
+            {captain}
+          </i>
+        )}
       </span>
       <span className="points-player-name">{name.split(" ")[0]}</span>
       <strong>

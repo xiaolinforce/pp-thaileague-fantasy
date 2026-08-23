@@ -120,7 +120,17 @@ function SquadPlayer({
                 <PositionBadge position={player.position} />
               </span>
             )}
-            {captain && <i>{captain}</i>}
+            {captain && (
+              <i
+                className={`captain-badge ${
+                  captain === "C"
+                    ? "captain-badge--captain"
+                    : "captain-badge--vice-captain"
+                }`}
+              >
+                {captain}
+              </i>
+            )}
           </span>
           <span className="squad-name">
             {localize(player.shortName, language)}
