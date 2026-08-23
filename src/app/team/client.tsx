@@ -92,7 +92,7 @@ function SquadPlayer({
   swapState?: PlayerSwapState;
   showPositionBadgeOnShirt?: boolean;
 }) {
-  const { language } = useLanguage();
+  const { language, translate } = useLanguage();
   const playerName = localize(player.name, language);
   const ariaLabel =
     swapState === "source"
@@ -325,7 +325,9 @@ export default function TeamClient({
       })
       .slice(0, 3);
   }, [data.fixtures, selected]);
-  const selectedPlayerName = selected ? localize(selected.name, language) : "";
+  const selectedPlayerName = selected
+    ? translate(localize(selected.name, language))
+    : "";
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
