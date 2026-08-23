@@ -177,7 +177,7 @@ export default function TransfersClient({
         </div>
         <div className="compact-transfer-stats">
           <div>
-            <span>เปลี่ยนตัวได้อีก</span>
+            <span>เปลี่ยนฟรีได้อีก</span>
             <strong>{fantasy.team.freeTransfers}</strong>
           </div>
           <div>

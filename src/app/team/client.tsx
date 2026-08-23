@@ -616,7 +616,7 @@ export default function TeamClient({
                   [
                     ["triple_captain", "กัปตัน ×3"],
                     ["bench_boost", "นับตัวสำรอง"],
-                    ["wildcard", "เปลี่ยนตัวไม่จำกัด"],
+                    ["wildcard", "เปลี่ยนตัวอิสระ"],
                   ] as const
                 ).map(([chip, label]) => {
                   const isActive = activeChip === chip;
