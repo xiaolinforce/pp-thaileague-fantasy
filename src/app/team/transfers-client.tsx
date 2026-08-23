@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ArrowDownUp,
-  Search,
-  Plus,
-  X,
-} from "lucide-react";
+import { ArrowDownUp, Search, Plus, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -46,6 +41,7 @@ export default function TransfersClient({
   isEditable,
   members,
   onMembersChange,
+  onPlayerSelect,
   selectedVacancySlotId,
   onSelectedVacancySlotChange,
 }: {
@@ -54,6 +50,7 @@ export default function TransfersClient({
   isEditable: boolean;
   members: DraftLineupMember[];
   onMembersChange: (members: DraftLineupMember[]) => void;
+  onPlayerSelect: (player: CompetitionPlayerView) => void;
   selectedVacancySlotId: string | null;
   onSelectedVacancySlotChange: (slotId: string | null) => void;
 }) {
@@ -300,16 +297,27 @@ export default function TransfersClient({
 
         <div className="compact-market-list">
           {players.map((player) => {
-              const compatible =
-                !vacancyPosition || player.position === vacancyPosition;
+            const compatible =
+              !vacancyPosition || player.position === vacancyPosition;
             return (
               <article className="compact-market-row" key={player.id}>
-                <PlayerIdentity
-                  player={player}
-                  useShortName
-                  showMarketCompact
-                  showPositionBadge
-                />
+                <button
+                  type="button"
+                  className="compact-market-player-button"
+                  onClick={() => onPlayerSelect(player)}
+                  aria-label={
+                    language === "th"
+                      ? `ดูข้อมูล ${localize(player.name, language)}`
+                      : `View details for ${localize(player.name, language)}`
+                  }
+                >
+                  <PlayerIdentity
+                    player={player}
+                    useShortName
+                    showMarketCompact
+                    showPositionBadge
+                  />
+                </button>
                 <div className="compact-market-meta">
                   <strong>
                     L{player.tier} · {player.points}{" "}

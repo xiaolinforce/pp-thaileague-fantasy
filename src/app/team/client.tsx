@@ -2,6 +2,7 @@
 
 import {
   ArrowLeftRight,
+  CalendarDays,
   Check,
   Crown,
   LoaderCircle,
@@ -302,6 +303,35 @@ export default function TeamClient({
         (member) => member.fantasyPlayerId === selected.fantasyPlayerId,
       )
     : null;
+  const selectedFixtures = useMemo(() => {
+    if (!selected) return [];
+
+    return data.fixtures
+      .filter(
+        (fixture) =>
+          fixture.status !== "finished" &&
+          fixture.status !== "cancelled" &&
+          (fixture.home.id === selected.clubId ||
+            fixture.away.id === selected.clubId),
+      )
+      .sort((fixtureA, fixtureB) => {
+        const kickoffA = fixtureA.kickoffAt
+          ? new Date(fixtureA.kickoffAt).getTime()
+          : Number.POSITIVE_INFINITY;
+        const kickoffB = fixtureB.kickoffAt
+          ? new Date(fixtureB.kickoffAt).getTime()
+          : Number.POSITIVE_INFINITY;
+        return kickoffA - kickoffB || fixtureA.matchweek - fixtureB.matchweek;
+      })
+      .slice(0, 3);
+  }, [data.fixtures, selected]);
+  const selectedPlayerName = selected
+    ? language === "th" &&
+      selected.name.th === selected.name.en &&
+      selected.shortName.th !== selected.shortName.en
+      ? selected.shortName.th
+      : localize(selected.name, language)
+    : "";
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
@@ -743,6 +773,7 @@ export default function TeamClient({
             isEditable={isEditable}
             members={members}
             onMembersChange={setMembers}
+            onPlayerSelect={setSelected}
             selectedVacancySlotId={selectedVacancySlotId}
             onSelectedVacancySlotChange={setSelectedVacancySlotId}
           />
@@ -761,10 +792,10 @@ export default function TeamClient({
                 accent={selected.accent}
                 size="large"
               />
-              <div>
+              <div className="modal-player-identity">
                 <PositionBadge position={selected.position} />
-                <DialogHeader>
-                  <DialogTitle>{localize(selected.name, language)}</DialogTitle>
+                <DialogHeader className="modal-player-heading">
+                  <DialogTitle>{selectedPlayerName}</DialogTitle>
                   <DialogDescription>
                     {localize(selected.club, language)}
                   </DialogDescription>
@@ -781,100 +812,142 @@ export default function TeamClient({
                 <strong>{selected.points}</strong>
               </div>
               <div>
-                <span>นัดถัดไป</span>
-                <strong>{localize(selected.next, language)}</strong>
+                <span>ฟอร์ม</span>
+                <strong>{selected.form}</strong>
               </div>
             </div>
+            <section
+              className="player-upcoming-fixtures"
+              aria-labelledby="player-upcoming-fixtures-title"
+            >
+              <div className="player-upcoming-fixtures-heading">
+                <CalendarDays size={18} aria-hidden="true" />
+                <h3 id="player-upcoming-fixtures-title">3 โปรแกรมถัดไป</h3>
+              </div>
+              {selectedFixtures.length > 0 ? (
+                <div className="player-upcoming-fixtures-list">
+                  {selectedFixtures.map((fixture) => {
+                    const isHome = fixture.home.id === selected.clubId;
+                    const opponent = isHome ? fixture.away : fixture.home;
+                    return (
+                      <article key={fixture.id}>
+                        <div className="player-fixture-gameweek">
+                          <span>GW</span>
+                          <strong>{fixture.matchweek}</strong>
+                        </div>
+                        <div className="player-fixture-opponent">
+                          <strong>{localize(opponent.name, language)}</strong>
+                          <span>
+                            {isHome ? "เหย้า" : "เยือน"} ·{" "}
+                            {localize(fixture.dateLabel, language)}
+                          </span>
+                        </div>
+                        <time dateTime={fixture.kickoffAt ?? undefined}>
+                          {localize(fixture.timeLabel, language)}
+                        </time>
+                      </article>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="player-fixtures-empty">ยังไม่มีโปรแกรมถัดไป</p>
+              )}
+            </section>
             <DialogFooter className="modal-actions">
-              <button
-                type="button"
-                className="secondary-button danger-button"
-                disabled={!isEditable}
-                onClick={() => removePlayer(selected)}
-              >
-                <Trash2 size={17} aria-hidden="true" /> ลบ
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                disabled={
-                  !isEditable ||
-                  !selected.fantasyPlayerId ||
-                  !swappableSourceIds.has(selected.fantasyPlayerId)
-                }
-                onClick={() => startSwap(selected)}
-              >
-                <ArrowLeftRight size={17} aria-hidden="true" /> สลับตัว
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                disabled={
-                  !isEditable || selectedMember?.lineupRole !== "starter"
-                }
-                onClick={() => {
-                  if (!selected.fantasyPlayerId) return;
-                  setMembers((current) => {
-                    const oldCaptain = current.find(
-                      (member) => member.captainRole === "captain",
-                    );
-                    const wasVice =
-                      current.find(
-                        (member) => member.captainRole === "vice_captain",
-                      )?.fantasyPlayerId === selected.fantasyPlayerId;
-                    return current.map((member) => ({
-                      ...member,
-                      captainRole:
-                        member.fantasyPlayerId === selected.fantasyPlayerId
-                          ? "captain"
-                          : wasVice &&
-                              member.fantasyPlayerId ===
-                                oldCaptain?.fantasyPlayerId
-                            ? "vice_captain"
-                            : member.captainRole === "captain"
-                              ? "none"
-                              : member.captainRole,
-                    }));
-                  });
-                  setSelected(null);
-                }}
-              >
-                <Crown size={17} aria-hidden="true" /> กัปตัน
-              </button>
-              <button
-                type="button"
-                className="secondary-button"
-                disabled={
-                  !isEditable || selectedMember?.lineupRole !== "starter"
-                }
-                onClick={() => {
-                  if (!selected.fantasyPlayerId) return;
-                  setMembers((current) => {
-                    const oldVice = current.find(
-                      (member) => member.captainRole === "vice_captain",
-                    );
-                    const wasCaptain =
-                      current.find((member) => member.captainRole === "captain")
-                        ?.fantasyPlayerId === selected.fantasyPlayerId;
-                    return current.map((member) => ({
-                      ...member,
-                      captainRole:
-                        member.fantasyPlayerId === selected.fantasyPlayerId
-                          ? "vice_captain"
-                          : wasCaptain &&
-                              member.fantasyPlayerId ===
-                                oldVice?.fantasyPlayerId
-                            ? "captain"
-                            : member.captainRole === "vice_captain"
-                              ? "none"
-                              : member.captainRole,
-                    }));
-                  });
-                  setSelected(null);
-                }}
-              >
-                <ShieldCheck size={17} aria-hidden="true" /> รองกัปตัน
-              </button>
+              {selectedMember && (
+                <>
+                  <button
+                    type="button"
+                    className="secondary-button danger-button"
+                    disabled={!isEditable}
+                    onClick={() => removePlayer(selected)}
+                  >
+                    <Trash2 size={17} aria-hidden="true" /> ลบ
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={
+                      !isEditable ||
+                      !selected.fantasyPlayerId ||
+                      !swappableSourceIds.has(selected.fantasyPlayerId)
+                    }
+                    onClick={() => startSwap(selected)}
+                  >
+                    <ArrowLeftRight size={17} aria-hidden="true" /> สลับตัว
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={
+                      !isEditable || selectedMember.lineupRole !== "starter"
+                    }
+                    onClick={() => {
+                      if (!selected.fantasyPlayerId) return;
+                      setMembers((current) => {
+                        const oldCaptain = current.find(
+                          (member) => member.captainRole === "captain",
+                        );
+                        const wasVice =
+                          current.find(
+                            (member) => member.captainRole === "vice_captain",
+                          )?.fantasyPlayerId === selected.fantasyPlayerId;
+                        return current.map((member) => ({
+                          ...member,
+                          captainRole:
+                            member.fantasyPlayerId === selected.fantasyPlayerId
+                              ? "captain"
+                              : wasVice &&
+                                  member.fantasyPlayerId ===
+                                    oldCaptain?.fantasyPlayerId
+                                ? "vice_captain"
+                                : member.captainRole === "captain"
+                                  ? "none"
+                                  : member.captainRole,
+                        }));
+                      });
+                      setSelected(null);
+                    }}
+                  >
+                    <Crown size={17} aria-hidden="true" /> กัปตัน
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={
+                      !isEditable || selectedMember.lineupRole !== "starter"
+                    }
+                    onClick={() => {
+                      if (!selected.fantasyPlayerId) return;
+                      setMembers((current) => {
+                        const oldVice = current.find(
+                          (member) => member.captainRole === "vice_captain",
+                        );
+                        const wasCaptain =
+                          current.find(
+                            (member) => member.captainRole === "captain",
+                          )?.fantasyPlayerId === selected.fantasyPlayerId;
+                        return current.map((member) => ({
+                          ...member,
+                          captainRole:
+                            member.fantasyPlayerId === selected.fantasyPlayerId
+                              ? "vice_captain"
+                              : wasCaptain &&
+                                  member.fantasyPlayerId ===
+                                    oldVice?.fantasyPlayerId
+                                ? "captain"
+                                : member.captainRole === "vice_captain"
+                                  ? "none"
+                                  : member.captainRole,
+                        }));
+                      });
+                      setSelected(null);
+                    }}
+                  >
+                    <ShieldCheck size={17} aria-hidden="true" /> รองกัปตัน
+                  </button>
+                </>
+              )}
               <DialogClose render={<button className="secondary-button" />}>
                 <Check size={17} aria-hidden="true" /> ปิด
               </DialogClose>

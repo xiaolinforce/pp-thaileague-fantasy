@@ -1570,15 +1570,18 @@ textarea:focus-visible {
 }
 
 .accessible-player-modal [data-slot="dialog-title"] {
-  margin-top: 8px;
+  margin: 0;
   font-family: var(--font-mitr), sans-serif;
-  font-size: 22px;
+  font-size: 24px;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.2;
 }
 
 .accessible-player-modal [data-slot="dialog-description"] {
+  margin: 0;
+  color: var(--muted);
   font-size: 16px;
+  line-height: 1.3;
 }
 .modal-close {
   position: absolute;
@@ -1598,6 +1601,17 @@ textarea:focus-visible {
   align-items: center;
   gap: 18px;
   padding-right: 30px;
+}
+
+.modal-player-identity {
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 6px;
+}
+
+.modal-player-heading {
+  gap: 2px;
 }
 .modal-shirt {
   width: 82px;
@@ -1649,19 +1663,113 @@ textarea:focus-visible {
 .player-detail-grid div {
   border: 1px solid var(--line);
   border-radius: 11px;
-  padding: 12px;
+  padding: 13px 14px;
   display: flex;
   flex-direction: column;
 }
 .player-detail-grid span {
-  color: #969a9c;
-  font-size: 12px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
 }
 .player-detail-grid strong {
-  font-size: 12px;
-  line-height: 1.4;
-  margin-top: 4px;
+  color: var(--ink);
+  font-size: 18px;
+  line-height: 1.3;
+  margin-top: 3px;
   overflow-wrap: anywhere;
+}
+
+.player-upcoming-fixtures {
+  border-top: 1px solid var(--line);
+  padding-top: 16px;
+}
+
+.player-upcoming-fixtures-heading {
+  margin-bottom: 8px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-upcoming-fixtures-heading svg {
+  color: var(--orange-deep);
+}
+
+.player-upcoming-fixtures-heading h3 {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.4;
+}
+
+.player-upcoming-fixtures-list {
+  border-top: 1px solid #f0eeeb;
+}
+
+.player-upcoming-fixtures-list article {
+  min-height: 64px;
+  border-bottom: 1px solid #f0eeeb;
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+}
+
+.player-fixture-gameweek {
+  color: var(--orange-deep);
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-fixture-gameweek span {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.player-fixture-gameweek strong {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.player-fixture-opponent {
+  min-width: 0;
+  display: grid;
+  gap: 1px;
+}
+
+.player-fixture-opponent strong {
+  overflow: hidden;
+  font-size: 16px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-fixture-opponent span {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-upcoming-fixtures-list time {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.player-fixtures-empty {
+  margin: 0;
+  padding: 16px 0;
+  color: var(--muted);
+  font-size: 15px;
 }
 .modal-actions {
   display: flex;
@@ -2018,6 +2126,16 @@ textarea:focus-visible {
     border-radius: 20px;
     overflow-y: auto;
   }
+  .modal-player-top {
+    align-items: flex-start;
+    gap: 14px;
+  }
+  .accessible-player-modal [data-slot="dialog-title"] {
+    font-size: 20px;
+  }
+  .accessible-player-modal [data-slot="dialog-description"] {
+    font-size: 15px;
+  }
   .modal-shirt {
     width: 68px;
     height: 68px;
@@ -2034,6 +2152,17 @@ textarea:focus-visible {
   }
   .player-detail-grid > div:last-child {
     grid-column: 1 / -1;
+  }
+  .player-upcoming-fixtures-list article {
+    min-height: 68px;
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    gap: 8px;
+  }
+  .player-fixture-opponent span {
+    white-space: normal;
+  }
+  .player-upcoming-fixtures-list time {
+    font-size: 14px;
   }
   .modal-actions {
     display: grid;
@@ -2844,6 +2973,29 @@ textarea:focus-visible {
 .compact-market-row:hover,
 .compact-market-row.selected-transfer-player {
   background: #fff8f3;
+}
+
+.compact-market-player-button {
+  min-width: 0;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  cursor: pointer;
+}
+
+.compact-market-player-button:hover {
+  color: var(--orange-deep);
+}
+
+.compact-market-player-button:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
 }
 
 .compact-market-meta {
