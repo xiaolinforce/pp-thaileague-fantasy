@@ -322,6 +322,7 @@ export default function TransfersClient({
                     showMarketCompact
                     showPositionBadge
                     showTierBadge
+                    showNationalityBadge
                   />
                 </button>
                 <div className="compact-market-meta" aria-label={metricLabel}>

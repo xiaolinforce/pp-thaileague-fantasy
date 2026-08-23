@@ -12,12 +12,14 @@ export function PlayerIdentity({
   showMarketCompact = false,
   showPositionBadge = false,
   showTierBadge = false,
+  showNationalityBadge = false,
 }: {
   player: CompetitionPlayerView;
   useShortName?: boolean;
   showMarketCompact?: boolean;
   showPositionBadge?: boolean;
   showTierBadge?: boolean;
+  showNationalityBadge?: boolean;
 }) {
   const { language } = useLanguage();
   const playerName = useShortName
@@ -66,6 +68,22 @@ export function PlayerIdentity({
                 {player.tier}
               </span>
             )}
+            {showNationalityBadge &&
+              (player.isThai ? (
+                <span
+                  className="market-nationality-badge market-nationality-thai"
+                  aria-label={language === "th" ? "นักเตะไทย" : "Thai player"}
+                />
+              ) : (
+                <span
+                  className="market-nationality-badge market-nationality-foreign"
+                  aria-label={
+                    language === "th" ? "นักเตะต่างชาติ" : "Foreign player"
+                  }
+                >
+                  F
+                </span>
+              ))}
           </span>
         )}
       </div>

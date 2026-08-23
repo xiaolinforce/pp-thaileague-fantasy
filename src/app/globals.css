@@ -2870,6 +2870,38 @@ textarea:focus-visible {
   background: #e8edf2;
 }
 
+.market-player--compact span.market-nationality-badge {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  margin-top: 0;
+  border: 1px solid rgba(45, 45, 45, 0.12);
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.market-player--compact span.market-nationality-thai {
+  background: linear-gradient(
+    to bottom,
+    #a51931 0 16.67%,
+    #fff 16.67% 33.33%,
+    #2d2a4a 33.33% 66.67%,
+    #fff 66.67% 83.33%,
+    #a51931 83.33% 100%
+  );
+}
+
+.market-player--compact span.market-nationality-foreign {
+  color: #fff;
+  background: #6f42a7;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .form-chip {
   display: inline-flex;
   align-items: center;
