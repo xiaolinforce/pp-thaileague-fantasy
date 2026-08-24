@@ -240,7 +240,7 @@ const translations: Record<string, string> = {
   สลับตัว: "Swap",
   รองกัปตัน: "Vice-captain",
   ปิด: "Close",
-  ค้นหาชื่อนักเตะ: "Search players by name",
+  ค้นหาชื่อนักเตะ: "Search players",
   กรองสโมสร: "Filter by club",
   ทุกสโมสร: "All clubs",
   กรองระดับ: "Filter by tier",
