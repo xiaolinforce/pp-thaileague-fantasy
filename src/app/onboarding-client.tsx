@@ -11,6 +11,8 @@ import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { completeAuthenticationAction } from "@/app/auth-actions";
+import { useSetAppIdentity } from "@/components/fantasy/identity";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { authClient } from "@/lib/auth/client";
 
@@ -94,6 +96,7 @@ export default function OnboardingClient({
   upgradeMode?: boolean;
 }) {
   const router = useRouter();
+  const setIdentity = useSetAppIdentity();
   const { language, setLanguage } = useLanguage();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
@@ -137,8 +140,9 @@ export default function OnboardingClient({
         otp: otp.trim(),
       });
       if (result.error) throw result.error;
-      router.push("/auth/complete");
-      router.refresh();
+      const completion = await completeAuthenticationAction();
+      setIdentity(completion.identity);
+      router.replace(completion.destination);
     } catch (requestError) {
       setError(errorMessage(requestError));
       setBusyAction(null);
@@ -151,8 +155,9 @@ export default function OnboardingClient({
     try {
       const result = await authClient.signIn.anonymous();
       if (result.error) throw result.error;
-      router.push("/auth/complete");
-      router.refresh();
+      const completion = await completeAuthenticationAction();
+      setIdentity(completion.identity);
+      router.replace(completion.destination);
     } catch (requestError) {
       setError(errorMessage(requestError));
       setBusyAction(null);

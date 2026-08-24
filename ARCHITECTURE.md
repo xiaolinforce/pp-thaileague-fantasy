@@ -74,8 +74,11 @@ file; remove it in a deliberate cleanup once no design reference depends on it.
 | `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                 |
 
 The root layout provides Mitr, the language context, shared tooltips, and toast
-feedback. Database-backed pages are dynamically rendered: their data modules
-are server-only and call the current Next.js connection API before querying.
+feedback. Guest and Email OTP sign-in complete account provisioning through a
+Server Action before client navigation so the application shell receives the
+new identity immediately. Database-backed pages are dynamically rendered: their
+data modules are server-only and call the current Next.js connection API before
+querying.
 
 ## Read flow
 

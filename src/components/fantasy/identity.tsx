@@ -1,19 +1,20 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { authClient } from "@/lib/auth/client";
-
-export type AppIdentity = {
-  managerName: string;
-  teamName: string;
-  email: string | null;
-  isGuest: boolean;
-  role: string;
-  teamNameChangesRemaining: number;
-  managerNameChangeAvailableAt: string | null;
-} | null;
+import type { AppIdentity } from "@/lib/auth/types";
 
 const IdentityContext = createContext<AppIdentity>(null);
+const IdentityUpdateContext = createContext<Dispatch<
+  SetStateAction<AppIdentity>
+> | null>(null);
 
 function SessionHeartbeat() {
   authClient.useSession();
@@ -22,19 +23,31 @@ function SessionHeartbeat() {
 
 export function IdentityProvider({
   children,
-  identity,
+  identity: initialIdentity,
 }: {
   children: ReactNode;
   identity: AppIdentity;
 }) {
+  const [identity, setIdentity] = useState(initialIdentity);
+
   return (
-    <IdentityContext.Provider value={identity}>
-      {identity && <SessionHeartbeat />}
-      {children}
-    </IdentityContext.Provider>
+    <IdentityUpdateContext.Provider value={setIdentity}>
+      <IdentityContext.Provider value={identity}>
+        {identity && <SessionHeartbeat />}
+        {children}
+      </IdentityContext.Provider>
+    </IdentityUpdateContext.Provider>
   );
 }
 
 export function useAppIdentity() {
   return useContext(IdentityContext);
+}
+
+export function useSetAppIdentity() {
+  const setIdentity = useContext(IdentityUpdateContext);
+  if (!setIdentity) {
+    throw new Error("useSetAppIdentity must be used within IdentityProvider.");
+  }
+  return setIdentity;
 }

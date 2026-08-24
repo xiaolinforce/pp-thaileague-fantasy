@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { IdentityProvider } from "@/components/fantasy/identity";
 import { getCurrentFantasyIdentity } from "@/lib/auth/context";
+import { createAppIdentity } from "@/lib/auth/types";
 import "./globals.css";
 
 const mitr = Mitr({
@@ -39,28 +40,20 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const current = await getCurrentFantasyIdentity();
   const identity =
     current?.manager && current.team
-      ? {
-          managerName: current.manager.displayName,
-          teamName: current.team.name,
-          email: current.isAnonymous ? null : current.user.email,
+      ? createAppIdentity({
+          manager: current.manager,
+          team: current.team,
+          email: current.user.email,
           isGuest: current.isAnonymous,
           role: current.role,
-          teamNameChangesRemaining: Math.max(
-            0,
-            3 - current.team.nameChangesUsed,
-          ),
-          managerNameChangeAvailableAt:
-            current.manager.nameChangeAvailableAt &&
-            current.manager.nameChangeAvailableAt > new Date()
-              ? current.manager.nameChangeAvailableAt.toISOString()
-              : null,
-        }
+        })
       : null;
+  const identityKey = JSON.stringify(identity);
   return (
     <html lang="th" className={mitr.variable} suppressHydrationWarning>
       <body>
         <LanguageProvider>
-          <IdentityProvider identity={identity}>
+          <IdentityProvider key={identityKey} identity={identity}>
             <TooltipProvider>{children}</TooltipProvider>
           </IdentityProvider>
           <Toaster position="bottom-center" />
