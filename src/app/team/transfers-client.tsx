@@ -1,6 +1,11 @@
 "use client";
 
-import { ArrowDownUp, Search, Plus, X } from "lucide-react";
+import {
+  ArrowDownUp,
+  Plus,
+  Search,
+  X,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
@@ -51,6 +56,7 @@ export default function TransfersClient({
   onPlayerSelect,
   selectedVacancySlotId,
   onSelectedVacancySlotChange,
+  isAutoFilling,
 }: {
   data: CompetitionDataset;
   fantasy: FantasyState;
@@ -60,8 +66,9 @@ export default function TransfersClient({
   onPlayerSelect: (player: CompetitionPlayerView) => void;
   selectedVacancySlotId: string | null;
   onSelectedVacancySlotChange: (slotId: string | null) => void;
+  isAutoFilling: boolean;
 }) {
-  const { language } = useLanguage();
+  const { language, translate } = useLanguage();
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("ALL");
   const [tier, setTier] = useState("all");
@@ -134,6 +141,7 @@ export default function TransfersClient({
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
 
   function choosePlayer(player: CompetitionPlayerView) {
+    if (isAutoFilling) return;
     if (!isEditable) {
       toast.error("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว");
       return;
@@ -333,7 +341,7 @@ export default function TransfersClient({
                 <button
                   type="button"
                   className="transfer-player-action"
-                  disabled={!isEditable || !compatible}
+                  disabled={!isEditable || isAutoFilling || !compatible}
                   onClick={() => choosePlayer(player)}
                   aria-label={
                     language === "th"

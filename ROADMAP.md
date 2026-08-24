@@ -10,6 +10,7 @@
 - Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.
+- Published-ranking-weighted, randomized auto-fill for vacant squad slots.
 - Pure player-points and team-score engines with automatic substitutions.
 - Provisional and final Gameweek recalculation.
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,

@@ -4,6 +4,26 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-24 — Auto-fill is a ranking-weighted local draft suggestion
+
+**Decision:** Auto-fill preserves selected players and fills only vacancies
+from the complete eligible pool, independent of visible market filters. It
+targets the nominal 3/7/5 tier allocation when feasible, then uses published
+projected points with bounded randomness for quality and variety. It assigns
+missing captaincy but never saves the squad automatically.
+
+**Context:** New teams begin empty, while manually filling fifteen constrained
+positions is time-consuming. A purely best-ranked result would make teams too
+similar, and unrestricted randomness would undermine the value of the
+published ranking.
+
+**Consequences:** The read-only Server Action must authenticate, reload current
+eligibility and the effective published ranking, and return only draft members.
+The pure solver treats club, foreign-player, tier, position, lineup, and
+duplicate constraints as hard limits and accepts an injected random source for
+repeatable tests. The existing save action remains responsible for fresh
+server validation, transfer settlement, revisions, and persistence.
+
 ## 2026-08-24 — New teams choose their opening squad from an empty draft
 
 **Decision:** Provision Guest, Email, and Google users with a manager, season

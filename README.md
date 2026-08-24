@@ -17,6 +17,8 @@ Classic league standings.
 - Fifteen-player squads, valid FPL-style formations, tier and Thai-player
   limits, automatic substitutions, captain/vice-captain, Triple Captain, Bench
   Boost, Wildcard, free transfers, and transfer-point deductions.
+- Ranking-weighted squad auto-fill that completes vacant slots, targets the
+  full tier allocation, and keeps the result editable until the manager saves.
 - FPL-inspired scoring without bonus/BPS or Defensive Contributions, with a
   Thai Fantasy-specific 10 points for a goalkeeper goal.
 - Competition import from the Thai League official API and public Transfermarkt

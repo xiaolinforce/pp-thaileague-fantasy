@@ -3,12 +3,13 @@
 import {
   ArrowLeftRight,
   CalendarDays,
-  History,
   LoaderCircle,
+  History,
   Save,
   TriangleAlert,
   Trash2,
   UserRoundPlus,
+  WandSparkles,
   Zap,
 } from "lucide-react";
 import { useEffect, useMemo, useState, useTransition } from "react";
@@ -34,7 +35,10 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
-import { saveFantasySelectionAction } from "@/app/fantasy-actions";
+import {
+  saveFantasySelectionAction,
+  suggestFantasyAutoFillAction,
+} from "@/app/fantasy-actions";
 import {
   getValidLineupSwapTargetIds,
   swapLineupAssignments,
@@ -296,6 +300,8 @@ export default function TeamClient({
         })),
   );
   const [isPending, startTransition] = useTransition();
+  const [, startAutoFillTransition] = useTransition();
+  const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const router = useRouter();
   const playersByFantasyId = useMemo(
@@ -343,6 +349,14 @@ export default function TeamClient({
           : [];
       }),
     [members, playersByFantasyId],
+  );
+  const vacancies = useMemo(
+    () =>
+      members.filter(
+        (member) =>
+          member.fantasyPlayerId === null && member.vacancyPosition !== null,
+      ),
+    [members],
   );
   const validSwapTargetIds = useMemo(
     () =>
@@ -435,6 +449,7 @@ export default function TeamClient({
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
+  const interactionsDisabled = !isEditable || isAutoFilling;
   const remaining = Math.max(0, remainingMs ?? 0);
   const remainingDays = Math.floor(remaining / 86_400_000);
   const remainingHours = Math.floor((remaining % 86_400_000) / 3_600_000);
@@ -576,6 +591,39 @@ export default function TeamClient({
     });
   };
 
+  const autoFillVacancies = () => {
+    if (!isEditable || isAutoFilling || vacancies.length === 0) return;
+    setIsAutoFilling(true);
+    startAutoFillTransition(async () => {
+      try {
+        const result = await suggestFantasyAutoFillAction({ members });
+        if (!result.ok) {
+          toast.error(translate("เติมทีมอัตโนมัติไม่สำเร็จ"), {
+            description: translate(result.message),
+          });
+          return;
+        }
+        setMembers(result.members);
+        setSelectedVacancySlotId(null);
+        setSwapFrom(null);
+        setSelected(null);
+        toast.success(translate("เติมนักเตะอัตโนมัติแล้ว"), {
+          description: translate(
+            "เติมนักเตะ {count} คน พร้อมเลือกกัปตันและรองกัปตันแล้ว",
+          ).replace("{count}", String(result.addedCount)),
+        });
+      } catch {
+        toast.error(translate("เติมทีมอัตโนมัติไม่สำเร็จ"), {
+          description: translate(
+            "กรุณาตรวจสอบการเชื่อมต่อแล้วลองเติมทีมอีกครั้ง",
+          ),
+        });
+      } finally {
+        setIsAutoFilling(false);
+      }
+    });
+  };
+
   const scrollToMarket = () => {
     window.requestAnimationFrame(() =>
       document
@@ -585,7 +633,7 @@ export default function TeamClient({
   };
 
   const startSwap = (player: CompetitionPlayerView) => {
-    if (!isEditable || !player.fantasyPlayerId) return;
+    if (interactionsDisabled || !player.fantasyPlayerId) return;
     if (!swappableSourceIds.has(player.fantasyPlayerId)) return;
     setSelectedVacancySlotId(null);
     setSwapFrom(player.fantasyPlayerId);
@@ -593,14 +641,14 @@ export default function TeamClient({
   };
 
   const selectVacancy = (slotId: string) => {
-    if (!isEditable) return;
+    if (interactionsDisabled) return;
     setSwapFrom(null);
     setSelectedVacancySlotId(slotId);
     scrollToMarket();
   };
 
   const removePlayer = (player: CompetitionPlayerView) => {
-    if (!isEditable || !player.fantasyPlayerId) return;
+    if (interactionsDisabled || !player.fantasyPlayerId) return;
     const member = members.find(
       (item) => item.fantasyPlayerId === player.fantasyPlayerId,
     );
@@ -667,6 +715,7 @@ export default function TeamClient({
               onClick={saveTeam}
               disabled={
                 isPending ||
+                isAutoFilling ||
                 !isEditable ||
                 !hasUnsavedChanges ||
                 hasVacancies ||
@@ -791,7 +840,7 @@ export default function TeamClient({
                       type="button"
                       key={chip}
                       className={isActive ? "active" : ""}
-                      disabled={!isEditable}
+                      disabled={interactionsDisabled}
                       aria-pressed={isActive}
                       onClick={() =>
                         setActiveChip((current) =>
@@ -826,6 +875,29 @@ export default function TeamClient({
               </>
             )}
             <div className="squad-pitch">
+              {vacancies.length > 0 && (
+                <button
+                  type="button"
+                  className="secondary-button compact-auto-fill-button squad-auto-fill-button"
+                  disabled={!isEditable || isAutoFilling}
+                  onClick={autoFillVacancies}
+                  aria-busy={isAutoFilling}
+                  title={
+                    !isEditable
+                      ? translate("ปิดรับการจัดทีมแล้ว")
+                      : undefined
+                  }
+                >
+                  {isAutoFilling ? (
+                    <LoaderCircle className="spin" size={15} aria-hidden="true" />
+                  ) : (
+                    <WandSparkles size={15} aria-hidden="true" />
+                  )}
+                  {isAutoFilling
+                    ? translate("กำลังเติม…")
+                    : translate("จัดตัวอัตโนมัติ")}
+                </button>
+              )}
               <div className="field-lines">
                 <span />
                 <i />
@@ -847,7 +919,7 @@ export default function TeamClient({
                             onSelect={selectPlayer}
                             onSwap={startSwap}
                             onRemove={removePlayer}
-                            actionsDisabled={!isEditable}
+                            actionsDisabled={interactionsDisabled}
                             hideActions={Boolean(swapFrom)}
                             swapDisabled={
                               !slot.player.fantasyPlayerId ||
@@ -874,7 +946,7 @@ export default function TeamClient({
                             selected={
                               selectedVacancySlotId === slot.member.slotId
                             }
-                            disabled={!isEditable}
+                            disabled={interactionsDisabled}
                             onSelect={() => selectVacancy(slot.member.slotId)}
                           />
                         ),
@@ -899,7 +971,7 @@ export default function TeamClient({
                         onSelect={selectPlayer}
                         onSwap={startSwap}
                         onRemove={removePlayer}
-                        actionsDisabled={!isEditable}
+                        actionsDisabled={interactionsDisabled}
                         hideActions={Boolean(swapFrom)}
                         swapDisabled={
                           !slot.player.fantasyPlayerId ||
@@ -912,7 +984,7 @@ export default function TeamClient({
                       <VacantSquadSlot
                         position={slot.position}
                         selected={selectedVacancySlotId === slot.member.slotId}
-                        disabled={!isEditable}
+                        disabled={interactionsDisabled}
                         onSelect={() => selectVacancy(slot.member.slotId)}
                       />
                     )}
@@ -931,6 +1003,7 @@ export default function TeamClient({
             onPlayerSelect={setSelected}
             selectedVacancySlotId={selectedVacancySlotId}
             onSelectedVacancySlotChange={setSelectedVacancySlotId}
+            isAutoFilling={isAutoFilling}
           />
         </div>
       </main>
@@ -1046,7 +1119,7 @@ export default function TeamClient({
                   <button
                     type="button"
                     className="secondary-button danger-button"
-                    disabled={!isEditable}
+                    disabled={interactionsDisabled}
                     onClick={() => removePlayer(selected)}
                   >
                     <Trash2 size={17} aria-hidden="true" /> ลบ
@@ -1055,7 +1128,7 @@ export default function TeamClient({
                     type="button"
                     className="secondary-button"
                     disabled={
-                      !isEditable ||
+                      interactionsDisabled ||
                       !selected.fantasyPlayerId ||
                       !swappableSourceIds.has(selected.fantasyPlayerId)
                     }
@@ -1067,7 +1140,8 @@ export default function TeamClient({
                     type="button"
                     className="secondary-button"
                     disabled={
-                      !isEditable || selectedMember.lineupRole !== "starter"
+                      interactionsDisabled ||
+                      selectedMember.lineupRole !== "starter"
                     }
                     onClick={() => {
                       if (!selected.fantasyPlayerId) return;
@@ -1108,7 +1182,8 @@ export default function TeamClient({
                     type="button"
                     className="secondary-button"
                     disabled={
-                      !isEditable || selectedMember.lineupRole !== "starter"
+                      interactionsDisabled ||
+                      selectedMember.lineupRole !== "starter"
                     }
                     onClick={() => {
                       if (!selected.fantasyPlayerId) return;

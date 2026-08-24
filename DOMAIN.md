@@ -110,6 +110,24 @@ ranks. A published run records the model version, cutoff date, sources,
 configuration, confidence, and per-player reasons. It cannot be applied to a
 Gameweek that already has locked selections or scores.
 
+### Automatic squad completion
+
+Before the deadline, a manager may fill every vacant draft slot automatically.
+The suggestion preserves players already in the draft, ignores market display
+filters, and uses the current published ranking with fresh availability, club,
+position, Thai-status, and effective-tier data. It first attempts to maximize use of the
+three Level 1 and seven Level 2 nominal slots when a valid allocation exists,
+then favors higher projected points with bounded random variation so repeated
+empty drafts need not receive the same squad. Club, foreign-player, cumulative
+tier, position, duplicate-player, lineup, and bench constraints remain hard
+limits.
+
+The strongest newly selected players occupy vacant starting slots before bench
+slots of the same position. Existing valid captaincy is preserved; any missing
+captain or vice-captain is assigned from the highest-projected starters. The
+suggestion changes only the client draft and has no transfer or persistence
+effect until the manager saves through the normal validation path.
+
 ## Deadlines and Gameweeks
 
 The deadline is 90 minutes before the first kickoff in that matchweek. Squad,

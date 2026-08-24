@@ -128,6 +128,12 @@ the screen before cards or tables begin.
   vacant without an introductory message. Keep the untouched empty draft from
   triggering an unsaved-change warning, and begin that warning only after the
   first local selection. Partial squads remain local and cannot be saved.
+- Place a compact secondary auto-fill action beside the Player Market heading.
+  It fills only vacant slots from the full eligible pool, preserves current
+  players, assigns missing captaincy, and leaves the result unsaved and fully
+  editable. Disable it with written pending feedback while calculating, when
+  no vacancy remains, or after the deadline; do not make current market filters
+  alter its candidate pool.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a

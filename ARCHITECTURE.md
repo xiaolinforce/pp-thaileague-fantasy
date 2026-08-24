@@ -46,6 +46,7 @@ Seeded managers remain ranking fixtures and are not sign-in identities.
 | UI primitives            | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                     |
 | Read models              | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                                  |
 | Game rules               | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                             |
+| Squad auto-fill          | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                    |
 | Player ranking           | `src/lib/fantasy/ranking.ts`         | Pure preseason projection, deterministic ordering, confidence, and tier-boundary derivation.        |
 | Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                      |
 | Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.         |
@@ -95,6 +96,12 @@ querying.
 
 External services are not called during normal page rendering. They are read
 by explicit import scripts and persisted before the application serves them.
+
+The Team client may request an auto-fill suggestion through a read-only Server
+Action. The action authenticates the current manager, reloads the published
+ranking and current player eligibility from PostgreSQL, and returns only a
+completed local draft. It does not persist a selection or consume transfers;
+the normal save action remains the only confirmation boundary.
 
 ## Write flow
 

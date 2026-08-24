@@ -245,7 +245,22 @@ const translations: Record<string, string> = {
   ตัวช่วยพิเศษ: "Chips",
 
   // Transfers
+  จัดตัวอัตโนมัติ: "Auto-fill",
   ตลาดนักเตะ: "Player Market",
+  เติมอัตโนมัติ: "Auto-fill",
+  "กำลังเติม…": "Auto-filling…",
+  เติมทีมอัตโนมัติไม่สำเร็จ: "Unable to auto-fill the squad",
+  เติมนักเตะอัตโนมัติแล้ว: "Players auto-filled",
+  "เติมนักเตะ {count} คน พร้อมเลือกกัปตันและรองกัปตันแล้ว":
+    "Added {count} players and selected the captain and vice-captain",
+  ไม่มีช่องนักเตะว่างให้เติม: "There are no vacant player slots to fill",
+  ข้อมูลช่องนักเตะไม่ถูกต้อง: "The player-slot data is invalid",
+  ยังไม่มีอันดับนักเตะสำหรับเติมทีมอัตโนมัติ:
+    "Player rankings are not available for auto-fill yet",
+  ไม่สามารถหาทีมที่ผ่านทุกโควต้าได้:
+    "No squad satisfying every quota could be found",
+  กรุณาตรวจสอบการเชื่อมต่อแล้วลองเติมทีมอีกครั้ง:
+    "Check your connection and try auto-fill again",
   ซื้อขายนักเตะ: "Transfers",
   ซื้อขายในมุมมองเดียว: "Transfers in the same view",
   "เลือกคนในทีม แล้วเลือกนักเตะตำแหน่งเดียวกันเข้ามาแทน":

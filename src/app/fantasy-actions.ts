@@ -38,6 +38,9 @@ import { calculatePlayerPoints } from "@/lib/fantasy/scoring";
 import { recalculateGameweek } from "@/lib/fantasy/scoring-service";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { validateFantasyName } from "@/lib/auth/names";
+import { getFantasyAutoFillCandidates } from "@/data/fantasy-auto-fill";
+import { autoFillSquadDraft } from "@/lib/fantasy/auto-fill";
+import type { DraftLineupMember } from "@/lib/fantasy/team-draft";
 
 export type FantasySelectionInput = {
   members: Array<{
@@ -52,6 +55,119 @@ export type FantasySelectionInput = {
 export type FantasyActionResult =
   | { ok: true; message: string }
   | { ok: false; message: string; violations?: string[] };
+
+export type FantasyAutoFillResult =
+  | {
+      ok: true;
+      members: DraftLineupMember[];
+      addedCount: number;
+    }
+  | { ok: false; message: string };
+
+const autoFillPositions = new Set<FantasyPosition>([
+  "goalkeeper",
+  "defender",
+  "midfielder",
+  "forward",
+]);
+const autoFillLineupRoles = new Set(["starter", "bench"]);
+const autoFillCaptainRoles = new Set(["none", "captain", "vice_captain"]);
+
+function isValidAutoFillMembers(
+  members: DraftLineupMember[],
+): members is DraftLineupMember[] {
+  if (
+    !Array.isArray(members) ||
+    members.length !== THAI_LEAGUE_FANTASY_RULES.squadSize
+  ) {
+    return false;
+  }
+  const slotIds = new Set<string>();
+  const playerIds = new Set<string>();
+  for (const member of members) {
+    if (
+      !member ||
+      typeof member !== "object" ||
+      typeof member.slotId !== "string" ||
+      member.slotId.length === 0 ||
+      member.slotId.length > 120 ||
+      slotIds.has(member.slotId) ||
+      !autoFillLineupRoles.has(member.lineupRole) ||
+      !autoFillCaptainRoles.has(member.captainRole) ||
+      (member.benchOrder !== null &&
+        (!Number.isInteger(member.benchOrder) ||
+          member.benchOrder < 0 ||
+          member.benchOrder > 3)) ||
+      (member.vacancyPosition !== null &&
+        !autoFillPositions.has(member.vacancyPosition))
+    ) {
+      return false;
+    }
+    slotIds.add(member.slotId);
+    if (member.fantasyPlayerId !== null) {
+      if (
+        typeof member.fantasyPlayerId !== "string" ||
+        member.fantasyPlayerId.length === 0 ||
+        member.fantasyPlayerId.length > 80 ||
+        playerIds.has(member.fantasyPlayerId)
+      ) {
+        return false;
+      }
+      playerIds.add(member.fantasyPlayerId);
+    } else if (member.vacancyPosition === null) {
+      return false;
+    }
+    if (
+      (member.fantasyPlayerId !== null && member.vacancyPosition !== null) ||
+      (member.lineupRole === "starter" && member.benchOrder !== null) ||
+      (member.lineupRole === "bench" && member.benchOrder === null)
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export async function suggestFantasyAutoFillAction(input: {
+  members: DraftLineupMember[];
+}): Promise<FantasyAutoFillResult> {
+  const { season, gameweek } = await requireFantasyProfile();
+  if (!isBeforeDeadline(gameweek.deadlineAt)) {
+    return {
+      ok: false,
+      message: "ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว",
+    };
+  }
+  if (!input || !isValidAutoFillMembers(input.members)) {
+    return { ok: false, message: "ข้อมูลช่องนักเตะไม่ถูกต้อง" };
+  }
+  if (input.members.every((member) => member.fantasyPlayerId !== null)) {
+    return { ok: false, message: "ไม่มีช่องนักเตะว่างให้เติม" };
+  }
+
+  const ranking = await getFantasyAutoFillCandidates(season, gameweek);
+  if (!ranking) {
+    return {
+      ok: false,
+      message: "ยังไม่มีอันดับนักเตะสำหรับเติมทีมอัตโนมัติ",
+    };
+  }
+  const suggestion = autoFillSquadDraft({
+    members: input.members,
+    candidates: ranking,
+  });
+  if (!suggestion) {
+    return {
+      ok: false,
+      message: "ไม่สามารถหาทีมที่ผ่านทุกโควต้าได้",
+    };
+  }
+  return {
+    ok: true,
+    members: suggestion.members,
+    addedCount: suggestion.addedPlayerIds.length,
+  };
+}
 
 export async function updateFantasyNamesAction(input: {
   managerName: string;
