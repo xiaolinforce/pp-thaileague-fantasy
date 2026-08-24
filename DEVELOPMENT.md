@@ -37,6 +37,10 @@ Never commit a real connection string, auth secret, OAuth credential, email API
 key, or Turnstile secret. The Turnstile site key is intentionally public; do
 not expose any other secret with a `NEXT_PUBLIC_` prefix.
 
+Better Auth cookies use the fixed `pp-thaileague-fantasy` prefix. Keep it unique
+among applications running on `localhost`; browser cookies are scoped by host
+and path, not by port.
+
 For local Email OTP testing, configure Turnstile test keys plus one email
 provider and a permitted sender. For public production, use a verified sending
 domain, configure the Google callback at `/api/auth/callback/google`, publish

@@ -33,6 +33,8 @@ Thai League API + Transfermarkt + curated club identities
 Better Auth owns passwordless Email OTP, Google OAuth, anonymous Guest users,
 30-day sliding sessions, and database-backed rate limiting. Fantasy managers
 reference auth users without making historical teams dependent on the auth row.
+Auth cookies use the application-specific `pp-thaileague-fantasy` prefix so
+local sessions do not collide with other applications served from `localhost`.
 Seeded managers remain ranking fixtures and are not sign-in identities.
 
 ## Main boundaries

@@ -66,6 +66,9 @@ const authPlugins = [
 
 export const auth = betterAuth({
   appName: "PP Thai League Fantasy",
+  advanced: {
+    cookiePrefix: "pp-thaileague-fantasy",
+  },
   baseURL:
     process.env.BETTER_AUTH_URL ??
     process.env.NEXT_PUBLIC_SITE_URL ??
