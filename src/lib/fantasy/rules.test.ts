@@ -420,6 +420,25 @@ test("bench boost counts every squad member exactly once", () => {
   assert.equal(score.countedPlayerIds.length, 15);
 });
 
+test("an unsaved empty selection scores zero when the Gameweek locks", () => {
+  const score = resolveTeamScore({
+    selection: [],
+    playerResults: [],
+    activeChip: null,
+    transferPoints: 0,
+  });
+
+  assert.deepEqual(score, {
+    lineupPoints: 0,
+    benchPoints: 0,
+    captainBonus: 0,
+    transferPoints: 0,
+    totalPoints: 0,
+    countedPlayerIds: [],
+    autoSubstitutions: [],
+  });
+});
+
 test("default rules remain the agreed 15-player configuration", () => {
   assert.equal(THAI_LEAGUE_FANTASY_RULES.squadSize, 15);
   assert.equal(THAI_LEAGUE_FANTASY_RULES.maximumFreeTransfers, 4);

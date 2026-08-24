@@ -206,7 +206,7 @@ export default async function PointsPage({
           <section className="product-card points-pitch-card">
             <div className="product-card-head">
               <div>
-                <span className="eyebrow">แผนการเล่น {formation}</span>
+                <span className="eyebrow">แผนการเล่น {formation || "—"}</span>
                 <h2>{points.fantasy.team.name}</h2>
               </div>
               <span
@@ -221,35 +221,44 @@ export default async function PointsPage({
                 <i />
                 <b />
               </div>
-              <div className="points-pitch-rows">
-                {positionRows.map((position) => (
-                  <div className="points-pitch-row" key={position}>
-                    {fieldMembers
-                      .filter((member) => member.position === position)
-                      .map((member) => {
-                        const multiplier =
-                          scoringCaptain?.fantasyPlayerId ===
-                          member.fantasyPlayerId
-                            ? captainMultiplier
-                            : 1;
-                        return (
-                          <PointsPlayerToken
-                            key={member.fantasyPlayerId}
-                            member={member}
-                            points={playerContribution(member.fantasyPlayerId)}
-                            counted
-                            multiplier={multiplier}
-                            substitution={
-                              autoSubIn.has(member.fantasyPlayerId)
-                                ? "in"
-                                : undefined
-                            }
-                          />
-                        );
-                      })}
-                  </div>
-                ))}
-              </div>
+              {points.squad.length === 0 ? (
+                <div className="points-empty-squad" role="status">
+                  <strong>ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้</strong>
+                  <span>เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน</span>
+                </div>
+              ) : (
+                <div className="points-pitch-rows">
+                  {positionRows.map((position) => (
+                    <div className="points-pitch-row" key={position}>
+                      {fieldMembers
+                        .filter((member) => member.position === position)
+                        .map((member) => {
+                          const multiplier =
+                            scoringCaptain?.fantasyPlayerId ===
+                            member.fantasyPlayerId
+                              ? captainMultiplier
+                              : 1;
+                          return (
+                            <PointsPlayerToken
+                              key={member.fantasyPlayerId}
+                              member={member}
+                              points={playerContribution(
+                                member.fantasyPlayerId,
+                              )}
+                              counted
+                              multiplier={multiplier}
+                              substitution={
+                                autoSubIn.has(member.fantasyPlayerId)
+                                  ? "in"
+                                  : undefined
+                              }
+                            />
+                          );
+                        })}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="points-bench-panel">

@@ -325,6 +325,10 @@ const translations: Record<string, string> = {
   "Gameweek ก่อนหน้า": "Previous Gameweek",
   "Gameweek ถัดไป": "Next Gameweek",
   ยังไม่มีคะแนน: "No points yet",
+  "ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้":
+    "No squad has been saved for this Gameweek",
+  "เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน":
+    "Select all 15 players from the My Team page",
   ดูคะแนนทุกคนในทีมและที่มาของคะแนนแบบละเอียด:
     "See every player's score and a detailed points breakdown",
   "คะแนน Gameweek": "Gameweek Points",

@@ -316,32 +316,35 @@ export async function saveFantasySelectionAction(
       captainRole: player.captainRole,
     }));
 
-  await db
-    .update(fantasyTeamSelections)
-    .set({
+  const savedAt = new Date();
+  await db.batch([
+    db
+      .update(fantasyTeamSelections)
+      .set({
+        activeChip: input.activeChip,
+        freeTransfersBefore: team.freeTransfers,
+        freeTransfersAfter: settlement.freeTransfersAfter,
+        netTransferCount: transferCount,
+        transferPoints: settlement.transferPoints,
+        confirmedAt: savedAt,
+        updatedAt: savedAt,
+      })
+      .where(eq(fantasyTeamSelections.id, selection.id)),
+    db
+      .delete(fantasyTeamSelectionPlayers)
+      .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id)),
+    db.insert(fantasyTeamSelectionPlayers).values(playerValues),
+    db.insert(fantasyTransferRevisions).values({
+      selectionId: selection.id,
+      revision,
+      status: "confirmed",
+      squad: uniqueIds,
+      lineup: { members: playerValues },
       activeChip: input.activeChip,
-      freeTransfersBefore: team.freeTransfers,
-      freeTransfersAfter: settlement.freeTransfersAfter,
       netTransferCount: transferCount,
       transferPoints: settlement.transferPoints,
-      confirmedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(fantasyTeamSelections.id, selection.id));
-  await db
-    .delete(fantasyTeamSelectionPlayers)
-    .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
-  await db.insert(fantasyTeamSelectionPlayers).values(playerValues);
-  await db.insert(fantasyTransferRevisions).values({
-    selectionId: selection.id,
-    revision,
-    status: "confirmed",
-    squad: uniqueIds,
-    lineup: { members: playerValues },
-    activeChip: input.activeChip,
-    netTransferCount: transferCount,
-    transferPoints: settlement.transferPoints,
-  });
+    }),
+  ]);
   revalidateFantasyPages();
   return {
     ok: true,
@@ -810,16 +813,20 @@ export async function lockFantasyGameweekAction(formData: FormData) {
           benchOrder: member.benchOrder,
           captainRole: member.captainRole,
         }));
-        await db.insert(fantasyTeamSelectionPlayers).values(copied);
-        await db.insert(fantasyTransferRevisions).values({
-          selectionId: nextSelection.id,
-          revision: 1,
-          status: "confirmed",
-          squad: copied.map((member) => member.fantasyPlayerId),
-          lineup: { members: copied },
-          netTransferCount: 0,
-          transferPoints: 0,
-        });
+        if (copied.length > 0) {
+          await db.batch([
+            db.insert(fantasyTeamSelectionPlayers).values(copied),
+            db.insert(fantasyTransferRevisions).values({
+              selectionId: nextSelection.id,
+              revision: 1,
+              status: "confirmed",
+              squad: copied.map((member) => member.fantasyPlayerId),
+              lineup: { members: copied },
+              netTransferCount: 0,
+              transferPoints: 0,
+            }),
+          ]);
+        }
       }
     }
   }

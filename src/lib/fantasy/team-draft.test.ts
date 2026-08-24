@@ -2,12 +2,48 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  createEmptySquadDraft,
   fillDraftVacancy,
   fillFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
   removePlayerFromDraft,
   type DraftLineupMember,
 } from "./team-draft.ts";
+
+test("creates an empty 15-slot opening draft with a valid 4-4-2 shape", () => {
+  const draft = createEmptySquadDraft();
+  const starters = draft.filter((member) => member.lineupRole === "starter");
+  const bench = draft.filter((member) => member.lineupRole === "bench");
+
+  assert.equal(draft.length, 15);
+  assert.equal(
+    draft.every((member) => member.fantasyPlayerId === null),
+    true,
+  );
+  assert.equal(
+    draft.every((member) => member.vacancyPosition !== null),
+    true,
+  );
+  assert.deepEqual(
+    Object.fromEntries(
+      ["goalkeeper", "defender", "midfielder", "forward"].map((position) => [
+        position,
+        starters.filter((member) => member.vacancyPosition === position).length,
+      ]),
+    ),
+    { goalkeeper: 1, defender: 4, midfielder: 4, forward: 2 },
+  );
+  assert.deepEqual(
+    bench.map((member) => [member.vacancyPosition, member.benchOrder]),
+    [
+      ["goalkeeper", 0],
+      ["defender", 1],
+      ["midfielder", 2],
+      ["forward", 3],
+    ],
+  );
+  assert.equal(getCompleteSelectionMembers(draft), null);
+});
 
 const members: DraftLineupMember[] = [
   {

@@ -7,7 +7,7 @@
   fixtures, profile/rules, and internal Fantasy administration screens.
 - Client-side Thai/English display preference.
 - Email OTP, Google, and device-bound Guest identities with 30-day sliding sessions.
-- Account-owned managers and season teams; valid opening squads are provisioned automatically.
+- Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.
 - Pure player-points and team-score engines with automatic substitutions.

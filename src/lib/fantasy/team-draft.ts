@@ -16,6 +16,42 @@ export type CompleteSelectionMember = Omit<
   fantasyPlayerId: string;
 };
 
+const starterShape: Array<[FantasyPosition, number]> = [
+  ["goalkeeper", 1],
+  ["defender", 4],
+  ["midfielder", 4],
+  ["forward", 2],
+];
+
+const benchShape: Array<[FantasyPosition, number]> = [
+  ["goalkeeper", 0],
+  ["defender", 1],
+  ["midfielder", 2],
+  ["forward", 3],
+];
+
+export function createEmptySquadDraft(): DraftLineupMember[] {
+  const starters = starterShape.flatMap(([position, count]) =>
+    Array.from({ length: count }, (_, index) => ({
+      slotId: `initial-starter-${position}-${index + 1}`,
+      fantasyPlayerId: null,
+      vacancyPosition: position,
+      lineupRole: "starter" as const,
+      benchOrder: null,
+      captainRole: "none" as const,
+    })),
+  );
+  const bench = benchShape.map(([position, benchOrder]) => ({
+    slotId: `initial-bench-${position}`,
+    fantasyPlayerId: null,
+    vacancyPosition: position,
+    lineupRole: "bench" as const,
+    benchOrder,
+    captainRole: "none" as const,
+  }));
+  return [...starters, ...bench];
+}
+
 export function removePlayerFromDraft(
   members: DraftLineupMember[],
   fantasyPlayerId: string,

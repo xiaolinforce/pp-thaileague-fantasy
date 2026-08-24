@@ -4399,6 +4399,28 @@ textarea:focus-visible {
   flex-direction: column;
 }
 
+.points-empty-squad {
+  min-height: 610px;
+  padding: 24px;
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+}
+
+.points-empty-squad strong {
+  font-size: 18px;
+}
+
+.points-empty-squad span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 14px;
+}
+
 .points-pitch-row {
   min-height: 125px;
   display: flex;
@@ -6171,7 +6193,8 @@ textarea:focus-visible {
   }
 
   .points-pitch,
-  .points-pitch-rows {
+  .points-pitch-rows,
+  .points-empty-squad {
     min-height: 535px;
   }
 

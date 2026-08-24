@@ -4,6 +4,27 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-24 — New teams choose their opening squad from an empty draft
+
+**Decision:** Provision Guest, Email, and Google users with a manager, season
+team, Overall membership, and an empty selection. Show 15 position-locked UI
+slots, but persist player snapshots and transfer revision 1 only when the user
+first saves a valid 15-player squad. Existing teams and seeded demo squads are
+not cleared or rebuilt.
+
+**Context:** Automatically assigned players made the opening experience feel
+preselected and reduced the manager's ownership of the first squad. The current
+selection model already permits a draft selection with no player rows, so an
+empty opening state does not require nullable snapshot records or a schema
+migration.
+
+**Consequences:** Partial first squads remain client-local and are lost on
+reload because saving remains disabled until all 15 slots are filled. The first
+valid save creates revision 1 and counts zero transfers. An unsaved empty team
+locks and scores zero without creating an empty revision, and the following
+Gameweek remains an empty draft. Provisioning stays idempotent and must never
+clear an existing account's squad.
+
 ## 2026-08-17 — Root documentation is split by concern
 
 **Decision:** Keep `README.md` for orientation, `ARCHITECTURE.md` for technical

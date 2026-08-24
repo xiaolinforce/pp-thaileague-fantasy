@@ -128,7 +128,9 @@ it. Do not assume a distinct locked phase without adding and documenting its
 behavior.
 
 When the current Gameweek is locked, its settled squad and lineup are copied
-into the next Gameweek as the initial draft.
+into the next Gameweek as the initial draft. A new team that has not saved a
+complete squad locks with an empty selection, scores zero, and carries an empty
+draft into the next Gameweek.
 
 ## Transfers
 
@@ -209,8 +211,11 @@ leagues, head-to-head scoring, and live price changes are not implemented.
   scores, or standings.
 - Every account owns one manager identity. The manager owns at most one team
   per Fantasy season.
-- A new team receives a deterministic valid 15-player opening squad and joins
-  every Overall league for that season.
+- A new team joins every Overall league for that season with an empty opening
+  draft. The Team screen presents 15 position-locked slots in a 4-4-2 starting
+  shape plus one goalkeeper and three outfield bench slots. No player snapshot
+  or transfer revision is stored until the manager saves a valid 15-player
+  squad; the opening squad does not count as transfers.
 - Guest manager and team names are random and cannot be edited. Member names
   may duplicate, are 3–30 characters, and accept Thai, English, digits, spaces,
   period, underscore, and hyphen after whitespace normalization and abuse/

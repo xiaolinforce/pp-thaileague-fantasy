@@ -124,6 +124,10 @@ the screen before cards or tables begin.
   market. A compatible market player fills the first matching vacancy directly;
   selecting a specific vacancy remains an optional way to narrow the market when
   several slots are open. Saving stays disabled until every vacancy is filled.
+- A newly provisioned team starts with all 15 pitch and bench slots visibly
+  vacant without an introductory message. Keep the untouched empty draft from
+  triggering an unsaved-change warning, and begin that warning only after the
+  first local selection. Partial squads remain local and cannot be saved.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a

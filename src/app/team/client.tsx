@@ -46,6 +46,7 @@ import {
   type RuleViolation,
 } from "@/lib/fantasy/rules";
 import {
+  createEmptySquadDraft,
   getCompleteSelectionMembers,
   removePlayerFromDraft,
   type DraftLineupMember,
@@ -282,15 +283,17 @@ export default function TeamClient({
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
     fantasy.selection.activeChip,
   );
-  const [members, setMembers] = useState<DraftLineupMember[]>(
-    fantasy.selection.members.map((member, index) => ({
-      slotId: `selection-slot-${index}`,
-      fantasyPlayerId: member.fantasyPlayerId,
-      vacancyPosition: null,
-      lineupRole: member.lineupRole,
-      benchOrder: member.benchOrder,
-      captainRole: member.captainRole,
-    })),
+  const [members, setMembers] = useState<DraftLineupMember[]>(() =>
+    fantasy.selection.members.length === 0
+      ? createEmptySquadDraft()
+      : fantasy.selection.members.map((member, index) => ({
+          slotId: `selection-slot-${index}`,
+          fantasyPlayerId: member.fantasyPlayerId,
+          vacancyPosition: null,
+          lineupRole: member.lineupRole,
+          benchOrder: member.benchOrder,
+          captainRole: member.captainRole,
+        })),
   );
   const [isPending, startTransition] = useTransition();
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
@@ -451,10 +454,20 @@ export default function TeamClient({
     [members],
   );
   const hasVacancies = completeSelectionMembers === null;
-  const lineupValidationViolations = useMemo(
-    () => (hasVacancies ? [] : validateLineup(lineupAssignments)),
-    [hasVacancies, lineupAssignments],
-  );
+  const lineupValidationViolations = useMemo(() => {
+    const violations = validateLineup(lineupAssignments);
+    return hasVacancies
+      ? violations.filter((violation) =>
+          [
+            "club_quota",
+            "foreign_quota",
+            "tier_quota",
+            "unknown_tier",
+            "unavailable_player",
+          ].includes(violation.code),
+        )
+      : violations;
+  }, [hasVacancies, lineupAssignments]);
   const clientValidationMessages = useMemo(() => {
     return [
       ...new Set(
@@ -480,9 +493,24 @@ export default function TeamClient({
     [lineupValidationViolations, translate],
   );
   const hasClientValidationErrors = clientValidationMessages.length > 0;
+  const draftSelectionMembers = useMemo(
+    () =>
+      members.flatMap((member) =>
+        member.fantasyPlayerId
+          ? [
+              {
+                fantasyPlayerId: member.fantasyPlayerId,
+                lineupRole: member.lineupRole,
+                benchOrder: member.benchOrder,
+                captainRole: member.captainRole,
+              },
+            ]
+          : [],
+      ),
+    [members],
+  );
   const hasUnsavedChanges =
-    hasVacancies ||
-    JSON.stringify(completeSelectionMembers) !== JSON.stringify(savedMembers) ||
+    JSON.stringify(draftSelectionMembers) !== JSON.stringify(savedMembers) ||
     activeChip !== fantasy.selection.activeChip;
 
   const getSwapState = (

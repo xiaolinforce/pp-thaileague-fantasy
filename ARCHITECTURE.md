@@ -48,7 +48,7 @@ Seeded managers remain ranking fixtures and are not sign-in identities.
 | Game rules               | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                             |
 | Player ranking           | `src/lib/fantasy/ranking.ts`         | Pure preseason projection, deterministic ordering, confidence, and tier-boundary derivation.        |
 | Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                      |
-| Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, valid opening squad, Overall membership, and Guest upgrade behavior.         |
+| Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.         |
 | Transactional email      | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                      |
 | Scoring                  | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                      |
 | Score persistence        | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                               |
@@ -124,7 +124,9 @@ moves the manager ownership to the new auth user. Signing into an existing
 account keeps that account's team and marks the Guest manager `abandoned`,
 preserving both histories without merging selections. Initial account
 provisioning is idempotent: concurrent auth completion requests converge on one
-manager, team, 15-player selection, and opening transfer revision.
+manager, team, and empty opening selection. Selection-player snapshots and the
+opening transfer revision are created together only after the manager first
+saves a valid 15-player squad.
 
 Email OTP values are hashed in the verification table, expire after five
 minutes, allow three attempts, and rotate on resend. Turnstile protects every

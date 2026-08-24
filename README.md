@@ -2,7 +2,7 @@
 
 PP Thai League Fantasy is a Thai-first, responsive Thai League 1 Fantasy
 Football prototype built with Next.js 16, Drizzle ORM, and Neon Postgres. It
-imports competition data, provisions a squad for each account, applies the agreed
+imports competition data, provisions an empty opening draft for each account, applies the agreed
 Fantasy rules, calculates provisional/final Gameweek scores, and presents
 Classic league standings.
 
@@ -10,7 +10,7 @@ Classic league standings.
 
 - Thai League 1 season 2026/27.
 - Passwordless Email OTP, Google OAuth, and device-bound Guest accounts through Better Auth.
-- One manager identity per account, with one automatically provisioned team per season.
+- One manager identity per account, with one automatically provisioned empty team draft per season.
 - Landing, dashboard, team selection, transfers, points, leagues, fixtures,
   profile/rules, and internal Fantasy administration screens.
 - Thai source interface with a client-side English display preference.
@@ -86,7 +86,9 @@ The Fantasy seed is idempotent for the configured season. It creates Gameweeks,
 seeded league opponents, two Classic leagues, and safe fallback tier metadata.
 The ranking command publishes a versioned 1-to-all player order and derives
 Level 1/2/3 as the top 50, next 100, and remaining players. A
-real account or Guest receives a deterministic valid 15-player opening squad.
+real account or Guest receives an empty opening draft and chooses all 15 players
+before the first save. Seeded demo managers continue to use deterministic valid
+squads so standings and scoring fixtures remain useful.
 All player mutations derive the team from the current server session; admin
 mutations additionally require `role=admin`.
 
