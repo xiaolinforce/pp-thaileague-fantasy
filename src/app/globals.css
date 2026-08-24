@@ -3078,6 +3078,10 @@ textarea:focus-visible {
   min-width: 0;
 }
 
+.compact-market-primary-filters .compact-market-search {
+  min-width: 0;
+}
+
 .compact-market-primary-filters {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
