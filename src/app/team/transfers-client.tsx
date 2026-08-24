@@ -60,9 +60,20 @@ export default function TransfersClient({
 }) {
   const { language } = useLanguage();
   const [query, setQuery] = useState("");
+  const [clubId, setClubId] = useState("all");
   const [position, setPosition] = useState("ALL");
   const [tier, setTier] = useState("all");
   const [sort, setSort] = useState("points");
+  const clubs = useMemo(
+    () =>
+      [...data.clubs].sort((clubA, clubB) =>
+        localize(clubA.shortName, language).localeCompare(
+          localize(clubB.shortName, language),
+          language === "th" ? "th-TH" : "en",
+        ),
+      ),
+    [data.clubs, language],
+  );
   const playersByFantasyId = useMemo(
     () =>
       new Map(
@@ -95,10 +106,11 @@ export default function TransfersClient({
       (player) =>
         player.fantasyPlayerId && !ownedIds.has(player.fantasyPlayerId),
     )
+    .filter((player) => clubId === "all" || player.clubId === clubId)
     .filter((player) => position === "ALL" || player.position === position)
     .filter((player) => tier === "all" || player.tier === Number(tier))
     .filter((player) =>
-      `${player.name.th} ${player.name.en} ${player.club.th} ${player.club.en}`
+      `${player.name.th} ${player.name.en} ${player.shortName.th} ${player.shortName.en}`
         .toLowerCase()
         .includes(query.toLowerCase()),
     )
@@ -164,25 +176,43 @@ export default function TransfersClient({
         </div>
 
         <div className="compact-market-toolbar">
-          <label className="search-field compact-market-search">
-            <Search size={17} aria-hidden="true" />
-            <Input
-              className="market-search-input"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="ค้นหานักเตะหรือสโมสร"
-              aria-label="ค้นหานักเตะหรือสโมสร"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={() => setQuery("")}
-                aria-label="ล้างคำค้น"
-              >
-                <X size={15} aria-hidden="true" />
-              </button>
-            )}
-          </label>
+          <div className="compact-market-primary-filters">
+            <label className="search-field compact-market-search">
+              <Search size={17} aria-hidden="true" />
+              <Input
+                className="market-search-input"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="ค้นหาชื่อนักเตะ"
+                aria-label="ค้นหาชื่อนักเตะ"
+              />
+              {query && (
+                <button
+                  type="button"
+                  onClick={() => setQuery("")}
+                  aria-label="ล้างคำค้น"
+                >
+                  <X size={15} aria-hidden="true" />
+                </button>
+              )}
+            </label>
+            <Select
+              value={clubId}
+              onValueChange={(value) => value && setClubId(String(value))}
+            >
+              <SelectTrigger aria-label="กรองสโมสร">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกสโมสร</SelectItem>
+                {clubs.map((club) => (
+                  <SelectItem value={club.id} key={club.id}>
+                    {localize(club.shortName, language)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
           <ToggleGroup
             className="position-filter compact-position-filter"
             value={[position]}
