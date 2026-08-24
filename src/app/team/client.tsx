@@ -52,7 +52,9 @@ import {
 import {
   createEmptySquadDraft,
   getCompleteSelectionMembers,
+  getValidDraftVacancySwapTargetIds,
   removePlayerFromDraft,
+  swapDraftVacancyWithPlayer,
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
 import TransfersClient from "@/app/team/transfers-client";
@@ -75,6 +77,9 @@ const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
 };
 
 type PlayerSwapState = "source" | "available" | "unavailable";
+type SwapSource =
+  | { type: "player"; fantasyPlayerId: string }
+  | { type: "vacancy"; slotId: string };
 
 function formatClientViolation(
   violation: RuleViolation,
@@ -236,17 +241,70 @@ function translateAction(language: "th" | "en", thai: string, english: string) {
   return language === "th" ? thai : english;
 }
 
-function VacantSquadSlot({ position }: { position: CompetitionPosition }) {
+function VacantSquadSlot({
+  position,
+  onSwap,
+  actionsDisabled,
+  hideAction,
+  swapDisabled,
+  swapState,
+  captain,
+}: {
+  position: CompetitionPosition;
+  onSwap: () => void;
+  actionsDisabled: boolean;
+  hideAction: boolean;
+  swapDisabled: boolean;
+  swapState?: PlayerSwapState;
+  captain?: "C" | "V";
+}) {
   const { language } = useLanguage();
+  const isSource = swapState === "source";
   return (
-    <div className="vacant-squad-slot">
-      <span className="vacant-squad-icon">
-        <UserRound size={23} aria-hidden="true" />
-      </span>
-      <span className="squad-name">{position}</span>
-      <span className="squad-fixture">
-        {language === "th" ? "ว่าง" : "Vacant"}
-      </span>
+    <div
+      className={`squad-token-shell vacant-squad-token-shell${swapState ? ` swap-${swapState}` : ""}`}
+    >
+      <div className="vacant-squad-slot">
+        <span className="vacant-squad-icon">
+          <UserRound size={23} aria-hidden="true" />
+          {captain && (
+            <i
+              className={`captain-badge ${
+                captain === "C"
+                  ? "captain-badge--captain"
+                  : "captain-badge--vice-captain"
+              }`}
+            >
+              {captain}
+            </i>
+          )}
+        </span>
+        <span className="squad-name">{position}</span>
+        <span className="squad-fixture">
+          {language === "th" ? "ว่าง" : "Vacant"}
+        </span>
+      </div>
+      {(!hideAction || isSource) && (
+        <button
+          type="button"
+          className="squad-token-action squad-swap-action"
+          onClick={onSwap}
+          disabled={actionsDisabled || swapDisabled}
+          aria-pressed={isSource}
+          aria-label={
+            language === "th"
+              ? isSource
+                ? `ยกเลิกการสลับช่องว่าง ${position}`
+                : `สลับช่องว่าง ${position}`
+              : isSource
+                ? `Cancel swap for vacant ${position} slot`
+                : `Swap vacant ${position} slot`
+          }
+          title={language === "th" ? "สลับตัว" : "Swap"}
+        >
+          <ArrowLeftRight size={13} aria-hidden="true" />
+        </button>
+      )}
     </div>
   );
 }
@@ -260,7 +318,7 @@ export default function TeamClient({
 }) {
   const { language, translate } = useLanguage();
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
-  const [swapFrom, setSwapFrom] = useState<string | null>(null);
+  const [swapFrom, setSwapFrom] = useState<SwapSource | null>(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
     fantasy.selection.activeChip,
   );
@@ -335,13 +393,29 @@ export default function TeamClient({
       ),
     [members],
   );
-  const validSwapTargetIds = useMemo(
+  const playerPositionsById = useMemo(
     () =>
-      swapFrom && lineupAssignments.length === members.length
-        ? getValidLineupSwapTargetIds(lineupAssignments, swapFrom)
-        : new Set<string>(),
-    [lineupAssignments, members.length, swapFrom],
+      new Map(
+        [...playersByFantasyId].map(([fantasyPlayerId, player]) => [
+          fantasyPlayerId,
+          fantasyPositions[player.position],
+        ]),
+      ),
+    [playersByFantasyId],
   );
+  const validSwapTargetIds = useMemo(() => {
+    if (!swapFrom) return new Set<string>();
+    if (swapFrom.type === "vacancy") {
+      return getValidDraftVacancySwapTargetIds(
+        members,
+        swapFrom.slotId,
+        playerPositionsById,
+      );
+    }
+    return lineupAssignments.length === members.length
+      ? getValidLineupSwapTargetIds(lineupAssignments, swapFrom.fantasyPlayerId)
+      : new Set<string>();
+  }, [lineupAssignments, members, playerPositionsById, swapFrom]);
   const swappableSourceIds = useMemo(() => {
     if (lineupAssignments.length !== members.length) return new Set<string>();
     return new Set(
@@ -352,6 +426,21 @@ export default function TeamClient({
       ),
     );
   }, [lineupAssignments, members.length]);
+  const swappableVacancySlotIds = useMemo(
+    () =>
+      new Set(
+        vacancies.flatMap((vacancy) =>
+          getValidDraftVacancySwapTargetIds(
+            members,
+            vacancy.slotId,
+            playerPositionsById,
+          ).size > 0
+            ? [vacancy.slotId]
+            : [],
+        ),
+      ),
+    [members, playerPositionsById, vacancies],
+  );
   const squadSlots = members.flatMap((member) => {
     const player = member.fantasyPlayerId
       ? (playersByFantasyId.get(member.fantasyPlayerId) ?? null)
@@ -509,11 +598,21 @@ export default function TeamClient({
     fantasyPlayerId: string | null,
   ): PlayerSwapState | undefined => {
     if (!swapFrom || !fantasyPlayerId) return undefined;
-    if (fantasyPlayerId === swapFrom) return "source";
+    if (
+      swapFrom.type === "player" &&
+      fantasyPlayerId === swapFrom.fantasyPlayerId
+    ) {
+      return "source";
+    }
     return validSwapTargetIds.has(fantasyPlayerId)
       ? "available"
       : "unavailable";
   };
+
+  const getVacancySwapState = (slotId: string): PlayerSwapState | undefined =>
+    swapFrom?.type === "vacancy" && swapFrom.slotId === slotId
+      ? "source"
+      : undefined;
 
   useEffect(() => {
     const deadline = new Date(fantasy.gameweek.deadlineAt).getTime();
@@ -603,7 +702,21 @@ export default function TeamClient({
   const startSwap = (player: CompetitionPlayerView) => {
     if (interactionsDisabled || !player.fantasyPlayerId) return;
     if (!swappableSourceIds.has(player.fantasyPlayerId)) return;
-    setSwapFrom(player.fantasyPlayerId);
+    setSwapFrom({
+      type: "player",
+      fantasyPlayerId: player.fantasyPlayerId,
+    });
+    setSelected(null);
+  };
+
+  const startVacancySwap = (slotId: string) => {
+    if (interactionsDisabled) return;
+    if (swapFrom?.type === "vacancy" && swapFrom.slotId === slotId) {
+      setSwapFrom(null);
+      return;
+    }
+    if (!swappableVacancySlotIds.has(slotId)) return;
+    setSwapFrom({ type: "vacancy", slotId });
     setSelected(null);
   };
 
@@ -630,14 +743,29 @@ export default function TeamClient({
       setSelected(player);
       return;
     }
-    if (swapFrom === player.fantasyPlayerId) {
+    if (
+      swapFrom.type === "player" &&
+      swapFrom.fantasyPlayerId === player.fantasyPlayerId
+    ) {
       setSwapFrom(null);
       return;
     }
     if (!validSwapTargetIds.has(player.fantasyPlayerId)) return;
+    if (swapFrom.type === "vacancy") {
+      setMembers(
+        (current) =>
+          swapDraftVacancyWithPlayer(
+            current,
+            swapFrom.slotId,
+            player.fantasyPlayerId!,
+          ) ?? current,
+      );
+      setSwapFrom(null);
+      return;
+    }
     const swapped = swapLineupAssignments(
       lineupAssignments,
-      swapFrom,
+      swapFrom.fantasyPlayerId,
       player.fantasyPlayerId,
     );
     if (!swapped) return;
@@ -904,6 +1032,20 @@ export default function TeamClient({
                           <VacantSquadSlot
                             key={slot.member.slotId}
                             position={slot.position}
+                            onSwap={() => startVacancySwap(slot.member.slotId)}
+                            actionsDisabled={interactionsDisabled}
+                            hideAction={Boolean(swapFrom)}
+                            swapDisabled={
+                              !swappableVacancySlotIds.has(slot.member.slotId)
+                            }
+                            swapState={getVacancySwapState(slot.member.slotId)}
+                            captain={
+                              slot.member.captainRole === "captain"
+                                ? "C"
+                                : slot.member.captainRole === "vice_captain"
+                                  ? "V"
+                                  : undefined
+                            }
                           />
                         ),
                       )}
@@ -937,7 +1079,23 @@ export default function TeamClient({
                         showPositionBadgeOnShirt
                       />
                     ) : (
-                      <VacantSquadSlot position={slot.position} />
+                      <VacantSquadSlot
+                        position={slot.position}
+                        onSwap={() => startVacancySwap(slot.member.slotId)}
+                        actionsDisabled={interactionsDisabled}
+                        hideAction={Boolean(swapFrom)}
+                        swapDisabled={
+                          !swappableVacancySlotIds.has(slot.member.slotId)
+                        }
+                        swapState={getVacancySwapState(slot.member.slotId)}
+                        captain={
+                          slot.member.captainRole === "captain"
+                            ? "C"
+                            : slot.member.captainRole === "vice_captain"
+                              ? "V"
+                              : undefined
+                        }
+                      />
                     )}
                   </div>
                 ))}

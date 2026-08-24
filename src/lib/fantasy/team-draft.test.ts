@@ -1,12 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import type { FantasyPosition } from "./rules.ts";
+
 import {
   createEmptySquadDraft,
   fillDraftVacancy,
   fillFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
+  getValidDraftVacancySwapTargetIds,
   removePlayerFromDraft,
+  swapDraftVacancyWithPlayer,
   type DraftLineupMember,
 } from "./team-draft.ts";
 
@@ -132,5 +136,147 @@ test("fills the first matching vacancy without requiring a selected slot", () =>
   assert.equal(
     fillFirstMatchingDraftVacancy(vacancies, "forward", "fwd-1"),
     null,
+  );
+});
+
+function makeCompleteDraft() {
+  const positionsById = new Map<string, FantasyPosition>();
+  const members = createEmptySquadDraft().map((member, index) => {
+    const fantasyPlayerId = `${member.vacancyPosition}-${index + 1}`;
+    positionsById.set(fantasyPlayerId, member.vacancyPosition!);
+    return {
+      ...member,
+      fantasyPlayerId,
+      vacancyPosition: null,
+      captainRole:
+        index === 1
+          ? ("captain" as const)
+          : index === 2
+            ? ("vice_captain" as const)
+            : ("none" as const),
+    };
+  });
+  return { members, positionsById };
+}
+
+test("swaps a vacancy with a cross-position player while preserving the missing position", () => {
+  const { members: complete, positionsById } = makeCompleteDraft();
+  const starterDefender = complete.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      positionsById.get(member.fantasyPlayerId!) === "defender",
+  )!;
+  const benchMidfielder = complete.find(
+    (member) =>
+      member.lineupRole === "bench" &&
+      positionsById.get(member.fantasyPlayerId!) === "midfielder",
+  )!;
+  const vacancy = removePlayerFromDraft(
+    complete,
+    starterDefender.fantasyPlayerId!,
+    "defender",
+  );
+
+  const targets = getValidDraftVacancySwapTargetIds(
+    vacancy,
+    starterDefender.slotId,
+    positionsById,
+  );
+  assert.equal(targets.has(benchMidfielder.fantasyPlayerId!), true);
+
+  const swapped = swapDraftVacancyWithPlayer(
+    vacancy,
+    starterDefender.slotId,
+    benchMidfielder.fantasyPlayerId!,
+  )!;
+  const movedVacancy = swapped.find(
+    (member) => member.slotId === starterDefender.slotId,
+  )!;
+  const movedPlayer = swapped.find(
+    (member) => member.fantasyPlayerId === benchMidfielder.fantasyPlayerId,
+  )!;
+  assert.equal(movedVacancy.vacancyPosition, "defender");
+  assert.equal(movedVacancy.lineupRole, "bench");
+  assert.equal(movedVacancy.benchOrder, benchMidfielder.benchOrder);
+  assert.equal(movedPlayer.lineupRole, "starter");
+  assert.equal(movedPlayer.benchOrder, null);
+});
+
+test("rejects vacancy swaps that break the formation or bench structure", () => {
+  const { members: complete, positionsById } = makeCompleteDraft();
+  const starterDefender = complete.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      positionsById.get(member.fantasyPlayerId!) === "defender",
+  )!;
+  const benchGoalkeeper = complete.find(
+    (member) =>
+      member.lineupRole === "bench" &&
+      positionsById.get(member.fantasyPlayerId!) === "goalkeeper",
+  )!;
+  const anotherStarter = complete.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      member.fantasyPlayerId !== starterDefender.fantasyPlayerId,
+  )!;
+  const vacancy = removePlayerFromDraft(
+    complete,
+    starterDefender.fantasyPlayerId!,
+    "defender",
+  );
+  const targets = getValidDraftVacancySwapTargetIds(
+    vacancy,
+    starterDefender.slotId,
+    positionsById,
+  );
+
+  assert.equal(targets.has(benchGoalkeeper.fantasyPlayerId!), false);
+  assert.equal(targets.has(anotherStarter.fantasyPlayerId!), false);
+  assert.equal(
+    swapDraftVacancyWithPlayer(
+      vacancy,
+      starterDefender.slotId,
+      anotherStarter.fantasyPlayerId!,
+    ),
+    null,
+  );
+  assert.equal(
+    swapDraftVacancyWithPlayer(
+      vacancy,
+      starterDefender.slotId,
+      starterDefender.slotId,
+    ),
+    null,
+  );
+});
+
+test("passes captaincy through a vacancy that replaces a starter", () => {
+  const { members: complete, positionsById } = makeCompleteDraft();
+  const benchDefender = complete.find(
+    (member) =>
+      member.lineupRole === "bench" &&
+      positionsById.get(member.fantasyPlayerId!) === "defender",
+  )!;
+  const captain = complete.find((member) => member.captainRole === "captain")!;
+  const vacancy = removePlayerFromDraft(
+    complete,
+    benchDefender.fantasyPlayerId!,
+    "defender",
+  );
+  const swapped = swapDraftVacancyWithPlayer(
+    vacancy,
+    benchDefender.slotId,
+    captain.fantasyPlayerId!,
+  )!;
+
+  assert.equal(
+    swapped.find((member) => member.slotId === benchDefender.slotId)
+      ?.captainRole,
+    "captain",
+  );
+  assert.equal(
+    swapped.find((member) => member.fantasyPlayerId === captain.fantasyPlayerId)
+      ?.captainRole,
+    "none",
   );
 });

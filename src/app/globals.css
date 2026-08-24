@@ -3465,7 +3465,18 @@ textarea:focus-visible {
   color: white;
 }
 
+.vacant-squad-token-shell:hover {
+  transform: none;
+}
+
+.vacant-squad-token-shell.swap-source .vacant-squad-slot {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 0 0 2px rgba(255, 177, 132, 0.95);
+}
+
 .vacant-squad-icon {
+  position: relative;
   width: 46px;
   height: 46px;
   margin-bottom: 2px;
@@ -3513,7 +3524,8 @@ textarea:focus-visible {
   height: 46px;
 }
 
-.squad-shirt i {
+.squad-shirt i,
+.vacant-squad-icon > i {
   position: absolute;
   right: -8px;
   top: -5px;
@@ -3530,6 +3542,7 @@ textarea:focus-visible {
 }
 
 .squad-shirt i.captain-badge,
+.vacant-squad-icon > i.captain-badge,
 .points-player-kit > i.captain-badge {
   width: 21px;
   height: 21px;
@@ -3540,11 +3553,13 @@ textarea:focus-visible {
 }
 
 .squad-shirt i.captain-badge--captain,
+.vacant-squad-icon > i.captain-badge--captain,
 .points-player-kit > i.captain-badge--captain {
   background: var(--orange);
 }
 
 .squad-shirt i.captain-badge--vice-captain,
+.vacant-squad-icon > i.captain-badge--vice-captain,
 .points-player-kit > i.captain-badge--vice-captain {
   background: color-mix(in srgb, var(--orange) 38%, var(--paper));
 }

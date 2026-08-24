@@ -52,6 +52,13 @@ the incoming starter inherits the outgoing starter's captain or vice-captain
 role. Swapping players who are both in the starting eleven keeps each role with
 its existing player.
 
+A vacant draft slot may swap with a real player but not another vacancy. The
+vacancy keeps its required player position while exchanging lineup role and
+bench order with the player. Cross-position swaps are allowed only when the
+placeholder-complete lineup still satisfies the starting-formation and bench
+structure. Captaincy follows the same starter/bench inheritance rule, so a
+vacancy may temporarily carry the role until its replacement is added.
+
 An unavailable player cannot be added to a newly validated squad. Existing
 selection rows retain their snapshots so later availability or classification
 changes do not rewrite history.
