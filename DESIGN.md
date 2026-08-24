@@ -114,16 +114,16 @@ the screen before cards or tables begin.
   controls; historical squads belong on the Points screen.
 - Keep lineup management and player transfers visible in one Team workspace,
   without mode tabs. On desktop, show the pitch and market side by side; stack
-  the market after the pitch on narrow screens. Selecting a vacant squad slot
-  should filter the market to compatible replacements without leaving the page.
+  the market after the pitch on narrow screens. Vacant squad slots are
+  non-interactive status indicators and do not move focus or filter the market.
   Do not list players who are already in the current draft squad; a removed
   player becomes eligible for the market again while the change is unsaved.
 - Expose swap and remove as compact, icon-only actions on every pitch and bench
   player, with accessible names. Removing a player keeps that lineup slot as a
   visible position-locked vacancy without selecting it or moving focus to the
   market. A compatible market player fills the first matching vacancy directly;
-  selecting a specific vacancy remains an optional way to narrow the market when
-  several slots are open. Saving stays disabled until every vacancy is filled.
+  the manager does not need to choose a destination slot first. Saving stays
+  disabled until every vacancy is filled.
 - A newly provisioned team starts with all 15 pitch and bench slots visibly
   vacant without an introductory message. Keep the untouched empty draft from
   triggering an unsaved-change warning, and begin that warning only after the

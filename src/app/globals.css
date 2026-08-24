@@ -3063,42 +3063,6 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
-.compact-transfer-guide {
-  margin: 12px;
-  padding: 11px 12px;
-  border-radius: 10px;
-  color: #dfe7ea;
-  background: var(--navy);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.compact-transfer-guide.active {
-  box-shadow: inset 3px 0 0 var(--orange);
-}
-
-.compact-transfer-guide strong,
-.compact-transfer-guide span {
-  display: block;
-}
-
-.compact-transfer-guide span {
-  margin-top: 2px;
-  color: #98a4aa;
-}
-
-.compact-clear-player {
-  border: 0;
-  color: #fff;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-
 .compact-market-toolbar {
   padding: 0 12px 12px;
   display: grid;
@@ -3488,31 +3452,10 @@ textarea:focus-visible {
 
 .vacant-squad-slot {
   min-width: 78px;
-  border: 0;
-  padding: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   color: white;
-  background: transparent;
-  cursor: pointer;
-  transition: transform 0.18s ease;
-}
-
-.vacant-squad-slot:hover:not(:disabled) {
-  transform: translateY(-4px);
-}
-
-.vacant-squad-slot.selected {
-  border-radius: 12px;
-  box-shadow:
-    0 0 0 2px rgba(255, 255, 255, 0.92),
-    0 0 0 5px var(--orange);
-}
-
-.vacant-squad-slot:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
 }
 
 .vacant-squad-icon {

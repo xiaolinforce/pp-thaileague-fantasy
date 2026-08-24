@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  ArrowDownUp,
-  Plus,
-  Search,
-  X,
-} from "lucide-react";
+import { ArrowDownUp, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
@@ -28,7 +23,6 @@ import {
   type CompetitionPlayerView,
 } from "@/lib/competition-types";
 import {
-  fillDraftVacancy,
   fillFirstMatchingDraftVacancy,
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
@@ -54,8 +48,6 @@ export default function TransfersClient({
   members,
   onMembersChange,
   onPlayerSelect,
-  selectedVacancySlotId,
-  onSelectedVacancySlotChange,
   isAutoFilling,
 }: {
   data: CompetitionDataset;
@@ -64,11 +56,9 @@ export default function TransfersClient({
   members: DraftLineupMember[];
   onMembersChange: (members: DraftLineupMember[]) => void;
   onPlayerSelect: (player: CompetitionPlayerView) => void;
-  selectedVacancySlotId: string | null;
-  onSelectedVacancySlotChange: (slotId: string | null) => void;
   isAutoFilling: boolean;
 }) {
-  const { language, translate } = useLanguage();
+  const { language } = useLanguage();
   const [query, setQuery] = useState("");
   const [position, setPosition] = useState("ALL");
   const [tier, setTier] = useState("all");
@@ -93,13 +83,6 @@ export default function TransfersClient({
       ),
     [members],
   );
-  const selectedVacancy = selectedVacancySlotId
-    ? members.find(
-        (member) =>
-          member.slotId === selectedVacancySlotId &&
-          member.fantasyPlayerId === null,
-      )
-    : null;
   const vacancies = members.filter(
     (member) =>
       member.fantasyPlayerId === null && member.vacancyPosition !== null,
@@ -107,20 +90,12 @@ export default function TransfersClient({
   const vacantPositions = new Set(
     vacancies.map((member) => competitionPositions[member.vacancyPosition!]),
   );
-  const vacancyPosition = selectedVacancy?.vacancyPosition
-    ? competitionPositions[selectedVacancy.vacancyPosition]
-    : null;
-  const effectivePosition = vacancyPosition ?? position;
-
   const players = data.players
     .filter(
       (player) =>
         player.fantasyPlayerId && !ownedIds.has(player.fantasyPlayerId),
     )
-    .filter(
-      (player) =>
-        effectivePosition === "ALL" || player.position === effectivePosition,
-    )
+    .filter((player) => position === "ALL" || player.position === position)
     .filter((player) => tier === "all" || player.tier === Number(tier))
     .filter((player) =>
       `${player.name.th} ${player.name.en} ${player.club.th} ${player.club.en}`
@@ -148,23 +123,13 @@ export default function TransfersClient({
     }
     if (!player.fantasyPlayerId) return;
     if (ownedIds.has(player.fantasyPlayerId)) return;
-    const nextMembers =
-      selectedVacancy && vacancyPosition
-        ? player.position === vacancyPosition
-          ? fillDraftVacancy(
-              members,
-              selectedVacancy.slotId,
-              player.fantasyPlayerId,
-            )
-          : null
-        : fillFirstMatchingDraftVacancy(
-            members,
-            fantasyPositions[player.position],
-            player.fantasyPlayerId,
-          );
+    const nextMembers = fillFirstMatchingDraftVacancy(
+      members,
+      fantasyPositions[player.position],
+      player.fantasyPlayerId,
+    );
     if (!nextMembers) return;
     onMembersChange(nextMembers);
-    onSelectedVacancySlotChange(null);
   }
 
   return (
@@ -198,36 +163,6 @@ export default function TransfersClient({
           </div>
         </div>
 
-        {selectedVacancy && (
-          <div className="compact-transfer-guide active" aria-live="polite">
-            <div>
-              <strong>
-                {vacancyPosition
-                  ? language === "th"
-                    ? `เลือก ${vacancyPosition} เพื่อเติมช่องว่าง`
-                    : `Choose a ${vacancyPosition} for the vacant slot`
-                  : null}
-              </strong>
-              <span>
-                {language === "th"
-                  ? selectedVacancy.lineupRole === "starter"
-                    ? "กำลังเติมช่องตัวจริง"
-                    : `กำลังเติมม้านั่งลำดับ ${selectedVacancy.benchOrder}`
-                  : selectedVacancy.lineupRole === "starter"
-                    ? "Filling a starting-XI slot"
-                    : `Filling bench slot ${selectedVacancy.benchOrder}`}
-              </span>
-            </div>
-            <button
-              type="button"
-              className="compact-clear-player"
-              onClick={() => onSelectedVacancySlotChange(null)}
-            >
-              <X size={15} /> ยกเลิก
-            </button>
-          </div>
-        )}
-
         <div className="compact-market-toolbar">
           <label className="search-field compact-market-search">
             <Search size={17} aria-hidden="true" />
@@ -250,17 +185,13 @@ export default function TransfersClient({
           </label>
           <ToggleGroup
             className="position-filter compact-position-filter"
-            value={[effectivePosition]}
+            value={[position]}
             onValueChange={(values) => {
-              if (!selectedVacancy && values[0]) setPosition(String(values[0]));
+              if (values[0]) setPosition(String(values[0]));
             }}
           >
             {(["ALL", "GK", "DEF", "MID", "FWD"] as const).map((item) => (
-              <ToggleGroupItem
-                value={item}
-                key={item}
-                disabled={Boolean(vacancyPosition) && item !== vacancyPosition}
-              >
+              <ToggleGroupItem value={item} key={item}>
                 {item === "ALL" ? "ทั้งหมด" : item}
               </ToggleGroupItem>
             ))}
@@ -298,10 +229,7 @@ export default function TransfersClient({
 
         <div className="compact-market-list">
           {players.map((player) => {
-            const compatible =
-              vacancyPosition !== null
-                ? player.position === vacancyPosition
-                : vacantPositions.has(player.position);
+            const compatible = vacantPositions.has(player.position);
             const metricValue =
               sort === "form" ? player.form.toFixed(1) : String(player.points);
             const metricLabel =

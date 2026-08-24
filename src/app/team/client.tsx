@@ -8,7 +8,7 @@ import {
   Save,
   TriangleAlert,
   Trash2,
-  UserRoundPlus,
+  UserRound,
   WandSparkles,
   Zap,
 } from "lucide-react";
@@ -236,38 +236,18 @@ function translateAction(language: "th" | "en", thai: string, english: string) {
   return language === "th" ? thai : english;
 }
 
-function VacantSquadSlot({
-  position,
-  selected,
-  disabled,
-  onSelect,
-}: {
-  position: CompetitionPosition;
-  selected: boolean;
-  disabled: boolean;
-  onSelect: () => void;
-}) {
+function VacantSquadSlot({ position }: { position: CompetitionPosition }) {
   const { language } = useLanguage();
   return (
-    <button
-      type="button"
-      className={`vacant-squad-slot${selected ? " selected" : ""}`}
-      disabled={disabled}
-      onClick={onSelect}
-      aria-label={
-        language === "th"
-          ? `เลือกช่องว่าง ${position} เพื่อเพิ่มนักเตะ`
-          : `Select vacant ${position} slot to add a player`
-      }
-    >
+    <div className="vacant-squad-slot">
       <span className="vacant-squad-icon">
-        <UserRoundPlus size={23} aria-hidden="true" />
+        <UserRound size={23} aria-hidden="true" />
       </span>
       <span className="squad-name">{position}</span>
       <span className="squad-fixture">
         {language === "th" ? "ว่าง" : "Vacant"}
       </span>
-    </button>
+    </div>
   );
 }
 
@@ -279,9 +259,6 @@ export default function TeamClient({
   fantasy: FantasyState;
 }) {
   const { language, translate } = useLanguage();
-  const [selectedVacancySlotId, setSelectedVacancySlotId] = useState<
-    string | null
-  >(null);
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
@@ -604,7 +581,6 @@ export default function TeamClient({
           return;
         }
         setMembers(result.members);
-        setSelectedVacancySlotId(null);
         setSwapFrom(null);
         setSelected(null);
         toast.success(translate("เติมนักเตะอัตโนมัติแล้ว"), {
@@ -624,27 +600,11 @@ export default function TeamClient({
     });
   };
 
-  const scrollToMarket = () => {
-    window.requestAnimationFrame(() =>
-      document
-        .getElementById("team-transfer-market")
-        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
-    );
-  };
-
   const startSwap = (player: CompetitionPlayerView) => {
     if (interactionsDisabled || !player.fantasyPlayerId) return;
     if (!swappableSourceIds.has(player.fantasyPlayerId)) return;
-    setSelectedVacancySlotId(null);
     setSwapFrom(player.fantasyPlayerId);
     setSelected(null);
-  };
-
-  const selectVacancy = (slotId: string) => {
-    if (interactionsDisabled) return;
-    setSwapFrom(null);
-    setSelectedVacancySlotId(slotId);
-    scrollToMarket();
   };
 
   const removePlayer = (player: CompetitionPlayerView) => {
@@ -661,7 +621,6 @@ export default function TeamClient({
       ),
     );
     setSwapFrom(null);
-    setSelectedVacancySlotId(null);
     setSelected(null);
   };
 
@@ -883,13 +842,15 @@ export default function TeamClient({
                   onClick={autoFillVacancies}
                   aria-busy={isAutoFilling}
                   title={
-                    !isEditable
-                      ? translate("ปิดรับการจัดทีมแล้ว")
-                      : undefined
+                    !isEditable ? translate("ปิดรับการจัดทีมแล้ว") : undefined
                   }
                 >
                   {isAutoFilling ? (
-                    <LoaderCircle className="spin" size={15} aria-hidden="true" />
+                    <LoaderCircle
+                      className="spin"
+                      size={15}
+                      aria-hidden="true"
+                    />
                   ) : (
                     <WandSparkles size={15} aria-hidden="true" />
                   )}
@@ -943,11 +904,6 @@ export default function TeamClient({
                           <VacantSquadSlot
                             key={slot.member.slotId}
                             position={slot.position}
-                            selected={
-                              selectedVacancySlotId === slot.member.slotId
-                            }
-                            disabled={interactionsDisabled}
-                            onSelect={() => selectVacancy(slot.member.slotId)}
                           />
                         ),
                       )}
@@ -981,12 +937,7 @@ export default function TeamClient({
                         showPositionBadgeOnShirt
                       />
                     ) : (
-                      <VacantSquadSlot
-                        position={slot.position}
-                        selected={selectedVacancySlotId === slot.member.slotId}
-                        disabled={interactionsDisabled}
-                        onSelect={() => selectVacancy(slot.member.slotId)}
-                      />
+                      <VacantSquadSlot position={slot.position} />
                     )}
                   </div>
                 ))}
@@ -1001,8 +952,6 @@ export default function TeamClient({
             members={members}
             onMembersChange={setMembers}
             onPlayerSelect={setSelected}
-            selectedVacancySlotId={selectedVacancySlotId}
-            onSelectedVacancySlotChange={setSelectedVacancySlotId}
             isAutoFilling={isAutoFilling}
           />
         </div>
