@@ -104,45 +104,39 @@ export function fillFirstMatchingDraftVacancy(
     : null;
 }
 
-export function swapDraftVacancyWithPlayer(
+export function swapDraftLineupMembers(
   members: DraftLineupMember[],
-  vacancySlotId: string,
-  fantasyPlayerId: string,
+  sourceSlotId: string,
+  targetSlotId: string,
 ) {
-  const vacancy = members.find(
-    (member) =>
-      member.slotId === vacancySlotId &&
-      member.fantasyPlayerId === null &&
-      member.vacancyPosition !== null,
-  );
-  const player = members.find(
-    (member) => member.fantasyPlayerId === fantasyPlayerId,
-  );
-  if (!vacancy || !player) return null;
+  if (sourceSlotId === targetSlotId) return null;
+  const source = members.find((member) => member.slotId === sourceSlotId);
+  const target = members.find((member) => member.slotId === targetSlotId);
+  if (!source || !target) return null;
 
   const hasAssignmentChange =
-    vacancy.lineupRole !== player.lineupRole ||
-    vacancy.benchOrder !== player.benchOrder;
+    source.lineupRole !== target.lineupRole ||
+    source.benchOrder !== target.benchOrder;
   if (!hasAssignmentChange) return null;
 
-  const swapsStarterAndBench = vacancy.lineupRole !== player.lineupRole;
+  const swapsStarterAndBench = source.lineupRole !== target.lineupRole;
   const outgoingStarter = swapsStarterAndBench
-    ? vacancy.lineupRole === "starter"
-      ? vacancy
-      : player
+    ? source.lineupRole === "starter"
+      ? source
+      : target
     : null;
   const incomingStarterSlotId = swapsStarterAndBench
-    ? vacancy.lineupRole === "bench"
-      ? vacancy.slotId
-      : player.slotId
+    ? source.lineupRole === "bench"
+      ? source.slotId
+      : target.slotId
     : null;
 
   return members.map((member) => {
-    if (member.slotId === vacancy.slotId) {
+    if (member.slotId === source.slotId) {
       return {
         ...member,
-        lineupRole: player.lineupRole,
-        benchOrder: player.benchOrder,
+        lineupRole: target.lineupRole,
+        benchOrder: target.benchOrder,
         captainRole: swapsStarterAndBench
           ? member.slotId === incomingStarterSlotId
             ? (outgoingStarter?.captainRole ?? "none")
@@ -150,11 +144,11 @@ export function swapDraftVacancyWithPlayer(
           : member.captainRole,
       };
     }
-    if (member.slotId === player.slotId) {
+    if (member.slotId === target.slotId) {
       return {
         ...member,
-        lineupRole: vacancy.lineupRole,
-        benchOrder: vacancy.benchOrder,
+        lineupRole: source.lineupRole,
+        benchOrder: source.benchOrder,
         captainRole: swapsStarterAndBench
           ? member.slotId === incomingStarterSlotId
             ? (outgoingStarter?.captainRole ?? "none")
@@ -187,18 +181,17 @@ function getDraftLineupAssignments(
   return assignments;
 }
 
-export function getValidDraftVacancySwapTargetIds(
+export function getValidDraftSwapTargetSlotIds(
   members: DraftLineupMember[],
-  vacancySlotId: string,
+  sourceSlotId: string,
   playerPositionsById: ReadonlyMap<string, FantasyPosition>,
 ) {
-  const targetIds = new Set<string>();
+  const targetSlotIds = new Set<string>();
   for (const member of members) {
-    if (!member.fantasyPlayerId) continue;
-    const swapped = swapDraftVacancyWithPlayer(
+    const swapped = swapDraftLineupMembers(
       members,
-      vacancySlotId,
-      member.fantasyPlayerId,
+      sourceSlotId,
+      member.slotId,
     );
     if (!swapped) continue;
     const assignments = getDraftLineupAssignments(swapped, playerPositionsById);
@@ -208,10 +201,10 @@ export function getValidDraftVacancySwapTargetIds(
         violation.code !== "captain" && violation.code !== "vice_captain",
     );
     if (structuralViolations.length === 0) {
-      targetIds.add(member.fantasyPlayerId);
+      targetSlotIds.add(member.slotId);
     }
   }
-  return targetIds;
+  return targetSlotIds;
 }
 
 export function getCompleteSelectionMembers(

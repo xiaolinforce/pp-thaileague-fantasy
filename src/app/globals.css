@@ -3415,6 +3415,54 @@ textarea:focus-visible {
   transform: none;
 }
 
+.squad-captain-role,
+.squad-player-tier {
+  position: absolute;
+  z-index: 4;
+  bottom: 74px;
+  display: flex;
+  pointer-events: none;
+}
+
+.squad-captain-role {
+  left: calc(50% - 34px);
+}
+
+.squad-player-tier {
+  right: calc(50% - 34px);
+}
+
+.squad-player-tier .player-meta-badges {
+  margin: 0;
+}
+
+.squad-captain-role .captain-badge {
+  position: static;
+  width: 18px;
+  height: 18px;
+  border: none;
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 900;
+  font-style: normal;
+  line-height: 1;
+  box-shadow: 0 2px 5px rgba(10, 31, 26, 0.3);
+}
+
+.squad-captain-role .captain-badge--captain {
+  background: var(--orange);
+}
+
+.squad-captain-role .captain-badge--vice-captain {
+  background: color-mix(in srgb, var(--orange) 38%, var(--paper));
+}
+
+.squad-token-shell.swap-unavailable .squad-captain-role,
+.squad-token-shell.swap-unavailable .squad-player-tier {
+  opacity: 0.4;
+  filter: saturate(0.45);
+}
+
 .squad-token-action {
   position: absolute;
   z-index: 5;
@@ -3469,6 +3517,10 @@ textarea:focus-visible {
 }
 
 .vacant-squad-slot {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: inherit;
   min-width: 78px;
   display: flex;
   flex-direction: column;
@@ -3484,6 +3536,25 @@ textarea:focus-visible {
   border-radius: 12px;
   background: rgba(255, 255, 255, 0.14);
   box-shadow: inset 0 0 0 2px rgba(255, 177, 132, 0.95);
+}
+
+.vacant-squad-token-shell.swap-available .vacant-squad-slot {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  box-shadow:
+    0 0 0 2px rgba(255, 255, 255, 0.92),
+    0 0 0 5px var(--orange);
+  cursor: pointer;
+}
+
+.vacant-squad-token-shell.swap-available:hover {
+  transform: translateY(-6px);
+}
+
+.vacant-squad-token-shell.swap-unavailable .vacant-squad-slot:disabled {
+  opacity: 0.4;
+  filter: saturate(0.45);
+  cursor: default;
 }
 
 .vacant-squad-icon {
@@ -3597,6 +3668,53 @@ textarea:focus-visible {
   padding: 3px 5px 2px;
   font-size: 12px;
   font-weight: 800;
+}
+
+.squad-token .squad-name.squad-name--thai,
+.squad-token .squad-name.squad-name--foreign {
+  position: relative;
+  border: 0;
+  padding-inline: 9px;
+}
+
+.squad-token .squad-name.squad-name--thai::before,
+.squad-token .squad-name.squad-name--thai::after,
+.squad-token .squad-name.squad-name--foreign::before,
+.squad-token .squad-name.squad-name--foreign::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.squad-token .squad-name.squad-name--thai::before,
+.squad-token .squad-name.squad-name--thai::after {
+  background: linear-gradient(
+    to bottom,
+    #a51931 0 16.67%,
+    #fff 16.67% 33.33%,
+    #2d2a4a 33.33% 66.67%,
+    #fff 66.67% 83.33%,
+    #a51931 83.33% 100%
+  );
+}
+
+.squad-token .squad-name.squad-name--foreign::before,
+.squad-token .squad-name.squad-name--foreign::after {
+  background: #6f42a7;
+}
+
+.squad-token .squad-name.squad-name--thai::before,
+.squad-token .squad-name.squad-name--foreign::before {
+  left: 0;
+  border-radius: 6px 0 0;
+}
+
+.squad-token .squad-name.squad-name--thai::after,
+.squad-token .squad-name.squad-name--foreign::after {
+  right: 0;
+  border-radius: 0 6px 0 0;
 }
 
 .squad-fixture {
@@ -6268,6 +6386,24 @@ textarea:focus-visible {
 
   .squad-swap-action {
     left: calc(50% - 32px);
+  }
+
+  .squad-captain-role {
+    left: calc(50% - 32px);
+    bottom: 70px;
+  }
+
+  .squad-player-tier {
+    right: calc(50% - 32px);
+    bottom: 70px;
+  }
+
+  .squad-player-tier .player-tier-badge,
+  .squad-captain-role .captain-badge {
+    width: 16px;
+    height: 16px;
+    flex-basis: 16px;
+    font-size: 9px;
   }
 
   .squad-remove-action {

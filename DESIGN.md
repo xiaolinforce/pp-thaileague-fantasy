@@ -116,18 +116,25 @@ the screen before cards or tables begin.
   without mode tabs. On desktop, show the pitch and market side by side; stack
   the market after the pitch on narrow screens. The body of a vacant squad slot
   is non-interactive and does not move focus or filter the market, while its
-  compact swap action can move the vacancy within the lineup.
+  compact swap action can move the vacancy within the lineup. During an active
+  swap, a valid vacant target becomes interactive and receives the same visible
+  target treatment as a valid player.
   Do not list players who are already in the current draft squad; a removed
   player becomes eligible for the market again while the change is unsaved.
 - Expose swap and remove as compact, icon-only actions on every pitch and bench
   player, with accessible names. Removing a player keeps that lineup slot as a
   visible position-locked vacancy without selecting it or moving focus to the
-  market. A vacancy exposes only the swap action and can swap with a real player,
-  including across positions when the resulting formation and bench structure
-  remain valid; vacancies cannot swap with each other. A compatible market
+  market. A vacancy exposes only the swap action outside swap mode. Every player
+  and vacancy can initiate a swap with another player or vacancy, including
+  across positions when the resulting formation and bench structure remain
+  valid. A compatible market
   player fills the first matching vacancy directly; the manager does not need to
   choose a destination slot first. Saving stays disabled until every vacancy is
   filled.
+- Show nationality on each pitch and bench player's name frame with 4px
+  left-and-right accents only: Thai-flag colors for Thai players and purple for
+  foreign players. Place the captain or vice-captain marker above the left swap
+  action and the tier badge above the right remove action.
 - A newly provisioned team starts with all 15 pitch and bench slots visibly
   vacant without an introductory message. Keep the untouched empty draft from
   triggering an unsaved-change warning, and begin that warning only after the

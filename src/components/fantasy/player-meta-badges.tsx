@@ -6,10 +6,12 @@ import type { CompetitionPlayerView } from "@/lib/competition-types";
 
 export function PlayerMetaBadges({
   player,
+  showPosition = true,
   showTier = true,
   showNationality = true,
 }: {
   player: CompetitionPlayerView;
+  showPosition?: boolean;
   showTier?: boolean;
   showNationality?: boolean;
 }) {
@@ -17,7 +19,7 @@ export function PlayerMetaBadges({
 
   return (
     <span className="player-meta-badges">
-      <PositionBadge position={player.position} />
+      {showPosition && <PositionBadge position={player.position} />}
       {showTier && (
         <span
           className={`player-tier-badge player-tier-badge--${player.tier}`}
