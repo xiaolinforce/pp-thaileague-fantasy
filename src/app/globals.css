@@ -3079,6 +3079,11 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
 }
 
+.compact-transfer-stats strong.compact-transfer-unlimited {
+  font-size: 20px;
+  line-height: 1;
+}
+
 .compact-market-toolbar {
   padding: 0 12px 12px;
   display: grid;

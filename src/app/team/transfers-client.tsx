@@ -136,6 +136,9 @@ export default function TransfersClient({
     (player) => player.tier <= 3,
   ).length;
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
+  const hasUnlimitedOpeningTransfers = fantasy.gameweek.number === 1;
+  const unlimitedTransfersLabel =
+    language === "th" ? "เปลี่ยนนักเตะได้ไม่จำกัด" : "Unlimited transfers";
 
   function choosePlayer(player: CompetitionPlayerView) {
     if (isAutoFilling) return;
@@ -167,7 +170,25 @@ export default function TransfersClient({
         <div className="compact-transfer-stats">
           <div>
             <span>เปลี่ยนฟรีได้อีก</span>
-            <strong>{fantasy.team.freeTransfers}</strong>
+            <strong
+              className={
+                hasUnlimitedOpeningTransfers
+                  ? "compact-transfer-unlimited"
+                  : undefined
+              }
+              aria-label={
+                hasUnlimitedOpeningTransfers
+                  ? unlimitedTransfersLabel
+                  : undefined
+              }
+              title={
+                hasUnlimitedOpeningTransfers
+                  ? unlimitedTransfersLabel
+                  : undefined
+              }
+            >
+              {hasUnlimitedOpeningTransfers ? "∞" : fantasy.team.freeTransfers}
+            </strong>
           </div>
           <div>
             <span>ต่างชาติ</span>

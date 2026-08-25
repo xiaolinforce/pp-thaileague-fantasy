@@ -148,6 +148,9 @@ the screen before cards or tables begin.
 - Keep the Player Market filters in task order: club, then position and
   nationality dropdowns, then tier and sort. Nationality offers all players,
   Thai players, or foreign players and filters the visible market only.
+- Show an infinity symbol instead of the stored free-transfer balance in
+  Gameweek 1, with an accessible unlimited-transfer label, because opening
+  squad revisions do not count as transfers.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a
