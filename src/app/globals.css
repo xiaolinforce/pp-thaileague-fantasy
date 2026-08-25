@@ -2846,6 +2846,19 @@ textarea:focus-visible {
   font-weight: 800;
 }
 
+.market-select-position-badge.position-badge {
+  width: 34px;
+  height: 18px;
+  padding: 0 5px;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
 .player-meta-badges .player-tier-badge {
   width: 18px;
   height: 18px;
@@ -3187,6 +3200,76 @@ textarea:focus-visible {
 
 .compact-market-row:hover .market-player-points strong {
   color: var(--orange-deep);
+}
+
+.market-select-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.market-select-dot {
+  width: 14px;
+  height: 14px;
+  border: 1px solid rgba(35, 38, 40, 0.22);
+  border-radius: 999px;
+  background: #d7dee3;
+  flex: 0 0 auto;
+}
+
+.market-select-dot--all {
+  background: #eceff2;
+}
+
+.market-select-nationality-badge,
+.market-select-tier-badge {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.market-select-nationality-badge--thai {
+  border: 1px solid rgba(45, 45, 45, 0.14);
+  background: linear-gradient(
+    to bottom,
+    #a51931 0 16.67%,
+    #fff 16.67% 33.33%,
+    #2d2a4a 33.33% 66.67%,
+    #fff 66.67% 83.33%,
+    #a51931 83.33% 100%
+  );
+}
+
+.market-select-nationality-badge--foreign {
+  border: 1px solid rgba(111, 66, 167, 0.35);
+  color: #fff;
+  background: #6f42a7;
+}
+
+.market-select-tier-badge--1 {
+  color: #b8410c;
+  background: #ffe9df;
+}
+
+.market-select-tier-badge--2 {
+  color: #866200;
+  background: #fff3cf;
+}
+
+.market-select-tier-badge--3 {
+  color: #36566f;
+  background: #e8edf2;
+}
+
+.market-select-tier-badge--4 {
+  color: var(--muted);
+  background: var(--warm);
 }
 
 .compact-market-row .transfer-player-action {

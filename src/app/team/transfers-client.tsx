@@ -3,8 +3,10 @@
 import { ArrowDownUp, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
+import { ClubColor } from "@/components/fantasy/club-colors";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { PlayerIdentity } from "@/components/fantasy/player-identity";
+import { PositionBadge } from "@/components/fantasy/position-badge";
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import {
@@ -214,10 +216,23 @@ export default function TransfersClient({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">ทุกสโมสร</SelectItem>
+                <SelectItem value="all">
+                  <span className="market-select-item">
+                    <span className="market-select-dot market-select-dot--all" />
+                    ทุกสโมสร
+                  </span>
+                </SelectItem>
                 {clubs.map((club) => (
                   <SelectItem value={club.id} key={club.id}>
-                    {localize(club.shortName, language)}
+                    <span className="market-select-item">
+                      <ClubColor
+                        color={club.colors[0]}
+                        secondaryColor={club.colors[1]}
+                        label={localize(club.shortName, language)}
+                        size="medium"
+                      />
+                      {localize(club.shortName, language)}
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -232,11 +247,48 @@ export default function TransfersClient({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ALL">ทุกตำแหน่ง</SelectItem>
-                <SelectItem value="GK">GK</SelectItem>
-                <SelectItem value="DEF">DEF</SelectItem>
-                <SelectItem value="MID">MID</SelectItem>
-                <SelectItem value="FWD">FWD</SelectItem>
+                <SelectItem value="ALL">
+                  <span className="market-select-item">
+                    <span className="market-select-dot market-select-dot--all" />
+                    ทุกตำแหน่ง
+                  </span>
+                </SelectItem>
+                <SelectItem value="GK">
+                  <span className="market-select-item">
+                    <PositionBadge
+                      position="GK"
+                      className="market-select-position-badge"
+                    />
+                    GK
+                  </span>
+                </SelectItem>
+                <SelectItem value="DEF">
+                  <span className="market-select-item">
+                    <PositionBadge
+                      position="DEF"
+                      className="market-select-position-badge"
+                    />
+                    กองหลัง
+                  </span>
+                </SelectItem>
+                <SelectItem value="MID">
+                  <span className="market-select-item">
+                    <PositionBadge
+                      position="MID"
+                      className="market-select-position-badge"
+                    />
+                    กองกลาง
+                  </span>
+                </SelectItem>
+                <SelectItem value="FWD">
+                  <span className="market-select-item">
+                    <PositionBadge
+                      position="FWD"
+                      className="market-select-position-badge"
+                    />
+                    กองหน้า
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
             <Select
@@ -247,9 +299,26 @@ export default function TransfersClient({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">ทุกสัญชาติ</SelectItem>
-                <SelectItem value="thai">นักเตะไทย</SelectItem>
-                <SelectItem value="foreign">นักเตะต่างชาติ</SelectItem>
+                <SelectItem value="all">
+                  <span className="market-select-item">
+                    <span className="market-select-dot market-select-dot--all" />
+                    ทุกสัญชาติ
+                  </span>
+                </SelectItem>
+                <SelectItem value="thai">
+                  <span className="market-select-item">
+                    <span className="market-select-nationality-badge market-select-nationality-badge--thai" />
+                    นักเตะไทย
+                  </span>
+                </SelectItem>
+                <SelectItem value="foreign">
+                  <span className="market-select-item">
+                    <span className="market-select-nationality-badge market-select-nationality-badge--foreign">
+                      F
+                    </span>
+                    นักเตะต่างชาติ
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -262,11 +331,44 @@ export default function TransfersClient({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">ทุกระดับ</SelectItem>
-                <SelectItem value="1">ระดับ 1</SelectItem>
-                <SelectItem value="2">ระดับ 2</SelectItem>
-                <SelectItem value="3">ระดับ 3</SelectItem>
-                <SelectItem value="4">ระดับ 4</SelectItem>
+                <SelectItem value="all">
+                  <span className="market-select-item">
+                    <span className="market-select-dot market-select-dot--all" />
+                    ทุกระดับ
+                  </span>
+                </SelectItem>
+                <SelectItem value="1">
+                  <span className="market-select-item">
+                    <span className="market-select-tier-badge market-select-tier-badge--1">
+                      1
+                    </span>
+                    ระดับ 1
+                  </span>
+                </SelectItem>
+                <SelectItem value="2">
+                  <span className="market-select-item">
+                    <span className="market-select-tier-badge market-select-tier-badge--2">
+                      2
+                    </span>
+                    ระดับ 2
+                  </span>
+                </SelectItem>
+                <SelectItem value="3">
+                  <span className="market-select-item">
+                    <span className="market-select-tier-badge market-select-tier-badge--3">
+                      3
+                    </span>
+                    ระดับ 3
+                  </span>
+                </SelectItem>
+                <SelectItem value="4">
+                  <span className="market-select-item">
+                    <span className="market-select-tier-badge market-select-tier-badge--4">
+                      4
+                    </span>
+                    ระดับ 4
+                  </span>
+                </SelectItem>
               </SelectContent>
             </Select>
             <Select
