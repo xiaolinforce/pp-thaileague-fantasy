@@ -3100,15 +3100,26 @@ textarea:focus-visible {
   width: 100%;
 }
 
+.compact-position-nationality-filters {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  gap: 8px;
+}
+
 .compact-position-filter button {
   min-width: 0;
   flex: 1;
   padding-inline: 5px;
 }
 
+.compact-position-nationality-filters [data-slot="select-trigger"] {
+  width: 100%;
+  height: 44px;
+}
+
 .compact-market-selects {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
 }
 

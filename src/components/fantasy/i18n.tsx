@@ -244,6 +244,7 @@ const translations: Record<string, string> = {
   กรองสโมสร: "Filter by club",
   ทุกสโมสร: "All clubs",
   กรองระดับ: "Filter by tier",
+  กรองสัญชาติ: "Filter nationality",
   เรียงลำดับ: "Sort players",
   ตัวช่วยพิเศษ: "Chips",
 
@@ -286,6 +287,9 @@ const translations: Record<string, string> = {
   "L1 / พรีเมียม": "L1 / premium",
   ยกเลิก: "Cancel",
   ทุกระดับ: "All tiers",
+  ทุกสัญชาติ: "All nationalities",
+  นักเตะไทย: "Thai players",
+  นักเตะต่างชาติ: "Foreign players",
   ระดับสูงสุด: "Highest tier",
   ทีมปัจจุบัน: "Current squad",
   กดบันทึกทีมด้านบนเมื่อพร้อม: "Save your team above when ready",

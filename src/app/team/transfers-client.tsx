@@ -63,6 +63,7 @@ export default function TransfersClient({
   const [clubId, setClubId] = useState("all");
   const [position, setPosition] = useState("ALL");
   const [tier, setTier] = useState("all");
+  const [nationality, setNationality] = useState("all");
   const [sort, setSort] = useState("points");
   const clubs = useMemo(
     () =>
@@ -109,6 +110,11 @@ export default function TransfersClient({
     .filter((player) => clubId === "all" || player.clubId === clubId)
     .filter((player) => position === "ALL" || player.position === position)
     .filter((player) => tier === "all" || player.tier === Number(tier))
+    .filter(
+      (player) =>
+        nationality === "all" ||
+        (nationality === "thai" ? player.isThai : !player.isThai),
+    )
     .filter((player) =>
       `${player.name.th} ${player.name.en} ${player.shortName.th} ${player.shortName.en}`
         .toLowerCase()
@@ -218,19 +224,34 @@ export default function TransfersClient({
               </SelectContent>
             </Select>
           </div>
-          <ToggleGroup
-            className="position-filter compact-position-filter"
-            value={[position]}
-            onValueChange={(values) => {
-              if (values[0]) setPosition(String(values[0]));
-            }}
-          >
-            {(["ALL", "GK", "DEF", "MID", "FWD"] as const).map((item) => (
-              <ToggleGroupItem value={item} key={item}>
-                {item === "ALL" ? "ทั้งหมด" : item}
-              </ToggleGroupItem>
-            ))}
-          </ToggleGroup>
+          <div className="compact-position-nationality-filters">
+            <ToggleGroup
+              className="position-filter compact-position-filter"
+              value={[position]}
+              onValueChange={(values) => {
+                if (values[0]) setPosition(String(values[0]));
+              }}
+            >
+              {(["ALL", "GK", "DEF", "MID", "FWD"] as const).map((item) => (
+                <ToggleGroupItem value={item} key={item}>
+                  {item === "ALL" ? "ทั้งหมด" : item}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+            <Select
+              value={nationality}
+              onValueChange={(value) => value && setNationality(String(value))}
+            >
+              <SelectTrigger aria-label="กรองสัญชาติ">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">ทุกสัญชาติ</SelectItem>
+                <SelectItem value="thai">นักเตะไทย</SelectItem>
+                <SelectItem value="foreign">นักเตะต่างชาติ</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <div className="compact-market-selects">
             <Select
               value={tier}
