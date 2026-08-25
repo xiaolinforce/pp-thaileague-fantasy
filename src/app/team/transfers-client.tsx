@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { FantasyState } from "@/data/fantasy";
 import {
   localize,
@@ -225,19 +224,21 @@ export default function TransfersClient({
             </Select>
           </div>
           <div className="compact-position-nationality-filters">
-            <ToggleGroup
-              className="position-filter compact-position-filter"
-              value={[position]}
-              onValueChange={(values) => {
-                if (values[0]) setPosition(String(values[0]));
-              }}
+            <Select
+              value={position}
+              onValueChange={(value) => value && setPosition(String(value))}
             >
-              {(["ALL", "GK", "DEF", "MID", "FWD"] as const).map((item) => (
-                <ToggleGroupItem value={item} key={item}>
-                  {item === "ALL" ? "ทั้งหมด" : item}
-                </ToggleGroupItem>
-              ))}
-            </ToggleGroup>
+              <SelectTrigger aria-label="กรองตำแหน่งผู้เล่น">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">ทุกตำแหน่ง</SelectItem>
+                <SelectItem value="GK">GK</SelectItem>
+                <SelectItem value="DEF">DEF</SelectItem>
+                <SelectItem value="MID">MID</SelectItem>
+                <SelectItem value="FWD">FWD</SelectItem>
+              </SelectContent>
+            </Select>
             <Select
               value={nationality}
               onValueChange={(value) => value && setNationality(String(value))}

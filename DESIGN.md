@@ -145,9 +145,9 @@ the screen before cards or tables begin.
   editable. Disable it with written pending feedback while calculating, when
   no vacancy remains, or after the deadline; do not make current market filters
   alter its candidate pool.
-- Keep the Player Market filters in task order: club, then position beside
-  nationality, then tier and sort. Nationality offers all players, Thai
-  players, or foreign players and filters the visible market only.
+- Keep the Player Market filters in task order: club, then position and
+  nationality dropdowns, then tier and sort. Nationality offers all players,
+  Thai players, or foreign players and filters the visible market only.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a
