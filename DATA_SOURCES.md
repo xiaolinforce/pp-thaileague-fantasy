@@ -77,8 +77,8 @@ npm run db:verify:fantasy
 
 The Fantasy seed depends on the imported competition season, entries, player
 registrations, and fixtures. It must not be run first. A fresh seed assigns a
-safe Level 3 fallback; the reviewed ranking publication then derives the
-effective 50/100/remaining level distribution.
+safe Level 4 fallback; the reviewed ranking publication then derives the
+effective 5%/15%/20%/remainder level distribution.
 
 ## Competition normalization
 
@@ -118,8 +118,10 @@ identifiers.
 
 The Fantasy seed is idempotent for the configured season. It derives Gameweeks
 from the first stored kickoff in each imported matchweek, sets the deadline 90
-minutes earlier, creates tier definitions and effective player tiers, builds
-valid demo squads, and creates Overall and Private Classic leagues.
+minutes earlier, creates tier definitions and effective player tiers, and
+creates Overall and Private Classic leagues. Before a four-tier ranking exists,
+demo selections remain empty; rerunning the seed after publication builds valid
+demo squads from the reviewed classifications.
 
 The seed recognizes a Thai nationality from normalized source text as an
 initial value only. Reviewed Thai-status and tier corrections belong in the
@@ -151,8 +153,8 @@ confidence, model components, projection, overall/position rank, and tier.
 Publishing requires an explicit version and confirmed development database:
 
 ```bash
-npm run db:rank:players -- --version=preseason-2026-27-v1 --effective-gameweek=1 --l1=50 --l2=100 --output=ranking.csv
-npm run db:rank:players -- --publish --version=preseason-2026-27-v1 --effective-gameweek=1 --l1=50 --l2=100
+npm run db:rank:players -- --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20 --output=ranking.csv
+npm run db:rank:players -- --publish --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20
 ```
 
 Publication refuses a passed deadline, locked selection, score, duplicate

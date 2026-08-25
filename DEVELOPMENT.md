@@ -115,13 +115,15 @@ Confirm the target before any migration, import, normalization, or seed command.
 ### Ranking workflow
 
 Run the ranking command without `--publish` first and retain a CSV for review.
-The default version targets the 2026/27 preseason, Gameweek 1, Level 1 count
-`50`, and Level 2 count `100`. When changing any assumption, pass all values
-explicitly and use a new version:
+The default version targets the 2026/27 preseason and Gameweek 1. It derives
+Level 1 from the top `5%`, Level 2 from the next `15%`, Level 3 from the next
+`20%`, and Level 4 from the remainder of the active ranked pool. Cumulative
+boundaries are rounded to keep ranks contiguous. When changing any assumption,
+pass all values explicitly and use a new version:
 
 ```bash
-npm run db:rank:players -- --version=preseason-2026-27-v2 --effective-gameweek=1 --l1=50 --l2=100 --output=ranking-v2.csv
-npm run db:rank:players -- --publish --version=preseason-2026-27-v2 --effective-gameweek=1 --l1=50 --l2=100
+npm run db:rank:players -- --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20 --output=ranking-v2.csv
+npm run db:rank:players -- --publish --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20
 npm run db:verify:fantasy
 ```
 

@@ -798,6 +798,7 @@ export const fantasyRankingRuns = pgTable(
     totalPlayers: integer("total_players").notNull(),
     levelOneCount: integer("level_one_count").notNull(),
     levelTwoCount: integer("level_two_count").notNull(),
+    levelThreeCount: integer("level_three_count").default(0).notNull(),
     sourceName: text("source_name").notNull(),
     sourceUrls: jsonb("source_urls").$type<string[]>().default([]).notNull(),
     configuration: jsonb("configuration")
@@ -822,7 +823,7 @@ export const fantasyRankingRuns = pgTable(
     ),
     check(
       "fantasy_ranking_runs_counts_check",
-      sql`${table.totalPlayers} > 0 and ${table.levelOneCount} >= 0 and ${table.levelTwoCount} >= 0 and ${table.levelOneCount} + ${table.levelTwoCount} <= ${table.totalPlayers}`,
+      sql`${table.totalPlayers} > 0 and ${table.levelOneCount} >= 0 and ${table.levelTwoCount} >= 0 and ${table.levelThreeCount} >= 0 and ${table.levelOneCount} + ${table.levelTwoCount} + ${table.levelThreeCount} <= ${table.totalPlayers}`,
     ),
     check(
       "fantasy_ranking_runs_published_at_check",

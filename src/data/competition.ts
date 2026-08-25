@@ -338,8 +338,8 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
       const [color, accent] = club.colors;
       const fantasyPlayer = fantasyPlayerByPlayerId.get(player.id);
       const tier = fantasyPlayer
-        ? (tierByFantasyPlayerId.get(fantasyPlayer.id) ?? 3)
-        : 3;
+        ? (tierByFantasyPlayerId.get(fantasyPlayer.id) ?? 4)
+        : 4;
       const matchPoints = fantasyPlayer
         ? (pointsByFantasyPlayer.get(fantasyPlayer.id) ?? []).sort(
             (a, b) => b.matchweek - a.matchweek,

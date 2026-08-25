@@ -44,6 +44,19 @@ export type RankingCandidate = {
 export type RankingConfiguration = {
   levelOneCount: number;
   levelTwoCount: number;
+  levelThreeCount: number;
+};
+
+export type RankingTierPercentages = {
+  levelOne: number;
+  levelTwo: number;
+  levelThree: number;
+};
+
+export const DEFAULT_RANKING_TIER_PERCENTAGES: RankingTierPercentages = {
+  levelOne: 5,
+  levelTwo: 15,
+  levelThree: 20,
 };
 
 export type PlayerRanking = {
@@ -54,7 +67,7 @@ export type PlayerRanking = {
   clubId: string;
   overallRank: number;
   positionRank: number;
-  tierLevel: 1 | 2 | 3;
+  tierLevel: 1 | 2 | 3 | 4;
   modelProjectedPoints: number;
   manualAdjustment: number;
   projectedPoints: number;
@@ -74,6 +87,47 @@ export type PlayerRanking = {
   modelComponents: Record<string, number>;
   reason: string;
 };
+
+export function deriveRankingTierCounts(
+  totalPlayers: number,
+  percentages: RankingTierPercentages = DEFAULT_RANKING_TIER_PERCENTAGES,
+): RankingConfiguration & { levelFourCount: number } {
+  if (!Number.isInteger(totalPlayers) || totalPlayers <= 0) {
+    throw new Error("Ranking player total must be a positive integer.");
+  }
+  const percentageValues = [
+    percentages.levelOne,
+    percentages.levelTwo,
+    percentages.levelThree,
+  ];
+  if (
+    percentageValues.some(
+      (value) => !Number.isFinite(value) || value < 0 || value > 100,
+    ) ||
+    percentageValues.reduce((sum, value) => sum + value, 0) > 100
+  ) {
+    throw new Error("Ranking tier percentages must fit within 100 percent.");
+  }
+
+  const levelOneBoundary = Math.round(
+    (totalPlayers * percentages.levelOne) / 100,
+  );
+  const levelTwoBoundary = Math.round(
+    (totalPlayers * (percentages.levelOne + percentages.levelTwo)) / 100,
+  );
+  const levelThreeBoundary = Math.round(
+    (totalPlayers *
+      (percentages.levelOne + percentages.levelTwo + percentages.levelThree)) /
+      100,
+  );
+
+  return {
+    levelOneCount: levelOneBoundary,
+    levelTwoCount: levelTwoBoundary - levelOneBoundary,
+    levelThreeCount: levelThreeBoundary - levelTwoBoundary,
+    levelFourCount: totalPlayers - levelThreeBoundary,
+  };
+}
 
 const POSITION_PRIOR_POINTS_PER_90: Record<FantasyPosition, number> = {
   goalkeeper: 3.2,
@@ -333,7 +387,10 @@ export function rankFantasyPlayers(
   if (
     configuration.levelOneCount < 0 ||
     configuration.levelTwoCount < 0 ||
-    configuration.levelOneCount + configuration.levelTwoCount >
+    configuration.levelThreeCount < 0 ||
+    configuration.levelOneCount +
+      configuration.levelTwoCount +
+      configuration.levelThreeCount >
       candidates.length
   ) {
     throw new Error("Ranking tier counts do not fit the candidate pool.");
@@ -369,7 +426,12 @@ export function rankFantasyPlayers(
         : overallRank <=
             configuration.levelOneCount + configuration.levelTwoCount
           ? 2
-          : 3;
+          : overallRank <=
+              configuration.levelOneCount +
+                configuration.levelTwoCount +
+                configuration.levelThreeCount
+            ? 3
+            : 4;
     return {
       fantasyPlayerId: player.fantasyPlayerId,
       playerId: player.playerId,

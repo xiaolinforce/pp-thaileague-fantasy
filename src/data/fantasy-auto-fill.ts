@@ -116,7 +116,7 @@ export async function getFantasyAutoFillCandidates(
       id: row.fantasyPlayerId,
       clubId: row.clubId,
       position: row.position as FantasyPosition,
-      tier: tierByPlayer.get(row.fantasyPlayerId) ?? 3,
+      tier: tierByPlayer.get(row.fantasyPlayerId) ?? 4,
       isThai: row.isThai,
       projectedPoints: row.projectedPoints,
       overallRank: row.overallRank,

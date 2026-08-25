@@ -23,6 +23,8 @@ import {
   players,
 } from "../src/db/schema";
 import {
+  DEFAULT_RANKING_TIER_PERCENTAGES,
+  deriveRankingTierCounts,
   FANTASY_RANKING_MODEL_VERSION,
   normalizeRankingName,
   rankFantasyPlayers,
@@ -30,6 +32,7 @@ import {
   type HistoricalPlayerStats,
   type PlayerRanking,
   type RankingCandidate,
+  type RankingTierPercentages,
 } from "../src/lib/fantasy/ranking.ts";
 import {
   validateSquad,
@@ -55,7 +58,7 @@ if (!databaseUrl) throw new Error("DATABASE_URL is not configured.");
 
 const db = drizzle(databaseUrl, { schema });
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
-const DEFAULT_VERSION = "preseason-2026-27-v1";
+const DEFAULT_VERSION = "preseason-2026-27-v2";
 const DATA_CUTOFF = "2026-08-22";
 const SOURCE_NAME = "preseason-ranking-model";
 const FUZZY_MATCH_THRESHOLD = 0.9;
@@ -65,8 +68,7 @@ type Options = {
   publish: boolean;
   version: string;
   effectiveGameweek: number;
-  levelOneCount: number;
-  levelTwoCount: number;
+  tierPercentages: RankingTierPercentages;
   output: string | null;
 };
 
@@ -90,6 +92,14 @@ function parsePositiveInteger(value: string, name: string) {
   return parsed;
 }
 
+function parsePercentage(value: string, name: string) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed < 0 || parsed > 100) {
+    throw new Error(`${name} must be between 0 and 100.`);
+  }
+  return parsed;
+}
+
 function parseOptions(): Options {
   const values = new Map<string, string>();
   let publish = false;
@@ -109,8 +119,23 @@ function parseOptions(): Options {
       values.get("effective-gameweek") || "1",
       "effective-gameweek",
     ),
-    levelOneCount: parsePositiveInteger(values.get("l1") || "50", "l1"),
-    levelTwoCount: parsePositiveInteger(values.get("l2") || "100", "l2"),
+    tierPercentages: {
+      levelOne: parsePercentage(
+        values.get("l1-percent") ||
+          String(DEFAULT_RANKING_TIER_PERCENTAGES.levelOne),
+        "l1-percent",
+      ),
+      levelTwo: parsePercentage(
+        values.get("l2-percent") ||
+          String(DEFAULT_RANKING_TIER_PERCENTAGES.levelTwo),
+        "l2-percent",
+      ),
+      levelThree: parsePercentage(
+        values.get("l3-percent") ||
+          String(DEFAULT_RANKING_TIER_PERCENTAGES.levelThree),
+        "l3-percent",
+      ),
+    },
     output: values.get("output") || null,
   };
 }
@@ -326,6 +351,7 @@ function printSummary(rankings: PlayerRanking[]) {
     tier1: rankings.filter((row) => row.tierLevel === 1).length,
     tier2: rankings.filter((row) => row.tierLevel === 2).length,
     tier3: rankings.filter((row) => row.tierLevel === 3).length,
+    tier4: rankings.filter((row) => row.tierLevel === 4).length,
     exactMatches: rankings.filter((row) => row.matchMethod === "exact_name")
       .length,
     fuzzyMatches: rankings.filter((row) => row.matchMethod === "fuzzy_name")
@@ -352,7 +378,7 @@ function printSummary(rankings: PlayerRanking[]) {
     })),
   );
   console.table(
-    ([1, 2, 3] as const).flatMap((tier) =>
+    ([1, 2, 3, 4] as const).flatMap((tier) =>
       (["goalkeeper", "defender", "midfielder", "forward"] as const).map(
         (position) => ({
           tier,
@@ -451,6 +477,7 @@ async function assertDraftSquadsRemainValid(
         tier: tierByPlayer.get(member.fantasyPlayerId) ?? member.tierSnapshot,
         isThai: member.isThaiSnapshot,
       }));
+    if (squad.length === 0) continue;
     const violations = validateSquad(squad);
     if (violations.length > 0) {
       throw new Error(
@@ -465,11 +492,13 @@ async function publishRankings({
   gameweek,
   rankings,
   options,
+  tierCounts,
 }: {
   fantasySeason: typeof fantasySeasons.$inferSelect;
   gameweek: typeof fantasyGameweeks.$inferSelect;
   rankings: PlayerRanking[];
   options: Options;
+  tierCounts: ReturnType<typeof deriveRankingTierCounts>;
 }) {
   if (gameweek.status !== "open" && gameweek.status !== "planned") {
     throw new Error(
@@ -524,8 +553,9 @@ async function publishRankings({
         modelVersion: FANTASY_RANKING_MODEL_VERSION,
         dataCutoff: DATA_CUTOFF,
         totalPlayers: rankings.length,
-        levelOneCount: options.levelOneCount,
-        levelTwoCount: options.levelTwoCount,
+        levelOneCount: tierCounts.levelOneCount,
+        levelTwoCount: tierCounts.levelTwoCount,
+        levelThreeCount: tierCounts.levelThreeCount,
         sourceName: SOURCE_NAME,
         sourceUrls: [...previousSeasonSourceUrls, sourceUrls.tournament],
         configuration: {
@@ -533,6 +563,7 @@ async function publishRankings({
           previousSeasonYear: PREVIOUS_SEASON_YEAR,
           fuzzyMatchThreshold: FUZZY_MATCH_THRESHOLD,
           fuzzyMatchGap: FUZZY_MATCH_GAP,
+          tierPercentages: options.tierPercentages,
         },
         notes:
           "Preseason ranking based on official prior-season statistics, current Transfermarkt squad values, and club context.",
@@ -551,8 +582,9 @@ async function publishRankings({
         modelVersion: FANTASY_RANKING_MODEL_VERSION,
         dataCutoff: DATA_CUTOFF,
         totalPlayers: rankings.length,
-        levelOneCount: options.levelOneCount,
-        levelTwoCount: options.levelTwoCount,
+        levelOneCount: tierCounts.levelOneCount,
+        levelTwoCount: tierCounts.levelTwoCount,
+        levelThreeCount: tierCounts.levelThreeCount,
         sourceName: SOURCE_NAME,
         sourceUrls: [...previousSeasonSourceUrls, sourceUrls.tournament],
         configuration: {
@@ -560,6 +592,7 @@ async function publishRankings({
           previousSeasonYear: PREVIOUS_SEASON_YEAR,
           fuzzyMatchThreshold: FUZZY_MATCH_THRESHOLD,
           fuzzyMatchGap: FUZZY_MATCH_GAP,
+          tierPercentages: options.tierPercentages,
         },
         notes:
           "Preseason ranking based on official prior-season statistics, current Transfermarkt squad values, and club context.",
@@ -657,10 +690,11 @@ async function publishRankings({
       version: options.version,
       effectiveGameweekId: gameweek.id,
       totalPlayers: rankings.length,
-      levelOneCount: options.levelOneCount,
-      levelTwoCount: options.levelTwoCount,
-      levelThreeCount:
-        rankings.length - options.levelOneCount - options.levelTwoCount,
+      levelOneCount: tierCounts.levelOneCount,
+      levelTwoCount: tierCounts.levelTwoCount,
+      levelThreeCount: tierCounts.levelThreeCount,
+      levelFourCount: tierCounts.levelFourCount,
+      tierPercentages: options.tierPercentages,
     },
   });
   await db.batch([
@@ -727,10 +761,11 @@ async function main() {
     marketValues,
     clubContexts,
   );
-  const rankings = rankFantasyPlayers(candidates, {
-    levelOneCount: options.levelOneCount,
-    levelTwoCount: options.levelTwoCount,
-  });
+  const tierCounts = deriveRankingTierCounts(
+    candidates.length,
+    options.tierPercentages,
+  );
+  const rankings = rankFantasyPlayers(candidates, tierCounts);
   if (rankings.length !== currentPlayers.length) {
     throw new Error(
       `Expected ${currentPlayers.length} rankings, received ${rankings.length}.`,
@@ -739,7 +774,13 @@ async function main() {
   printSummary(rankings);
   if (options.output) await writeCsv(rankings, options.output);
   if (options.publish) {
-    await publishRankings({ fantasySeason, gameweek, rankings, options });
+    await publishRankings({
+      fantasySeason,
+      gameweek,
+      rankings,
+      options,
+      tierCounts,
+    });
   } else {
     console.log(
       "Preview only. Re-run with --publish after reviewing the report.",

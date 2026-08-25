@@ -11,7 +11,7 @@ function createCandidates() {
   const candidates: AutoFillCandidate[] = [];
   let rank = 1;
   for (const position of positions) {
-    for (const tier of [1, 2, 3]) {
+    for (const tier of [1, 2, 3, 4]) {
       for (let index = 0; index < 12; index += 1) {
         candidates.push({
           id: `${position}-${tier}-${index}`,
@@ -70,8 +70,9 @@ test("fills an empty squad with exact tier targets and valid captaincy", () => {
   const lineup = toLineup(result.members, candidates);
   assert.deepEqual(validateLineup(lineup), []);
   assert.equal(lineup.filter((player) => player.tier === 1).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 2).length, 7);
-  assert.equal(lineup.filter((player) => player.tier === 3).length, 5);
+  assert.equal(lineup.filter((player) => player.tier === 2).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 3).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 4).length, 6);
   assert.equal(
     lineup.filter((player) => player.captainRole === "captain").length,
     1,

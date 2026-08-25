@@ -1,5 +1,5 @@
 import { loadEnvConfig } from "@next/env";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
 import {
@@ -10,7 +10,9 @@ import {
   fantasyLeagues,
   fantasyManagers,
   fantasyPlayers,
+  fantasyPlayerRankings,
   fantasyPlayerTiers,
+  fantasyRankingRuns,
   fantasySeasons,
   fantasyTeams,
   fantasyTeamSelectionPlayers,
@@ -21,7 +23,11 @@ import {
   playerRegistrations,
   players,
 } from "../src/db/schema";
-import { getDeadline, type FantasyPosition } from "../src/lib/fantasy/rules.ts";
+import {
+  getCumulativeTierLimits,
+  getDeadline,
+  type FantasyPosition,
+} from "../src/lib/fantasy/rules.ts";
 
 loadEnvConfig(process.cwd());
 
@@ -158,19 +164,37 @@ async function seedFantasyGame() {
       {
         fantasySeasonId: fantasySeason.id,
         level: 2,
-        slotCount: 7,
+        slotCount: 3,
         nameTh: "ระดับ 2",
         nameEn: "Tier 2",
       },
       {
         fantasySeasonId: fantasySeason.id,
         level: 3,
-        slotCount: 5,
+        slotCount: 3,
         nameTh: "ระดับ 3",
         nameEn: "Tier 3",
       },
+      {
+        fantasySeasonId: fantasySeason.id,
+        level: 4,
+        slotCount: 6,
+        nameTh: "ระดับ 4",
+        nameEn: "Tier 4",
+      },
     ])
-    .onConflictDoNothing();
+    .onConflictDoUpdate({
+      target: [
+        fantasyTierDefinitions.fantasySeasonId,
+        fantasyTierDefinitions.level,
+      ],
+      set: {
+        slotCount: sql`excluded.slot_count`,
+        nameTh: sql`excluded.name_th`,
+        nameEn: sql`excluded.name_en`,
+        updatedAt: new Date(),
+      },
+    });
 
   const fixtureRows = await db
     .select()
@@ -275,11 +299,23 @@ async function seedFantasyGame() {
       .values({
         fantasyPlayerId: fantasyPlayer.id,
         effectiveGameweekId: firstGameweek.id,
-        level: 3,
+        level: 4,
         sourceName: "initial-seed",
-        reason: "Fallback Tier 3 until a reviewed ranking is published",
+        reason: "Fallback Tier 4 until a reviewed ranking is published",
       })
-      .onConflictDoNothing();
+      .onConflictDoUpdate({
+        target: [
+          fantasyPlayerTiers.fantasyPlayerId,
+          fantasyPlayerTiers.effectiveGameweekId,
+        ],
+        set: {
+          level: 4,
+          sourceName: "initial-seed",
+          reason: "Fallback Tier 4 until a reviewed ranking is published",
+          updatedAt: new Date(),
+        },
+        setWhere: eq(fantasyPlayerTiers.sourceName, "initial-seed"),
+      });
   }
 
   const tiers = await db
@@ -305,6 +341,30 @@ async function seedFantasyGame() {
       },
     ];
   });
+  const publishedRankings = await db
+    .select()
+    .from(fantasyRankingRuns)
+    .where(
+      and(
+        eq(fantasyRankingRuns.fantasySeasonId, fantasySeason.id),
+        eq(fantasyRankingRuns.status, "published"),
+      ),
+    )
+    .limit(1);
+  const publishedRanking = publishedRankings[0];
+  const publishedLevelFour = publishedRanking
+    ? await db
+        .select({ id: fantasyPlayerRankings.id })
+        .from(fantasyPlayerRankings)
+        .where(
+          and(
+            eq(fantasyPlayerRankings.rankingRunId, publishedRanking.id),
+            eq(fantasyPlayerRankings.tierLevel, 4),
+          ),
+        )
+        .limit(1)
+    : [];
+  const canSeedDemoSquads = publishedLevelFour.length > 0;
 
   const required: Record<FantasyPosition, number> = {
     goalkeeper: 2,
@@ -314,7 +374,9 @@ async function seedFantasyGame() {
   };
   const selected: typeof candidates = [];
   const clubCounts = new Map<string, number>();
-  for (const position of Object.keys(required) as FantasyPosition[]) {
+  for (const position of canSeedDemoSquads
+    ? (Object.keys(required) as FantasyPosition[])
+    : []) {
     const pool = candidates
       .filter((candidate) => candidate.position === position)
       .sort(
@@ -332,8 +394,13 @@ async function seedFantasyGame() {
       const next = [...selected, candidate];
       if (next.filter((item) => !item.fantasyPlayer.isThai).length > 7)
         continue;
-      if (next.filter((item) => item.tier === 1).length > 3) continue;
-      if (next.filter((item) => item.tier <= 2).length > 10) continue;
+      if (
+        getCumulativeTierLimits().some(
+          ({ level, limit }) =>
+            next.filter((item) => item.tier <= level).length > limit,
+        )
+      )
+        continue;
       selected.push(candidate);
       clubCounts.set(
         candidate.clubId,
@@ -341,7 +408,7 @@ async function seedFantasyGame() {
       );
     }
   }
-  if (selected.length !== 15)
+  if (canSeedDemoSquads && selected.length !== 15)
     throw new Error(`Could only build a ${selected.length}-player demo squad.`);
 
   const managersAndTeams: Array<{
@@ -394,6 +461,7 @@ async function seedFantasyGame() {
       .from(fantasyTeamSelectionPlayers)
       .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
     if (existingMembers.length > 0) continue;
+    if (!canSeedDemoSquads) continue;
 
     const starterLimits: Record<FantasyPosition, number> = {
       goalkeeper: 1,

@@ -43,6 +43,13 @@
       "when": 1787413885436,
       "tag": "0005_third_xorn",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787632527531,
+      "tag": "0006_lonely_kingpin",
+      "breakpoints": true
     }
   ]
 }

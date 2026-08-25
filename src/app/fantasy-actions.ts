@@ -289,7 +289,7 @@ async function getCurrentPlayerSnapshots(
         fantasyPlayerId: row.fantasyPlayer.id,
         clubId: row.entry.clubId,
         position: row.fantasyPlayer.lockedPosition as FantasyPosition,
-        tier: tierByPlayer.get(row.fantasyPlayer.id) ?? 3,
+        tier: tierByPlayer.get(row.fantasyPlayer.id) ?? 4,
         isThai: row.fantasyPlayer.isThai,
       },
     ]),
@@ -744,7 +744,10 @@ export async function updateFantasyPlayerClassificationAction(
   const level = formInteger(formData, "level");
   const isThai = String(formData.get("isThai") ?? "false") === "true";
   const reason = String(formData.get("reason") ?? "").trim();
-  if (!fantasyPlayerId || !effectiveGameweekId || !reason || level < 1) {
+  const isKnownTier = THAI_LEAGUE_FANTASY_RULES.tierSlots.some(
+    (tier) => tier.level === level,
+  );
+  if (!fantasyPlayerId || !effectiveGameweekId || !reason || !isKnownTier) {
     throw new Error("Player, Gameweek, tier and reason are required.");
   }
   const [player, gameweek] = await Promise.all([

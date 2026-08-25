@@ -4,11 +4,30 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-25 — Squads use four cumulative tiers
+
+**Decision:** Define nominal squad slots as 3/3/3/6 for Levels 1–4. Validate
+them cumulatively: Level 1 is capped at 3, Levels 1–2 at 6, Levels 1–3 at 9,
+and the complete squad at 15. Derive player levels from the active eligible
+published ranking as top 5%, next 15%, next 20%, and the remaining 60%, using
+rounded cumulative boundaries.
+
+**Context:** Four levels create more useful separation across the full player
+pool while preserving the existing rule that a lower-ranked player may occupy
+an unused higher-level slot. The product is still pre-launch, so the new model
+can begin at Gameweek 1 without changing real-player history.
+
+**Consequences:** Ranking runs store Level 1–3 counts and derive Level 4 from
+the remainder. Seeds use Level 4 as the safe pre-ranking fallback. Validation,
+auto-fill, admin classification, market filters, rule copy, and verification
+must all recognize Levels 1–4. Historical selection snapshots remain the
+source of truth once real Gameweeks lock.
+
 ## 2026-08-24 — Auto-fill is a ranking-weighted local draft suggestion
 
 **Decision:** Auto-fill preserves selected players and fills only vacancies
 from the complete eligible pool, independent of visible market filters. It
-targets the nominal 3/7/5 tier allocation when feasible, then uses published
+targets the nominal 3/3/3/6 tier allocation when feasible, then uses published
 projected points with bounded randomness for quality and variety. It assigns
 missing captaincy but never saves the squad automatically.
 
@@ -107,6 +126,9 @@ must invoke the same controlled import boundary rather than bypass it from page
 code.
 
 ## 2026-08-22 — Player order is canonical and tiers are derived boundaries
+
+**Tier boundaries superseded on 2026-08-25:** The canonical order remains, but
+the current four-tier boundaries are defined by the decision above.
 
 **Decision:** Store a complete versioned player ranking where rank 1 represents
 the highest projected Fantasy points. Derive Level 1 from ranks 1–50, Level 2

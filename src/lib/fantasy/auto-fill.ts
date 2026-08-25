@@ -1,5 +1,6 @@
 import type { DraftLineupMember } from "./team-draft.ts";
 import {
+  getCumulativeTierLimits,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
   type FantasyPosition,
@@ -26,15 +27,12 @@ type SearchState = {
   pickedIds: Set<string>;
   clubCounts: Map<string, number>;
   foreignCount: number;
-  tierOneCount: number;
-  topTwoTierCount: number;
+  tierCounts: Map<number, number>;
   lastIndexByPosition: Map<FantasyPosition, number>;
   score: number;
 };
 
 const BEAM_WIDTH = 768;
-const TIER_ONE_PRIORITY = 1_000_000_000;
-const TIER_TWO_PRIORITY = 1_000_000;
 const positions: FantasyPosition[] = [
   "goalkeeper",
   "defender",
@@ -57,12 +55,13 @@ function countBy<T>(values: T[]) {
 }
 
 function candidatePriority(candidate: AutoFillCandidate, random: () => number) {
+  const maximumTier = Math.max(
+    ...THAI_LEAGUE_FANTASY_RULES.tierSlots.map((slot) => slot.level),
+  );
   const tierPriority =
-    candidate.tier === 1
-      ? TIER_ONE_PRIORITY
-      : candidate.tier === 2
-        ? TIER_TWO_PRIORITY
-        : 0;
+    candidate.tier < maximumTier
+      ? 10 ** ((maximumTier - candidate.tier) * 4)
+      : 0;
   const boundedRandom = Math.min(1, Math.max(0, random()));
   const qualityVariation = 0.88 + boundedRandom * 0.24;
   const rankTieBreaker = 1 / Math.max(1, candidate.overallRank);
@@ -73,14 +72,19 @@ function candidatePriority(candidate: AutoFillCandidate, random: () => number) {
   );
 }
 
+function exceedsTierLimit(tierCounts: Map<number, number>) {
+  return getCumulativeTierLimits().some(({ level, limit }) => {
+    const used = [...tierCounts.entries()].reduce(
+      (sum, [tier, count]) => sum + (tier <= level ? count : 0),
+      0,
+    );
+    return used > limit;
+  });
+}
+
 function canAddCandidate(state: SearchState, candidate: AutoFillCandidate) {
   const rules = THAI_LEAGUE_FANTASY_RULES;
-  const tierOneLimit = rules.tierSlots
-    .filter((slot) => slot.level <= 1)
-    .reduce((sum, slot) => sum + slot.slots, 0);
-  const topTwoTierLimit = rules.tierSlots
-    .filter((slot) => slot.level <= 2)
-    .reduce((sum, slot) => sum + slot.slots, 0);
+  const knownTiers = new Set(rules.tierSlots.map((slot) => slot.level));
   if (state.pickedIds.has(candidate.id)) return false;
   if ((state.clubCounts.get(candidate.clubId) ?? 0) >= rules.sameClubLimit) {
     return false;
@@ -88,11 +92,8 @@ function canAddCandidate(state: SearchState, candidate: AutoFillCandidate) {
   if (!candidate.isThai && state.foreignCount >= rules.foreignPlayerLimit) {
     return false;
   }
-  if (candidate.tier === 1 && state.tierOneCount >= tierOneLimit) return false;
-  if (candidate.tier <= 2 && state.topTwoTierCount >= topTwoTierLimit) {
-    return false;
-  }
-  return candidate.tier >= 1 && candidate.tier <= 3;
+  if (!knownTiers.has(candidate.tier)) return false;
+  return !exceedsTierLimit(incrementCount(state.tierCounts, candidate.tier));
 }
 
 function assignCaptaincy(
@@ -208,26 +209,15 @@ export function autoFillSquadDraft({
   const foreignCount = occupiedCandidates.filter(
     (candidate) => !candidate.isThai,
   ).length;
-  const tierOneCount = occupiedCandidates.filter(
-    (candidate) => candidate.tier === 1,
-  ).length;
-  const topTwoTierCount = occupiedCandidates.filter(
-    (candidate) => candidate.tier <= 2,
-  ).length;
-  const tierOneLimit = rules.tierSlots
-    .filter((slot) => slot.level <= 1)
-    .reduce((sum, slot) => sum + slot.slots, 0);
-  const topTwoTierLimit = rules.tierSlots
-    .filter((slot) => slot.level <= 2)
-    .reduce((sum, slot) => sum + slot.slots, 0);
+  const tierCounts = countBy(
+    occupiedCandidates.map((candidate) => candidate.tier),
+  );
+  const knownTiers = new Set(rules.tierSlots.map((slot) => slot.level));
   if (
     [...clubCounts.values()].some((count) => count > rules.sameClubLimit) ||
     foreignCount > rules.foreignPlayerLimit ||
-    tierOneCount > tierOneLimit ||
-    topTwoTierCount > topTwoTierLimit ||
-    occupiedCandidates.some(
-      (candidate) => candidate.tier < 1 || candidate.tier > 3,
-    )
+    exceedsTierLimit(tierCounts) ||
+    occupiedCandidates.some((candidate) => !knownTiers.has(candidate.tier))
   ) {
     return null;
   }
@@ -276,8 +266,7 @@ export function autoFillSquadDraft({
       pickedIds: new Set(occupiedIds),
       clubCounts,
       foreignCount,
-      tierOneCount,
-      topTwoTierCount,
+      tierCounts,
       lastIndexByPosition: new Map(),
       score: 0,
     },
@@ -307,9 +296,7 @@ export function autoFillSquadDraft({
           pickedIds: nextIds,
           clubCounts: incrementCount(state.clubCounts, candidate.clubId),
           foreignCount: state.foreignCount + (candidate.isThai ? 0 : 1),
-          tierOneCount: state.tierOneCount + (candidate.tier === 1 ? 1 : 0),
-          topTwoTierCount:
-            state.topTwoTierCount + (candidate.tier <= 2 ? 1 : 0),
+          tierCounts: incrementCount(state.tierCounts, candidate.tier),
           lastIndexByPosition: nextIndexes,
           score: state.score + (priorityByCandidate.get(candidate.id) ?? 0),
         });

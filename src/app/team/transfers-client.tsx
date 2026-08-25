@@ -124,7 +124,10 @@ export default function TransfersClient({
     return player ? [player] : [];
   });
   const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
-  const levelTwo = squadPlayers.filter((player) => player.tier === 2).length;
+  const topTwoLevels = squadPlayers.filter((player) => player.tier <= 2).length;
+  const topThreeLevels = squadPlayers.filter(
+    (player) => player.tier <= 3,
+  ).length;
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
 
   function choosePlayer(player: CompetitionPlayerView) {
@@ -160,14 +163,16 @@ export default function TransfersClient({
             <strong>{fantasy.team.freeTransfers}</strong>
           </div>
           <div>
-            <span>ผู้เล่นระดับ 1</span>
+            <span>ระดับ 1</span>
             <strong>{levelOne}/3</strong>
           </div>
           <div>
-            <span>ผู้เล่นระดับ 2</span>
-            <strong>
-              {levelTwo}/{10 - levelOne}
-            </strong>
+            <span>ระดับ 1–2</span>
+            <strong>{topTwoLevels}/6</strong>
+          </div>
+          <div>
+            <span>ระดับ 1–3</span>
+            <strong>{topThreeLevels}/9</strong>
           </div>
           <div>
             <span>ต่างชาติ</span>
@@ -239,6 +244,7 @@ export default function TransfersClient({
                 <SelectItem value="1">ระดับ 1</SelectItem>
                 <SelectItem value="2">ระดับ 2</SelectItem>
                 <SelectItem value="3">ระดับ 3</SelectItem>
+                <SelectItem value="4">ระดับ 4</SelectItem>
               </SelectContent>
             </Select>
             <Select

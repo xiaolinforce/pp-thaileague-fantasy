@@ -15,6 +15,7 @@ import {
   fantasyTeams,
   fantasyTeamSelectionPlayers,
   fantasyTeamSelections,
+  fantasyTierDefinitions,
 } from "../src/db/schema";
 
 loadEnvConfig(process.cwd());
@@ -33,6 +34,7 @@ const tables = {
   fantasyTeams,
   fantasyTeamSelections,
   fantasyTeamSelectionPlayers,
+  fantasyTierDefinitions,
   fantasyLeagues,
   fantasyLeagueMembers,
 };
@@ -41,6 +43,24 @@ async function verifyFantasyGame() {
   for (const [name, table] of Object.entries(tables)) {
     const result = await db.select({ count: count() }).from(table);
     console.log(`${name}: ${result[0].count}`);
+  }
+
+  const tierDefinitions = await db
+    .select()
+    .from(fantasyTierDefinitions)
+    .orderBy(asc(fantasyTierDefinitions.level));
+  const expectedTierSlots = [3, 3, 3, 6];
+  if (
+    tierDefinitions.length !== expectedTierSlots.length ||
+    tierDefinitions.some(
+      (definition, index) =>
+        definition.level !== index + 1 ||
+        definition.slotCount !== expectedTierSlots[index],
+    )
+  ) {
+    throw new Error(
+      "Fantasy tier definitions must be Level 1-4 with 3/3/3/6 slots.",
+    );
   }
 
   const publishedRuns = await db
@@ -80,10 +100,14 @@ async function verifyFantasyGame() {
     const tierThree = rankings.filter(
       (ranking) => ranking.tierLevel === 3,
     ).length;
+    const tierFour = rankings.filter(
+      (ranking) => ranking.tierLevel === 4,
+    ).length;
     if (
       tierOne !== run.levelOneCount ||
       tierTwo !== run.levelTwoCount ||
-      tierOne + tierTwo + tierThree !== run.totalPlayers
+      tierThree !== run.levelThreeCount ||
+      tierOne + tierTwo + tierThree + tierFour !== run.totalPlayers
     ) {
       throw new Error(
         `Ranking ${run.version} tier totals do not match its run.`,
@@ -161,7 +185,7 @@ async function verifyFantasyGame() {
       );
     }
     console.log(
-      `publishedRanking ${run.version}: ranks 1-${rankings.length}; L1=${tierOne}, L2=${tierTwo}, L3=${tierThree}`,
+      `publishedRanking ${run.version}: ranks 1-${rankings.length}; L1=${tierOne}, L2=${tierTwo}, L3=${tierThree}, L4=${tierFour}`,
     );
   }
 }

@@ -84,14 +84,27 @@ export const THAI_LEAGUE_FANTASY_RULES: FantasyRules = {
   foreignPlayerLimit: 7,
   tierSlots: [
     { level: 1, slots: 3 },
-    { level: 2, slots: 7 },
-    { level: 3, slots: 5 },
+    { level: 2, slots: 3 },
+    { level: 3, slots: 3 },
+    { level: 4, slots: 6 },
   ],
   weeklyFreeTransfers: 2,
   maximumFreeTransfers: 4,
   transferPointCost: 4,
   chipUsesPerSeason: 2,
 };
+
+export function getCumulativeTierLimits(
+  rules: Pick<FantasyRules, "tierSlots"> = THAI_LEAGUE_FANTASY_RULES,
+) {
+  let cumulativeLimit = 0;
+  return [...rules.tierSlots]
+    .sort((left, right) => left.level - right.level)
+    .map((tier) => {
+      cumulativeLimit += tier.slots;
+      return { level: tier.level, limit: cumulativeLimit };
+    });
+}
 
 function countBy<T extends string | number>(values: T[]) {
   const counts = new Map<T, number>();
@@ -178,19 +191,17 @@ export function validateSquad(
     }
   }
 
-  let cumulativeSlots = 0;
-  for (const tier of sortedTierSlots) {
-    cumulativeSlots += tier.slots;
+  for (const tier of getCumulativeTierLimits(rules)) {
     const usedSlots = squad.filter(
       (player) => player.tier <= tier.level,
     ).length;
-    if (usedSlots > cumulativeSlots) {
+    if (usedSlots > tier.limit) {
       violations.push({
         code: "tier_quota",
-        message: `ผู้เล่นระดับ ${tier.level} ขึ้นไปใช้ได้ไม่เกิน ${cumulativeSlots} ช่อง`,
+        message: `ผู้เล่นระดับ 1–${tier.level} รวมกันได้ไม่เกิน ${tier.limit} คน`,
         details: {
           level: tier.level,
-          limit: cumulativeSlots,
+          limit: tier.limit,
           actual: usedSlots,
         },
       });

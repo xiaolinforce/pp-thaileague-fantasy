@@ -82,11 +82,13 @@ The current season defines:
 | Level | Nominal slots |      Cumulative maximum |
 | ----: | ------------: | ----------------------: |
 |     1 |             3 |              Level 1: 3 |
-|     2 |             7 | Levels 1–2 combined: 10 |
-|     3 |             5 | Levels 1–3 combined: 15 |
+|     2 |             3 |  Levels 1–2 combined: 6 |
+|     3 |             3 |  Levels 1–3 combined: 9 |
+|     4 |             6 | Levels 1–4 combined: 15 |
 
 Validation is cumulative. A lower-ranked player may occupy a remaining
-higher-level slot, but a Level 1 player cannot overflow into Level 2 or 3. Tier
+higher-level slot, but a higher-ranked player cannot overflow into any
+lower-tier slot. Tier
 records are effective from a Gameweek so later changes do not alter earlier
 selection snapshots.
 
@@ -97,13 +99,16 @@ projection. Rank `1` is the player with the highest projected Fantasy points;
 ranks continue without gaps through every active Fantasy player. Position rank
 is also stored for review, but the tier boundary uses overall rank only.
 
-For the 2026/27 preseason publication:
+For the 2026/27 preseason publication, counts are derived from every active,
+eligible player in the published ranking. Cumulative boundaries are rounded so
+the ranks remain contiguous and Level 4 receives the exact remainder:
 
-| Overall rank | Level |       Players |
-| -----------: | ----: | ------------: |
-|         1–50 |     1 |            50 |
-|       51–150 |     2 |           100 |
-|     151–last |     3 | all remaining |
+| Overall-rank share | Level | Players |
+| -----------------: | ----: | ------: |
+|             top 5% |     1 |      5% |
+|           next 15% |     2 |     15% |
+|           next 20% |     3 |     20% |
+|          remainder |     4 |     60% |
 
 The projection combines prior-season minutes and events, the project scoring
 rules, competition strength, club attack/defence context, current market value,
@@ -124,7 +129,7 @@ Before the deadline, a manager may fill every vacant draft slot automatically.
 The suggestion preserves players already in the draft, ignores market display
 filters, and uses the current published ranking with fresh availability, club,
 position, Thai-status, and effective-tier data. It first attempts to maximize use of the
-three Level 1 and seven Level 2 nominal slots when a valid allocation exists,
+three nominal slots at each of Levels 1–3 when a valid allocation exists,
 then favors higher projected points with bounded random variation so repeated
 empty drafts need not receive the same squad. Club, foreign-player, cumulative
 tier, position, duplicate-player, lineup, and bench constraints remain hard

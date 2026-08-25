@@ -64,6 +64,7 @@ npm run db:normalize:player-short-names -- --apply
 npm run db:verify:competition
 npm run db:seed:fantasy
 npm run db:rank:players -- --publish
+npm run db:seed:fantasy
 npm run db:verify:fantasy
 npm run dev
 ```
@@ -84,10 +85,13 @@ the imported database during normal runtime.
 - Import competition data before seeding the dependent Fantasy records.
 - Inspect the configured database with `npm run db:studio`.
 
-The Fantasy seed is idempotent for the configured season. It creates Gameweeks,
-seeded league opponents, two Classic leagues, and safe fallback tier metadata.
+The Fantasy seed is idempotent for the configured season. Its first pass creates
+Gameweeks, seeded league opponents, two Classic leagues, and safe fallback tier
+metadata. Run it again after ranking publication to populate deterministic demo
+squads from the reviewed four-tier classifications.
 The ranking command publishes a versioned 1-to-all player order and derives
-Level 1/2/3 as the top 50, next 100, and remaining players. A
+four levels from the active ranked pool: Level 1 is 5%, Level 2 is the next
+15%, Level 3 is the next 20%, and Level 4 is the remaining 60%. A
 real account or Guest receives an empty opening draft and chooses all 15 players
 before the first save. Seeded demo managers continue to use deterministic valid
 squads so standings and scoring fixtures remain useful.

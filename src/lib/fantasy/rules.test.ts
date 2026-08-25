@@ -33,7 +33,7 @@ const positions = [
   "forward",
 ] as const;
 
-function makeSquad(tiers = [1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]) {
+function makeSquad(tiers = [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4]) {
   return positions.map<SquadPlayer>((position, index) => ({
     id: `p${index + 1}`,
     clubId: `c${Math.floor(index / 3) + 1}`,
@@ -78,10 +78,8 @@ function makeValidLineup() {
   }));
 }
 
-test("accepts the agreed level-B tier slots", () => {
+test("accepts the four-tier nominal allocation", () => {
   assert.deepEqual(validateSquad(makeSquad()), []);
-  const tenLevelTwo = makeSquad([2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]);
-  assert.deepEqual(validateSquad(tenLevelTwo), []);
 });
 
 test("rejects four level-one players", () => {
@@ -89,6 +87,42 @@ test("rejects four level-one players", () => {
     makeSquad([1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]),
   );
   assert.ok(violations.some((violation) => violation.code === "tier_quota"));
+});
+
+test("allows lower tiers to fill unused higher-tier slots", () => {
+  assert.deepEqual(
+    validateSquad(makeSquad([2, 2, 2, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4])),
+    [],
+  );
+  assert.deepEqual(
+    validateSquad(makeSquad([3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4])),
+    [],
+  );
+  assert.deepEqual(validateSquad(makeSquad(Array(15).fill(4))), []);
+});
+
+test("rejects cumulative tier quota overflow", () => {
+  const sevenTopTwo = makeSquad([1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4]);
+  const tenTopThree = makeSquad([1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4]);
+  assert.ok(
+    validateSquad(sevenTopTwo).some(
+      (violation) =>
+        violation.code === "tier_quota" && violation.details?.level === 2,
+    ),
+  );
+  assert.ok(
+    validateSquad(tenTopThree).some(
+      (violation) =>
+        violation.code === "tier_quota" && violation.details?.level === 3,
+    ),
+  );
+});
+
+test("rejects a tier outside the season definition", () => {
+  const violations = validateSquad(
+    makeSquad([1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 5]),
+  );
+  assert.ok(violations.some((violation) => violation.code === "unknown_tier"));
 });
 
 test("rejects more than seven foreign players", () => {

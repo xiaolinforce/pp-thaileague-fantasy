@@ -16,7 +16,7 @@
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,
   stat overrides, transfer revisions, and application-level admin audit entries.
 - Versioned preseason player ranking with contiguous overall/position ranks,
-  source confidence, review CSV, and deterministic 50/100/remaining tiers.
+  source confidence, review CSV, and deterministic 5%/15%/20%/remaining tiers.
 - Overall and Private Classic demo standings.
 - Idempotent competition and Fantasy seed workflows with database verification.
 

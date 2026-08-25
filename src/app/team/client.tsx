@@ -148,7 +148,7 @@ function formatClientViolation(
         count: violation.details?.limit,
       });
     case "tier_quota":
-      return format("ผู้เล่นระดับ {level} ขึ้นไปใช้ได้ไม่เกิน {count} ช่อง", {
+      return format("ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน", {
         level: violation.details?.level,
         count: violation.details?.limit,
       });

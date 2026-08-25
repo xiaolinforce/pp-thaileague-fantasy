@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  deriveRankingTierCounts,
   estimateHistoricalFantasyPoints,
   normalizeRankingName,
   rankFantasyPlayers,
@@ -93,16 +94,26 @@ test("creates contiguous deterministic ranks and exact tier counts", () => {
       candidate("d", [], 1_000_000),
       candidate("e", []),
     ],
-    { levelOneCount: 1, levelTwoCount: 2 },
+    { levelOneCount: 1, levelTwoCount: 1, levelThreeCount: 1 },
   );
   assert.deepEqual(
     rankings.map((ranking) => ranking.overallRank),
     [1, 2, 3, 4, 5],
   );
   assert.equal(rankings.filter((ranking) => ranking.tierLevel === 1).length, 1);
-  assert.equal(rankings.filter((ranking) => ranking.tierLevel === 2).length, 2);
-  assert.equal(rankings.filter((ranking) => ranking.tierLevel === 3).length, 2);
+  assert.equal(rankings.filter((ranking) => ranking.tierLevel === 2).length, 1);
+  assert.equal(rankings.filter((ranking) => ranking.tierLevel === 3).length, 1);
+  assert.equal(rankings.filter((ranking) => ranking.tierLevel === 4).length, 2);
   assert.equal(rankings[0].fantasyPlayerId, "a");
+});
+
+test("derives cumulative 5/15/20/60 tier boundaries", () => {
+  assert.deepEqual(deriveRankingTierCounts(403), {
+    levelOneCount: 20,
+    levelTwoCount: 61,
+    levelThreeCount: 80,
+    levelFourCount: 242,
+  });
 });
 
 test("rejects duplicate players and invalid tier boundaries", () => {
@@ -112,6 +123,7 @@ test("rejects duplicate players and invalid tier boundaries", () => {
       rankFantasyPlayers([duplicate, duplicate], {
         levelOneCount: 1,
         levelTwoCount: 0,
+        levelThreeCount: 0,
       }),
     /Duplicate ranking candidate/,
   );
@@ -120,6 +132,7 @@ test("rejects duplicate players and invalid tier boundaries", () => {
       rankFantasyPlayers([duplicate], {
         levelOneCount: 1,
         levelTwoCount: 1,
+        levelThreeCount: 0,
       }),
     /do not fit/,
   );
