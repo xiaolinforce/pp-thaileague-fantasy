@@ -68,6 +68,7 @@ const rules = [
     points: [
       "Triple Captain, Bench Boost และ Wildcard ใช้ได้อย่างละ 2 ครั้งต่อฤดูกาล",
       "ใช้ได้ 1 Chip ต่อ Gameweek และใช้ชนิดเดิมใน Gameweek ติดกันได้",
+      "Wildcard ใช้ได้ตั้งแต่ GW2 เป็นต้นไป",
       "ยกเลิก Chip ได้ก่อน Deadline โดย Wildcard ทำให้ Transfer ไม่มีค่าใช้จ่ายและคง Free Transfer ที่สะสมไว้",
     ],
   },

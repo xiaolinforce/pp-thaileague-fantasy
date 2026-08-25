@@ -40,6 +40,7 @@ import {
   suggestFantasyAutoFillAction,
 } from "@/app/fantasy-actions";
 import {
+  THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
   type FantasyChip,
   type FantasyPosition,
@@ -363,7 +364,10 @@ export default function TeamClient({
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
-    fantasy.selection.activeChip,
+    fantasy.gameweek.number < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek &&
+      fantasy.selection.activeChip === "wildcard"
+      ? null
+      : fantasy.selection.activeChip,
   );
   const [members, setMembers] = useState<DraftLineupMember[]>(() =>
     fantasy.selection.members.length === 0
@@ -919,12 +923,16 @@ export default function TeamClient({
                   ] as const
                 ).map(([chip, label]) => {
                   const isActive = activeChip === chip;
+                  const isUnavailable =
+                    chip === "wildcard" &&
+                    fantasy.gameweek.number <
+                      THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek;
                   return (
                     <button
                       type="button"
                       key={chip}
                       className={isActive ? "active" : ""}
-                      disabled={interactionsDisabled}
+                      disabled={interactionsDisabled || isUnavailable}
                       aria-pressed={isActive}
                       onClick={() =>
                         setActiveChip((current) =>
@@ -934,10 +942,12 @@ export default function TeamClient({
                     >
                       <span>{label}</span>
                       <p>
-                        {translate("เหลือใช้ {count} ครั้ง").replace(
-                          "{count}",
-                          String(fantasy.chipsRemaining[chip]),
-                        )}
+                        {isUnavailable
+                          ? translate("ใช้ได้ตั้งแต่ GW2")
+                          : translate("เหลือใช้ {count} ครั้ง").replace(
+                              "{count}",
+                              String(fantasy.chipsRemaining[chip]),
+                            )}
                       </p>
                     </button>
                   );

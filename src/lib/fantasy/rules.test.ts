@@ -7,6 +7,7 @@ import {
   settleTransfers,
   swapLineupAssignments,
   THAI_LEAGUE_FANTASY_RULES,
+  validateChipUse,
   validateLineup,
   validateLineupAssignment,
   validateSquad,
@@ -258,6 +259,32 @@ test("wildcard preserves saved transfers and still adds the weekly allowance", (
       wildcard: true,
     }),
     { transferPoints: 0, freeTransfersAfter: 4 },
+  );
+});
+
+test("wildcard is unavailable in Gameweek 1 and available from Gameweek 2", () => {
+  assert.deepEqual(
+    validateChipUse({
+      chip: "wildcard",
+      activeChip: null,
+      previousUses: 0,
+      gameweekNumber: 1,
+    }),
+    [
+      {
+        code: "chip_unavailable",
+        message: "เปลี่ยนตัวอิสระใช้ได้ตั้งแต่ GW2",
+      },
+    ],
+  );
+  assert.deepEqual(
+    validateChipUse({
+      chip: "wildcard",
+      activeChip: null,
+      previousUses: 0,
+      gameweekNumber: 2,
+    }),
+    [],
   );
 });
 

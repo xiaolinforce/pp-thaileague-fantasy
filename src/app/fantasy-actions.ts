@@ -402,6 +402,7 @@ export async function saveFantasySelectionAction(
       // deadline replaces it, so only locked usage counts against the limit.
       activeChip: null,
       previousUses,
+      gameweekNumber: gameweek.number,
     });
     if (chipViolations.length > 0) {
       return {
@@ -868,10 +869,15 @@ export async function lockFantasyGameweekAction(formData: FormData) {
       where: eq(fantasyTeams.id, selection.fantasyTeamId),
     });
     if (!team) continue;
+    const activeChip =
+      gameweek.number < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek &&
+      selection.activeChip === "wildcard"
+        ? null
+        : selection.activeChip;
     const settlement = settleTransfers({
       freeTransfersBefore: selection.freeTransfersBefore,
       transferCount: selection.netTransferCount,
-      wildcard: selection.activeChip === "wildcard",
+      wildcard: activeChip === "wildcard",
     });
     await db
       .update(fantasyTeamSelections)
@@ -880,6 +886,7 @@ export async function lockFantasyGameweekAction(formData: FormData) {
         lockedAt: new Date(),
         freeTransfersAfter: settlement.freeTransfersAfter,
         transferPoints: settlement.transferPoints,
+        activeChip,
         updatedAt: new Date(),
       })
       .where(eq(fantasyTeamSelections.id, selection.id));

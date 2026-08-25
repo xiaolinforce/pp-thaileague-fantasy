@@ -177,7 +177,8 @@ draft into the next Gameweek.
 
 The supported chips are Triple Captain, Bench Boost, and Wildcard. Each chip
 may be used twice per season. Only one chip may be active in a Gameweek, and
-the same chip may be used in consecutive Gameweeks when uses remain.
+the same chip may be used in consecutive Gameweeks when uses remain. Wildcard
+is unavailable in Gameweek 1 and becomes available from Gameweek 2.
 
 | Chip           | Effect                                                               |
 | -------------- | -------------------------------------------------------------------- |

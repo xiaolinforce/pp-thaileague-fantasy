@@ -41,6 +41,7 @@ export type FantasyRules = {
   maximumFreeTransfers: number;
   transferPointCost: number;
   chipUsesPerSeason: number;
+  wildcardStartGameweek: number;
 };
 
 export type RuleViolationCode =
@@ -58,6 +59,7 @@ export type RuleViolationCode =
   | "captain"
   | "vice_captain"
   | "chip_already_active"
+  | "chip_unavailable"
   | "chip_limit";
 
 export type RuleViolation = {
@@ -92,6 +94,7 @@ export const THAI_LEAGUE_FANTASY_RULES: FantasyRules = {
   maximumFreeTransfers: 4,
   transferPointCost: 4,
   chipUsesPerSeason: 2,
+  wildcardStartGameweek: 2,
 };
 
 export function getCumulativeTierLimits(
@@ -419,13 +422,23 @@ export function validateChipUse({
   chip,
   activeChip,
   previousUses,
+  gameweekNumber,
   rules = THAI_LEAGUE_FANTASY_RULES,
 }: {
   chip: FantasyChip;
   activeChip: FantasyChip | null;
   previousUses: number;
+  gameweekNumber: number;
   rules?: FantasyRules;
 }): RuleViolation[] {
+  if (chip === "wildcard" && gameweekNumber < rules.wildcardStartGameweek) {
+    return [
+      {
+        code: "chip_unavailable",
+        message: "เปลี่ยนตัวอิสระใช้ได้ตั้งแต่ GW2",
+      },
+    ];
+  }
   if (activeChip && activeChip !== chip) {
     return [
       {

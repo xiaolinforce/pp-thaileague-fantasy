@@ -237,6 +237,9 @@ const translations: Record<string, string> = {
   นับตัวสำรอง: "Bench Boost",
   ครั้ง: "uses",
   "เหลือใช้ {count} ครั้ง": "Remaining {count} times",
+  "ใช้ได้ตั้งแต่ GW2": "Available from GW2",
+  "เปลี่ยนตัวอิสระใช้ได้ตั้งแต่ GW2":
+    "Wildcard is available from GW2",
   สลับตัว: "Swap",
   รองกัปตัน: "Vice-captain",
   ปิด: "Close",
@@ -600,6 +603,8 @@ const translations: Record<string, string> = {
     "Triple Captain, Bench Boost, and Wildcard can each be used twice per season",
   "ใช้ได้ 1 Chip ต่อ Gameweek และใช้ชนิดเดิมใน Gameweek ติดกันได้":
     "Use 1 chip per Gameweek; the same chip may be used in consecutive Gameweeks",
+  "Wildcard ใช้ได้ตั้งแต่ GW2 เป็นต้นไป":
+    "Wildcard is available from GW2 onward",
   "ยกเลิก Chip ได้ก่อน Deadline โดย Wildcard ทำให้ Transfer ไม่มีค่าใช้จ่ายและคง Free Transfer ที่สะสมไว้":
     "Cancel a chip before the deadline; Wildcard makes transfers free and preserves banked free transfers",
   "คิดคะแนนจากนาทีลงสนาม ประตู แอสซิสต์ คลีนชีต การเซฟ จุดโทษ ใบเหลือง ใบแดง และประตูตัวเอง":

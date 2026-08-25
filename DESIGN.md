@@ -151,6 +151,8 @@ the screen before cards or tables begin.
 - Show an infinity symbol instead of the stored free-transfer balance in
   Gameweek 1, with an accessible unlimited-transfer label, because opening
   squad revisions do not count as transfers.
+- In Gameweek 1, disable Wildcard and show that it becomes available from
+  Gameweek 2. Enforce the same restriction on the server.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
   recent Gameweek with provisional or final scoring. Its pitch is read-only and
   shows the counted lineup after automatic substitutions, while preserving a
