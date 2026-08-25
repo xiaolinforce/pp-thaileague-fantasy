@@ -121,7 +121,10 @@ export default function TransfersClient({
         .toLowerCase()
         .includes(query.toLowerCase()),
     )
-    .sort((a, b) => (sort === "form" ? b.form - a.form : b.points - a.points))
+    .sort((a, b) => {
+      if (sort === "tier") return a.tier - b.tier || b.points - a.points;
+      return sort === "form" ? b.form - a.form : b.points - a.points;
+    })
     .slice(0, 50);
 
   const squadPlayers = members.flatMap((member) => {
@@ -405,6 +408,7 @@ export default function TransfersClient({
               <SelectContent>
                 <SelectItem value="points">คะแนนสูงสุด</SelectItem>
                 <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
+                <SelectItem value="tier">ระดับสูงสุด</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -413,15 +417,23 @@ export default function TransfersClient({
           {players.map((player) => {
             const compatible = vacantPositions.has(player.position);
             const metricValue =
-              sort === "form" ? player.form.toFixed(1) : String(player.points);
+              sort === "form"
+                ? player.form.toFixed(1)
+                : sort === "tier"
+                  ? String(player.tier)
+                  : String(player.points);
             const metricLabel =
               sort === "form"
                 ? language === "th"
                   ? `ฟอร์ม ${metricValue}`
                   : `Form ${metricValue}`
-                : language === "th"
-                  ? `${metricValue} คะแนน`
-                  : `${metricValue} points`;
+                : sort === "tier"
+                  ? language === "th"
+                    ? `ระดับ ${metricValue}`
+                    : `Tier ${metricValue}`
+                  : language === "th"
+                    ? `${metricValue} คะแนน`
+                    : `${metricValue} points`;
             return (
               <article className="compact-market-row" key={player.id}>
                 <button
