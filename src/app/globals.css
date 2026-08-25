@@ -3045,9 +3045,9 @@ textarea:focus-visible {
 
 .compact-transfer-stats {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   border-top: 1px solid var(--line);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 0;
 }
 
 .compact-transfer-stats > div {
@@ -3087,6 +3087,13 @@ textarea:focus-visible {
 
 .compact-transfer-stats + .compact-market-toolbar {
   padding-top: 14px;
+}
+
+.compact-transfer-stats--below {
+  margin: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgba(189, 67, 6, 0.24);
+  border-bottom: 1px solid var(--line);
 }
 
 .compact-market-search {

@@ -170,6 +170,12 @@ export default function TransfersClient({
             <strong>{fantasy.team.freeTransfers}</strong>
           </div>
           <div>
+            <span>ต่างชาติ</span>
+            <strong>{foreignPlayers}/7</strong>
+          </div>
+        </div>
+        <div className="compact-transfer-stats compact-transfer-stats--below">
+          <div>
             <span>ระดับ 1</span>
             <strong>{levelOne}/3</strong>
           </div>
@@ -180,10 +186,6 @@ export default function TransfersClient({
           <div>
             <span>ระดับ 1–3</span>
             <strong>{topThreeLevels}/9</strong>
-          </div>
-          <div>
-            <span>ต่างชาติ</span>
-            <strong>{foreignPlayers}/7</strong>
           </div>
         </div>
 
@@ -386,7 +388,6 @@ export default function TransfersClient({
             </Select>
           </div>
         </div>
-
         <div className="compact-market-list">
           {players.map((player) => {
             const compatible = vacantPositions.has(player.position);
