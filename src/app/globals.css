@@ -3101,9 +3101,7 @@ textarea:focus-visible {
   display: grid;
   gap: 3px;
   border-top: 1px solid rgba(189, 67, 6, 0.24);
-  border-bottom: 1px solid var(--line);
   color: var(--orange-deep);
-  background: var(--orange-soft);
 }
 
 .compact-tier-quota-heading {

@@ -226,7 +226,7 @@ export default function TransfersClient({
           className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
         >
           <div className="compact-tier-quota-heading">
-            <span>โควต้านักเตะระดับ 1–3</span>
+            <span>{translate("โควต้านักเตะระดับ 1-3")}</span>
             <Popover>
               <PopoverTrigger
                 className="compact-tier-quota-info"
@@ -241,11 +241,11 @@ export default function TransfersClient({
                 sideOffset={7}
               >
                 <PopoverHeader>
-                  <PopoverTitle>โควต้าระดับเป็นแบบสะสม</PopoverTitle>
+                  <PopoverTitle>{translate("โควต้านักเตะระดับ 1-3")}</PopoverTitle>
                   <PopoverDescription>
-                    ระดับ 1 เติมวง 1–3 ระดับ 2 เติมวง 4–6 แล้วถอยกลับไปวง 3–1
-                    ส่วนระดับ 3 เติมวง 7–9 แล้วถอยกลับไปวง 6–1
-                    โดยข้ามวงที่ถูกใช้แล้ว ระดับ 4 ไม่ใช้วงกลมชุดนี้
+                    {translate(
+                      "นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน นักเตะระดับ 1 มีได้สูงสุด 3 คน นักเตะระดับ 2 มีได้สูงสุด 6 คน"
+                    )}
                   </PopoverDescription>
                 </PopoverHeader>
               </PopoverContent>
