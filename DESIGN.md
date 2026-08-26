@@ -148,6 +148,12 @@ the screen before cards or tables begin.
 - Keep the Player Market filters in task order: club, then position and
   nationality dropdowns, then tier and sort. Nationality offers all players,
   Thai players, or foreign players and filters the visible market only.
+- Present the cumulative Level 1–3 limits above the Player Market as one compact
+  nine-dot meter grouped into three nominal slots per level. Fill each level's
+  nominal group from left to right, then let Level 2 and Level 3 overflow move
+  backward into unoccupied higher-level circles. Pair an over-limit meter with written status, and
+  keep the cumulative rule available from a keyboard- and touch-accessible
+  explanation control.
 - Show an infinity symbol instead of the stored free-transfer balance in
   Gameweek 1, with an accessible unlimited-transfer label, because opening
   squad revisions do not count as transfers.

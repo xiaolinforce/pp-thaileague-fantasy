@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDownUp, Plus, Search, X } from "lucide-react";
+import { ArrowDownUp, CircleHelp, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { ClubColor } from "@/components/fantasy/club-colors";
@@ -9,6 +9,14 @@ import { PlayerIdentity } from "@/components/fantasy/player-identity";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Select,
   SelectContent,
@@ -27,6 +35,7 @@ import {
   fillFirstMatchingDraftVacancy,
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
+import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import type { FantasyPosition } from "@/lib/fantasy/rules";
 
 const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
@@ -59,7 +68,7 @@ export default function TransfersClient({
   onPlayerSelect: (player: CompetitionPlayerView) => void;
   isAutoFilling: boolean;
 }) {
-  const { language } = useLanguage();
+  const { language, translate } = useLanguage();
   const [query, setQuery] = useState("");
   const [clubId, setClubId] = useState("all");
   const [position, setPosition] = useState("ALL");
@@ -134,11 +143,26 @@ export default function TransfersClient({
     return player ? [player] : [];
   });
   const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
+  const levelTwo = squadPlayers.filter((player) => player.tier === 2).length;
+  const levelThree = squadPlayers.filter((player) => player.tier === 3).length;
   const topTwoLevels = squadPlayers.filter((player) => player.tier <= 2).length;
   const topThreeLevels = squadPlayers.filter(
     (player) => player.tier <= 3,
   ).length;
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
+  const tierQuotaDots = buildTierQuotaMeter({
+    1: levelOne,
+    2: levelTwo,
+    3: levelThree,
+  });
+  const isTierQuotaOver =
+    levelOne > 3 || topTwoLevels > 6 || topThreeLevels > 9;
+  const tierQuotaSummary = translate(
+    "ใช้ระดับ 1 {level1} คน ระดับ 2 {level2} คน และระดับ 3 {level3} คน",
+  )
+    .replace("{level1}", String(levelOne))
+    .replace("{level2}", String(levelTwo))
+    .replace("{level3}", String(levelThree));
   const hasUnlimitedOpeningTransfers = fantasy.gameweek.number === 1;
   const unlimitedTransfersLabel =
     language === "th" ? "เปลี่ยนนักเตะได้ไม่จำกัด" : "Unlimited transfers";
@@ -198,18 +222,56 @@ export default function TransfersClient({
             <strong>{foreignPlayers}/7</strong>
           </div>
         </div>
-        <div className="compact-transfer-stats compact-transfer-stats--below">
-          <div>
-            <span>ระดับ 1</span>
-            <strong>{levelOne}/3</strong>
+        <div
+          className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
+        >
+          <div className="compact-tier-quota-heading">
+            <span>โควต้านักเตะระดับ 1–3</span>
+            <Popover>
+              <PopoverTrigger
+                className="compact-tier-quota-info"
+                aria-label="ดูวิธีนับโควต้าระดับ"
+              >
+                <CircleHelp size={16} aria-hidden="true" />
+              </PopoverTrigger>
+              <PopoverContent
+                className="compact-tier-quota-popover"
+                align="start"
+                side="bottom"
+                sideOffset={7}
+              >
+                <PopoverHeader>
+                  <PopoverTitle>โควต้าระดับเป็นแบบสะสม</PopoverTitle>
+                  <PopoverDescription>
+                    ระดับ 1 เติมวง 1–3 ระดับ 2 เติมวง 4–6 แล้วถอยกลับไปวง 3–1
+                    ส่วนระดับ 3 เติมวง 7–9 แล้วถอยกลับไปวง 6–1
+                    โดยข้ามวงที่ถูกใช้แล้ว ระดับ 4 ไม่ใช้วงกลมชุดนี้
+                  </PopoverDescription>
+                </PopoverHeader>
+              </PopoverContent>
+            </Popover>
+            {isTierQuotaOver && (
+              <strong className="compact-tier-quota-warning">เกินโควต้า</strong>
+            )}
           </div>
-          <div>
-            <span>ระดับ 1–2</span>
-            <strong>{topTwoLevels}/6</strong>
-          </div>
-          <div>
-            <span>ระดับ 1–3</span>
-            <strong>{topThreeLevels}/9</strong>
+          <div
+            className="compact-tier-quota-dots"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span className="sr-only">
+              {tierQuotaSummary}
+              {isTierQuotaOver ? `, ${translate("เกินโควต้า")}` : ""}
+            </span>
+            <span className="compact-tier-quota-dot-track" aria-hidden="true">
+              {tierQuotaDots.map((tierLevel, index) => (
+                <span
+                  className={`compact-tier-quota-dot${tierLevel ? ` compact-tier-quota-dot--${tierLevel}` : ""}`}
+                  key={index}
+                />
+              ))}
+            </span>
           </div>
         </div>
 
