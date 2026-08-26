@@ -81,7 +81,7 @@ configuration is not enabled. Guest profiles expose an upgrade action; member
 profiles expose sign-out and naming controls. Do not make a Guest name field
 appear editable.
 
-At 900px and below, the sidebar gives way to the bottom mobile navigation. The
+Below 768px, the sidebar gives way to the bottom mobile navigation. The
 four highest-frequency destinations remain visible; Fixtures, Profile,
 Settings, and Help move into the More sheet. Do not create a second unrelated
 navigation model for a new route.
@@ -199,16 +199,26 @@ replacement for business-critical warnings without testing the rendered result.
 
 ## Responsive behavior
 
-- Wide desktop supports sidebar plus multi-column working layouts.
-- At 1120px, dense grids and wide supporting panels begin to collapse.
-- At 900px, use mobile bottom navigation and stack primary page regions.
-- At 640px and below, reduce decorative spacing before reducing readable text,
-  stack controls, and keep actions within the viewport.
-- Administrative layouts also collapse around 980px and 620px.
+- Use one shared three-mode responsive system across every route: Mobile below
+  768px, Tablet from 768px through 1279px, and Desktop from 1280px upward. These
+  modes have only two viewport cutoffs: 48rem and 80rem.
+- Mobile uses bottom navigation, single-column task flows, compact spacing, and
+  full-width controls while preserving readable text and approximately 44px
+  touch targets.
+- Tablet uses the compact 86px icon sidebar and stacks dense primary regions.
+  Two-column supporting grids are acceptable where their content remains
+  readable, but Team, Points, Fixtures, Profile, and administration must not
+  depend on desktop-width columns.
+- Desktop uses the full 238px sidebar and may place primary and supporting
+  regions side by side. The Team pitch and Player Market become side by side
+  only in this mode.
+- Use fluid sizing, `clamp()`, flexible Grid/Flex tracks, and container-aware
+  composition instead of introducing route-specific viewport breakpoints.
 - Use horizontal overflow for genuinely tabular or filter-strip content.
 - Touch targets should be approximately 44px high where practical.
 
-Test at a narrow 360px viewport in addition to the defined CSS breakpoints.
+Test at 360px and on both sides of the shared cutoffs: 767/768px and
+1279/1280px.
 
 ## Accessibility and motion
 

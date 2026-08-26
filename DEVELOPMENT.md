@@ -176,7 +176,8 @@ Also confirm as applicable:
   Boost, Triple Captain, and transfer deductions;
 - loading, empty, error, pending, and success states remain understandable;
 - Thai and English display modes work after a reload;
-- desktop, 900 px navigation collapse, and narrow mobile layouts remain usable;
+- Mobile below 768px, Tablet at 768–1279px, Desktop from 1280px, and a narrow
+  360px viewport remain usable without document-level horizontal overflow;
 - keyboard focus is visible and interactive controls have accessible names; and
 - a production build passes after route, server, metadata, or integration work.
 

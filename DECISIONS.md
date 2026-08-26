@@ -4,6 +4,27 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-26 — The interface uses three shared responsive modes
+
+**Decision:** Use Mobile below 768px, Tablet from 768px through 1279px, and
+Desktop from 1280px upward across every route. Implement these as two shared
+viewport cutoffs at 48rem and 80rem. Mobile uses bottom navigation, Tablet uses
+the compact icon sidebar, and Desktop uses the full sidebar and wide
+multi-column workspaces.
+
+**Context:** The earlier 620px, 640px, 900px, 980px, and 1120px route-specific
+breakpoints created too many intermediate states. At 1121px the Team workspace
+kept the full sidebar while its two-column content no longer fit, producing
+document-level horizontal overflow. The shared cutoffs match common responsive
+foundations while reserving enough width for the full 238px sidebar and the
+Team pitch/market workspace.
+
+**Consequences:** New route and component work must reuse the shared Mobile,
+Tablet, and Desktop modes rather than add viewport breakpoints. Use fluid Grid,
+Flexbox, `clamp()`, or container-aware layout for local adaptation. Responsive
+verification covers 360px and both sides of 768px and 1280px, in Thai and
+English, with document-level horizontal overflow treated as a defect.
+
 ## 2026-08-25 — Squads use four cumulative tiers
 
 **Decision:** Define nominal squad slots as 3/3/3/6 for Levels 1–4. Validate

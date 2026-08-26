@@ -3,6 +3,9 @@
 @import "shadcn/tailwind.css";
 
 @theme inline {
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 48rem;
+  --breakpoint-desktop: 80rem;
   --text-sm: 1rem;
   --text-sm--line-height: 1.5rem;
   --text-xs: 0.75rem;
@@ -416,7 +419,7 @@ textarea:focus-visible {
   font-size: 12px;
   line-height: 1.6;
 }
-@media (max-width: 900px) {
+@media (width < 80rem) {
   .onboarding-page {
     grid-template-columns: 1fr;
   }
@@ -433,7 +436,7 @@ textarea:focus-visible {
     padding: 28px 20px 48px;
   }
 }
-@media (max-width: 640px) {
+@media (width < 48rem) {
   .onboarding-language-switcher {
     top: 20px;
     right: 16px;
@@ -1925,7 +1928,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 1120px) {
+@media (width < 80rem) {
   .sidebar {
     width: 86px;
     padding-left: 13px;
@@ -1969,7 +1972,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 900px) {
+@media (width < 48rem) {
   .sidebar {
     display: none;
   }
@@ -2048,7 +2051,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
   .cn-toast[data-sonner-toast][data-styled="true"] {
     width: calc(100vw - 24px);
     min-height: 68px;
@@ -3088,6 +3091,13 @@ textarea:focus-visible {
   padding: 0 12px 12px;
   display: grid;
   gap: 8px;
+}
+
+.compact-market-toolbar [data-slot="select-trigger"] {
+  gap: 4px;
+  padding-right: 7px;
+  padding-left: 9px;
+  font-size: 13px;
 }
 
 .compact-transfer-stats + .compact-market-toolbar {
@@ -6231,7 +6241,7 @@ textarea:focus-visible {
   color: var(--green-dark);
 }
 
-@media (max-width: 1120px) {
+@media (width < 80rem) {
   .side-nav a,
   .sidebar-bottom > a:not(.manager-card) {
     width: 52px;
@@ -6273,7 +6283,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 900px) {
+@media (width < 80rem) {
   .mobile-nav a {
     flex: 1;
     border: 0;
@@ -6391,7 +6401,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
   .compact-tier-quota-heading {
     gap: 3px;
   }
@@ -6799,7 +6809,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 900px) {
+@media (width < 80rem) {
   .profile-overview-card {
     align-items: flex-start;
   }
@@ -6809,7 +6819,7 @@ textarea:focus-visible {
   }
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
   .profile-overview-card {
     padding: 17px 16px;
     align-items: stretch;
@@ -7047,7 +7057,7 @@ textarea:focus-visible {
 }
 .chip-options {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(150px, 100%), 1fr));
   gap: 8px;
   flex: 1;
 }
@@ -7099,7 +7109,7 @@ textarea:focus-visible {
   box-shadow: 0 4px 12px rgba(248, 113, 30, 0.2);
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
   .squad-chip-toolbar {
     align-items: stretch;
     flex-direction: column;
@@ -7197,7 +7207,7 @@ textarea:focus-visible {
 .fantasy-league-section + .fantasy-league-section {
   margin-top: 20px;
 }
-@media (max-width: 980px) {
+@media (width < 80rem) {
   .admin-fantasy-grid {
     grid-template-columns: 1fr;
   }
@@ -7205,7 +7215,7 @@ textarea:focus-visible {
     grid-template-columns: repeat(2, 1fr);
   }
 }
-@media (max-width: 620px) {
+@media (width < 48rem) {
   .admin-stat-fields {
     grid-template-columns: 1fr;
   }
@@ -7350,7 +7360,7 @@ body {
   font-weight: 800;
 }
 
-@media (max-width: 640px) {
+@media (width < 48rem) {
   .squad-name {
     font-size: 10px;
   }

@@ -64,9 +64,7 @@ function Turnstile({
         "expired-callback": () => onToken(""),
         "error-callback": () => onToken(""),
         theme: "light",
-        size: window.matchMedia("(max-width: 400px)").matches
-          ? "compact"
-          : "flexible",
+        size: "flexible",
       });
     }, 100);
     return () => {
