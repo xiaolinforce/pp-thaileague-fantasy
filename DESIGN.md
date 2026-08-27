@@ -112,9 +112,11 @@ the screen before cards or tables begin.
 - The Team screen always represents the one Gameweek currently open for squad
   changes. Show its number and live deadline without previous/next Gameweek
   controls; historical squads belong on the Points screen.
-- Keep lineup management and player transfers visible in one Team workspace,
-  without mode tabs. On desktop, show the pitch and market side by side; stack
-  the market after the pitch on narrow screens. The body of a vacant squad slot
+- Keep lineup management and player transfers visible in one Team workspace. On
+  desktop, show the pitch and market side by side. Below the desktop breakpoint,
+  provide a two-tab control before the workspace for switching between Squad
+  Players and Player Market, preserving each view's state while the other is
+  hidden. The body of a vacant squad slot
   is non-interactive and does not move focus or filter the market, while its
   compact swap action can move the vacancy within the lineup. During an active
   swap, a valid vacant target becomes interactive and receives the same visible

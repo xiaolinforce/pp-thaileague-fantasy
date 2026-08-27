@@ -3017,6 +3017,10 @@ textarea:focus-visible {
   align-items: stretch;
 }
 
+.segment-tabs.team-workspace-tabs {
+  display: none;
+}
+
 .compact-transfer-market {
   position: static;
   overflow: hidden;
@@ -6324,6 +6328,46 @@ textarea:focus-visible {
   .fixtures-layout,
   .profile-layout {
     grid-template-columns: 1fr;
+  }
+
+  .segment-tabs.team-workspace-tabs {
+    width: 100%;
+    height: 56px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 3px;
+    border: 1px solid #e5e1db;
+    border-radius: 12px;
+    background: #f1efeb;
+    box-shadow: inset 0 1px 2px rgba(40, 35, 30, 0.04);
+  }
+
+  .team-workspace-tabs [data-slot="tabs-trigger"] {
+    min-width: 0;
+    height: 48px;
+    min-height: 48px;
+    padding-inline: 12px;
+    border-radius: 9px;
+    color: #6e7478;
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .team-workspace-tabs [data-slot="tabs-trigger"]:hover:not([data-active]) {
+    color: var(--ink);
+    background: rgba(255, 255, 255, 0.48);
+  }
+
+  .team-workspace-tabs [data-slot="tabs-trigger"][data-active] {
+    color: var(--orange-deep);
+    background: var(--paper);
+    box-shadow: 0 2px 6px rgba(40, 35, 30, 0.1);
+  }
+
+  .unified-team-workspace.team-workspace--squad > .compact-transfer-market,
+  .unified-team-workspace.team-workspace--market > .squad-card {
+    display: none;
   }
 
   .compact-transfer-market {

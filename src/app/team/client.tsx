@@ -6,6 +6,8 @@ import {
   LoaderCircle,
   History,
   Save,
+  Search,
+  Shirt,
   TriangleAlert,
   Trash2,
   UserRound,
@@ -37,6 +39,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
 import {
@@ -390,6 +393,9 @@ export default function TeamClient({
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
+  const [workspaceView, setWorkspaceView] = useState<"squad" | "market">(
+    "squad",
+  );
   const router = useRouter();
   const playersByFantasyId = useMemo(
     () =>
@@ -909,7 +915,30 @@ export default function TeamClient({
           </div>
         </section>
 
-        <div className="unified-team-workspace">
+        <Tabs
+          value={workspaceView}
+          onValueChange={(value) =>
+            setWorkspaceView(value as "squad" | "market")
+          }
+        >
+          <TabsList
+            className="segment-tabs team-workspace-tabs"
+            aria-label={translate("สลับมุมมองทีม")}
+          >
+            <TabsTrigger value="squad">
+              <Shirt size={17} aria-hidden="true" />
+              นักเตะในทีม
+            </TabsTrigger>
+            <TabsTrigger value="market">
+              <Search size={17} aria-hidden="true" />
+              ตลาดนักเตะ
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div
+          className={`unified-team-workspace team-workspace--${workspaceView}`}
+        >
           <div className="product-card squad-card">
             <section
               className="squad-chip-toolbar"
