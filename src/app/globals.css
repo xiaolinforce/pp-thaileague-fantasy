@@ -499,6 +499,7 @@ textarea:focus-visible {
   letter-spacing: 0.08em;
 }
 .brand-copy strong {
+  font-size: 14px;
   font-weight: 900;
 }
 .brand-copy span {
@@ -7506,7 +7507,7 @@ body {
   }
 
   .compact-topbar .brand-copy strong {
-    font-size: 15px;
+    font-size: 12px;
   }
 
   .compact-topbar .brand-copy span {

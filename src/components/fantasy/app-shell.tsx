@@ -63,7 +63,7 @@ export function Brand({ compact = false }: { compact?: boolean }) {
       </span>
       {!compact && (
         <span className="brand-copy">
-          <strong>PP THAI</strong>
+          <strong>THAI LEAGUE</strong>
           <span>FANTASY</span>
         </span>
       )}
