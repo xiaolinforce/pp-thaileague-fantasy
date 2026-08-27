@@ -6377,7 +6377,8 @@ textarea:focus-visible {
   }
 
   .compact-market-list {
-    max-height: 650px;
+    max-height: none;
+    overflow-y: visible;
   }
 
   .points-aside {
