@@ -31,6 +31,8 @@ const translations: Record<string, string> = {
   โปรไฟล์และกติกา: "Profile & Rules",
   โปรไฟล์: "Profile",
   เมนูหลัก: "Main navigation",
+  เปิดเมนูหลัก: "Open main navigation",
+  ปิดเมนูหลัก: "Close main navigation",
   เมนูมือถือ: "Mobile navigation",
   เพิ่มเติม: "More",
   เมนูเพิ่มเติม: "More Menu",

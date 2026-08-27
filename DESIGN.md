@@ -55,7 +55,9 @@ use stable alignment and tabular numerals where practical.
 
 Desktop uses a fixed 238px navy sidebar and a flexible main canvas. The sidebar
 contains the brand, primary Fantasy navigation, support/settings links, and the
-current session's team identity. Reuse `AppShell` and `PageHeader` for product routes.
+current session's team identity. Below the desktop breakpoint, preserve this
+same full navigation in a left drawer, opened from a navy Top bar with a
+hamburger control. Reuse `AppShell` and `PageHeader` for product routes.
 
 ## Account onboarding
 
@@ -81,10 +83,10 @@ configuration is not enabled. Guest profiles expose an upgrade action; member
 profiles expose sign-out and naming controls. Do not make a Guest name field
 appear editable.
 
-Below 768px, the sidebar gives way to the bottom mobile navigation. The
-four highest-frequency destinations remain visible; Fixtures, Profile,
-Settings, and Help move into the More sheet. Do not create a second unrelated
-navigation model for a new route.
+Below the desktop breakpoint, navigation is initially hidden in the left drawer
+and opens from the Top bar hamburger. Keep all primary navigation, support,
+settings, and manager identity in the drawer so that mobile and tablet preserve
+the desktop information architecture.
 
 The active route must be identified by text treatment and structure, not color
 alone. Page headings should state both the section and the immediate purpose of
@@ -208,13 +210,13 @@ replacement for business-critical warnings without testing the rendered result.
 - Use one shared three-mode responsive system across every route: Mobile below
   768px, Tablet from 768px through 1279px, and Desktop from 1280px upward. These
   modes have only two viewport cutoffs: 48rem and 80rem.
-- Mobile uses bottom navigation, single-column task flows, compact spacing, and
-  full-width controls while preserving readable text and approximately 44px
-  touch targets.
-- Tablet uses the compact 86px icon sidebar and stacks dense primary regions.
-  Two-column supporting grids are acceptable where their content remains
-  readable, but Team, Points, Fixtures, Profile, and administration must not
-  depend on desktop-width columns.
+- Mobile uses a navy Top bar with a left hamburger that opens the full sidebar
+  drawer, single-column task flows, compact spacing, and full-width controls
+  while preserving readable text and approximately 44px touch targets.
+- Tablet uses the same navy Top bar and full sidebar drawer, then stacks dense
+  primary regions. Two-column supporting grids are acceptable where their
+  content remains readable, but Team, Points, Fixtures, Profile, and
+  administration must not depend on desktop-width columns.
 - Desktop uses the full 238px sidebar and may place primary and supporting
   regions side by side. The Team pitch and Player Market become side by side
   only in this mode.

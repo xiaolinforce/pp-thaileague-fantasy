@@ -2324,6 +2324,75 @@ textarea:focus-visible {
   min-height: 41px;
 }
 
+/* Compact navigation keeps the desktop information architecture while making
+   room for the page task on touch-first viewports. */
+.compact-topbar {
+  display: none;
+}
+
+.compact-menu-trigger {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 12px;
+  color: white;
+  background: transparent;
+  cursor: pointer;
+}
+
+.compact-menu-trigger:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.compact-menu-trigger:focus-visible,
+.compact-sidebar-close:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.compact-sidebar-sheet {
+  width: min(238px, calc(100vw - 48px)) !important;
+  max-width: none !important;
+  padding: 0 !important;
+  gap: 0 !important;
+  border: 0 !important;
+  background: var(--navy) !important;
+  color: white !important;
+}
+
+.drawer-sidebar {
+  position: relative;
+  height: 100%;
+  padding: 28px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  background: var(--navy);
+}
+
+.compact-sidebar-close {
+  position: absolute;
+  top: 18px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 10px;
+  color: #dce3e7;
+  background: transparent;
+  cursor: pointer;
+}
+
+.compact-sidebar-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
 .top-stats-link {
   color: #60676b;
   display: flex;
@@ -7396,5 +7465,78 @@ body {
 @media (width < 48rem) {
   .squad-name {
     font-size: 10px;
+  }
+}
+
+@media (width < 80rem) {
+  .sidebar {
+    display: none;
+  }
+
+  .main-shell {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .compact-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 66px;
+    padding: 0 18px 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--navy);
+    color: white;
+  }
+
+  .compact-topbar .brand {
+    min-width: 0;
+  }
+
+  .compact-topbar .brand-mark {
+    width: 38px;
+    height: 38px;
+  }
+
+  .compact-topbar .brand-copy,
+  .drawer-sidebar .brand-copy {
+    display: flex;
+  }
+
+  .compact-topbar .brand-copy strong {
+    font-size: 15px;
+  }
+
+  .compact-topbar .brand-copy span {
+    font-size: 10px;
+    margin-top: 3px;
+  }
+
+  .drawer-sidebar .side-nav a,
+  .drawer-sidebar .sidebar-bottom > a:not(.manager-card) {
+    width: auto;
+    justify-content: flex-start;
+    padding: 0 14px;
+  }
+
+  .drawer-sidebar .side-nav a > span:not(.nav-pip),
+  .drawer-sidebar .sidebar-bottom > a:not(.manager-card) span,
+  .drawer-sidebar .manager-card > span:nth-child(2),
+  .drawer-sidebar .manager-card svg {
+    display: initial;
+  }
+
+  .drawer-sidebar .manager-card > span:nth-child(2) {
+    display: flex;
+  }
+
+  .drawer-sidebar .manager-card {
+    padding: 20px 6px 2px;
+  }
+
+  .floating-language-tester {
+    bottom: 24px;
   }
 }
