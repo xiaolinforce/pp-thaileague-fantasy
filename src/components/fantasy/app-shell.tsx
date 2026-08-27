@@ -11,7 +11,6 @@ import {
   Shirt,
   Trophy,
   UserRound,
-  X,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -216,7 +215,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </SheetHeader>
               <aside className="drawer-sidebar">
                 <SheetClose className="compact-sidebar-close" aria-label="ปิดเมนูหลัก">
-                  <X size={20} aria-hidden="true" />
+                  <Menu size={17} strokeWidth={2} aria-hidden="true" />
                   <span className="sr-only">ปิดเมนูหลัก</span>
                 </SheetClose>
                 <SidebarContent
