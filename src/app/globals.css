@@ -488,29 +488,8 @@ textarea:focus-visible {
 .brand-mark {
   width: 44px;
   height: 44px;
-  position: relative;
   display: grid;
   place-items: center;
-  background: var(--orange);
-  border-radius: 50% 50% 50% 12px;
-  transform: rotate(-7deg);
-  box-shadow: 0 8px 18px rgba(245, 102, 23, 0.25);
-}
-.brand-mark::after {
-  content: "";
-  position: absolute;
-  width: 25px;
-  height: 25px;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  border-radius: 50%;
-}
-.brand-mark span {
-  color: white;
-  font-size: 12px;
-  font-weight: 900;
-  letter-spacing: -0.05em;
-  transform: rotate(7deg);
-  z-index: 1;
 }
 .brand-copy {
   display: flex;
@@ -528,6 +507,11 @@ textarea:focus-visible {
   font-weight: 800;
   letter-spacing: 0.28em;
   margin-top: 5px;
+}
+.brand-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .floating-language-tester {
   position: fixed;

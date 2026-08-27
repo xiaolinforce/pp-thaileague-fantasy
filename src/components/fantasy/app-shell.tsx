@@ -12,6 +12,7 @@ import {
   Trophy,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
@@ -50,7 +51,14 @@ export function Brand({ compact = false }: { compact?: boolean }) {
   return (
     <div className="brand" aria-label="PP Thai League Fantasy">
       <span className="brand-mark">
-        <span>PP</span>
+        <Image
+          className="brand-logo"
+          src="/logo.png"
+          alt="PP Thai League Fantasy"
+          width={44}
+          height={44}
+          priority
+        />
       </span>
       {!compact && (
         <span className="brand-copy">
