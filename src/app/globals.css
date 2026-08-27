@@ -3115,6 +3115,7 @@ textarea:focus-visible {
   font-weight: 800;
   line-height: 1.25;
   text-align: center;
+  margin-top: 8px;
 }
 
 .compact-tier-quota-info {
