@@ -190,8 +190,12 @@ This implementation is a prototype convenience, not a route-level i18n system:
 - there are no locale-prefixed URLs or localized server metadata;
 - the first server render is Thai before the client restores a preference;
 - dictionary replacement depends on the exact Thai source copy; and
-- the persistent language control is available at the top right of the desktop
-  sidebar and in Profile settings; mobile users reach it through Profile.
+- Profile settings remain the persistent language preference. A temporary
+  floating language tester is also available throughout the app shell for
+  development: it can be dragged anywhere on screen and remembers its local
+  position. It is not a production navigation control and may be removed after
+  language testing; mobile users can always reach the persistent setting through
+  Profile.
 
 Until the localization architecture changes, add Thai source copy and its
 English dictionary entry in the same change. Never rely on automatic partial

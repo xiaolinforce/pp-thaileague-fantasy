@@ -8,6 +8,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactElement,
   type ReactNode,
@@ -862,18 +863,152 @@ export function LanguageSwitcher() {
   );
 }
 
-export function SidebarLanguageButton() {
+export function FloatingLanguageTester() {
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const dragRef = useRef<{
+    pointerId: number;
+    startX: number;
+    startY: number;
+    startLeft: number;
+    startTop: number;
+    left: number;
+    top: number;
+    moved: boolean;
+  } | null>(null);
+  const ignoreClickRef = useRef(false);
+  const [position, setPosition] = useState<{
+    left: number;
+    top: number;
+  } | null>(null);
   const { language, setLanguage } = useLanguage();
   const nextLanguage = language === "th" ? "en" : "th";
   const label = language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย";
 
+  const constrainPosition = (
+    left: number,
+    top: number,
+    width: number,
+    height: number,
+  ) => ({
+    left: Math.min(
+      Math.max(8, left),
+      Math.max(8, window.innerWidth - width - 8),
+    ),
+    top: Math.min(
+      Math.max(8, top),
+      Math.max(8, window.innerHeight - height - 8),
+    ),
+  });
+
+  useEffect(() => {
+    const stored = window.localStorage.getItem("thai-fantasy-language-tester");
+    if (!stored) return;
+
+    try {
+      const parsed: unknown = JSON.parse(stored);
+      if (
+        typeof parsed === "object" &&
+        parsed !== null &&
+        "left" in parsed &&
+        "top" in parsed &&
+        typeof parsed.left === "number" &&
+        typeof parsed.top === "number"
+      ) {
+        const rect = buttonRef.current?.getBoundingClientRect();
+        if (rect) {
+          setPosition(
+            constrainPosition(parsed.left, parsed.top, rect.width, rect.height),
+          );
+        }
+      }
+    } catch {
+      window.localStorage.removeItem("thai-fantasy-language-tester");
+    }
+  }, []);
+
+  const moveButton = (clientX: number, clientY: number) => {
+    const drag = dragRef.current;
+    const button = buttonRef.current;
+    if (!drag || !button) return;
+
+    const next = constrainPosition(
+      drag.startLeft + clientX - drag.startX,
+      drag.startTop + clientY - drag.startY,
+      button.offsetWidth,
+      button.offsetHeight,
+    );
+    drag.left = next.left;
+    drag.top = next.top;
+    setPosition(next);
+  };
+
   return (
     <button
+      ref={buttonRef}
       type="button"
-      className="sidebar-language-button"
-      onClick={() => setLanguage(nextLanguage)}
+      className="floating-language-tester"
+      onPointerDown={(event) => {
+        const rect = event.currentTarget.getBoundingClientRect();
+        dragRef.current = {
+          pointerId: event.pointerId,
+          startX: event.clientX,
+          startY: event.clientY,
+          startLeft: rect.left,
+          startTop: rect.top,
+          left: rect.left,
+          top: rect.top,
+          moved: false,
+        };
+        event.currentTarget.setPointerCapture(event.pointerId);
+      }}
+      onPointerMove={(event) => {
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+
+        if (
+          !drag.moved &&
+          Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >
+            4
+        ) {
+          drag.moved = true;
+        }
+        if (drag.moved) moveButton(event.clientX, event.clientY);
+      }}
+      onPointerUp={(event) => {
+        const drag = dragRef.current;
+        if (!drag || drag.pointerId !== event.pointerId) return;
+
+        if (drag.moved) {
+          window.localStorage.setItem(
+            "thai-fantasy-language-tester",
+            JSON.stringify({ left: drag.left, top: drag.top }),
+          );
+          ignoreClickRef.current = true;
+        }
+        dragRef.current = null;
+      }}
+      onPointerCancel={() => {
+        dragRef.current = null;
+      }}
+      onClick={() => {
+        if (ignoreClickRef.current) {
+          ignoreClickRef.current = false;
+          return;
+        }
+        setLanguage(nextLanguage);
+      }}
       aria-label={label}
       title={label}
+      style={
+        position
+          ? {
+              left: position.left,
+              top: position.top,
+              right: "auto",
+              bottom: "auto",
+            }
+          : undefined
+      }
     >
       {nextLanguage.toUpperCase()}
     </button>

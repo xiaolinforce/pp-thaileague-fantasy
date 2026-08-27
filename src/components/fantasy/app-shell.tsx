@@ -15,7 +15,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { Localized, SidebarLanguageButton } from "@/components/fantasy/i18n";
+import { FloatingLanguageTester, Localized } from "@/components/fantasy/i18n";
 import {
   Sheet,
   SheetClose,
@@ -79,9 +79,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <a className="skip-link" href="#main-content">
           ข้ามไปยังเนื้อหาหลัก
         </a>
+        <FloatingLanguageTester />
         <aside className="sidebar">
           <Brand />
-          <SidebarLanguageButton />
           <nav className="side-nav" aria-label="เมนูหลัก">
             {navigation.map(({ label, href, icon: Icon }) => {
               const active = pathname === href;
