@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
-import { useLanguage } from "@/components/fantasy/i18n";
+import { getLocalizedPositionLabel, useLanguage } from "@/components/fantasy/i18n";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { ClubColor } from "@/components/fantasy/club-colors";
 import { PlayerIdentity } from "@/components/fantasy/player-identity";
@@ -243,10 +243,18 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="ALL">ทุกตำแหน่ง</SelectItem>
-                      <SelectItem value="GK">GK</SelectItem>
-                      <SelectItem value="DEF">DEF</SelectItem>
-                      <SelectItem value="MID">MID</SelectItem>
-                      <SelectItem value="FWD">FWD</SelectItem>
+                      <SelectItem value="GK">
+                        {getLocalizedPositionLabel("GK", language)}
+                      </SelectItem>
+                      <SelectItem value="DEF">
+                        {getLocalizedPositionLabel("DEF", language)}
+                      </SelectItem>
+                      <SelectItem value="MID">
+                        {getLocalizedPositionLabel("MID", language)}
+                      </SelectItem>
+                      <SelectItem value="FWD">
+                        {getLocalizedPositionLabel("FWD", language)}
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

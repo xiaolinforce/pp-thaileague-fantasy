@@ -4,7 +4,11 @@ import { ArrowDownUp, CircleHelp, Plus, Search, X } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { ClubColor } from "@/components/fantasy/club-colors";
-import { Localized, useLanguage } from "@/components/fantasy/i18n";
+import {
+  getLocalizedPositionLabel,
+  Localized,
+  useLanguage,
+} from "@/components/fantasy/i18n";
 import { PlayerIdentity } from "@/components/fantasy/player-identity";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import { toast } from "@/components/ui/sonner";
@@ -347,7 +351,7 @@ export default function TransfersClient({
                       position="GK"
                       className="market-select-position-badge"
                     />
-                    GK
+                    {getLocalizedPositionLabel("GK", language)}
                   </span>
                 </SelectItem>
                 <SelectItem value="DEF">
@@ -356,7 +360,7 @@ export default function TransfersClient({
                       position="DEF"
                       className="market-select-position-badge"
                     />
-                    กองหลัง
+                    {getLocalizedPositionLabel("DEF", language)}
                   </span>
                 </SelectItem>
                 <SelectItem value="MID">
@@ -365,7 +369,7 @@ export default function TransfersClient({
                       position="MID"
                       className="market-select-position-badge"
                     />
-                    กองกลาง
+                    {getLocalizedPositionLabel("MID", language)}
                   </span>
                 </SelectItem>
                 <SelectItem value="FWD">
@@ -374,7 +378,7 @@ export default function TransfersClient({
                       position="FWD"
                       className="market-select-position-badge"
                     />
-                    กองหน้า
+                    {getLocalizedPositionLabel("FWD", language)}
                   </span>
                 </SelectItem>
               </SelectContent>

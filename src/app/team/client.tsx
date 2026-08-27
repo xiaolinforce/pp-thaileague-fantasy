@@ -17,7 +17,11 @@ import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { PlayerMetaBadges } from "@/components/fantasy/player-meta-badges";
-import { Localized, useLanguage } from "@/components/fantasy/i18n";
+import {
+  getLocalizedPositionLabel,
+  Localized,
+  useLanguage,
+} from "@/components/fantasy/i18n";
 import {
   localize,
   type CompetitionPosition,
@@ -291,12 +295,13 @@ function VacantSquadSlot({
 }) {
   const { language } = useLanguage();
   const isSource = swapState === "source";
+  const localizedPosition = getLocalizedPositionLabel(position, language);
   const slotContent = (
     <>
       <span className="vacant-squad-icon">
         <UserRound size={23} aria-hidden="true" />
       </span>
-      <span className="squad-name">{position}</span>
+      <span className="squad-name">{localizedPosition}</span>
       <span className="squad-fixture">
         {language === "th" ? "ว่าง" : "Vacant"}
       </span>
@@ -316,11 +321,11 @@ function VacantSquadSlot({
           aria-label={
             language === "th"
               ? swapState === "available"
-                ? `สลับกับช่องว่าง ${position}`
-                : `ไม่สามารถสลับกับช่องว่าง ${position}`
+                ? `สลับกับช่องว่าง ${localizedPosition}`
+                : `ไม่สามารถสลับกับช่องว่าง ${localizedPosition}`
               : swapState === "available"
-                ? `Swap with vacant ${position} slot`
-                : `Cannot swap with vacant ${position} slot`
+                ? `Swap with vacant ${localizedPosition} slot`
+                : `Cannot swap with vacant ${localizedPosition} slot`
           }
         >
           {slotContent}
@@ -338,11 +343,11 @@ function VacantSquadSlot({
           aria-label={
             language === "th"
               ? isSource
-                ? `ยกเลิกการสลับช่องว่าง ${position}`
-                : `สลับช่องว่าง ${position}`
+                ? `ยกเลิกการสลับช่องว่าง ${localizedPosition}`
+                : `สลับช่องว่าง ${localizedPosition}`
               : isSource
-                ? `Cancel swap for vacant ${position} slot`
-                : `Swap vacant ${position} slot`
+                ? `Cancel swap for vacant ${localizedPosition} slot`
+                : `Swap vacant ${localizedPosition} slot`
           }
           title={language === "th" ? "สลับตัว" : "Swap"}
         >

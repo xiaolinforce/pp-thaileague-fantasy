@@ -684,6 +684,29 @@ const translationEntries = Object.entries(translations).sort(
   ([thaiA], [thaiB]) => thaiB.length - thaiA.length,
 );
 
+const positionLabels: Record<Language, Record<string, string>> = {
+  th: {
+    GK: "ผู้รักษาประตู",
+    DEF: "กองหลัง",
+    MID: "กองกลาง",
+    FWD: "กองหน้า",
+    goalkeeper: "ผู้รักษาประตู",
+    defender: "กองหลัง",
+    midfielder: "กองกลาง",
+    forward: "กองหน้า",
+  },
+  en: {
+    GK: "Goalkeeper",
+    DEF: "Defender",
+    MID: "Midfielder",
+    FWD: "Forward",
+    goalkeeper: "Goalkeeper",
+    defender: "Defender",
+    midfielder: "Midfielder",
+    forward: "Forward",
+  },
+};
+
 type LanguageContextValue = {
   language: Language;
   setLanguage: (language: Language) => void;
@@ -749,6 +772,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       {children}
     </LanguageContext.Provider>
   );
+}
+
+export function getLocalizedPositionLabel(
+  position: string,
+  language: Language,
+) {
+  return positionLabels[language][position] ?? position;
 }
 
 export function useLanguage() {
