@@ -1925,6 +1925,15 @@ textarea:focus-visible {
 }
 
 @media (width < 80rem) {
+  .compact-market-head {
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .compact-market-head h2 {
+    display: none;
+  }
+
   .sidebar {
     width: 86px;
     padding-left: 13px;
