@@ -1,6 +1,13 @@
 "use client";
 
-import { ArrowDownUp, CircleHelp, Plus, Search, X } from "lucide-react";
+import {
+  ArrowDownUp,
+  CircleHelp,
+  Plus,
+  Search,
+  UserRound,
+  X,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { ClubColor } from "@/components/fantasy/club-colors";
@@ -68,6 +75,7 @@ export default function TransfersClient({
   members,
   onMembersChange,
   onPlayerSelect,
+  onPlayerRemove,
   isAutoFilling,
 }: {
   data: CompetitionDataset;
@@ -76,6 +84,7 @@ export default function TransfersClient({
   members: DraftLineupMember[];
   onMembersChange: (members: DraftLineupMember[]) => void;
   onPlayerSelect: (player: CompetitionPlayerView) => void;
+  onPlayerRemove: (player: CompetitionPlayerView) => void;
   isAutoFilling: boolean;
 }) {
   const { language, translate } = useLanguage();
@@ -139,10 +148,7 @@ export default function TransfersClient({
     vacancies.map((member) => competitionPositions[member.vacancyPosition!]),
   );
   const players = data.players
-    .filter(
-      (player) =>
-        player.fantasyPlayerId && !ownedIds.has(player.fantasyPlayerId),
-    )
+    .filter((player) => player.fantasyPlayerId)
     .filter((player) => clubId === "all" || player.clubId === clubId)
     .filter((player) => position === "ALL" || player.position === position)
     .filter((player) => tier === "all" || player.tier === Number(tier))
@@ -523,6 +529,9 @@ export default function TransfersClient({
         <div className="compact-market-list">
           {players.map((player) => {
             const compatible = vacantPositions.has(player.position);
+            const isOwned =
+              player.fantasyPlayerId !== null &&
+              ownedIds.has(player.fantasyPlayerId);
             const metricValue =
               sort === "form"
                 ? player.form.toFixed(1)
@@ -569,16 +578,39 @@ export default function TransfersClient({
                 </div>
                 <button
                   type="button"
-                  className="transfer-player-action"
-                  disabled={!isEditable || isAutoFilling || !compatible}
-                  onClick={() => choosePlayer(player)}
+                  className={
+                    isOwned
+                      ? "transfer-player-action transfer-player-action--owned"
+                      : "transfer-player-action"
+                  }
+                  disabled={
+                    !isEditable || isAutoFilling || (!isOwned && !compatible)
+                  }
+                  onClick={() =>
+                    isOwned ? onPlayerRemove(player) : choosePlayer(player)
+                  }
                   aria-label={
-                    language === "th"
-                      ? `ซื้อ ${localize(player.name, language)} เข้าทีม`
-                      : `Transfer ${localize(player.name, language)} into the squad`
+                    isOwned
+                      ? language === "th"
+                        ? `ลบ ${localize(player.name, language)} ออกจากทีม`
+                        : `Remove ${localize(player.name, language)} from the squad`
+                      : language === "th"
+                        ? `ซื้อ ${localize(player.name, language)} เข้าทีม`
+                        : `Transfer ${localize(player.name, language)} into the squad`
+                  }
+                  title={
+                    isOwned
+                      ? language === "th"
+                        ? `ลบ ${localize(player.name, language)} ออกจากทีม`
+                        : `Remove ${localize(player.name, language)} from the squad`
+                      : undefined
                   }
                 >
-                  <Plus size={13} />
+                  {isOwned ? (
+                    <UserRound size={18} aria-hidden="true" />
+                  ) : (
+                    <Plus size={13} aria-hidden="true" />
+                  )}
                 </button>
               </article>
             );

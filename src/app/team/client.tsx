@@ -1305,6 +1305,7 @@ export default function TeamClient({
             members={members}
             onMembersChange={setMembers}
             onPlayerSelect={setSelected}
+            onPlayerRemove={removePlayer}
             isAutoFilling={isAutoFilling}
           />
         </div>
