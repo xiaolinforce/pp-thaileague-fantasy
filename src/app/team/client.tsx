@@ -933,7 +933,7 @@ export default function TeamClient({
   const saveButton = (
     <button
       type="button"
-      className="primary-button"
+      className="primary-button compact-auto-fill-button squad-pitch-action squad-save-button"
       onClick={saveTeam}
       disabled={
         isPending ||
@@ -955,9 +955,9 @@ export default function TeamClient({
       }
     >
       {isPending ? (
-        <LoaderCircle className="spin" size={17} aria-hidden="true" />
+        <LoaderCircle className="spin" size={15} aria-hidden="true" />
       ) : (
-        <Save size={17} aria-hidden="true" />
+        <Save size={15} aria-hidden="true" />
       )}
       {isPending ? "กำลังบันทึกทีม…" : "บันทึกทีม"}
     </button>
@@ -1164,31 +1164,36 @@ export default function TeamClient({
               </>
             )}
             <div className="squad-pitch">
-              {vacancies.length > 0 && (
-                <button
-                  type="button"
-                  className="secondary-button compact-auto-fill-button squad-auto-fill-button"
-                  disabled={!isEditable || isAutoFilling}
-                  onClick={autoFillVacancies}
-                  aria-busy={isAutoFilling}
-                  title={
-                    !isEditable ? translate("ปิดรับการจัดทีมแล้ว") : undefined
-                  }
-                >
-                  {isAutoFilling ? (
-                    <LoaderCircle
-                      className="spin"
-                      size={15}
-                      aria-hidden="true"
-                    />
-                  ) : (
-                    <WandSparkles size={15} aria-hidden="true" />
-                  )}
-                  {isAutoFilling
-                    ? translate("กำลังเติม…")
-                    : translate("จัดตัวอัตโนมัติ")}
-                </button>
-              )}
+              <div className="squad-pitch-actions">
+                {saveButton}
+                {vacancies.length > 0 && (
+                  <button
+                    type="button"
+                    className="secondary-button compact-auto-fill-button squad-pitch-action squad-auto-fill-button"
+                    disabled={!isEditable || isAutoFilling}
+                    onClick={autoFillVacancies}
+                    aria-busy={isAutoFilling}
+                    title={
+                      !isEditable
+                        ? translate("ปิดรับการจัดทีมแล้ว")
+                        : undefined
+                    }
+                  >
+                    {isAutoFilling ? (
+                      <LoaderCircle
+                        className="spin"
+                        size={15}
+                        aria-hidden="true"
+                      />
+                    ) : (
+                      <WandSparkles size={15} aria-hidden="true" />
+                    )}
+                    {isAutoFilling
+                      ? translate("กำลังเติม…")
+                      : translate("จัดตัวอัตโนมัติ")}
+                  </button>
+                )}
+              </div>
               <div className="field-lines">
                 <span />
                 <i />
@@ -1256,7 +1261,6 @@ export default function TeamClient({
                 <div>
                   <h3>ม้านั่งสำรอง</h3>
                 </div>
-                <div className="bench-title__actions">{saveButton}</div>
               </div>
               <div className="bench-grid">
                 {benchSlots.map((slot, index) => (

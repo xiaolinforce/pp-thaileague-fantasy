@@ -3621,11 +3621,21 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
-.squad-auto-fill-button {
+.squad-pitch-actions {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  inset: 12px 12px auto;
   z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.squad-pitch-action {
+  justify-content: center;
+}
+
+.squad-auto-fill-button {
   background: var(--orange-action);
   border-color: var(--orange-action);
   color: #fff;
@@ -7717,7 +7727,7 @@ body {
     display: none;
   }
 
-  .compact-auto-fill-button.squad-auto-fill-button {
+  .compact-auto-fill-button.squad-pitch-action {
     min-height: 26px;
     padding: 0 7px;
     gap: 3px;
@@ -7725,7 +7735,7 @@ body {
     font-size: 11px;
   }
 
-  .compact-auto-fill-button.squad-auto-fill-button svg {
+  .compact-auto-fill-button.squad-pitch-action svg {
     width: 12px;
     height: 12px;
   }
