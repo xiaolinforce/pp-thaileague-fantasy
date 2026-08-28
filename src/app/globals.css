@@ -7527,6 +7527,13 @@ body {
     min-height: 88px;
   }
 
+  .bench-item > b {
+    z-index: 3;
+    padding: 2px 3px;
+    font-size: 8px;
+    line-height: 1;
+  }
+
   .squad-token-shell,
   .squad-token,
   .vacant-squad-slot {
@@ -7540,6 +7547,18 @@ body {
   .bench-item .vacant-squad-icon {
     width: 32px;
     height: 32px;
+  }
+
+  .bench-item .squad-position-badge {
+    top: -4px;
+    z-index: 3;
+  }
+
+  .bench-item .squad-position-badge .position-badge {
+    min-height: 14px;
+    padding: 1px 4px;
+    font-size: 8px;
+    line-height: 1;
   }
 
   .squad-name,
