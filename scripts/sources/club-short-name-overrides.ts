@@ -10,7 +10,7 @@ export type ClubShortNameOverride = {
 export const clubShortNameOverrides: Record<string, ClubShortNameOverride> = {
   "11": { th: "บุรีรัมย์", en: "Buriram" },
   "18": { th: "ชลบุรี", en: "Chonburi" },
-  "21": { th: "บีจี", en: "BG Pathum" },
+  "21": { th: "บีจี", en: "BG" },
   "26": { th: "เชียงราย", en: "Chiangrai" },
   "31": { th: "ระยอง", en: "Rayong" },
   "40": { th: "แบงค็อก", en: "Bangkok" },
