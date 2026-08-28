@@ -191,6 +191,70 @@ function GameweekDetails({
   );
 }
 
+function ChipToolbarTitle({ label }: { label: string }) {
+  return (
+    <span className="squad-chip-title">
+      <Zap size={18} aria-hidden="true" />
+      <span>{label}</span>
+    </span>
+  );
+}
+
+type ChipOptionsProps = {
+  activeChip: FantasyChip | null;
+  chipsRemaining: FantasyState["chipsRemaining"];
+  gameweekNumber: number;
+  interactionsDisabled: boolean;
+  onChipSelect: (chip: FantasyChip) => void;
+  translate: (text: string) => string;
+};
+
+function ChipOptions({
+  activeChip,
+  chipsRemaining,
+  gameweekNumber,
+  interactionsDisabled,
+  onChipSelect,
+  translate,
+}: ChipOptionsProps) {
+  return (
+    <div className="chip-options">
+      {(
+        [
+          ["triple_captain", "กัปตัน ×3"],
+          ["bench_boost", "นับตัวสำรอง"],
+          ["wildcard", "เปลี่ยนตัวอิสระ"],
+        ] as const
+      ).map(([chip, label]) => {
+        const isActive = activeChip === chip;
+        const isUnavailable =
+          chip === "wildcard" &&
+          gameweekNumber < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek;
+        return (
+          <button
+            type="button"
+            key={chip}
+            className={isActive ? "active" : ""}
+            disabled={interactionsDisabled || isUnavailable}
+            aria-pressed={isActive}
+            onClick={() => onChipSelect(chip)}
+          >
+            <span>{translate(label)}</span>
+            <p>
+              {isUnavailable
+                ? translate("ใช้ได้ตั้งแต่ GW2")
+                : translate("เหลือใช้ {count} ครั้ง").replace(
+                    "{count}",
+                    String(chipsRemaining[chip]),
+                  )}
+            </p>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 function SquadCaptainBadge({ captain }: { captain: "C" | "V" }) {
   const { language } = useLanguage();
   return (
@@ -1013,51 +1077,47 @@ export default function TeamClient({
           <div className="product-card squad-card">
             <section
               className="squad-chip-toolbar"
-              aria-labelledby="chip-title"
+              aria-label={translate("ตัวช่วยพิเศษ")}
             >
-              <div className="squad-chip-title" id="chip-title">
-                <Zap size={18} aria-hidden="true" />
-                <span>{translate("ตัวช่วยพิเศษ")}</span>
+              <div className="squad-chip-toolbar__desktop">
+                <ChipToolbarTitle label={translate("ตัวช่วยพิเศษ")} />
+                <ChipOptions
+                  activeChip={activeChip}
+                  chipsRemaining={fantasy.chipsRemaining}
+                  gameweekNumber={fantasy.gameweek.number}
+                  interactionsDisabled={interactionsDisabled}
+                  onChipSelect={(chip) =>
+                    setActiveChip((current) =>
+                      current === chip ? null : chip,
+                    )
+                  }
+                  translate={translate}
+                />
               </div>
-              <div className="chip-options">
-                {(
-                  [
-                    ["triple_captain", "กัปตัน ×3"],
-                    ["bench_boost", "นับตัวสำรอง"],
-                    ["wildcard", "เปลี่ยนตัวอิสระ"],
-                  ] as const
-                ).map(([chip, label]) => {
-                  const isActive = activeChip === chip;
-                  const isUnavailable =
-                    chip === "wildcard" &&
-                    fantasy.gameweek.number <
-                      THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek;
-                  return (
-                    <button
-                      type="button"
-                      key={chip}
-                      className={isActive ? "active" : ""}
-                      disabled={interactionsDisabled || isUnavailable}
-                      aria-pressed={isActive}
-                      onClick={() =>
+              <Accordion
+                className="squad-chip-toolbar__mobile"
+                defaultValue={[]}
+              >
+                <AccordionItem value="chips">
+                  <AccordionTrigger className="squad-chip-toolbar__trigger">
+                    <ChipToolbarTitle label={translate("ตัวช่วยพิเศษ")} />
+                  </AccordionTrigger>
+                  <AccordionContent className="squad-chip-toolbar__content">
+                    <ChipOptions
+                      activeChip={activeChip}
+                      chipsRemaining={fantasy.chipsRemaining}
+                      gameweekNumber={fantasy.gameweek.number}
+                      interactionsDisabled={interactionsDisabled}
+                      onChipSelect={(chip) =>
                         setActiveChip((current) =>
                           current === chip ? null : chip,
                         )
                       }
-                    >
-                      <span>{label}</span>
-                      <p>
-                        {isUnavailable
-                          ? translate("ใช้ได้ตั้งแต่ GW2")
-                          : translate("เหลือใช้ {count} ครั้ง").replace(
-                              "{count}",
-                              String(fantasy.chipsRemaining[chip]),
-                            )}
-                      </p>
-                    </button>
-                  );
-                })}
-              </div>
+                      translate={translate}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </section>
             {hasClientValidationErrors && (
               <>

@@ -3513,6 +3513,14 @@ textarea:focus-visible {
   gap: 14px;
 }
 
+.squad-chip-toolbar__desktop {
+  display: contents;
+}
+
+.squad-chip-toolbar__mobile {
+  display: none;
+}
+
 .squad-chip-title {
   width: 100%;
   min-width: 78px;
@@ -7651,5 +7659,51 @@ body {
   .compact-gameweek__content .countdown {
     width: 100%;
     padding-top: 12px;
+  }
+
+  .squad-chip-toolbar {
+    gap: 0;
+    padding: 0;
+  }
+
+  .squad-chip-toolbar__desktop {
+    display: none;
+  }
+
+  .squad-chip-toolbar__mobile {
+    display: flex;
+  }
+
+  .squad-chip-toolbar__mobile [data-slot="accordion-item"] {
+    border: 0;
+  }
+
+  .squad-chip-toolbar__trigger {
+    min-height: 52px;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border: 0;
+    border-radius: 0;
+    color: var(--orange-deep);
+  }
+
+  .squad-chip-toolbar__trigger .squad-chip-title {
+    width: auto;
+  }
+
+  .squad-chip-toolbar__trigger [data-slot="accordion-trigger-icon"] {
+    position: absolute;
+    right: 18px;
+    color: var(--orange-deep);
+  }
+
+  .squad-chip-toolbar__trigger:hover {
+    text-decoration: none;
+  }
+
+  .squad-chip-toolbar__content {
+    height: auto !important;
+    padding: 0 12px 12px !important;
   }
 }
