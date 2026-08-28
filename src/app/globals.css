@@ -7562,6 +7562,14 @@ body {
     font-size: 9px;
   }
 
+  .bench-item .squad-name {
+    font-size: 10px;
+  }
+
+  .bench-item .squad-fixture {
+    font-size: 9px;
+  }
+
   .squad-token-shell:not(.vacant-squad-token-shell) .squad-token-action {
     display: none;
   }
@@ -7843,6 +7851,6 @@ body {
 
   .squad-chip-toolbar__content {
     height: auto !important;
-    padding: 0 12px 12px !important;
+    padding: 10px 12px 12px !important;
   }
 }
