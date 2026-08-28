@@ -110,6 +110,7 @@ type GameweekDetailsProps = {
   gameweekNumber: number;
   isEditable: boolean;
   language: Language;
+  translate: (text: string) => string;
   remainingDays: number;
   remainingHours: number;
   remainingMinutes: number;
@@ -122,6 +123,7 @@ function GameweekDetails({
   gameweekNumber,
   isEditable,
   language,
+  translate,
   remainingDays,
   remainingHours,
   remainingMinutes,
@@ -137,7 +139,7 @@ function GameweekDetails({
         </div>
       ) : null}
       <div className="deadline">
-        <span>เดดไลน์จัดทีม</span>
+        <span>{translate("เดดไลน์จัดทีม")}</span>
         <strong>
           {language === "th"
             ? (() => {
@@ -177,7 +179,7 @@ function GameweekDetails({
           <>
             <span>
               <b>{remainingMs === null ? "--" : remainingDays}</b>
-              <small>วัน</small>
+              <small>{translate("วัน")}</small>
             </span>
             <i>:</i>
             <span>
@@ -186,7 +188,7 @@ function GameweekDetails({
                   ? "--"
                   : String(remainingHours).padStart(2, "0")}
               </b>
-              <small>ชม.</small>
+              <small>{translate("ชม.")}</small>
             </span>
             <i>:</i>
             <span>
@@ -195,11 +197,13 @@ function GameweekDetails({
                   ? "--"
                   : String(remainingMinutes).padStart(2, "0")}
               </b>
-              <small>นาที</small>
+              <small>{translate("นาที")}</small>
             </span>
           </>
         ) : (
-          <strong className="deadline-closed">ปิดรับการจัดทีมแล้ว</strong>
+          <strong className="deadline-closed">
+            {translate("ปิดรับการจัดทีมแล้ว")}
+          </strong>
         )}
       </div>
     </>
@@ -1035,6 +1039,7 @@ export default function TeamClient({
               gameweekNumber={fantasy.gameweek.number}
               isEditable={isEditable}
               language={language}
+              translate={translate}
               remainingDays={remainingDays}
               remainingHours={remainingHours}
               remainingMinutes={remainingMinutes}
@@ -1055,6 +1060,7 @@ export default function TeamClient({
                   gameweekNumber={fantasy.gameweek.number}
                   isEditable={isEditable}
                   language={language}
+                  translate={translate}
                   remainingDays={remainingDays}
                   remainingHours={remainingHours}
                   remainingMinutes={remainingMinutes}

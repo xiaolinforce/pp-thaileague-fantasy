@@ -7774,7 +7774,7 @@ body {
     height: auto !important;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 6px;
     padding: 0 18px 16px !important;
   }
 
@@ -7805,7 +7805,7 @@ body {
 
   .compact-gameweek__content .countdown {
     width: 100%;
-    padding-top: 12px;
+    padding-top: 0;
   }
 
   .squad-chip-toolbar {
