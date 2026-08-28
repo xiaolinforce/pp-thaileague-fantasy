@@ -4135,12 +4135,6 @@ textarea:focus-visible {
   font-size: 12px;
 }
 
-.bench-item .squad-token-shell,
-.bench-item .squad-token,
-.bench-item .vacant-squad-slot {
-  min-width: 0;
-}
-
 .bench-item .squad-shirt svg {
   width: 36px;
   height: 36px;
