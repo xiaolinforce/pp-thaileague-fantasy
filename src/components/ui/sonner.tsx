@@ -20,7 +20,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       gap={10}
       visibleToasts={3}
       offset={{ bottom: 24 }}
-      mobileOffset={{ bottom: 92 }}
+      mobileOffset={{ bottom: "max(16px, env(safe-area-inset-bottom))" }}
       icons={{
         success: <CircleCheckIcon size={18} strokeWidth={2.2} />,
         info: <InfoIcon size={18} strokeWidth={2.2} />,
