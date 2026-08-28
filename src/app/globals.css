@@ -3171,11 +3171,32 @@ textarea:focus-visible {
   gap: 8px;
 }
 
+.compact-market-filter-accordion [data-slot="accordion-trigger"] {
+  display: none;
+}
+
+@media (width >= 48rem) {
+  .compact-market-filter-accordion [data-slot="accordion-content"] {
+    display: block !important;
+    overflow: visible;
+  }
+
+  .compact-market-filter-content {
+    height: auto !important;
+    padding-bottom: 0 !important;
+  }
+}
+
 .compact-market-toolbar [data-slot="select-trigger"] {
   gap: 4px;
   padding-right: 7px;
   padding-left: 9px;
   font-size: 13px;
+}
+
+[data-slot="select-content"] {
+  overscroll-behavior: contain;
+  touch-action: pan-y;
 }
 
 .compact-transfer-stats + .compact-market-toolbar {
@@ -7498,6 +7519,45 @@ body {
 }
 
 @media (width < 48rem) {
+  .compact-market-filter-accordion {
+    width: calc(100% - 24px);
+    margin: 0 12px 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #faf9f7;
+  }
+
+  .compact-market-filter-accordion [data-slot="accordion-trigger"] {
+    display: flex;
+    min-height: 44px;
+    padding: 0 12px;
+    align-items: center;
+    color: var(--ink);
+    font-size: 14px;
+    font-weight: 800;
+    text-decoration: none;
+  }
+
+  .compact-market-filter-accordion [data-slot="accordion-trigger"]:hover {
+    color: var(--orange-deep);
+    text-decoration: none;
+  }
+
+  .compact-market-filter-accordion [data-slot="accordion-content"] {
+    border-top: 1px solid var(--line);
+  }
+
+  .compact-market-filter-accordion .compact-market-toolbar {
+    padding: 8px 12px 12px;
+  }
+
+  .compact-market-primary-filters,
+  .compact-position-nationality-filters,
+  .compact-market-selects {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .unified-team-workspace .squad-card {
     width: 100vw;
     margin-inline: calc(50% - 50vw);

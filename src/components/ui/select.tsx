@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Select as SelectPrimitive } from "@base-ui/react/select";
+import { useScrollLock } from "@base-ui/utils/useScrollLock";
 
 import { cn } from "@/lib/utils";
 import { ChevronDownIcon, CheckIcon, ChevronUpIcon } from "lucide-react";
@@ -34,15 +35,30 @@ function collectSelectItems(children: React.ReactNode) {
 function Select<Value, Multiple extends boolean | undefined = false>({
   children,
   items,
+  defaultOpen = false,
+  onOpenChange,
+  open,
   ...props
 }: SelectPrimitive.Root.Props<Value, Multiple>) {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen);
+  const isOpen = open ?? uncontrolledOpen;
   const resolvedItems = React.useMemo(
     () => items ?? collectSelectItems(children),
     [children, items],
   );
+  useScrollLock(isOpen);
 
   return (
-    <SelectPrimitive.Root items={resolvedItems} {...props}>
+    <SelectPrimitive.Root
+      defaultOpen={defaultOpen}
+      items={resolvedItems}
+      open={open}
+      onOpenChange={(nextOpen, eventDetails) => {
+        if (open === undefined) setUncontrolledOpen(nextOpen);
+        onOpenChange?.(nextOpen, eventDetails);
+      }}
+      {...props}
+    >
       {children}
     </SelectPrimitive.Root>
   );
