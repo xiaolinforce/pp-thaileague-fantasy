@@ -23,6 +23,7 @@ import {
   getLocalizedPositionLabel,
   Localized,
   useLanguage,
+  type Language,
 } from "@/components/fantasy/i18n";
 import {
   localize,
@@ -39,6 +40,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
@@ -82,6 +89,107 @@ const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
 };
 
 type PlayerSwapState = "source" | "available" | "unavailable";
+
+type GameweekDetailsProps = {
+  deadlineAt: string;
+  gameweekNumber: number;
+  isEditable: boolean;
+  language: Language;
+  remainingDays: number;
+  remainingHours: number;
+  remainingMinutes: number;
+  remainingMs: number | null;
+  showGameweek?: boolean;
+};
+
+function GameweekDetails({
+  deadlineAt,
+  gameweekNumber,
+  isEditable,
+  language,
+  remainingDays,
+  remainingHours,
+  remainingMinutes,
+  remainingMs,
+  showGameweek = true,
+}: GameweekDetailsProps) {
+  return (
+    <>
+      {showGameweek ? (
+        <div className="gameweek-main">
+          <span>GAMEWEEK</span>
+          <strong>{gameweekNumber}</strong>
+        </div>
+      ) : null}
+      <div className="deadline">
+        <span>เดดไลน์จัดทีม</span>
+        <strong>
+          {language === "th"
+            ? (() => {
+                const parts = new Intl.DateTimeFormat("th-TH", {
+                  weekday: "short",
+                  day: "numeric",
+                  month: "short",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                  timeZone: "Asia/Bangkok",
+                }).formatToParts(new Date(deadlineAt));
+                const weekday = parts.find(
+                  (part) => part.type === "weekday",
+                )?.value;
+                const day = parts.find((part) => part.type === "day")?.value;
+                const month = parts.find(
+                  (part) => part.type === "month",
+                )?.value;
+                const hour = parts.find(
+                  (part) => part.type === "hour",
+                )?.value;
+                const minute = parts.find(
+                  (part) => part.type === "minute",
+                )?.value;
+                return `${weekday}ที่ ${day} ${month} ${hour}:${minute}`;
+              })()
+            : new Intl.DateTimeFormat("en-GB", {
+                dateStyle: "medium",
+                timeStyle: "short",
+                timeZone: "Asia/Bangkok",
+              }).format(new Date(deadlineAt))}
+        </strong>
+      </div>
+      <div className="countdown">
+        {isEditable ? (
+          <>
+            <span>
+              <b>{remainingMs === null ? "--" : remainingDays}</b>
+              <small>วัน</small>
+            </span>
+            <i>:</i>
+            <span>
+              <b>
+                {remainingMs === null
+                  ? "--"
+                  : String(remainingHours).padStart(2, "0")}
+              </b>
+              <small>ชม.</small>
+            </span>
+            <i>:</i>
+            <span>
+              <b>
+                {remainingMs === null
+                  ? "--"
+                  : String(remainingMinutes).padStart(2, "0")}
+              </b>
+              <small>นาที</small>
+            </span>
+          </>
+        ) : (
+          <strong className="deadline-closed">ปิดรับการจัดทีมแล้ว</strong>
+        )}
+      </div>
+    </>
+  );
+}
 
 function SquadCaptainBadge({ captain }: { captain: "C" | "V" }) {
   const { language } = useLanguage();
@@ -841,78 +949,41 @@ export default function TeamClient({
           }
         />
         <section className="gameweek-banner compact-gameweek">
-          <div className="gameweek-main">
-            <span>GAMEWEEK</span>
-            <strong>{fantasy.gameweek.number}</strong>
+          <div className="compact-gameweek__desktop">
+            <GameweekDetails
+              deadlineAt={fantasy.gameweek.deadlineAt}
+              gameweekNumber={fantasy.gameweek.number}
+              isEditable={isEditable}
+              language={language}
+              remainingDays={remainingDays}
+              remainingHours={remainingHours}
+              remainingMinutes={remainingMinutes}
+              remainingMs={remainingMs}
+            />
           </div>
-          <div className="deadline">
-            <span>เดดไลน์จัดทีม</span>
-            <strong>
-              {language === "th"
-                ? (() => {
-                    const parts = new Intl.DateTimeFormat("th-TH", {
-                      weekday: "short",
-                      day: "numeric",
-                      month: "short",
-                      hour: "numeric",
-                      minute: "2-digit",
-                      hourCycle: "h23",
-                      timeZone: "Asia/Bangkok",
-                    }).formatToParts(new Date(fantasy.gameweek.deadlineAt));
-                    const weekday = parts.find(
-                      (part) => part.type === "weekday",
-                    )?.value;
-                    const day = parts.find(
-                      (part) => part.type === "day",
-                    )?.value;
-                    const month = parts.find(
-                      (part) => part.type === "month",
-                    )?.value;
-                    const hour = parts.find(
-                      (part) => part.type === "hour",
-                    )?.value;
-                    const minute = parts.find(
-                      (part) => part.type === "minute",
-                    )?.value;
-                    return `${weekday}ที่ ${day} ${month} ${hour}:${minute}`;
-                  })()
-                : new Intl.DateTimeFormat("en-GB", {
-                    dateStyle: "medium",
-                    timeStyle: "short",
-                    timeZone: "Asia/Bangkok",
-                  }).format(new Date(fantasy.gameweek.deadlineAt))}
-            </strong>
-          </div>
-          <div className="countdown">
-            {isEditable ? (
-              <>
-                <span>
-                  <b>{remainingMs === null ? "--" : remainingDays}</b>
-                  <small>วัน</small>
+          <Accordion className="compact-gameweek__mobile" defaultValue={[]}>
+            <AccordionItem value="gameweek">
+              <AccordionTrigger className="compact-gameweek__trigger">
+                <span className="compact-gameweek__title">
+                  <span>GAMEWEEK</span>
+                  <strong>{fantasy.gameweek.number}</strong>
                 </span>
-                <i>:</i>
-                <span>
-                  <b>
-                    {remainingMs === null
-                      ? "--"
-                      : String(remainingHours).padStart(2, "0")}
-                  </b>
-                  <small>ชม.</small>
-                </span>
-                <i>:</i>
-                <span>
-                  <b>
-                    {remainingMs === null
-                      ? "--"
-                      : String(remainingMinutes).padStart(2, "0")}
-                  </b>
-                  <small>นาที</small>
-                </span>
-              </>
-            ) : (
-              <strong className="deadline-closed">ปิดรับการจัดทีมแล้ว</strong>
-            )}
-          </div>
+              </AccordionTrigger>
+              <AccordionContent className="compact-gameweek__content">
+                <GameweekDetails
+                  deadlineAt={fantasy.gameweek.deadlineAt}
+                  gameweekNumber={fantasy.gameweek.number}
+                  isEditable={isEditable}
+                  language={language}
+                  remainingDays={remainingDays}
+                  remainingHours={remainingHours}
+                  remainingMinutes={remainingMinutes}
+                  remainingMs={remainingMs}
+                  showGameweek={false}
+                />
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         </section>
 
         <Tabs

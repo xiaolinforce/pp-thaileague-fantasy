@@ -3064,6 +3064,14 @@ textarea:focus-visible {
   min-height: 86px;
 }
 
+.compact-gameweek__desktop {
+  display: contents;
+}
+
+.compact-gameweek__mobile {
+  display: none;
+}
+
 .unified-team-workspace {
   display: grid;
   grid-template-columns: minmax(560px, 1.2fr) minmax(360px, 0.8fr);
@@ -6703,7 +6711,7 @@ textarea:focus-visible {
   }
 
   .squad-pitch {
-    margin: 0 6px;
+    margin: 12px 6px 0;
   }
 
   .squad-rows {
@@ -7545,31 +7553,89 @@ body {
 @media (width < 48rem) {
   .compact-gameweek {
     min-height: 0;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    padding: 16px 18px;
+    display: block;
+    padding: 0;
   }
 
-  .compact-gameweek .gameweek-main {
-    min-width: 0;
-    align-self: auto;
+  .compact-gameweek__desktop {
+    display: none;
+  }
+
+  .compact-gameweek__mobile {
+    display: flex;
+  }
+
+  .compact-gameweek__mobile [data-slot="accordion-item"] {
+    border: 0;
+  }
+
+  .compact-gameweek__trigger {
+    min-height: 52px;
     align-items: center;
-    padding: 0;
+    justify-content: center;
+    padding: 14px 18px;
+    border: 0;
+    border-radius: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: normal;
+  }
+
+  .compact-gameweek__title {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
     text-align: center;
   }
 
-  .compact-gameweek .gameweek-main span,
+  .compact-gameweek__title > span {
+    color: #ffd1b4;
+    font-size: 12px;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+  }
+
+  .compact-gameweek__title strong {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+
+  .compact-gameweek__trigger:hover {
+    text-decoration: none;
+  }
+
+  .compact-gameweek__trigger [data-slot="accordion-trigger-icon"] {
+    position: absolute;
+    right: 18px;
+    color: #fff;
+  }
+
+  .compact-gameweek__content {
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 0 18px 16px !important;
+  }
+
   .compact-gameweek .countdown small {
     font-size: 12px;
   }
 
-  .compact-gameweek .gameweek-main strong,
   .compact-gameweek .countdown b {
     font-size: 12px;
   }
 
-  .compact-gameweek .deadline {
+  .compact-gameweek .deadline strong {
+    font-size: 12px;
+  }
+
+  .compact-gameweek__content .deadline {
     width: 100%;
     flex: none;
     align-items: center;
@@ -7578,11 +7644,11 @@ body {
     text-align: center;
   }
 
-  .compact-gameweek .deadline span {
+  .compact-gameweek__content .deadline span {
     justify-content: center;
   }
 
-  .compact-gameweek .countdown {
+  .compact-gameweek__content .countdown {
     width: 100%;
     padding-top: 12px;
   }
