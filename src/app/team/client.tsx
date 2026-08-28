@@ -930,6 +930,39 @@ export default function TeamClient({
     });
   };
 
+  const saveButton = (
+    <button
+      type="button"
+      className="primary-button"
+      onClick={saveTeam}
+      disabled={
+        isPending ||
+        isAutoFilling ||
+        !isEditable ||
+        !hasUnsavedChanges ||
+        hasVacancies ||
+        hasClientValidationErrors
+      }
+      aria-busy={isPending}
+      title={
+        !isEditable
+          ? "ปิดรับการจัดทีมแล้ว"
+          : hasClientValidationErrors
+            ? clientValidationMessages[0]
+            : !hasUnsavedChanges
+              ? "ยังไม่มีการเปลี่ยนแปลง"
+              : undefined
+      }
+    >
+      {isPending ? (
+        <LoaderCircle className="spin" size={17} aria-hidden="true" />
+      ) : (
+        <Save size={17} aria-hidden="true" />
+      )}
+      {isPending ? "กำลังบันทึกทีม…" : "บันทึกทีม"}
+    </button>
+  );
+
   const startSwap = (player: CompetitionPlayerView) => {
     if (interactionsDisabled || !player.fantasyPlayerId) return;
     const member = members.find(
@@ -1006,41 +1039,7 @@ export default function TeamClient({
   return (
     <AppShell>
       <main id="main-content" className="content product-content">
-        <PageHeader
-          title="ทีมของฉัน"
-          actions={
-            <button
-              type="button"
-              className="primary-button"
-              onClick={saveTeam}
-              disabled={
-                isPending ||
-                isAutoFilling ||
-                !isEditable ||
-                !hasUnsavedChanges ||
-                hasVacancies ||
-                hasClientValidationErrors
-              }
-              aria-busy={isPending}
-              title={
-                !isEditable
-                  ? "ปิดรับการจัดทีมแล้ว"
-                  : hasClientValidationErrors
-                    ? clientValidationMessages[0]
-                    : !hasUnsavedChanges
-                      ? "ยังไม่มีการเปลี่ยนแปลง"
-                      : undefined
-              }
-            >
-              {isPending ? (
-                <LoaderCircle className="spin" size={17} aria-hidden="true" />
-              ) : (
-                <Save size={17} aria-hidden="true" />
-              )}
-              {isPending ? "กำลังบันทึกทีม…" : "บันทึกทีม"}
-            </button>
-          }
-        />
+        <PageHeader title="ทีมของฉัน" />
         <section className="gameweek-banner compact-gameweek">
           <div className="compact-gameweek__desktop">
             <GameweekDetails
@@ -1257,6 +1256,7 @@ export default function TeamClient({
                 <div>
                   <h3>ม้านั่งสำรอง</h3>
                 </div>
+                <div className="bench-title__actions">{saveButton}</div>
               </div>
               <div className="bench-grid">
                 {benchSlots.map((slot, index) => (
