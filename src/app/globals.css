@@ -2050,7 +2050,7 @@ textarea:focus-visible {
     gap: 5px;
   }
   .content {
-    padding: 19px 12px 92px;
+    padding: 19px 12px max(28px, env(safe-area-inset-bottom));
   }
   .page-intro {
     align-items: flex-start;
@@ -7780,6 +7780,8 @@ body {
 
   .compact-gameweek .countdown small {
     font-size: 12px;
+    margin-top: 0;
+    line-height: 1;
   }
 
   .compact-gameweek .countdown b {
@@ -7794,13 +7796,16 @@ body {
     width: 100%;
     flex: none;
     align-items: center;
+    gap: 4px;
     padding: 12px 0 0;
     border-top: 1px solid rgba(255, 255, 255, 0.17);
     text-align: center;
   }
 
-  .compact-gameweek__content .deadline span {
+  .compact-gameweek__content .deadline span,
+  .compact-gameweek__content .deadline strong {
     justify-content: center;
+    line-height: 1;
   }
 
   .compact-gameweek__content .countdown {

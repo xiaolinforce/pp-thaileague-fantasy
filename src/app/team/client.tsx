@@ -167,11 +167,20 @@ function GameweekDetails({
                 )?.value;
                 return `${weekday}ที่ ${day} ${month} ${hour}:${minute}`;
               })()
-            : new Intl.DateTimeFormat("en-GB", {
-                dateStyle: "medium",
-                timeStyle: "short",
-                timeZone: "Asia/Bangkok",
-              }).format(new Date(deadlineAt))}
+            : (() => {
+                const parts = new Intl.DateTimeFormat("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hourCycle: "h23",
+                  timeZone: "Asia/Bangkok",
+                }).formatToParts(new Date(deadlineAt));
+                const value = (type: Intl.DateTimeFormatPartTypes) =>
+                  parts.find((part) => part.type === type)?.value ?? "";
+                return `${value("day")} ${value("month").slice(0, 3)} ${value("year")}, ${value("hour")}:${value("minute")}`;
+              })()}
         </strong>
       </div>
       <div className="countdown">
