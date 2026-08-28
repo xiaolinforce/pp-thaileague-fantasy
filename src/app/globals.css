@@ -109,6 +109,10 @@ textarea {
   font: inherit;
 }
 
+button:not(:disabled) {
+  cursor: pointer;
+}
+
 input,
 textarea {
   caret-color: var(--orange-deep);
@@ -1546,26 +1550,20 @@ textarea:focus-visible {
   z-index: 100;
   animation: fade-in 0.18s ease;
 }
-.player-modal {
-  width: min(440px, 100%);
-  background: white;
-  border-radius: 22px;
-  padding: 26px;
-  position: relative;
-  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
-  animation: slide-up 0.22s ease;
-}
-
-[data-slot="dialog-content"].accessible-player-modal {
+[data-slot="dialog-content"].product-dialog {
   position: fixed;
   width: min(620px, calc(100% - 32px));
   max-width: 620px;
   gap: 18px;
+  background: white;
+  border-radius: 22px;
   padding: 26px;
   overflow: hidden;
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.28);
+  animation: slide-up 0.22s ease;
 }
 
-.accessible-player-modal > * {
+.product-dialog > * {
   min-width: 0;
 }
 
@@ -2220,7 +2218,7 @@ textarea:focus-visible {
   .list-player {
     min-width: 570px;
   }
-  [data-slot="dialog-content"].accessible-player-modal {
+  [data-slot="dialog-content"].product-dialog {
     width: calc(100% - 24px);
     max-height: calc(100dvh - 24px);
     gap: 16px;

@@ -26,6 +26,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { useAppIdentity } from "@/components/fantasy/identity";
+import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
 import type { AppIdentity } from "@/lib/auth/types";
 
 const navigation = [
@@ -81,6 +82,7 @@ function SidebarContent({
   initials: string;
   onNavigate?: () => void;
 }) {
+  const { requestNavigation } = useNavigationBlocker();
   const linkFor = ({
     href,
     className,
@@ -97,7 +99,9 @@ function SidebarContent({
         href={href}
         className={className}
         aria-current={ariaCurrent}
-        onClick={onNavigate}
+        onNavigate={(event) => {
+          if (requestNavigation(event, href)) onNavigate?.();
+        }}
       >
         {children}
       </Link>

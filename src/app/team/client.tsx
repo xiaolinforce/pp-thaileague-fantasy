@@ -17,6 +17,7 @@ import {
 import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { PlayerMetaBadges } from "@/components/fantasy/player-meta-badges";
 import {
@@ -570,6 +571,7 @@ export default function TeamClient({
   fantasy: FantasyState;
 }) {
   const { language, translate } = useLanguage();
+  const { setNavigationBlocked } = useNavigationBlocker();
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
@@ -855,9 +857,15 @@ export default function TeamClient({
   }, [fantasy.gameweek.deadlineAt]);
 
   useEffect(() => {
+    setNavigationBlocked(hasUnsavedChanges);
+    return () => setNavigationBlocked(false);
+  }, [hasUnsavedChanges, setNavigationBlocked]);
+
+  useEffect(() => {
     if (!hasUnsavedChanges) return;
     const warnBeforeLeaving = (event: BeforeUnloadEvent) => {
       event.preventDefault();
+      event.returnValue = "";
     };
     window.addEventListener("beforeunload", warnBeforeLeaving);
     return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
@@ -1320,7 +1328,7 @@ export default function TeamClient({
         onOpenChange={(open) => !open && setSelected(null)}
       >
         {selected && (
-          <DialogContent className="player-modal accessible-player-modal">
+          <DialogContent className="product-dialog accessible-player-modal">
             <div className="modal-player-top">
               <PlayerKit
                 color={selected.color}

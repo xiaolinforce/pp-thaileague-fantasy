@@ -63,6 +63,11 @@ const translations: Record<string, string> = {
   บันทึกทีมไม่ได้: "Unable to save team",
   "การเปลี่ยนแปลงยังไม่ถูกบันทึก กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง":
     "Your changes were not saved. Check your connection and try again",
+  ยังไม่ได้บันทึกการเปลี่ยนแปลง: "You have unsaved changes",
+  "การเปลี่ยนแปลงทีมของคุณจะหายไป หากออกจากหน้านี้โดยไม่บันทึก":
+    "Your team changes will be lost if you leave this page without saving",
+  อยู่หน้านี้ต่อ: "Stay on this page",
+  ออกจากหน้านี้: "Leave this page",
   ช่วยเหลือ: "Help",
   ตั้งค่า: "Settings",
   ภาษา: "Language",

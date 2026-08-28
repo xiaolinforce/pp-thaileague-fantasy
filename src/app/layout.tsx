@@ -4,6 +4,7 @@ import { LanguageProvider } from "@/components/fantasy/i18n";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { IdentityProvider } from "@/components/fantasy/identity";
+import { NavigationBlockerProvider } from "@/components/fantasy/navigation-blocker";
 import { getCurrentFantasyIdentity } from "@/lib/auth/context";
 import { createAppIdentity } from "@/lib/auth/types";
 import "./globals.css";
@@ -53,9 +54,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="th" className={mitr.variable} suppressHydrationWarning>
       <body>
         <LanguageProvider>
-          <IdentityProvider key={identityKey} identity={identity}>
-            <TooltipProvider>{children}</TooltipProvider>
-          </IdentityProvider>
+          <NavigationBlockerProvider>
+            <IdentityProvider key={identityKey} identity={identity}>
+              <TooltipProvider>{children}</TooltipProvider>
+            </IdentityProvider>
+          </NavigationBlockerProvider>
           <Toaster position="bottom-center" />
         </LanguageProvider>
       </body>

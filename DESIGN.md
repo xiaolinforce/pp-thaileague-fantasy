@@ -96,6 +96,9 @@ the screen before cards or tables begin.
 
 - Use shared primitives under `src/components/ui` for buttons, dialogs, sheets,
   popovers, selects, toggles, tooltips, toasts, skeletons, and alerts.
+- Use the shared `product-dialog` shell for product modals and dismissible
+  confirmations. Navigation warnings may be closed with their cancel action,
+  close button, Escape, or an outside press without discarding local changes.
 - Use fantasy components for domain identity such as position badges, kits,
   players, clubs, and Gameweek controls.
 - Keep the primary action close to the state it changes. Disable it while a
