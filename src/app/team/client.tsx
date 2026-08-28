@@ -843,7 +843,7 @@ export default function TeamClient({
         <section className="gameweek-banner compact-gameweek">
           <div className="gameweek-main">
             <span>GAMEWEEK</span>
-            <strong>{String(fantasy.gameweek.number).padStart(2, "0")}</strong>
+            <strong>{fantasy.gameweek.number}</strong>
           </div>
           <div className="deadline">
             <span>เดดไลน์จัดทีม</span>

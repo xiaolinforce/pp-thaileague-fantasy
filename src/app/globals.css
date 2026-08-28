@@ -7541,3 +7541,49 @@ body {
     bottom: 24px;
   }
 }
+
+@media (width < 48rem) {
+  .compact-gameweek {
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    padding: 16px 18px;
+  }
+
+  .compact-gameweek .gameweek-main {
+    min-width: 0;
+    align-self: auto;
+    align-items: center;
+    padding: 0;
+    text-align: center;
+  }
+
+  .compact-gameweek .gameweek-main span,
+  .compact-gameweek .countdown small {
+    font-size: 12px;
+  }
+
+  .compact-gameweek .gameweek-main strong,
+  .compact-gameweek .countdown b {
+    font-size: 12px;
+  }
+
+  .compact-gameweek .deadline {
+    width: 100%;
+    flex: none;
+    align-items: center;
+    padding: 12px 0 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.17);
+    text-align: center;
+  }
+
+  .compact-gameweek .deadline span {
+    justify-content: center;
+  }
+
+  .compact-gameweek .countdown {
+    width: 100%;
+    padding-top: 12px;
+  }
+}
