@@ -3748,6 +3748,10 @@ textarea:focus-visible {
   margin: 0;
 }
 
+.squad-player-tier .player-nationality-badge {
+  display: none;
+}
+
 .squad-captain-role .captain-badge {
   position: static;
   width: 18px;
@@ -6808,6 +6812,11 @@ textarea:focus-visible {
   }
 
   .squad-name {
+    min-height: 18px;
+    max-height: 18px;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 18px;
     font-size: 10px;
   }
 
@@ -7480,8 +7489,138 @@ body {
 }
 
 @media (width < 48rem) {
+  .unified-team-workspace .squad-card {
+    width: 100vw;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: 12px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .squad-chip-toolbar {
+    margin-inline: 0;
+  }
+
+  .squad-pitch {
+    margin-inline: 0;
+  }
+
+  .squad-pitch,
+  .squad-rows {
+    min-height: 450px;
+  }
+
+  .squad-rows {
+    padding-block: 18px;
+  }
+
+  .squad-row {
+    min-height: 82px;
+  }
+
+  .bench-panel {
+    padding-inline: 0;
+  }
+
+  .bench-item {
+    min-height: 88px;
+  }
+
+  .squad-token-shell,
+  .squad-token,
+  .vacant-squad-slot {
+    width: clamp(56px, 17.5vw, 68px);
+    min-width: 0;
+  }
+
+  .squad-shirt svg,
+  .bench-item .squad-shirt svg,
+  .vacant-squad-icon,
+  .bench-item .vacant-squad-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .squad-name,
+  .squad-fixture {
+    width: clamp(54px, 16.5vw, 64px);
+    min-width: 0;
+    max-width: none;
+  }
+
   .squad-name {
     font-size: 10px;
+  }
+
+  .squad-fixture {
+    min-height: 18px;
+    max-height: 18px;
+    padding-top: 0;
+    padding-bottom: 0;
+    line-height: 18px;
+    font-size: 9px;
+  }
+
+  .squad-token-shell:not(.vacant-squad-token-shell) .squad-token-action {
+    display: none;
+  }
+
+  .squad-captain-role,
+  .vacant-squad-token-shell .squad-swap-action {
+    left: calc(50% - 24px);
+  }
+
+  .squad-captain-role {
+    bottom: 50px;
+  }
+
+  .squad-player-tier {
+    right: calc(50% - 24px);
+    bottom: 36px;
+  }
+
+  .squad-player-tier .player-meta-badges {
+    align-items: center;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .squad-player-tier .player-nationality-badge {
+    width: 14px;
+    height: 14px;
+    flex-basis: 14px;
+    border-radius: 4px;
+    display: inline-flex;
+  }
+
+  .squad-player-tier .player-nationality-badge--foreign {
+    font-size: 8px;
+  }
+
+  .squad-token .squad-name.squad-name--thai,
+  .squad-token .squad-name.squad-name--foreign {
+    padding-inline: 3px;
+  }
+
+  .squad-token .squad-name.squad-name--thai::before,
+  .squad-token .squad-name.squad-name--thai::after,
+  .squad-token .squad-name.squad-name--foreign::before,
+  .squad-token .squad-name.squad-name--foreign::after {
+    display: none;
+  }
+
+  .compact-auto-fill-button.squad-auto-fill-button {
+    min-height: 26px;
+    padding: 0 7px;
+    gap: 3px;
+    border-radius: 7px;
+    font-size: 11px;
+  }
+
+  .compact-auto-fill-button.squad-auto-fill-button svg {
+    width: 12px;
+    height: 12px;
   }
 }
 

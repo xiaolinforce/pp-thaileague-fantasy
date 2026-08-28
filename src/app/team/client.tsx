@@ -380,7 +380,7 @@ function SquadPlayer({
           <PlayerMetaBadges
             player={player}
             showPosition={false}
-            showNationality={false}
+            showNationality
           />
         </span>
         <button
