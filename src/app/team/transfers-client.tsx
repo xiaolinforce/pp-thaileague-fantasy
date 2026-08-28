@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownUp, CircleHelp, Plus, Search, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ClubColor } from "@/components/fantasy/club-colors";
 import {
@@ -85,6 +85,22 @@ export default function TransfersClient({
   const [tier, setTier] = useState("all");
   const [nationality, setNationality] = useState("all");
   const [sort, setSort] = useState("points");
+  const [filterAccordionValue, setFilterAccordionValue] = useState<string[]>(
+    [],
+  );
+
+  useEffect(() => {
+    const desktopQuery = window.matchMedia("(min-width: 48rem)");
+    const syncFilterVisibility = () => {
+      setFilterAccordionValue(desktopQuery.matches ? ["filters"] : []);
+    };
+
+    syncFilterVisibility();
+    desktopQuery.addEventListener("change", syncFilterVisibility);
+    return () =>
+      desktopQuery.removeEventListener("change", syncFilterVisibility);
+  }, []);
+
   const clubs = useMemo(
     () =>
       [...data.clubs].sort((clubA, clubB) =>
@@ -289,7 +305,8 @@ export default function TransfersClient({
 
         <Accordion
           className="compact-market-filter-accordion"
-          defaultValue={[]}
+          value={filterAccordionValue}
+          onValueChange={setFilterAccordionValue}
         >
           <AccordionItem value="filters">
             <AccordionTrigger className="compact-market-filter-trigger">
