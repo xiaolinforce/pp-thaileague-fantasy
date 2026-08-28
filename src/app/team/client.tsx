@@ -88,6 +88,21 @@ const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
   forward: "FWD",
 };
 
+function getShortPositionLabel(position: CompetitionPosition) {
+  switch (position) {
+    case "GK":
+      return "GK";
+    case "DEF":
+      return "DEF";
+    case "MID":
+      return "MID";
+    case "FWD":
+      return "FWD";
+    default:
+      return position;
+  }
+}
+
 type PlayerSwapState = "source" | "available" | "unavailable";
 
 type GameweekDetailsProps = {
@@ -471,12 +486,13 @@ function VacantSquadSlot({
   const { language } = useLanguage();
   const isSource = swapState === "source";
   const localizedPosition = getLocalizedPositionLabel(position, language);
+  const shortPosition = getShortPositionLabel(position);
   const slotContent = (
     <>
       <span className="vacant-squad-icon">
         <UserRound size={23} aria-hidden="true" />
       </span>
-      <span className="squad-name">{localizedPosition}</span>
+      <span className="squad-name">{shortPosition}</span>
       <span className="squad-fixture">
         {language === "th" ? "ว่าง" : "Vacant"}
       </span>
