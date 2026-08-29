@@ -10,9 +10,11 @@ import type { FantasyPointsGameweek } from "@/data/fantasy";
 export function PointsGameweekSwitcher({
   gameweeks,
   selected,
+  className,
 }: {
   gameweeks: FantasyPointsGameweek[];
   selected: number;
+  className?: string;
 }) {
   const router = useRouter();
   const { translate } = useLanguage();
@@ -33,7 +35,7 @@ export function PointsGameweekSwitcher({
 
   return (
     <div
-      className="points-week-switcher"
+      className={`points-week-switcher${className ? ` ${className}` : ""}`}
       aria-label={`${translate("เลือก Gameweek ปัจจุบันคือ")} ${selected}${scoreStatus ? `, ${scoreStatus}` : ""}`}
       aria-busy={isPending}
     >

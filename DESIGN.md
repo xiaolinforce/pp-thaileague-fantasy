@@ -170,8 +170,9 @@ the screen before cards or tables begin.
   recent Gameweek with provisional or final scoring. Use previous/next arrows
   around a written Gameweek and scoring status instead of a dropdown. Its pitch
   is read-only and shows the counted lineup after automatic substitutions. On
-  desktop, match the Team pitch-and-bench width and place average, manager, and
-  highest-other-manager points in a vertical rail to its right. Below the
+  desktop, match the Team pitch-and-bench width and place the Gameweek selector
+  above average, manager, and highest-other-manager points in a vertical rail
+  to its right. Below the
   desktop breakpoint, keep those three scores in one row above the pitch. Open
   each player's per-category breakdown in the shared product dialog from the
   pitch or bench instead of repeating a page-level details table.

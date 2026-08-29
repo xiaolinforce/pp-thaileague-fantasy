@@ -95,11 +95,17 @@ export default async function PointsPage({
             <PointsGameweekSwitcher
               gameweeks={points.gameweeks}
               selected={points.fantasy.gameweek.number}
+              className="points-week-switcher--header"
             />
           }
         />
 
         <div className="points-layout points-pitch-layout">
+          <PointsGameweekSwitcher
+            gameweeks={points.gameweeks}
+            selected={points.fantasy.gameweek.number}
+            className="points-week-switcher--rail"
+          />
           <section
             className="points-score-rail"
             aria-label="สรุปคะแนน Gameweek"

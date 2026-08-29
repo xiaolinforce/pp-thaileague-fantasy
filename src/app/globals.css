@@ -4312,10 +4312,28 @@ textarea:focus-visible {
   outline-offset: -4px;
 }
 
+.points-week-switcher--header {
+  display: none;
+}
+
+.points-week-switcher--rail {
+  grid-area: gameweek;
+  width: 100%;
+}
+
+.points-week-switcher--rail .points-week-current {
+  min-width: 0;
+  flex: 1;
+}
+
 .points-pitch-layout {
-  grid-template-areas: "pitch scores";
+  grid-template-areas:
+    "pitch gameweek"
+    "pitch scores";
   grid-template-columns: minmax(560px, 1.2fr) minmax(360px, 0.8fr);
-  gap: 20px;
+  grid-template-rows: 44px auto;
+  column-gap: 20px;
+  row-gap: 12px;
 }
 
 .points-pitch-card {
@@ -4366,8 +4384,8 @@ textarea:focus-visible {
 .points-score-card--primary {
   min-height: 170px;
   color: white;
-  background: var(--orange);
-  box-shadow: 0 15px 36px rgba(160, 73, 19, 0.18);
+  background: var(--navy);
+  box-shadow: 0 15px 36px rgba(21, 29, 36, 0.22);
 }
 
 .points-score-card--primary strong {
@@ -4378,20 +4396,20 @@ textarea:focus-visible {
 
 .points-score-card--primary span {
   margin-top: 10px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.82);
   font-size: 14px;
   font-weight: 800;
 }
 
 .points-score-card--supporting {
-  color: var(--orange-deep);
-  background: var(--orange-soft);
-  box-shadow: 0 10px 26px rgba(84, 58, 40, 0.07);
+  color: white;
+  background: var(--navy);
+  box-shadow: 0 10px 26px rgba(21, 29, 36, 0.16);
 }
 
 .points-score-card--supporting > span {
   max-width: 18ch;
-  color: #7f4b2b;
+  color: rgba(255, 255, 255, 0.76);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.25;
@@ -4399,7 +4417,7 @@ textarea:focus-visible {
 
 .points-score-card--supporting strong {
   margin-top: 4px;
-  color: var(--orange-deep);
+  color: white;
   font-size: 38px;
   font-weight: 900;
   line-height: 1;
@@ -4407,7 +4425,7 @@ textarea:focus-visible {
 
 .points-score-card--supporting small {
   margin-top: 4px;
-  color: #8b5b3e;
+  color: rgba(255, 255, 255, 0.72);
   font-size: 11px;
 }
 
@@ -6206,11 +6224,20 @@ textarea:focus-visible {
     overflow-y: visible;
   }
 
+  .points-week-switcher--header {
+    display: flex;
+  }
+
+  .points-week-switcher--rail {
+    display: none;
+  }
+
   .points-pitch-layout {
     grid-template-areas:
       "scores"
       "pitch";
     grid-template-columns: 1fr;
+    grid-template-rows: auto;
     gap: 12px;
   }
 
