@@ -4383,7 +4383,7 @@ textarea:focus-visible {
 
 .points-score-card--primary {
   min-height: 170px;
-  color: white;
+  color: var(--orange);
   background: var(--navy);
   box-shadow: 0 15px 36px rgba(21, 29, 36, 0.22);
 }
@@ -4396,20 +4396,24 @@ textarea:focus-visible {
 
 .points-score-card--primary span {
   margin-top: 10px;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--orange);
   font-size: 14px;
   font-weight: 800;
 }
 
 .points-score-card--supporting {
-  color: white;
-  background: var(--navy);
-  box-shadow: 0 10px 26px rgba(21, 29, 36, 0.16);
+  border: 1px solid var(--line);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.points-score-card--supporting::after {
+  display: none;
 }
 
 .points-score-card--supporting > span {
   max-width: 18ch;
-  color: rgba(255, 255, 255, 0.76);
+  color: var(--muted);
   font-size: 13px;
   font-weight: 800;
   line-height: 1.25;
@@ -4417,7 +4421,7 @@ textarea:focus-visible {
 
 .points-score-card--supporting strong {
   margin-top: 4px;
-  color: white;
+  color: var(--ink);
   font-size: 38px;
   font-weight: 900;
   line-height: 1;
@@ -4425,7 +4429,7 @@ textarea:focus-visible {
 
 .points-score-card--supporting small {
   margin-top: 4px;
-  color: rgba(255, 255, 255, 0.72);
+  color: var(--muted);
   font-size: 11px;
 }
 
