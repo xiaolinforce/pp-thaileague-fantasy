@@ -21,10 +21,7 @@ export async function completeAuthenticationAction() {
   });
 
   return {
-    destination:
-      profile.created && !profile.isAnonymous
-        ? "/profile?setup=1"
-        : "/dashboard",
+    destination: "/team",
     identity,
   };
 }

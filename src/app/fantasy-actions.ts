@@ -297,7 +297,7 @@ async function getCurrentPlayerSnapshots(
 }
 
 function revalidateFantasyPages() {
-  for (const path of ["/dashboard", "/team", "/points", "/leagues"]) {
+  for (const path of ["/team", "/points", "/leagues"]) {
     revalidatePath(path);
   }
 }

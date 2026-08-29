@@ -19,8 +19,6 @@ export type Language = "th" | "en";
 
 const translations: Record<string, string> = {
   // Navigation and shared shell
-  ภาพรวม: "Overview",
-  หน้าแรก: "Home",
   ทีมของฉัน: "My Team",
   ทีม: "Team",
   ซื้อขาย: "Transfers",
@@ -122,42 +120,6 @@ const translations: Record<string, string> = {
   สมัครสมาชิกเพื่อเก็บทีม: "Create an account to save this team",
   ออกจากระบบ: "Sign out",
   "Guest ไม่มีอีเมล": "Guest has no email",
-
-  // Dashboard
-  "ทุกอย่างพร้อมสำหรับ Gameweek แรก — ตรวจทีมก่อนเดดไลน์วันศุกร์":
-    "Everything is ready for the opening Gameweek — check your squad before Friday's deadline",
-  จัดทีมตอนนี้: "Pick Team",
-  เริ่มฤดูกาล: "Start the season",
-  ให้เหนือคู่แข่ง: "ahead of the competition",
-  "เหลือเวลาอีก 5 วันก่อนตลาดปิด ทีมของคุณจัดครบ 15 คนแล้ว":
-    "Five days remain before the deadline. Your 15-player squad is complete.",
-  ดูทีมของฉัน: "View My Team",
-  อันดับ: "Rank",
-  อันดับรวม: "Overall Rank",
-  "▲ 4,281 อันดับ": "▲ 4,281 places",
-  คะแนนรวม: "Total Points",
-  "เฉลี่ย 52 คะแนน": "52 points average",
-  มูลค่าทีม: "Team Value",
-  "คงเหลือ ฿3.5m": "฿3.5m remaining",
-  อันดับมินิลีก: "Mini-league Rank",
-  "จาก 24 ทีม": "of 24 teams",
-  ดาวเด่นในทีม: "Squad Standouts",
-  ผู้เล่นฟอร์มร้อน: "In-form Players",
-  ดูคะแนนทั้งหมด: "View All Points",
-  นัดถัดไป: "Next Fixture",
-  "ศุกร์ 21 ส.ค.": "Friday 21 Aug",
-  ดูโปรแกรมทั้งหมด: "View All Fixtures",
-  วางแผน: "Plan",
-  ก่อนเดดไลน์: "before the deadline",
-  ทีมของคุณมี: "Your squad has",
-  "คน และแก้ไขได้จนถึง 90 นาทีก่อนคู่แรก":
-    "players and remains editable until 90 minutes before the first kickoff",
-  "นักเตะระดับ 1": "Tier 1 Players",
-  "โควตาสูงสุด 3 คน": "Maximum 3 players",
-  ยังไม่มีนักเตะในทีมสำหรับแสดงฟอร์ม:
-    "No squad players are available for form highlights yet",
-  "ยังไม่มีโปรแกรมที่ยืนยันสำหรับ Gameweek นี้":
-    "No confirmed fixtures are available for this Gameweek yet",
 
   // Team
   จัดทีมและซื้อขาย: "Team & Transfers",

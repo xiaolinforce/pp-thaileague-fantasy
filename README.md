@@ -11,7 +11,7 @@ Classic league standings.
 - Thai League 1 season 2026/27.
 - Passwordless Email OTP, Google OAuth, and device-bound Guest accounts through Better Auth.
 - One manager identity per account, with one automatically provisioned empty team draft per season.
-- Landing, dashboard, team selection, transfers, points, leagues, fixtures,
+- Landing, team selection, transfers, points, leagues, fixtures,
   profile/rules, and internal Fantasy administration screens.
 - Thai source interface with a client-side English display preference.
 - Fifteen-player squads, valid FPL-style formations, tier and Thai-player
@@ -35,7 +35,6 @@ production-readiness work.
 | ---------------- | ------------------------------------------------------------------ |
 | `/`              | Account/Guest onboarding and sign-in.                              |
 | `/upgrade`       | Upgrade the current Guest while preserving its team when possible. |
-| `/dashboard`     | Current manager and Gameweek overview.                             |
 | `/team`          | Lineup, captaincy, chips, player discovery, and squad revisions.   |
 | `/points`        | Gameweek score and category breakdown.                             |
 | `/leagues`       | Overall and Private Classic standings.                             |

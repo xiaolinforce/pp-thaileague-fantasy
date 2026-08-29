@@ -74,6 +74,6 @@ export async function requireAdmin() {
   const role = String(
     (session.user as typeof session.user & { role?: string }).role ?? "member",
   );
-  if (role !== "admin") redirect("/dashboard");
+  if (role !== "admin") redirect("/team");
   return session;
 }

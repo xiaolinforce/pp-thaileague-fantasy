@@ -4,7 +4,6 @@ import {
   CalendarDays,
   ChevronRight,
   CircleHelp,
-  Home,
   ListChecks,
   Menu,
   Settings,
@@ -30,7 +29,6 @@ import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
 import type { AppIdentity } from "@/lib/auth/types";
 
 const navigation = [
-  { label: "ภาพรวม", shortLabel: "หน้าแรก", href: "/dashboard", icon: Home },
   { label: "ทีมของฉัน", shortLabel: "ทีม", href: "/team", icon: Shirt },
   { label: "คะแนน", shortLabel: "คะแนน", href: "/points", icon: ListChecks },
   { label: "ลีก", shortLabel: "ลีก", href: "/leagues", icon: Trophy },
@@ -218,7 +216,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <SheetTitle>เมนูหลัก</SheetTitle>
               </SheetHeader>
               <aside className="drawer-sidebar">
-                <SheetClose className="compact-sidebar-close" aria-label="ปิดเมนูหลัก">
+                <SheetClose
+                  className="compact-sidebar-close"
+                  aria-label="ปิดเมนูหลัก"
+                >
                   <Menu size={17} strokeWidth={2} aria-hidden="true" />
                   <span className="sr-only">ปิดเมนูหลัก</span>
                 </SheetClose>

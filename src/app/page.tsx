@@ -6,7 +6,7 @@ import { authFeatures } from "@/lib/auth/server";
 
 export default async function HomePage() {
   const identity = await getCurrentFantasyIdentity();
-  if (identity?.manager && identity.team) redirect("/dashboard");
+  if (identity?.manager && identity.team) redirect("/team");
   if (identity) redirect("/auth/complete");
   return (
     <OnboardingClient
