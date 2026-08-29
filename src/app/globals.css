@@ -489,6 +489,11 @@ textarea:focus-visible {
   align-items: center;
   gap: 11px;
 }
+
+.sidebar > .brand {
+  justify-content: center;
+}
+
 .brand-mark {
   width: 44px;
   height: 44px;
@@ -4737,7 +4742,7 @@ textarea:focus-visible {
 }
 
 .points-player-dialog-score {
-  min-height: 126px;
+  min-height: 112px;
   position: relative;
   overflow: hidden;
   border-radius: 14px;
@@ -4774,9 +4779,9 @@ textarea:focus-visible {
 .points-player-dialog-score span {
   position: relative;
   z-index: 1;
-  margin-top: 8px;
+  margin-top: 6px;
   color: rgba(255, 255, 255, 0.9);
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 800;
 }
 

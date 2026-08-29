@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 
 import { PlayerKit } from "@/components/fantasy/player-kit";
+import { PlayerMetaBadges } from "@/components/fantasy/player-meta-badges";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import { useLanguage } from "@/components/fantasy/i18n";
 import {
@@ -67,20 +68,6 @@ export function PointsPlayerToken({
   const detailRows = Object.entries(result?.breakdown ?? {}).filter(
     ([, value]) => value !== 0,
   );
-  const positionName = {
-    th: {
-      GK: "ผู้รักษาประตู",
-      DEF: "กองหลัง",
-      MID: "กองกลาง",
-      FWD: "กองหน้า",
-    },
-    en: {
-      GK: "Goalkeeper",
-      DEF: "Defender",
-      MID: "Midfielder",
-      FWD: "Forward",
-    },
-  }[language][position];
   return (
     <Dialog>
       <DialogTrigger
@@ -150,7 +137,15 @@ export function PointsPlayerToken({
               <DialogTitle>{name}</DialogTitle>
               <DialogDescription>{club}</DialogDescription>
             </DialogHeader>
-            <PositionBadge position={position} />
+            <div className="modal-player-position-badge">
+              <PlayerMetaBadges
+                player={{
+                  position,
+                  tier: member.tier,
+                  isThai: member.isThai,
+                }}
+              />
+            </div>
           </div>
         </div>
 
@@ -160,10 +155,6 @@ export function PointsPlayerToken({
         </div>
 
         <div className="points-player-breakdown">
-          <div>
-            <span>{language === "th" ? "ตำแหน่ง" : "Position"}</span>
-            <strong>{positionName}</strong>
-          </div>
           <div>
             <span>
               {language === "th" ? "นาทีที่ลงสนาม" : "Minutes played"}
