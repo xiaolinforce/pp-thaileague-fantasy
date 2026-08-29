@@ -967,6 +967,7 @@ export async function lockFantasyGameweekAction(formData: FormData) {
       .where(eq(fantasyGameweeks.id, nextGameweek.id));
   }
   await recalculateGameweek(gameweek.id);
+  revalidatePath("/", "layout");
   revalidateFantasyPages();
 }
 

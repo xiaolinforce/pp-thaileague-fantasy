@@ -1,7 +1,9 @@
 import { ShieldCheck } from "lucide-react";
+import { redirect } from "next/navigation";
 
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { getFantasyPointsState } from "@/data/fantasy";
+import { getFantasyNavigationAvailability } from "@/data/navigation";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
 import { PointsPlayerToken } from "./player-token";
 
@@ -17,6 +19,9 @@ export default async function PointsPage({
 }: {
   searchParams: Promise<{ gw?: string | string[] }>;
 }) {
+  const navigationAvailability = await getFantasyNavigationAvailability();
+  if (!navigationAvailability.pointsEnabled) redirect("/team");
+
   const query = await searchParams;
   const rawGameweek = Array.isArray(query.gw) ? query.gw[0] : query.gw;
   const requestedGameweek = rawGameweek ? Number(rawGameweek) : undefined;

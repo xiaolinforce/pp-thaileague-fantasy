@@ -5,6 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { IdentityProvider } from "@/components/fantasy/identity";
 import { NavigationBlockerProvider } from "@/components/fantasy/navigation-blocker";
+import { NavigationAvailabilityProvider } from "@/components/fantasy/navigation-availability";
+import { getFantasyNavigationAvailability } from "@/data/navigation";
 import { getCurrentFantasyIdentity } from "@/lib/auth/context";
 import { createAppIdentity } from "@/lib/auth/types";
 import "./globals.css";
@@ -38,7 +40,10 @@ export const metadata: Metadata = {
 };
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
-  const current = await getCurrentFantasyIdentity();
+  const [current, navigationAvailability] = await Promise.all([
+    getCurrentFantasyIdentity(),
+    getFantasyNavigationAvailability(),
+  ]);
   const identity =
     current?.manager && current.team
       ? createAppIdentity({
@@ -54,11 +59,13 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="th" className={mitr.variable} suppressHydrationWarning>
       <body>
         <LanguageProvider>
-          <NavigationBlockerProvider>
-            <IdentityProvider key={identityKey} identity={identity}>
-              <TooltipProvider>{children}</TooltipProvider>
-            </IdentityProvider>
-          </NavigationBlockerProvider>
+          <NavigationAvailabilityProvider availability={navigationAvailability}>
+            <NavigationBlockerProvider>
+              <IdentityProvider key={identityKey} identity={identity}>
+                <TooltipProvider>{children}</TooltipProvider>
+              </IdentityProvider>
+            </NavigationBlockerProvider>
+          </NavigationAvailabilityProvider>
           <Toaster position="bottom-center" />
         </LanguageProvider>
       </body>

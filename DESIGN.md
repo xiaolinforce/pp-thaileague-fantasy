@@ -92,6 +92,11 @@ The active route must be identified by text treatment and structure, not color
 alone. Page headings should state both the section and the immediate purpose of
 the screen before cards or tables begin.
 
+Keep Points directly below Team in the main navigation. While Gameweek 1 is
+`open`, render Points as a disabled, non-navigable item in both the desktop
+sidebar and compact drawer, and redirect direct `/points` requests to Team.
+Enable Points when Gameweek 1 leaves `open`.
+
 ## Components and interaction
 
 - Use shared primitives under `src/components/ui` for buttons, dialogs, sheets,

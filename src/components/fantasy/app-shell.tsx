@@ -5,6 +5,7 @@ import {
   ChevronRight,
   CircleHelp,
   ListChecks,
+  LockKeyhole,
   Menu,
   Settings,
   Shirt,
@@ -15,7 +16,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Fragment, useState, type ReactNode } from "react";
-import { FloatingLanguageTester, Localized } from "@/components/fantasy/i18n";
+import {
+  FloatingLanguageTester,
+  Localized,
+  useLanguage,
+} from "@/components/fantasy/i18n";
+import { useNavigationAvailability } from "@/components/fantasy/navigation-availability";
 import {
   Sheet,
   SheetClose,
@@ -27,6 +33,7 @@ import {
 import { useAppIdentity } from "@/components/fantasy/identity";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
 import type { AppIdentity } from "@/lib/auth/types";
+import styles from "./app-shell.module.css";
 
 const navigation = [
   { label: "ทีมของฉัน", shortLabel: "ทีม", href: "/team", icon: Shirt },
@@ -81,6 +88,12 @@ function SidebarContent({
   onNavigate?: () => void;
 }) {
   const { requestNavigation } = useNavigationBlocker();
+  const { pointsEnabled } = useNavigationAvailability();
+  const { language } = useLanguage();
+  const pointsDisabledLabel =
+    language === "th"
+      ? "คะแนน — เปิดใช้งานหลัง Gameweek 1 ปิดรับจัดทีม"
+      : "Points — available after Gameweek 1 closes";
   const linkFor = ({
     href,
     className,
@@ -112,6 +125,28 @@ function SidebarContent({
       <nav className="side-nav" aria-label="เมนูหลัก">
         {navigation.map(({ label, href, icon: Icon }) => {
           const active = pathname === href;
+          const disabled = href === "/points" && !pointsEnabled;
+
+          if (disabled) {
+            return (
+              <button
+                key={href}
+                type="button"
+                className={styles.disabledNavigationItem}
+                disabled
+                aria-label={pointsDisabledLabel}
+                title={pointsDisabledLabel}
+              >
+                <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+                <span>{label}</span>
+                <LockKeyhole
+                  className={styles.disabledNavigationLock}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                />
+              </button>
+            );
+          }
 
           return (
             <Fragment key={href}>
