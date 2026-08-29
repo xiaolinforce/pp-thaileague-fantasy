@@ -326,55 +326,69 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       : undefined) ?? defaultSelection;
   if (!selected) throw new Error("No Fantasy selection was found.");
 
-  const [fixtureRows, squadRows, teamScore] = await Promise.all([
-    db
-      .select({ id: fixtures.id })
-      .from(fixtures)
-      .where(
-        and(
-          eq(fixtures.competitionSeasonId, season.competitionSeasonId),
-          eq(fixtures.matchweek, selected.gameweek.number),
+  const [fixtureRows, squadRows, teamScore, gameweekScoreRows] =
+    await Promise.all([
+      db
+        .select({ id: fixtures.id })
+        .from(fixtures)
+        .where(
+          and(
+            eq(fixtures.competitionSeasonId, season.competitionSeasonId),
+            eq(fixtures.matchweek, selected.gameweek.number),
+          ),
         ),
-      ),
-    db
-      .select({
-        member: fantasyTeamSelectionPlayers,
-        fullNameTh: players.fullNameTh,
-        fullNameEn: players.fullNameEn,
-        shortNameTh: players.shortNameTh,
-        shortNameEn: players.shortNameEn,
-        clubNameTh: clubs.nameTh,
-        clubNameEn: clubs.nameEn,
-        clubShortNameTh: clubs.shortNameTh,
-        clubShortNameEn: clubs.shortNameEn,
-        clubAbbreviation: clubs.abbreviation,
-        color: clubVisualIdentities.topLeftColor,
-        accent: clubVisualIdentities.topRightColor,
-      })
-      .from(fantasyTeamSelectionPlayers)
-      .innerJoin(
-        fantasyPlayers,
-        eq(fantasyTeamSelectionPlayers.fantasyPlayerId, fantasyPlayers.id),
-      )
-      .innerJoin(players, eq(fantasyPlayers.playerId, players.id))
-      .innerJoin(
-        clubs,
-        eq(fantasyTeamSelectionPlayers.clubIdSnapshot, clubs.id),
-      )
-      .leftJoin(
-        clubVisualIdentities,
-        eq(
-          fantasyTeamSelectionPlayers.clubIdSnapshot,
-          clubVisualIdentities.clubId,
+      db
+        .select({
+          member: fantasyTeamSelectionPlayers,
+          fullNameTh: players.fullNameTh,
+          fullNameEn: players.fullNameEn,
+          shortNameTh: players.shortNameTh,
+          shortNameEn: players.shortNameEn,
+          clubNameTh: clubs.nameTh,
+          clubNameEn: clubs.nameEn,
+          clubShortNameTh: clubs.shortNameTh,
+          clubShortNameEn: clubs.shortNameEn,
+          clubAbbreviation: clubs.abbreviation,
+          color: clubVisualIdentities.topLeftColor,
+          accent: clubVisualIdentities.topRightColor,
+        })
+        .from(fantasyTeamSelectionPlayers)
+        .innerJoin(
+          fantasyPlayers,
+          eq(fantasyTeamSelectionPlayers.fantasyPlayerId, fantasyPlayers.id),
+        )
+        .innerJoin(players, eq(fantasyPlayers.playerId, players.id))
+        .innerJoin(
+          clubs,
+          eq(fantasyTeamSelectionPlayers.clubIdSnapshot, clubs.id),
+        )
+        .leftJoin(
+          clubVisualIdentities,
+          eq(
+            fantasyTeamSelectionPlayers.clubIdSnapshot,
+            clubVisualIdentities.clubId,
+          ),
+        )
+        .where(
+          eq(fantasyTeamSelectionPlayers.selectionId, selected.selection.id),
         ),
-      )
-      .where(
-        eq(fantasyTeamSelectionPlayers.selectionId, selected.selection.id),
-      ),
-    db.query.fantasyTeamGameweekScores.findFirst({
-      where: eq(fantasyTeamGameweekScores.selectionId, selected.selection.id),
-    }),
-  ]);
+      db.query.fantasyTeamGameweekScores.findFirst({
+        where: eq(fantasyTeamGameweekScores.selectionId, selected.selection.id),
+      }),
+      db
+        .select({
+          selectionId: fantasyTeamGameweekScores.selectionId,
+          totalPoints: fantasyTeamGameweekScores.totalPoints,
+        })
+        .from(fantasyTeamGameweekScores)
+        .innerJoin(
+          fantasyTeamSelections,
+          eq(fantasyTeamGameweekScores.selectionId, fantasyTeamSelections.id),
+        )
+        .where(
+          eq(fantasyTeamSelections.fantasyGameweekId, selected.gameweek.id),
+        ),
+    ]);
   const fixtureIds = fixtureRows.map((fixture) => fixture.id);
   const pointRows = fixtureIds.length
     ? await db
@@ -461,6 +475,19 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       members,
     },
   };
+  const averagePoints = gameweekScoreRows.length
+    ? Math.round(
+        gameweekScoreRows.reduce((sum, score) => sum + score.totalPoints, 0) /
+          gameweekScoreRows.length,
+      )
+    : 0;
+  const highestPoints = gameweekScoreRows.reduce(
+    (highest, score) =>
+      score.selectionId === selected.selection.id
+        ? highest
+        : Math.max(highest, score.totalPoints),
+    0,
+  );
 
   return {
     fantasy,
@@ -472,6 +499,10 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
     })) satisfies FantasyPointsGameweek[],
     squad: members,
     players: [...byPlayer.values()],
+    gameweekSummary: {
+      averagePoints,
+      highestPoints,
+    },
     teamScore: teamScore
       ? {
           status: teamScore.status,

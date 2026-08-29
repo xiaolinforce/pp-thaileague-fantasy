@@ -4255,271 +4255,9 @@ textarea:focus-visible {
   margin-left: 4px;
 }
 
-.points-summary-grid {
-  display: grid;
-  grid-template-columns: 1.4fr 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 17px;
-}
-
-.points-total-card {
-  color: white;
-  background: var(--navy);
-  border-radius: 16px;
-  min-height: 124px;
-  padding: 19px 23px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.points-total-card > div:first-child {
-  display: flex;
-  flex-direction: column;
-}
-
-.points-total-card span {
-  color: #9ea8ad;
-  font-size: 12px;
-}
-
-.points-total-card strong {
-  font-size: 36px;
-  line-height: 1.05;
-  margin: 5px 0;
-}
-
-.points-total-card small {
-  color: #52d49d;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-}
-
-.points-total-status.is-pending {
-  color: #c8ced1;
-}
-
-.points-total-status.is-provisional {
-  color: #ffb07b;
-}
-
-.points-gauge {
-  width: 74px;
-  height: 74px;
-  border: 9px solid rgba(255, 255, 255, 0.1);
-  border-top-color: var(--orange);
-  border-right-color: var(--orange);
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.points-gauge strong {
-  font-size: 16px;
-  margin: 0;
-}
-
-.points-gauge span {
-  font-size: 9px;
-  line-height: 1;
-  white-space: nowrap;
-}
-
 .points-layout {
   display: grid;
-  grid-template-columns: minmax(620px, 1.5fr) minmax(280px, 0.65fr);
-  gap: 17px;
   align-items: start;
-}
-
-.live-score {
-  color: #82888b;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.live-score i {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #2abd7f;
-  box-shadow: 0 0 0 4px #e1f7ed;
-}
-
-.live-score.is-provisional i {
-  background: var(--orange);
-  box-shadow: 0 0 0 4px var(--orange-soft);
-}
-
-.points-table-scroll {
-  width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-inline: contain;
-}
-
-.points-table {
-  width: 100%;
-  min-width: 680px;
-  border-collapse: collapse;
-  font-variant-numeric: tabular-nums;
-}
-
-.points-head {
-  background: #faf9f7;
-  color: #979b9d;
-  font-size: 12px;
-}
-
-.points-head th,
-.points-row th,
-.points-row td {
-  padding: 9px 10px;
-  text-align: center;
-  vertical-align: middle;
-}
-
-.points-head th:first-child,
-.points-row th:first-child {
-  width: 42%;
-  padding-left: 18px;
-  text-align: left;
-}
-
-.points-head th:last-child,
-.points-row td:last-child {
-  padding-right: 18px;
-}
-
-.points-row th,
-.points-row td {
-  border-bottom: 1px solid #f0eeeb;
-  color: #787d80;
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.points-row .market-player {
-  text-align: left;
-}
-
-.points-total-cell strong {
-  color: var(--orange);
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.points-aside {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.donut-wrap {
-  padding: 24px 19px;
-  display: flex;
-  align-items: center;
-  gap: 22px;
-}
-
-.score-donut {
-  width: 112px;
-  height: 112px;
-  border-radius: 50%;
-  background: conic-gradient(
-    #f56617 0 33%,
-    #1a6954 33% 60%,
-    #3974c7 60% 78%,
-    #8c63c7 78% 91%,
-    #eab437 91% 100%
-  );
-  position: relative;
-  display: grid;
-  place-items: center;
-  flex: 0 0 auto;
-}
-
-.score-donut::after {
-  content: "";
-  position: absolute;
-  inset: 16px;
-  border-radius: 50%;
-  background: white;
-}
-
-.score-donut > span {
-  position: relative;
-  z-index: 2;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  color: #9a9ea0;
-  font-size: 12px;
-}
-
-.score-donut strong {
-  color: var(--ink);
-  font-size: 22px;
-}
-
-.score-legend {
-  flex: 1;
-}
-
-.score-legend > div {
-  display: grid;
-  grid-template-columns: 9px minmax(0, 1fr) 40px;
-  align-items: center;
-  gap: 6px;
-  min-height: 25px;
-  font-size: 12px;
-  color: #777d80;
-}
-
-.standalone-score-legend {
-  padding: 0 18px 18px;
-}
-
-.standalone-score-legend strong {
-  text-align: right;
-}
-
-.score-legend i {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.captain-callout {
-  background: #fff1e7;
-  border: 1px solid #ffd4b9;
-  border-radius: 15px;
-  padding: 18px;
-  display: flex;
-  gap: 12px;
-  color: var(--orange-deep);
-}
-
-.captain-callout > svg {
-  flex: 0 0 auto;
-}
-
-.captain-callout h3 {
-  color: var(--ink);
-  font-size: 12px;
-  margin: 4px 0;
-}
-
-.captain-callout p {
-  color: #8d8078;
-  font-size: 12px;
-  line-height: 1.45;
-  margin: 0;
 }
 
 .points-week-switcher {
@@ -4527,25 +4265,25 @@ textarea:focus-visible {
   display: flex;
   align-items: stretch;
   overflow: hidden;
-  background: white;
-  border: 1px solid var(--line);
+  color: white;
+  background: var(--orange);
   border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(22, 30, 34, 0.05);
+  box-shadow: 0 10px 24px rgba(160, 73, 19, 0.16);
 }
 
 .points-week-switcher > button {
-  width: 42px;
+  width: 44px;
+  min-width: 44px;
   border: 0;
-  background: #faf9f7;
-  color: var(--ink);
+  background: rgba(134, 51, 3, 0.2);
+  color: white;
   display: grid;
   place-items: center;
   cursor: pointer;
 }
 
 .points-week-switcher > button:hover:not(:disabled) {
-  color: var(--orange);
-  background: #fff5ee;
+  background: rgba(134, 51, 3, 0.34);
 }
 
 .points-week-switcher > button:disabled {
@@ -4553,53 +4291,134 @@ textarea:focus-visible {
   cursor: not-allowed;
 }
 
-.points-week-switcher label {
-  min-width: 190px;
-  padding: 5px 10px;
+.points-week-current {
+  min-width: 176px;
+  padding: 5px 16px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
+  line-height: 1.2;
+  text-align: center;
 }
 
-.points-week-switcher label > span {
-  color: #9a9ea0;
+.points-week-current strong {
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.points-week-current span {
+  color: rgba(255, 255, 255, 0.82);
   font-size: 10px;
-  font-weight: 800;
 }
 
-.points-week-switcher [data-slot="select-trigger"] {
-  width: 100%;
-  border: 0;
-  outline: 0;
-  color: var(--ink);
-  background: transparent;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.points-week-switcher > button:focus-visible,
-.points-week-switcher [data-slot="select-trigger"]:focus-visible {
-  outline: 3px solid var(--orange);
-  outline-offset: 2px;
-}
-
-.points-week-select-content {
-  width: min(270px, calc(100vw - 24px));
+.points-week-switcher > button:focus-visible {
+  outline: 3px solid white;
+  outline-offset: -4px;
 }
 
 .points-pitch-layout {
-  grid-template-columns: minmax(600px, 1.45fr) minmax(280px, 0.65fr);
+  grid-template-areas: "pitch scores";
+  grid-template-columns: minmax(560px, 1.2fr) minmax(360px, 0.8fr);
+  gap: 20px;
 }
 
 .points-pitch-card {
+  grid-area: pitch;
   overflow: hidden;
 }
 
+.points-score-rail {
+  grid-area: scores;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.points-score-card {
+  min-width: 0;
+  min-height: 132px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.points-score-card::after {
+  content: "";
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -78px;
+  top: -125px;
+  border: 30px solid currentColor;
+  border-radius: 50%;
+  opacity: 0.07;
+  pointer-events: none;
+}
+
+.points-score-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.points-score-card--primary {
+  min-height: 170px;
+  color: white;
+  background: var(--orange);
+  box-shadow: 0 15px 36px rgba(160, 73, 19, 0.18);
+}
+
+.points-score-card--primary strong {
+  font-size: clamp(52px, 6vw, 76px);
+  font-weight: 900;
+  line-height: 0.92;
+}
+
+.points-score-card--primary span {
+  margin-top: 10px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.points-score-card--supporting {
+  color: var(--orange-deep);
+  background: var(--orange-soft);
+  box-shadow: 0 10px 26px rgba(84, 58, 40, 0.07);
+}
+
+.points-score-card--supporting > span {
+  max-width: 18ch;
+  color: #7f4b2b;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.points-score-card--supporting strong {
+  margin-top: 4px;
+  color: var(--orange-deep);
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.points-score-card--supporting small {
+  margin-top: 4px;
+  color: #8b5b3e;
+  font-size: 11px;
+}
+
 .points-pitch {
-  min-height: 610px;
-  margin: 0 14px;
+  min-height: 560px;
+  margin: 14px 14px 0;
   border-radius: 13px;
   color: white;
   background: repeating-linear-gradient(
@@ -4615,7 +4434,7 @@ textarea:focus-visible {
 
 .points-pitch.is-empty,
 .points-pitch.is-empty .points-empty-squad {
-  min-height: 430px;
+  min-height: 560px;
 }
 
 .points-pitch::after {
@@ -4630,8 +4449,8 @@ textarea:focus-visible {
 }
 
 .points-pitch-rows {
-  min-height: 610px;
-  padding: 31px 10px;
+  min-height: 560px;
+  padding: 30px 18px;
   position: relative;
   z-index: 3;
   display: flex;
@@ -4640,7 +4459,7 @@ textarea:focus-visible {
 }
 
 .points-empty-squad {
-  min-height: 610px;
+  min-height: 560px;
   padding: 24px;
   position: relative;
   z-index: 3;
@@ -4662,7 +4481,7 @@ textarea:focus-visible {
 }
 
 .points-pitch-row {
-  min-height: 125px;
+  min-height: 96px;
   display: flex;
   align-items: center;
   justify-content: space-around;
@@ -4670,15 +4489,28 @@ textarea:focus-visible {
 
 .points-player-token {
   width: 82px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  font: inherit;
   display: flex;
   flex-direction: column;
   align-items: center;
   position: relative;
   text-align: center;
+  cursor: pointer;
 }
 
-.points-captain-role,
-.points-player-meta {
+.points-player-token:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+  border-radius: 10px;
+}
+
+.points-captain-role {
   position: absolute;
   z-index: 4;
   top: -4px;
@@ -4688,18 +4520,6 @@ textarea:focus-visible {
 
 .points-captain-role {
   left: calc(50% - 34px);
-}
-
-.points-player-meta {
-  right: calc(50% - 34px);
-}
-
-.points-player-meta .player-meta-badges {
-  margin: 0;
-}
-
-.points-player-meta .player-nationality-badge {
-  display: none;
 }
 
 .points-captain-role .captain-badge {
@@ -4746,9 +4566,7 @@ textarea:focus-visible {
 }
 
 .points-player-name,
-.points-player-club,
-.points-player-score,
-.points-player-state {
+.points-player-score {
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4799,42 +4617,7 @@ textarea:focus-visible {
 }
 
 .points-player-score {
-  width: auto;
-  min-width: 42px;
-  margin-top: 4px;
-  padding: 2px 7px;
-  display: inline-flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 3px;
-  color: white;
-  background: rgba(10, 46, 37, 0.94);
-  border-radius: 999px;
-  font-size: 12px;
   font-variant-numeric: tabular-nums;
-}
-
-.points-player-score small {
-  color: #d6e8e1;
-  font-size: 10px;
-  font-weight: 600;
-}
-
-.points-player-state {
-  min-height: 16px;
-  margin-top: 2px;
-  color: #d6e8e1;
-  font-size: 10px;
-  font-weight: 800;
-}
-
-.points-player-token.is-sub-in .points-player-state {
-  color: #bfffdc;
-}
-
-.points-player-token.is-sub-out .points-player-state,
-.points-player-token.is-uncounted .points-player-state {
-  color: #8b8f91;
 }
 
 .points-bench-panel {
@@ -4843,12 +4626,13 @@ textarea:focus-visible {
 
 .points-bench-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
 
 .points-bench-item {
-  min-height: 160px;
+  min-width: 0;
+  min-height: 116px;
   position: relative;
   display: grid;
   place-items: center;
@@ -4878,23 +4662,12 @@ textarea:focus-visible {
   height: 36px;
 }
 
-.points-bench-item .points-player-club {
-  color: #707678;
-  background: #ebe9e5;
-}
-
 .points-bench-item .points-player-score {
   color: var(--ink);
   background: #e9e7e2;
 }
 
-.points-bench-item .points-player-score small,
-.points-bench-item .points-player-state {
-  color: #73787a;
-}
-
-.points-player-token.is-uncounted .points-player-score,
-.points-player-token.is-uncounted .points-player-club {
+.points-player-token.is-uncounted .points-player-score {
   color: #6d7375;
 }
 
@@ -4911,31 +4684,94 @@ textarea:focus-visible {
   font-weight: 700;
 }
 
-.live-score.is-pending i {
-  background: #a7abad;
-  box-shadow: 0 0 0 4px #eceeed;
+.points-player-dialog {
+  max-height: min(720px, calc(100dvh - 32px));
+  overflow-y: auto;
 }
 
-.points-detail-card {
-  margin-top: 17px;
+.points-player-dialog-score {
+  min-height: 126px;
+  position: relative;
   overflow: hidden;
+  border-radius: 14px;
+  color: white;
+  background: var(--orange);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
-.points-detail-card summary {
-  padding: 17px 20px;
-  color: var(--ink);
-  cursor: pointer;
+.points-player-dialog-score::after {
+  content: "";
+  position: absolute;
+  width: 190px;
+  height: 190px;
+  right: -70px;
+  top: -130px;
+  border: 30px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.points-player-dialog-score strong {
+  position: relative;
+  z-index: 1;
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+
+.points-player-dialog-score span {
+  position: relative;
+  z-index: 1;
+  margin-top: 8px;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 13px;
   font-weight: 800;
 }
 
-.points-detail-card summary:focus-visible {
-  outline: 3px solid var(--orange);
-  outline-offset: -3px;
+.points-player-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
 }
 
-.points-detail-card[open] summary {
-  border-bottom: 1px solid var(--line);
+.points-player-breakdown > div {
+  min-width: 0;
+  min-height: 62px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: #faf9f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.points-player-breakdown span {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.points-player-breakdown strong {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.points-player-dialog-empty {
+  margin: -4px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  text-align: center;
 }
 
 .chip-options button:disabled {
@@ -6375,13 +6211,22 @@ textarea:focus-visible {
     overflow-y: visible;
   }
 
-  .points-aside {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  .points-pitch-layout {
+    grid-template-areas:
+      "scores"
+      "pitch";
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
-  .points-pitch-layout {
-    grid-template-columns: 1fr;
+  .points-score-rail {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .points-score-card,
+  .points-score-card--primary {
+    min-height: 124px;
   }
 
   .profile-nav-card {
@@ -6412,7 +6257,6 @@ textarea:focus-visible {
   }
 
   .market-table,
-  .points-table-scroll,
   .league-table,
   .fixture-list-card,
   .stats-ranking-card {
@@ -6513,13 +6357,12 @@ textarea:focus-visible {
     width: 100%;
   }
 
-  .points-week-switcher label {
+  .points-week-current {
     min-width: 0;
     flex: 1;
   }
 
   .transfer-overview,
-  .points-summary-grid,
   .league-cards,
   .stat-leaders-grid,
   .form-grid {
@@ -6540,20 +6383,22 @@ textarea:focus-visible {
   }
 
   .points-pitch,
-  .points-pitch-rows {
-    min-height: 570px;
+  .points-pitch-rows,
+  .points-pitch.is-empty,
+  .points-pitch.is-empty .points-empty-squad {
+    min-height: 450px;
   }
 
   .points-pitch {
-    margin: 0 6px;
+    margin: 8px 6px 0;
   }
 
   .points-pitch-rows {
-    padding: 20px 2px;
+    padding: 22px 2px;
   }
 
   .points-pitch-row {
-    min-height: 128px;
+    min-height: 96px;
   }
 
   .points-player-token {
@@ -6574,7 +6419,7 @@ textarea:focus-visible {
   }
 
   .points-bench-item {
-    min-height: 136px;
+    min-height: 116px;
   }
 
   .points-bench-item > b {
@@ -6587,30 +6432,8 @@ textarea:focus-visible {
     padding-inline: 2px;
   }
 
-  .points-player-meta {
-    right: calc(50% - 25px);
-  }
-
   .points-captain-role {
     left: calc(50% - 25px);
-  }
-
-  .points-player-meta .player-meta-badges {
-    align-items: center;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .points-player-meta .player-nationality-badge {
-    width: 14px;
-    height: 14px;
-    flex-basis: 14px;
-    border-radius: 4px;
-    display: inline-flex;
-  }
-
-  .points-player-meta .player-nationality-badge--foreign {
-    font-size: 8px;
   }
 
   .points-player-name {
@@ -6622,37 +6445,36 @@ textarea:focus-visible {
     display: none;
   }
 
-  .points-player-score {
-    min-width: 38px;
-    padding-inline: 5px;
-    font-size: 11px;
+  .points-score-rail {
+    gap: 5px;
   }
 
-  .points-player-score small,
-  .points-player-state {
+  .points-score-card,
+  .points-score-card--primary {
+    min-height: 104px;
+    padding: 10px 5px;
+    border-radius: 12px;
+  }
+
+  .points-score-card--primary strong {
+    font-size: clamp(38px, 13vw, 50px);
+  }
+
+  .points-score-card--primary span,
+  .points-score-card--supporting > span {
+    font-size: 10px;
+  }
+
+  .points-score-card--supporting strong {
+    font-size: clamp(28px, 10vw, 38px);
+  }
+
+  .points-score-card--supporting small {
     font-size: 9px;
   }
 
-  .points-aside {
+  .points-player-breakdown {
     grid-template-columns: 1fr;
-  }
-
-  .points-pitch-card .product-card-head {
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .points-pitch-card .product-card-head > div {
-    min-width: 0;
-  }
-
-  .points-pitch-card .eyebrow {
-    white-space: nowrap;
-  }
-
-  .points-pitch-card .live-score {
-    flex-shrink: 0;
-    white-space: nowrap;
   }
 
   .auto-sub-summary {
@@ -7827,23 +7649,5 @@ body {
   .squad-chip-toolbar__content {
     height: auto !important;
     padding: 10px 12px 12px !important;
-  }
-}
-
-/* Points tokens share the My Team identity frame while keeping score metadata compact. */
-.points-player-score {
-  font-size: 12px;
-  font-weight: 700;
-}
-
-.product-content .points-player-score small,
-.points-player-state {
-  font-size: 10px;
-}
-
-@media (width < 48rem) {
-  .product-content .points-player-score small,
-  .points-player-state {
-    font-size: 9px;
   }
 }

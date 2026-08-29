@@ -307,7 +307,7 @@ const translations: Record<string, string> = {
   ค้นหาชื่อนักเตะหรือสโมสร: "Search player or club",
   ล้างคำค้น: "Clear search",
   ทั้งหมด: "All",
-  คะแนนสูงสุด: "Most Points",
+  คะแนนสูงสุด: "Highest score",
   ฟอร์มดีที่สุด: "Best Form",
   ราคาสูงสุด: "Highest Price",
   ตัวกรอง: "Filters",
@@ -335,6 +335,8 @@ const translations: Record<string, string> = {
   "Gameweek ก่อนหน้า": "Previous Gameweek",
   "Gameweek ถัดไป": "Next Gameweek",
   ยังไม่มีคะแนน: "No points yet",
+  "สรุปคะแนน Gameweek": "Gameweek score summary",
+  คะแนนเฉลี่ย: "Average score",
   "ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้":
     "No squad has been saved for this Gameweek",
   "เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน":
@@ -363,6 +365,7 @@ const translations: Record<string, string> = {
   "Auto-sub ออก": "Auto-sub out",
   สนามแสดงผู้เล่นที่ถูกนับคะแนนจริงแล้ว:
     "The pitch now shows the players whose points count",
+  สนามอัปเดตผู้เล่นตัวจริงแล้ว: "The pitch reflects the updated lineup",
   ที่มาคะแนนผู้เล่นในทีม: "Squad Points Breakdown",
   ดูรายละเอียดคะแนนรายบุคคล: "View individual points details",
   "ไม่มี DC และ Bonus": "No DC or Bonus",

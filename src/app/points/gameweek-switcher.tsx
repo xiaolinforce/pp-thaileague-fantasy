@@ -5,13 +5,6 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 
 import { useLanguage } from "@/components/fantasy/i18n";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import type { FantasyPointsGameweek } from "@/data/fantasy";
 
 export function PointsGameweekSwitcher({
@@ -27,6 +20,12 @@ export function PointsGameweekSwitcher({
   const selectedIndex = gameweeks.findIndex(
     (gameweek) => gameweek.number === selected,
   );
+  const selectedGameweek = gameweeks[selectedIndex];
+  const scoreStatus = selectedGameweek?.scoreComplete
+    ? "Final"
+    : selectedGameweek?.hasScore
+      ? "Provisional"
+      : translate("ยังไม่มีคะแนน");
 
   const goToGameweek = (gameweek: number) => {
     startTransition(() => router.push(`/points?gw=${gameweek}`));
@@ -46,30 +45,10 @@ export function PointsGameweekSwitcher({
       >
         <ChevronLeft size={18} />
       </button>
-      <label>
-        <span>{translate("เลือก Gameweek")}</span>
-        <Select
-          value={String(selected)}
-          onValueChange={(value) => value && goToGameweek(Number(value))}
-          disabled={isPending}
-        >
-          <SelectTrigger aria-label={translate("เลือก Gameweek")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="points-week-select-content">
-            {gameweeks.map((gameweek) => (
-              <SelectItem value={String(gameweek.number)} key={gameweek.number}>
-                Gameweek {String(gameweek.number).padStart(2, "0")}
-                {gameweek.scoreComplete
-                  ? " · Final"
-                  : gameweek.hasScore
-                    ? " · Provisional"
-                    : ` · ${translate("ยังไม่มีคะแนน")}`}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </label>
+      <output className="points-week-current" aria-live="polite">
+        <strong>Gameweek {String(selected).padStart(2, "0")}</strong>
+        <span>{scoreStatus}</span>
+      </output>
       <button
         type="button"
         onClick={() => goToGameweek(gameweeks[selectedIndex + 1].number)}

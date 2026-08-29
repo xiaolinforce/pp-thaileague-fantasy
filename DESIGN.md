@@ -167,9 +167,14 @@ the screen before cards or tables begin.
 - In Gameweek 1, disable Wildcard and show that it becomes available from
   Gameweek 2. Enforce the same restriction on the server.
 - The Points screen uses URL-backed Gameweek selection and defaults to the most
-  recent Gameweek with provisional or final scoring. Its pitch is read-only and
-  shows the counted lineup after automatic substitutions, while preserving a
-  detailed player-points view for review.
+  recent Gameweek with provisional or final scoring. Use previous/next arrows
+  around a written Gameweek and scoring status instead of a dropdown. Its pitch
+  is read-only and shows the counted lineup after automatic substitutions. On
+  desktop, match the Team pitch-and-bench width and place average, manager, and
+  highest-other-manager points in a vertical rail to its right. Below the
+  desktop breakpoint, keep those three scores in one row above the pitch. Open
+  each player's per-category breakdown in the shared product dialog from the
+  pitch or bench instead of repeating a page-level details table.
 - Always pair a player name with enough identity to distinguish position and
   club. Tier and Thai/foreign status should be visible wherever they affect a
   selection decision.
