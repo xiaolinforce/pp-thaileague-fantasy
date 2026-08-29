@@ -4352,6 +4352,19 @@ textarea:focus-visible {
   row-gap: 12px;
 }
 
+@media (width >= 80rem) {
+  .points-pitch-layout {
+    width: calc((100% - 20px) * 0.6);
+    margin-inline: auto;
+    grid-template-areas:
+      "gameweek"
+      "scores"
+      "pitch";
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: 44px auto auto;
+  }
+}
+
 .points-pitch-card {
   grid-area: pitch;
   overflow: hidden;
