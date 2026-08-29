@@ -4420,17 +4420,18 @@ textarea:focus-visible {
 }
 
 .points-score-card--supporting strong {
-  margin-top: 4px;
+  margin-top: 10px;
   color: var(--ink);
   font-size: 38px;
   font-weight: 900;
   line-height: 1;
 }
 
-.points-score-card--supporting small {
+.points-score-card.points-score-card--supporting small {
   margin-top: 4px;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 14px;
+  font-weight: 800;
 }
 
 .points-pitch {
@@ -6495,8 +6496,8 @@ textarea:focus-visible {
     font-size: clamp(28px, 10vw, 38px);
   }
 
-  .points-score-card--supporting small {
-    font-size: 9px;
+  .points-score-card.points-score-card--supporting small {
+    font-size: 10px;
   }
 
   .points-player-breakdown {
