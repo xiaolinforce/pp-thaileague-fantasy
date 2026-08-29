@@ -239,34 +239,21 @@ export function AppShell({ children }: { children: ReactNode }) {
   );
 }
 
-export function PageHeader({
-  eyebrow,
-  title,
-  titleClassName,
-  description,
-  actions,
-}: {
+type PageHeaderProps = {
   eyebrow?: string;
   title: string;
   titleClassName?: string;
   description?: string;
   actions?: ReactNode;
-}) {
+};
+
+export function PageHeader({ actions }: PageHeaderProps) {
+  if (!actions) return null;
+
   return (
     <Localized>
-      <section className="page-intro product-page-intro">
-        <div>
-          {eyebrow ? <span className="eyebrow orange">{eyebrow}</span> : null}
-          <h1
-            className={
-              titleClassName ? `page-title ${titleClassName}` : "page-title"
-            }
-          >
-            {title}
-          </h1>
-          {description ? <p>{description}</p> : null}
-        </div>
-        {actions && <div className="intro-actions">{actions}</div>}
+      <section className="page-intro product-page-intro page-intro--actions-only">
+        <div className="intro-actions">{actions}</div>
       </section>
     </Localized>
   );

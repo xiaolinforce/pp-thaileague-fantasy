@@ -2465,6 +2465,10 @@ textarea:focus-visible {
   align-items: center;
 }
 
+.page-intro--actions-only {
+  justify-content: flex-end;
+}
+
 .product-card {
   background: white;
   border: 1px solid var(--line);
@@ -4314,6 +4318,18 @@ textarea:focus-visible {
 
 .points-week-switcher--header {
   display: none;
+}
+
+@media (48rem <= width < 80rem) {
+  .product-page-intro:has(.points-week-switcher--header) {
+    justify-content: center;
+  }
+}
+
+@media (width >= 80rem) {
+  .product-page-intro:has(.points-week-switcher--header) {
+    display: none;
+  }
 }
 
 .points-week-switcher--rail {
