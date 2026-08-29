@@ -34,7 +34,7 @@ export function PointsGameweekSwitcher({
   return (
     <div
       className="points-week-switcher"
-      aria-label={`${translate("เลือก Gameweek ปัจจุบันคือ")} ${selected}`}
+      aria-label={`${translate("เลือก Gameweek ปัจจุบันคือ")} ${selected}${scoreStatus ? `, ${scoreStatus}` : ""}`}
       aria-busy={isPending}
     >
       <button
@@ -47,7 +47,6 @@ export function PointsGameweekSwitcher({
       </button>
       <output className="points-week-current" aria-live="polite">
         <strong>Gameweek {String(selected).padStart(2, "0")}</strong>
-        <span>{scoreStatus}</span>
       </output>
       <button
         type="button"
