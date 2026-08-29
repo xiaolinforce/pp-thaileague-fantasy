@@ -269,6 +269,7 @@ export type FantasyPointsGameweek = {
 
 export type FantasyPointsSquadMember = FantasySquadMember & {
   name: { th: string; en: string };
+  shortName: { th: string; en: string };
   club: { th: string; en: string };
   clubShort: { th: string; en: string };
   color: string;
@@ -340,6 +341,8 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
         member: fantasyTeamSelectionPlayers,
         fullNameTh: players.fullNameTh,
         fullNameEn: players.fullNameEn,
+        shortNameTh: players.shortNameTh,
+        shortNameEn: players.shortNameEn,
         clubNameTh: clubs.nameTh,
         clubNameEn: clubs.nameEn,
         clubShortNameTh: clubs.shortNameTh,
@@ -417,6 +420,14 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       name: {
         th: row.fullNameTh ?? row.fullNameEn,
         en: row.fullNameEn,
+      },
+      shortName: {
+        th:
+          row.shortNameTh ??
+          row.shortNameEn ??
+          row.fullNameTh ??
+          row.fullNameEn,
+        en: row.shortNameEn ?? row.fullNameEn,
       },
       club: { th: row.clubNameTh, en: row.clubNameEn },
       clubShort: {

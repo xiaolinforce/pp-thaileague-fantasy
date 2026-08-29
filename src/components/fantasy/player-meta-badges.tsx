@@ -10,7 +10,7 @@ export function PlayerMetaBadges({
   showTier = true,
   showNationality = true,
 }: {
-  player: CompetitionPlayerView;
+  player: Pick<CompetitionPlayerView, "position" | "tier" | "isThai">;
   showPosition?: boolean;
   showTier?: boolean;
   showNationality?: boolean;

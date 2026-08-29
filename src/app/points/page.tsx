@@ -1,4 +1,4 @@
-import { Crown, Info, ShieldCheck, Star } from "lucide-react";
+import { CircleDashed, Crown, Info, ShieldCheck, Star } from "lucide-react";
 
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PlayerKit } from "@/components/fantasy/player-kit";
@@ -44,7 +44,9 @@ const goalPoints = {
 export default async function PointsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ gw?: string | string[] }>;
+  searchParams: Promise<{
+    gw?: string | string[];
+  }>;
 }) {
   const query = await searchParams;
   const rawGameweek = Array.isArray(query.gw) ? query.gw[0] : query.gw;
@@ -113,13 +115,15 @@ export default async function PointsPage({
       ? rawPoints * captainMultiplier
       : rawPoints;
   };
-  const best = [...points.squad]
-    .filter((member) => countedIds.has(member.fantasyPlayerId))
-    .sort(
-      (a, b) =>
-        playerContribution(b.fantasyPlayerId) -
-        playerContribution(a.fantasyPlayerId),
-    )[0];
+  const best = points.teamScore
+    ? [...points.squad]
+        .filter((member) => countedIds.has(member.fantasyPlayerId))
+        .sort(
+          (a, b) =>
+            playerContribution(b.fantasyPlayerId) -
+            playerContribution(a.fantasyPlayerId),
+        )[0]
+    : undefined;
   const categoryTotals = new Map<string, number>();
   for (const member of points.squad) {
     const result = resultByPlayer.get(member.fantasyPlayerId);
@@ -140,12 +144,19 @@ export default async function PointsPage({
     : points.teamScore
       ? "Provisional"
       : "ยังไม่มีคะแนน";
+  const scoreState = points.fantasy.gameweek.scoreComplete
+    ? "final"
+    : points.teamScore
+      ? "provisional"
+      : "pending";
+  const transferPoints = points.teamScore?.transferPoints ?? 0;
 
   return (
     <AppShell>
       <main id="main-content" className="content product-content">
         <PageHeader
           title="คะแนน"
+          description="ดูคะแนนบนสนามตามทีมที่บันทึกไว้ พร้อม Auto-sub กัปตัน Chips และรายละเอียดคะแนน"
           actions={
             <PointsGameweekSwitcher
               gameweeks={points.gameweeks}
@@ -159,18 +170,23 @@ export default async function PointsPage({
             <div>
               <span>คะแนน Gameweek</span>
               <strong>{total}</strong>
-              <small>
-                <ShieldCheck size={13} /> {scoreStatus}
+              <small className={`points-total-status is-${scoreState}`}>
+                {scoreState === "pending" ? (
+                  <CircleDashed size={13} aria-hidden="true" />
+                ) : (
+                  <ShieldCheck size={13} aria-hidden="true" />
+                )}
+                {scoreStatus}
               </small>
             </div>
             <div className="points-gauge">
-              <span>TRANSFERS</span>
-              <strong>-{points.teamScore?.transferPoints ?? 0}</strong>
+              <span>แต้มที่หัก</span>
+              <strong>{transferPoints > 0 ? `-${transferPoints}` : "0"}</strong>
             </div>
           </article>
           <article className="points-mini-card">
             <span className="metric-icon orange-bg">
-              <Crown />
+              <Crown aria-hidden="true" />
             </span>
             <div>
               <span>กัปตันที่ได้คะแนน</span>
@@ -188,7 +204,7 @@ export default async function PointsPage({
           </article>
           <article className="points-mini-card">
             <span className="metric-icon green-bg">
-              <Star />
+              <Star aria-hidden="true" />
             </span>
             <div>
               <span>ดาวเด่น</span>
@@ -209,14 +225,14 @@ export default async function PointsPage({
                 <span className="eyebrow">แผนการเล่น {formation || "—"}</span>
                 <h2>{points.fantasy.team.name}</h2>
               </div>
-              <span
-                className={`live-score${points.teamScore ? "" : " pending"}`}
-              >
-                <i /> {scoreStatus}
+              <span className={`live-score is-${scoreState}`}>
+                <i aria-hidden="true" /> {scoreStatus}
               </span>
             </div>
-            <div className="points-pitch">
-              <div className="field-lines">
+            <div
+              className={`points-pitch${points.squad.length === 0 ? " is-empty" : ""}`}
+            >
+              <div className="field-lines" aria-hidden="true">
                 <span />
                 <i />
                 <b />
@@ -261,35 +277,46 @@ export default async function PointsPage({
               )}
             </div>
 
-            <div className="points-bench-panel">
-              <div className="bench-title">
-                <div>
-                  <h3>ม้านั่งสำรอง</h3>
+            {points.squad.length > 0 && (
+              <div className="points-bench-panel">
+                <div className="bench-title">
+                  <div>
+                    <h3>ม้านั่งสำรอง</h3>
+                  </div>
+                </div>
+                <div className="points-bench-grid">
+                  {benchMembers.map((member, index) => (
+                    <div
+                      className="points-bench-item"
+                      key={member.fantasyPlayerId}
+                    >
+                      <b>{index === 0 ? "GK" : index}</b>
+                      <PointsPlayerToken
+                        member={member}
+                        points={playerContribution(member.fantasyPlayerId)}
+                        counted={countedIds.has(member.fantasyPlayerId)}
+                        multiplier={
+                          scoringCaptain?.fantasyPlayerId ===
+                          member.fantasyPlayerId
+                            ? captainMultiplier
+                            : 1
+                        }
+                        substitution={
+                          autoSubOut.has(member.fantasyPlayerId)
+                            ? "out"
+                            : undefined
+                        }
+                        showPositionBadge
+                      />
+                    </div>
+                  ))}
                 </div>
               </div>
-              <div className="points-bench-grid">
-                {benchMembers.map((member) => (
-                  <PointsPlayerToken
-                    key={member.fantasyPlayerId}
-                    member={member}
-                    points={playerContribution(member.fantasyPlayerId)}
-                    counted={countedIds.has(member.fantasyPlayerId)}
-                    multiplier={
-                      scoringCaptain?.fantasyPlayerId === member.fantasyPlayerId
-                        ? captainMultiplier
-                        : 1
-                    }
-                    substitution={
-                      autoSubOut.has(member.fantasyPlayerId) ? "out" : undefined
-                    }
-                  />
-                ))}
-              </div>
-            </div>
+            )}
 
             {autoSubstitutions.length > 0 && (
               <div className="auto-sub-summary">
-                <ShieldCheck size={17} />
+                <ShieldCheck size={17} aria-hidden="true" />
                 <span>
                   Auto-sub {autoSubstitutions.length} —
                   สนามแสดงผู้เล่นที่ถูกนับคะแนนจริงแล้ว
@@ -305,7 +332,7 @@ export default async function PointsPage({
                   <span className="eyebrow">ที่มาคะแนนผู้เล่นในทีม</span>
                   <h2>ไม่มี DC และ Bonus</h2>
                 </div>
-                <Info size={17} />
+                <Info size={17} aria-hidden="true" />
               </div>
               <div className="score-legend standalone-score-legend">
                 {[...categoryTotals.entries()].map(([key, value]) => (
@@ -321,7 +348,7 @@ export default async function PointsPage({
               </div>
             </section>
             <section className="captain-callout">
-              <ShieldCheck />
+              <ShieldCheck aria-hidden="true" />
               <div>
                 <span className="eyebrow">แมตช์ตกค้าง</span>
                 <h3>ระบบคำนวณย้อนหลังอัตโนมัติ</h3>
@@ -334,60 +361,72 @@ export default async function PointsPage({
           </aside>
         </div>
 
-        <details className="product-card points-detail-card">
-          <summary>ดูรายละเอียดคะแนนรายบุคคล</summary>
-          <div className="points-table">
-            <div className="points-head">
-              <span>ผู้เล่น</span>
-              <span>MIN</span>
-              <span>G</span>
-              <span>A</span>
-              <span>CS</span>
-              <span>LV</span>
-              <span>PTS</span>
+        {points.squad.length > 0 && (
+          <details className="product-card points-detail-card">
+            <summary>ดูรายละเอียดคะแนนรายบุคคล</summary>
+            <div className="points-table-scroll">
+              <table className="points-table">
+                <thead>
+                  <tr className="points-head">
+                    <th scope="col">ผู้เล่น</th>
+                    <th scope="col">MIN</th>
+                    <th scope="col">G</th>
+                    <th scope="col">A</th>
+                    <th scope="col">CS</th>
+                    <th scope="col">LV</th>
+                    <th scope="col">PTS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {points.squad.map((member) => {
+                    const result = resultByPlayer.get(member.fantasyPlayerId);
+                    return (
+                      <tr className="points-row" key={member.fantasyPlayerId}>
+                        <th scope="row">
+                          <div className="market-player">
+                            <PlayerKit
+                              color={member.color}
+                              accent={member.accent}
+                              size="small"
+                            />
+                            <div>
+                              <strong>
+                                <PointsLocalizedName value={member.name} />
+                              </strong>
+                              <span>
+                                {positionLabels[member.position]} ·{" "}
+                                <PointsLocalizedName value={member.clubShort} />
+                                {member.captainRole === "captain"
+                                  ? " · กัปตัน"
+                                  : member.captainRole === "vice_captain"
+                                    ? " · รองกัปตัน"
+                                    : ""}
+                                {!countedIds.has(member.fantasyPlayerId)
+                                  ? " · ไม่นับคะแนน"
+                                  : ""}
+                              </span>
+                            </div>
+                          </div>
+                        </th>
+                        <td>{result?.minutes ?? 0}</td>
+                        <td>
+                          {(result?.breakdown.goals ?? 0) /
+                            goalPoints[member.position]}
+                        </td>
+                        <td>{(result?.breakdown.assists ?? 0) / 3}</td>
+                        <td>{result?.breakdown.cleanSheet ?? 0}</td>
+                        <td>L{member.tier}</td>
+                        <td className="points-total-cell">
+                          <strong>{result?.totalPoints ?? 0}</strong>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
-            {points.squad.map((member) => {
-              const result = resultByPlayer.get(member.fantasyPlayerId);
-              return (
-                <article className="points-row" key={member.fantasyPlayerId}>
-                  <div className="market-player">
-                    <PlayerKit
-                      color={member.color}
-                      accent={member.accent}
-                      size="small"
-                    />
-                    <div>
-                      <strong>
-                        <PointsLocalizedName value={member.name} />
-                      </strong>
-                      <span>
-                        {positionLabels[member.position]} ·{" "}
-                        <PointsLocalizedName value={member.clubShort} />
-                        {member.captainRole === "captain"
-                          ? " · กัปตัน"
-                          : member.captainRole === "vice_captain"
-                            ? " · รองกัปตัน"
-                            : ""}
-                        {!countedIds.has(member.fantasyPlayerId)
-                          ? " · ไม่นับคะแนน"
-                          : ""}
-                      </span>
-                    </div>
-                  </div>
-                  <span>{result?.minutes ?? 0}</span>
-                  <span>
-                    {(result?.breakdown.goals ?? 0) /
-                      goalPoints[member.position]}
-                  </span>
-                  <span>{(result?.breakdown.assists ?? 0) / 3}</span>
-                  <span>{result?.breakdown.cleanSheet ?? 0}</span>
-                  <span>L{member.tier}</span>
-                  <strong>{result?.totalPoints ?? 0}</strong>
-                </article>
-              );
-            })}
-          </div>
-        </details>
+          </details>
+        )}
       </main>
     </AppShell>
   );

@@ -342,6 +342,7 @@ const translations: Record<string, string> = {
   ดูคะแนนทุกคนในทีมและที่มาของคะแนนแบบละเอียด:
     "See every player's score and a detailed points breakdown",
   "คะแนน Gameweek": "Gameweek Points",
+  แต้มที่หัก: "Deductions",
   "สูงกว่าค่าเฉลี่ย 15 คะแนน": "15 points above average",
   กัปตัน: "Captain",
   กัปตันที่ได้คะแนน: "Scoring Captain",
