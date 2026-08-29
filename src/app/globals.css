@@ -3731,7 +3731,7 @@ textarea:focus-visible {
   border-radius: 6px 6px 0 0;
   padding: 3px 5px 2px;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 .squad-token .squad-name.squad-name--thai,
@@ -7397,7 +7397,7 @@ body {
 /* Pitch labels stay compact enough for the fixed player-slot spacing. */
 .squad-name {
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 500;
 }
 
 @media (width < 48rem) {
