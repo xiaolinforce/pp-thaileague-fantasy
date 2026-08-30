@@ -45,22 +45,18 @@ export function getDisplayedPlayerPoints({
 }
 
 export function summarizeGameweekScores(
-  scores: Array<{ selectionId: string; totalPoints: number }>,
-  currentSelectionId: string,
+  teams: Array<{ playerCount: number; totalPoints: number }>,
 ) {
+  const scores = teams
+    .filter((team) => team.playerCount > 0)
+    .map((team) => team.totalPoints);
   if (scores.length === 0) {
-    return { averagePoints: 0, highestOtherManagerPoints: null };
+    return { averagePoints: 0, highestPoints: 0 };
   }
-  const otherManagerScores = scores.filter(
-    (score) => score.selectionId !== currentSelectionId,
-  );
   return {
     averagePoints: Math.round(
-      scores.reduce((sum, score) => sum + score.totalPoints, 0) / scores.length,
+      scores.reduce((sum, score) => sum + score, 0) / scores.length,
     ),
-    highestOtherManagerPoints:
-      otherManagerScores.length > 0
-        ? Math.max(...otherManagerScores.map((score) => score.totalPoints))
-        : null,
+    highestPoints: Math.max(...scores),
   };
 }

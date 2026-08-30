@@ -13,10 +13,12 @@ import {
   fantasyRankingRuns,
   fantasySeasons,
   fantasyTeams,
+  fantasyTeamGameweekScores,
   fantasyTeamSelectionPlayers,
   fantasyTeamSelections,
   fantasyTierDefinitions,
 } from "../src/db/schema";
+import { summarizeGameweekScores } from "../src/lib/fantasy/points-presentation";
 
 loadEnvConfig(process.cwd());
 const databaseUrl = process.env.DATABASE_URL;
@@ -34,6 +36,7 @@ const tables = {
   fantasyTeams,
   fantasyTeamSelections,
   fantasyTeamSelectionPlayers,
+  fantasyTeamGameweekScores,
   fantasyTierDefinitions,
   fantasyLeagues,
   fantasyLeagueMembers,
@@ -47,9 +50,12 @@ async function verifyFantasyGame() {
 
   const gameweekRows = await db
     .select({
+      id: fantasyGameweeks.id,
       seasonId: fantasyGameweeks.fantasySeasonId,
       number: fantasyGameweeks.number,
       status: fantasyGameweeks.status,
+      averagePoints: fantasyGameweeks.averagePoints,
+      highestPoints: fantasyGameweeks.highestPoints,
     })
     .from(fantasyGameweeks)
     .orderBy(
@@ -80,6 +86,45 @@ async function verifyFantasyGame() {
     ) {
       throw new Error(
         `Fantasy season ${season.slug} must have one open Gameweek until its schedule is exhausted.`,
+      );
+    }
+  }
+
+  const [scoreRows, nonEmptySelectionRows] = await Promise.all([
+    db
+      .select({
+        gameweekId: fantasyTeamSelections.fantasyGameweekId,
+        selectionId: fantasyTeamSelections.id,
+        totalPoints: fantasyTeamGameweekScores.totalPoints,
+      })
+      .from(fantasyTeamGameweekScores)
+      .innerJoin(
+        fantasyTeamSelections,
+        eq(fantasyTeamGameweekScores.selectionId, fantasyTeamSelections.id),
+      )
+      .where(eq(fantasyTeamSelections.status, "locked")),
+    db
+      .selectDistinct({ selectionId: fantasyTeamSelectionPlayers.selectionId })
+      .from(fantasyTeamSelectionPlayers),
+  ]);
+  const nonEmptySelectionIds = new Set(
+    nonEmptySelectionRows.map((row) => row.selectionId),
+  );
+  for (const gameweek of gameweekRows) {
+    const expected = summarizeGameweekScores(
+      scoreRows
+        .filter((score) => score.gameweekId === gameweek.id)
+        .map((score) => ({
+          playerCount: nonEmptySelectionIds.has(score.selectionId) ? 1 : 0,
+          totalPoints: score.totalPoints,
+        })),
+    );
+    if (
+      gameweek.averagePoints !== expected.averagePoints ||
+      gameweek.highestPoints !== expected.highestPoints
+    ) {
+      throw new Error(
+        `Gameweek ${gameweek.number} score summary is stale: stored ${gameweek.averagePoints}/${gameweek.highestPoints}, expected ${expected.averagePoints}/${expected.highestPoints}.`,
       );
     }
   }

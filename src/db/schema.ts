@@ -689,6 +689,8 @@ export const fantasyGameweeks = pgTable(
     deadlineAt: timestamp("deadline_at", { withTimezone: true }).notNull(),
     status: fantasyGameweekStatusEnum("status").default("planned").notNull(),
     scoreComplete: boolean("score_complete").default(false).notNull(),
+    averagePoints: integer("average_points").default(0).notNull(),
+    highestPoints: integer("highest_points").default(0).notNull(),
     finalizedAt: timestamp("finalized_at", { withTimezone: true }),
     ...timestamps,
   },

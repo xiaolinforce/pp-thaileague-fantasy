@@ -4,6 +4,21 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-31 — Gameweek score summaries are persisted
+
+**Decision:** Persist rounded average points and highest points on each Fantasy
+Gameweek during score recalculation. Include every scored locked selection that
+contains at least one player, including the signed-in manager's team. Exclude
+empty selections and store zero when no team qualifies.
+
+**Context:** The Points route needs stable season-wide comparisons without
+aggregating every team score on each page request. Highest points describes the
+whole playing field rather than only other managers.
+
+**Consequences:** Locking, finalization, and score corrections update team scores
+and Gameweek summaries together. Historical rows are backfilled by the forward
+migration, and Points reads the persisted values directly.
+
 ## 2026-08-30 — Gameweek lifecycle transitions are transactional
 
 **Decision:** Run locking and finalization through a transaction-capable Neon

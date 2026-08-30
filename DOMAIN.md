@@ -230,6 +230,11 @@ Fixtures are associated with the original competition matchweek. Corrected or
 late player stats can be rescored, and the scoring service upserts player and
 team derived totals for that same Fantasy Gameweek.
 
+Each recalculation also stores the Gameweek's rounded average points and highest
+points across all scored teams whose locked selection contains at least one
+player. The current manager's team participates in both values. If no eligible
+team has been scored, both summaries are zero.
+
 Classic standings sort by:
 
 1. Total points, highest first.

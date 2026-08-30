@@ -166,7 +166,10 @@ Player match stats are converted into per-match point breakdowns. The scoring
 service aggregates all fixtures whose `matchweek` equals the Fantasy Gameweek,
 then applies automatic substitutions, captaincy, chips, and transfer deductions
 to every locked selection. Recalculation upserts the derived score, allowing
-late or corrected match data to update the original Gameweek.
+late or corrected match data to update the original Gameweek. The same
+recalculation persists average and highest points on the Gameweek from every
+scored selection that contains at least one player. Points pages read those
+stored summaries instead of aggregating every team on each request.
 
 ## Persistence model
 

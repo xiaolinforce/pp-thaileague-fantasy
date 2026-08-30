@@ -48,43 +48,58 @@ test("shows the scoring captain's already-multiplied contribution", () => {
   );
 });
 
-test("labels the highest comparison as another manager and handles no comparison", () => {
-  assert.deepEqual(summarizeGameweekScores([], "mine"), {
+test("summarizes every non-empty team and includes the current team", () => {
+  assert.deepEqual(summarizeGameweekScores([]), {
     averagePoints: 0,
-    highestOtherManagerPoints: null,
+    highestPoints: 0,
   });
   assert.deepEqual(
-    summarizeGameweekScores([{ selectionId: "mine", totalPoints: 80 }], "mine"),
+    summarizeGameweekScores([{ playerCount: 15, totalPoints: 80 }]),
     {
       averagePoints: 80,
-      highestOtherManagerPoints: null,
+      highestPoints: 80,
     },
   );
   assert.deepEqual(
-    summarizeGameweekScores(
-      [
-        { selectionId: "mine", totalPoints: 80 },
-        { selectionId: "other-1", totalPoints: 61 },
-        { selectionId: "other-2", totalPoints: 99 },
-      ],
-      "mine",
-    ),
+    summarizeGameweekScores([
+      { playerCount: 15, totalPoints: 80 },
+      { playerCount: 15, totalPoints: 61 },
+      { playerCount: 15, totalPoints: 99 },
+    ]),
     {
       averagePoints: 80,
-      highestOtherManagerPoints: 99,
+      highestPoints: 99,
+    },
+  );
+});
+
+test("excludes teams without players from the persisted summary", () => {
+  assert.deepEqual(
+    summarizeGameweekScores([
+      { playerCount: 0, totalPoints: 0 },
+      { playerCount: 15, totalPoints: 12 },
+    ]),
+    {
+      averagePoints: 12,
+      highestPoints: 12,
     },
   );
   assert.deepEqual(
-    summarizeGameweekScores(
-      [
-        { selectionId: "mine", totalPoints: -4 },
-        { selectionId: "other", totalPoints: -2 },
-      ],
-      "mine",
-    ),
-    {
-      averagePoints: -3,
-      highestOtherManagerPoints: -2,
-    },
+    summarizeGameweekScores([{ playerCount: 0, totalPoints: 0 }]),
+    { averagePoints: 0, highestPoints: 0 },
+  );
+});
+
+test("preserves zero and negative scores", () => {
+  assert.deepEqual(
+    summarizeGameweekScores([{ playerCount: 15, totalPoints: 0 }]),
+    { averagePoints: 0, highestPoints: 0 },
+  );
+  assert.deepEqual(
+    summarizeGameweekScores([
+      { playerCount: 15, totalPoints: -4 },
+      { playerCount: 15, totalPoints: -2 },
+    ]),
+    { averagePoints: -3, highestPoints: -2 },
   );
 });

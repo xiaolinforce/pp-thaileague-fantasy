@@ -179,11 +179,15 @@ Enable Points when Gameweek 1 leaves `open`.
   repeating score status in the selector. Its pitch is read-only and shows the
   counted lineup after automatic substitutions without an auto-sub summary. On
   desktop, match the Team pitch-and-bench width and place the Gameweek selector
-  above average, manager, and highest-other-manager points in one row to its
+  above average, manager, and highest points in one row to its
   right. Below the desktop breakpoint, keep those three scores in one row above
   the pitch. Open
   each player's per-category breakdown in the shared product dialog from the
   pitch or bench instead of repeating a page-level details table.
+- Average and highest points are persisted Gameweek summaries. Both include
+  every scored team whose locked selection contains at least one player; the
+  signed-in team is not excluded. Show zero for both values before any eligible
+  team has a score.
 - Always pair a player name with enough identity to distinguish position and
   club. Tier and Thai/foreign status should be visible wherever they affect a
   selection decision.

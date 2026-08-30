@@ -143,15 +143,9 @@ export default async function PointsPage({
               <span>คะแนน</span>
             </article>
             <article className="points-score-card points-score-card--supporting">
-              <span>คะแนนสูงสุดของทีมอื่น</span>
-              <strong>
-                {points.gameweekSummary.highestOtherManagerPoints ?? "—"}
-              </strong>
-              <small>
-                {points.gameweekSummary.highestOtherManagerPoints === null
-                  ? "ยังไม่มีทีมเปรียบเทียบ"
-                  : "คะแนน"}
-              </small>
+              <span>คะแนนสูงสุด</span>
+              <strong>{points.gameweekSummary.highestPoints}</strong>
+              <small>คะแนน</small>
             </article>
           </section>
 

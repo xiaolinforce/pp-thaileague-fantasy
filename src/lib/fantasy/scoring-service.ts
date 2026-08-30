@@ -13,11 +13,12 @@ import {
   fantasySeasons,
   fixtures,
 } from "@/db/schema";
+import { summarizeGameweekScores } from "./points-presentation.ts";
 import { resolveTeamScore, type GameweekPlayerResult } from "./scoring.ts";
 
 type ScoringDatabase = Pick<
   typeof transactionDb,
-  "query" | "select" | "insert"
+  "query" | "select" | "insert" | "update"
 >;
 
 export async function recalculateGameweek(
@@ -79,6 +80,7 @@ export async function recalculateGameweek(
         eq(fantasyTeamSelections.status, "locked"),
       ),
     );
+  const scoredTeams: Array<{ playerCount: number; totalPoints: number }> = [];
   for (const selection of selections) {
     const members = await database
       .select()
@@ -96,6 +98,10 @@ export async function recalculateGameweek(
       playerResults: [...resultByPlayer.values()],
       activeChip: selection.activeChip,
       transferPoints: selection.transferPoints,
+    });
+    scoredTeams.push({
+      playerCount: members.length,
+      totalPoints: score.totalPoints,
     });
     await database
       .insert(fantasyTeamGameweekScores)
@@ -125,5 +131,19 @@ export async function recalculateGameweek(
         },
       });
   }
-  return { selections: selections.length, players: resultByPlayer.size };
+  const gameweekSummary = summarizeGameweekScores(scoredTeams);
+  await database
+    .update(fantasyGameweeks)
+    .set({
+      averagePoints: gameweekSummary.averagePoints,
+      highestPoints: gameweekSummary.highestPoints,
+      updatedAt: new Date(),
+    })
+    .where(eq(fantasyGameweeks.id, gameweek.id));
+
+  return {
+    selections: selections.length,
+    players: resultByPlayer.size,
+    ...gameweekSummary,
+  };
 }
