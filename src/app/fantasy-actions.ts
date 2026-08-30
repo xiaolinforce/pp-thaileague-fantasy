@@ -41,6 +41,7 @@ import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { validateFantasyName } from "@/lib/auth/names";
 import { getFantasyAutoFillCandidates } from "@/data/fantasy-auto-fill";
 import { autoFillSquadDraft } from "@/lib/fantasy/auto-fill";
+import { createGameweekCarryover } from "@/lib/fantasy/gameweek-carryover";
 import type { DraftLineupMember } from "@/lib/fantasy/team-draft";
 
 export type FantasySelectionInput = {
@@ -967,17 +968,10 @@ export async function lockFantasyGameweekAction(formData: FormData) {
             .select()
             .from(fantasyTeamSelectionPlayers)
             .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
-          const copied = currentMembers.map((member) => ({
+          const copied = createGameweekCarryover({
             selectionId: nextSelection.id,
-            fantasyPlayerId: member.fantasyPlayerId,
-            clubIdSnapshot: member.clubIdSnapshot,
-            positionSnapshot: member.positionSnapshot,
-            tierSnapshot: member.tierSnapshot,
-            isThaiSnapshot: member.isThaiSnapshot,
-            lineupRole: member.lineupRole,
-            benchOrder: member.benchOrder,
-            captainRole: member.captainRole,
-          }));
+            members: currentMembers,
+          });
           if (copied.length > 0) {
             await tx.insert(fantasyTeamSelectionPlayers).values(copied);
             await tx.insert(fantasyTransferRevisions).values({
