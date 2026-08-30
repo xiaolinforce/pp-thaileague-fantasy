@@ -4,6 +4,22 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-30 — Gameweek lifecycle transitions are transactional
+
+**Decision:** Run locking and finalization through a transaction-capable Neon
+client. Lock affected rows, settle selections, provision the contiguous next
+Gameweek, transition statuses, and recalculate scores in one transaction. Keep
+the Neon HTTP client for ordinary reads and fixed batches.
+
+**Context:** Multi-step lifecycle actions could previously fail after only some
+teams or statuses were updated. Finalization also marked a Gameweek final before
+score recalculation completed.
+
+**Consequences:** A season may have only one open Gameweek. Locking rejects a
+missing non-final successor, and any lifecycle or scoring failure rolls the
+whole operation back. Transactional scoring accepts the active transaction
+client rather than opening an unrelated database session.
+
 ## 2026-08-26 — The interface uses three shared responsive modes
 
 **Decision:** Use Mobile below 768px, Tablet from 768px through 1279px, and

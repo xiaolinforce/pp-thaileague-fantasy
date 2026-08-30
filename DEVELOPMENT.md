@@ -87,7 +87,9 @@ Open `http://localhost:3006`.
 | `npm run db:normalize:club-short-names`   | Apply curated Thai/English club short names.                          |
 | `npm run db:normalize:player-short-names` | Preview or apply sourced Thai and derived English player short names. |
 | `npm run db:verify:competition`           | Assert expected source/import structure.                              |
-| `npm run db:verify:fantasy`               | Print main Fantasy table row counts.                                  |
+| `npm run db:verify:fantasy`               | Verify Fantasy counts, rankings, Gameweek continuity, and active GW.  |
+| `npm run db:apply:fixture-kickoffs`       | Preview TBC kickoff overrides; apply with exact `--branch-id`.        |
+| `npm run db:verify:transaction`           | Prove rollback on the exact development branch.                       |
 
 Database commands use a small Windows Node user-info compatibility shim. Keep
 the wrapper in package scripts unless the underlying Windows issue is confirmed

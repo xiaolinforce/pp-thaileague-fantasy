@@ -697,6 +697,9 @@ export const fantasyGameweeks = pgTable(
       table.fantasySeasonId,
       table.number,
     ),
+    uniqueIndex("fantasy_gameweeks_one_open_per_season_unique")
+      .on(table.fantasySeasonId)
+      .where(sql`${table.status} = 'open'`),
     index("fantasy_gameweeks_deadline_idx").on(table.deadlineAt),
     index("fantasy_gameweeks_status_idx").on(table.status),
     check("fantasy_gameweeks_number_check", sql`${table.number} > 0`),

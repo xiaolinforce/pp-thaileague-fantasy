@@ -163,6 +163,12 @@ into the next Gameweek as the initial draft. A new team that has not saved a
 complete squad locks with an empty selection, scores zero, and carries an empty
 draft into the next Gameweek.
 
+Locking and finalization are atomic lifecycle transitions. Locking requires an
+`open` Gameweek and a contiguous `planned` successor except at the season end.
+Finalization requires `provisional`; score recalculation and the final status
+commit together so a failed calculation cannot leave a partially transitioned
+Gameweek.
+
 ## Transfers
 
 - Each deadline adds two free transfers, capped at four.

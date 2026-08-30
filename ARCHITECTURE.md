@@ -114,6 +114,11 @@ the normal save action remains the only confirmation boundary.
    state. Administrative corrections also append application-level audit rows.
 5. Affected fantasy routes are revalidated.
 
+Ordinary reads and fixed query batches use the Neon HTTP client. Gameweek lock
+and finalization use the transaction-capable Neon serverless client, lock the
+affected rows with `FOR UPDATE`, and commit selection settlement, next-week
+provisioning, status transitions, and score recalculation as one unit.
+
 Authentication providers are independently opt-in and also subject to
 `AUTH_PRODUCTION_READY`. This deployment gate prevents accidental public use
 before domain/legal/provider review; it complements rather than replaces the

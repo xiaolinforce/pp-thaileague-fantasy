@@ -4,6 +4,7 @@ import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 
 import { db } from "@/db";
+import { transactionDb } from "@/db/transaction";
 import {
   competitionEntries,
   fantasyAdminAuditLog,
@@ -54,7 +55,12 @@ export type FantasySelectionInput = {
 
 export type FantasyActionResult =
   | { ok: true; message: string }
-  | { ok: false; message: string; violations?: string[] };
+  | {
+      ok: false;
+      message: string;
+      violations?: string[];
+      availableAt?: string;
+    };
 
 export type FantasyAutoFillResult =
   | {
@@ -201,6 +207,7 @@ export async function updateFantasyNamesAction(input: {
     return {
       ok: false,
       message: `เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่ ${profile.manager.nameChangeAvailableAt.toLocaleDateString("th-TH")}`,
+      availableAt: profile.manager.nameChangeAvailableAt.toISOString(),
     };
   }
   if (teamChanged && profile.team.nameChangesUsed >= 3) {
@@ -845,104 +852,135 @@ export async function updateFantasyPlayerClassificationAction(
 export async function lockFantasyGameweekAction(formData: FormData) {
   await requireAdmin();
   const gameweekId = String(formData.get("gameweekId") ?? "");
-  const gameweek = await db.query.fantasyGameweeks.findFirst({
-    where: eq(fantasyGameweeks.id, gameweekId),
-  });
-  if (!gameweek) throw new Error("Gameweek was not found.");
-  const selections = await db
-    .select()
-    .from(fantasyTeamSelections)
-    .where(
-      and(
-        eq(fantasyTeamSelections.fantasyGameweekId, gameweek.id),
-        eq(fantasyTeamSelections.status, "draft"),
-      ),
-    );
-  const nextGameweek = await db.query.fantasyGameweeks.findFirst({
-    where: and(
-      eq(fantasyGameweeks.fantasySeasonId, gameweek.fantasySeasonId),
-      eq(fantasyGameweeks.number, gameweek.number + 1),
-    ),
-  });
-  for (const selection of selections) {
-    const team = await db.query.fantasyTeams.findFirst({
-      where: eq(fantasyTeams.id, selection.fantasyTeamId),
-    });
-    if (!team) continue;
-    const activeChip =
-      gameweek.number < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek &&
-      selection.activeChip === "wildcard"
-        ? null
-        : selection.activeChip;
-    const settlement = settleTransfers({
-      freeTransfersBefore: selection.freeTransfersBefore,
-      transferCount: selection.netTransferCount,
-      wildcard: activeChip === "wildcard",
-    });
-    await db
-      .update(fantasyTeamSelections)
-      .set({
-        status: "locked",
-        lockedAt: new Date(),
-        freeTransfersAfter: settlement.freeTransfersAfter,
-        transferPoints: settlement.transferPoints,
-        activeChip,
-        updatedAt: new Date(),
-      })
-      .where(eq(fantasyTeamSelections.id, selection.id));
-    await db
-      .update(fantasyTeams)
-      .set({
-        freeTransfers: settlement.freeTransfersAfter,
-        updatedAt: new Date(),
-      })
-      .where(eq(fantasyTeams.id, team.id));
+  await transactionDb.transaction(async (tx) => {
+    const gameweekRows = await tx
+      .select()
+      .from(fantasyGameweeks)
+      .where(eq(fantasyGameweeks.id, gameweekId))
+      .for("update")
+      .limit(1);
+    const gameweek = gameweekRows[0];
+    if (!gameweek) throw new Error("Gameweek was not found.");
+    if (gameweek.status !== "open") {
+      throw new Error("Only an open Gameweek can be locked.");
+    }
+    const lastGameweekRows = await tx
+      .select({ number: fantasyGameweeks.number })
+      .from(fantasyGameweeks)
+      .where(eq(fantasyGameweeks.fantasySeasonId, gameweek.fantasySeasonId))
+      .orderBy(desc(fantasyGameweeks.number))
+      .limit(1);
+    const nextGameweekRows = await tx
+      .select()
+      .from(fantasyGameweeks)
+      .where(
+        and(
+          eq(fantasyGameweeks.fantasySeasonId, gameweek.fantasySeasonId),
+          eq(fantasyGameweeks.number, gameweek.number + 1),
+        ),
+      )
+      .for("update")
+      .limit(1);
+    const nextGameweek = nextGameweekRows[0];
+    if (!nextGameweek && gameweek.number !== lastGameweekRows[0]?.number) {
+      throw new Error("The next Gameweek is missing.");
+    }
+    if (nextGameweek && nextGameweek.status !== "planned") {
+      throw new Error("The next Gameweek is not planned.");
+    }
 
-    if (nextGameweek) {
-      const nextSelectionRows = await db
-        .insert(fantasyTeamSelections)
-        .values({
-          fantasyTeamId: team.id,
-          fantasyGameweekId: nextGameweek.id,
-          status: "draft",
-          freeTransfersBefore: settlement.freeTransfersAfter,
-        })
-        .onConflictDoUpdate({
-          target: [
-            fantasyTeamSelections.fantasyTeamId,
-            fantasyTeamSelections.fantasyGameweekId,
-          ],
-          set: {
-            freeTransfersBefore: settlement.freeTransfersAfter,
-            updatedAt: new Date(),
-          },
-        })
-        .returning();
-      const nextSelection = nextSelectionRows[0];
-      const existingNextMembers = await db
+    const selections = await tx
+      .select()
+      .from(fantasyTeamSelections)
+      .where(
+        and(
+          eq(fantasyTeamSelections.fantasyGameweekId, gameweek.id),
+          eq(fantasyTeamSelections.status, "draft"),
+        ),
+      )
+      .for("update");
+    for (const selection of selections) {
+      const teamRows = await tx
         .select()
-        .from(fantasyTeamSelectionPlayers)
-        .where(eq(fantasyTeamSelectionPlayers.selectionId, nextSelection.id));
-      if (existingNextMembers.length === 0) {
-        const currentMembers = await db
+        .from(fantasyTeams)
+        .where(eq(fantasyTeams.id, selection.fantasyTeamId))
+        .for("update")
+        .limit(1);
+      const team = teamRows[0];
+      if (!team) throw new Error("Fantasy team was not found.");
+      const activeChip =
+        gameweek.number < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek &&
+        selection.activeChip === "wildcard"
+          ? null
+          : selection.activeChip;
+      const settlement = settleTransfers({
+        freeTransfersBefore: selection.freeTransfersBefore,
+        transferCount: selection.netTransferCount,
+        wildcard: activeChip === "wildcard",
+      });
+      await tx
+        .update(fantasyTeamSelections)
+        .set({
+          status: "locked",
+          lockedAt: new Date(),
+          freeTransfersAfter: settlement.freeTransfersAfter,
+          transferPoints: settlement.transferPoints,
+          activeChip,
+          updatedAt: new Date(),
+        })
+        .where(eq(fantasyTeamSelections.id, selection.id));
+      await tx
+        .update(fantasyTeams)
+        .set({
+          freeTransfers: settlement.freeTransfersAfter,
+          updatedAt: new Date(),
+        })
+        .where(eq(fantasyTeams.id, team.id));
+
+      if (nextGameweek) {
+        const nextSelectionRows = await tx
+          .insert(fantasyTeamSelections)
+          .values({
+            fantasyTeamId: team.id,
+            fantasyGameweekId: nextGameweek.id,
+            status: "draft",
+            freeTransfersBefore: settlement.freeTransfersAfter,
+          })
+          .onConflictDoUpdate({
+            target: [
+              fantasyTeamSelections.fantasyTeamId,
+              fantasyTeamSelections.fantasyGameweekId,
+            ],
+            set: {
+              freeTransfersBefore: settlement.freeTransfersAfter,
+              updatedAt: new Date(),
+            },
+          })
+          .returning();
+        const nextSelection = nextSelectionRows[0];
+        const existingNextMembers = await tx
           .select()
           .from(fantasyTeamSelectionPlayers)
-          .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
-        const copied = currentMembers.map((member) => ({
-          selectionId: nextSelection.id,
-          fantasyPlayerId: member.fantasyPlayerId,
-          clubIdSnapshot: member.clubIdSnapshot,
-          positionSnapshot: member.positionSnapshot,
-          tierSnapshot: member.tierSnapshot,
-          isThaiSnapshot: member.isThaiSnapshot,
-          lineupRole: member.lineupRole,
-          benchOrder: member.benchOrder,
-          captainRole: member.captainRole,
-        }));
-        if (copied.length > 0) {
-          await db.batch([
-            db.insert(fantasyTeamSelectionPlayers).values(copied),
-            db.insert(fantasyTransferRevisions).values({
+          .where(eq(fantasyTeamSelectionPlayers.selectionId, nextSelection.id));
+        if (existingNextMembers.length === 0) {
+          const currentMembers = await tx
+            .select()
+            .from(fantasyTeamSelectionPlayers)
+            .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
+          const copied = currentMembers.map((member) => ({
+            selectionId: nextSelection.id,
+            fantasyPlayerId: member.fantasyPlayerId,
+            clubIdSnapshot: member.clubIdSnapshot,
+            positionSnapshot: member.positionSnapshot,
+            tierSnapshot: member.tierSnapshot,
+            isThaiSnapshot: member.isThaiSnapshot,
+            lineupRole: member.lineupRole,
+            benchOrder: member.benchOrder,
+            captainRole: member.captainRole,
+          }));
+          if (copied.length > 0) {
+            await tx.insert(fantasyTeamSelectionPlayers).values(copied);
+            await tx.insert(fantasyTransferRevisions).values({
               selectionId: nextSelection.id,
               revision: 1,
               status: "confirmed",
@@ -950,23 +988,23 @@ export async function lockFantasyGameweekAction(formData: FormData) {
               lineup: { members: copied },
               netTransferCount: 0,
               transferPoints: 0,
-            }),
-          ]);
+            });
+          }
         }
       }
     }
-  }
-  await db
-    .update(fantasyGameweeks)
-    .set({ status: "provisional", updatedAt: new Date() })
-    .where(eq(fantasyGameweeks.id, gameweek.id));
-  if (nextGameweek) {
-    await db
+    await tx
       .update(fantasyGameweeks)
-      .set({ status: "open", updatedAt: new Date() })
-      .where(eq(fantasyGameweeks.id, nextGameweek.id));
-  }
-  await recalculateGameweek(gameweek.id);
+      .set({ status: "provisional", updatedAt: new Date() })
+      .where(eq(fantasyGameweeks.id, gameweek.id));
+    if (nextGameweek) {
+      await tx
+        .update(fantasyGameweeks)
+        .set({ status: "open", updatedAt: new Date() })
+        .where(eq(fantasyGameweeks.id, nextGameweek.id));
+    }
+    await recalculateGameweek(gameweek.id, tx);
+  });
   revalidatePath("/", "layout");
   revalidateFantasyPages();
 }
@@ -974,15 +1012,28 @@ export async function lockFantasyGameweekAction(formData: FormData) {
 export async function finalizeFantasyGameweekAction(formData: FormData) {
   await requireAdmin();
   const gameweekId = String(formData.get("gameweekId") ?? "");
-  await db
-    .update(fantasyGameweeks)
-    .set({
-      status: "final",
-      scoreComplete: true,
-      finalizedAt: new Date(),
-      updatedAt: new Date(),
-    })
-    .where(eq(fantasyGameweeks.id, gameweekId));
-  await recalculateGameweek(gameweekId);
+  await transactionDb.transaction(async (tx) => {
+    const gameweekRows = await tx
+      .select()
+      .from(fantasyGameweeks)
+      .where(eq(fantasyGameweeks.id, gameweekId))
+      .for("update")
+      .limit(1);
+    const gameweek = gameweekRows[0];
+    if (!gameweek) throw new Error("Gameweek was not found.");
+    if (gameweek.status !== "provisional") {
+      throw new Error("Only a provisional Gameweek can be finalized.");
+    }
+    await tx
+      .update(fantasyGameweeks)
+      .set({
+        status: "final",
+        scoreComplete: true,
+        finalizedAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(fantasyGameweeks.id, gameweek.id));
+    await recalculateGameweek(gameweek.id, tx);
+  });
   revalidateFantasyPages();
 }

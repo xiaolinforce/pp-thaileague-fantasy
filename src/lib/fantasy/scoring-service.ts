@@ -2,7 +2,7 @@ import "server-only";
 
 import { and, eq, inArray } from "drizzle-orm";
 
-import { db } from "@/db";
+import { transactionDb } from "@/db/transaction";
 import {
   fantasyGameweeks,
   fantasyPlayerMatchPoints,
@@ -15,16 +15,24 @@ import {
 } from "@/db/schema";
 import { resolveTeamScore, type GameweekPlayerResult } from "./scoring.ts";
 
-export async function recalculateGameweek(fantasyGameweekId: string) {
-  const gameweek = await db.query.fantasyGameweeks.findFirst({
+type ScoringDatabase = Pick<
+  typeof transactionDb,
+  "query" | "select" | "insert"
+>;
+
+export async function recalculateGameweek(
+  fantasyGameweekId: string,
+  database: ScoringDatabase = transactionDb,
+) {
+  const gameweek = await database.query.fantasyGameweeks.findFirst({
     where: eq(fantasyGameweeks.id, fantasyGameweekId),
   });
   if (!gameweek) throw new Error("Fantasy Gameweek was not found.");
-  const season = await db.query.fantasySeasons.findFirst({
+  const season = await database.query.fantasySeasons.findFirst({
     where: eq(fantasySeasons.id, gameweek.fantasySeasonId),
   });
   if (!season) throw new Error("Fantasy season was not found.");
-  const fixtureRows = await db
+  const fixtureRows = await database
     .select({ id: fixtures.id })
     .from(fixtures)
     .where(
@@ -35,7 +43,7 @@ export async function recalculateGameweek(fantasyGameweekId: string) {
     );
   const fixtureIds = fixtureRows.map((fixture) => fixture.id);
   const pointRows = fixtureIds.length
-    ? await db
+    ? await database
         .select({
           stats: fantasyPlayerMatchStats,
           points: fantasyPlayerMatchPoints,
@@ -62,7 +70,7 @@ export async function recalculateGameweek(fantasyGameweekId: string) {
     resultByPlayer.set(row.stats.fantasyPlayerId, current);
   }
 
-  const selections = await db
+  const selections = await database
     .select()
     .from(fantasyTeamSelections)
     .where(
@@ -72,7 +80,7 @@ export async function recalculateGameweek(fantasyGameweekId: string) {
       ),
     );
   for (const selection of selections) {
-    const members = await db
+    const members = await database
       .select()
       .from(fantasyTeamSelectionPlayers)
       .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
@@ -89,7 +97,7 @@ export async function recalculateGameweek(fantasyGameweekId: string) {
       activeChip: selection.activeChip,
       transferPoints: selection.transferPoints,
     });
-    await db
+    await database
       .insert(fantasyTeamGameweekScores)
       .values({
         selectionId: selection.id,

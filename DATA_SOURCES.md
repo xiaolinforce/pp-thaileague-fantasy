@@ -123,6 +123,13 @@ creates Overall and Private Classic leagues. Before a four-tier ranking exists,
 demo selections remain empty; rerunning the seed after publication builds valid
 demo squads from the reviewed classifications.
 
+For the 2026/27 prototype, fixtures 49-56, 73-80, and 129-136 have curated
+simulated kickoff overrides because the upstream schedule supplied the pairings
+as time TBC. `db:apply:fixture-kickoffs` applies these values only while the
+stored kickoff is null, requires the exact Neon branch id when applying, and
+never replaces a confirmed imported kickoff. The overrides provide complete
+Gameweek deadlines until an official import supplies authoritative times.
+
 The seed recognizes a Thai nationality from normalized source text as an
 initial value only. Reviewed Thai-status and tier corrections belong in the
 Fantasy classification records and admin audit log; they must not be written
@@ -193,8 +200,10 @@ still joins the intended club.
 
 `npm run db:verify:fantasy` reports row counts and verifies every published
 ranking has complete contiguous ranks, exact configured tier totals, and tier
-rows consistent with its effective Gameweek. Keep pure rule and ranking
-invariants covered by `npm run test:rules`.
+rows consistent with its effective Gameweek. It also requires contiguous
+Gameweeks 1-30, at most one open Gameweek per Fantasy season, and an open
+Gameweek while planned weeks remain. Keep pure rule and ranking invariants
+covered by `npm run test:rules`.
 
 ## Adding a season
 

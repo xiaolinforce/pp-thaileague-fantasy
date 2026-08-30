@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "fantasy_gameweeks_one_open_per_season_unique" ON "fantasy_gameweeks" USING btree ("fantasy_season_id") WHERE "fantasy_gameweeks"."status" = 'open';

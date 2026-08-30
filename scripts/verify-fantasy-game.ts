@@ -45,6 +45,45 @@ async function verifyFantasyGame() {
     console.log(`${name}: ${result[0].count}`);
   }
 
+  const gameweekRows = await db
+    .select({
+      seasonId: fantasyGameweeks.fantasySeasonId,
+      number: fantasyGameweeks.number,
+      status: fantasyGameweeks.status,
+    })
+    .from(fantasyGameweeks)
+    .orderBy(
+      asc(fantasyGameweeks.fantasySeasonId),
+      asc(fantasyGameweeks.number),
+    );
+  for (const season of await db.select().from(fantasySeasons)) {
+    const seasonGameweeks = gameweekRows.filter(
+      (gameweek) => gameweek.seasonId === season.id,
+    );
+    if (
+      seasonGameweeks.length !== 30 ||
+      seasonGameweeks.some((gameweek, index) => gameweek.number !== index + 1)
+    ) {
+      throw new Error(
+        `Fantasy season ${season.slug} must contain contiguous Gameweeks 1-30.`,
+      );
+    }
+    const openGameweekCount = seasonGameweeks.filter(
+      (gameweek) => gameweek.status === "open",
+    ).length;
+    const hasPlannedGameweek = seasonGameweeks.some(
+      (gameweek) => gameweek.status === "planned",
+    );
+    if (
+      openGameweekCount > 1 ||
+      (openGameweekCount === 0 && hasPlannedGameweek)
+    ) {
+      throw new Error(
+        `Fantasy season ${season.slug} must have one open Gameweek until its schedule is exhausted.`,
+      );
+    }
+  }
+
   const tierDefinitions = await db
     .select()
     .from(fantasyTierDefinitions)
