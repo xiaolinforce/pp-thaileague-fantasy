@@ -4,6 +4,10 @@ export type ParsedPointsGameweek = {
   supplied: boolean;
 };
 
+export function hasGameweekDeadlinePassed(deadlineAt: Date, now: Date) {
+  return deadlineAt.getTime() <= now.getTime();
+}
+
 export function parsePointsGameweek(
   value: string | string[] | undefined,
 ): ParsedPointsGameweek {

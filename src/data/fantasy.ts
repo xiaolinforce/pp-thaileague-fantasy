@@ -24,6 +24,8 @@ import {
   players,
 } from "@/db/schema";
 import type { FantasyChip } from "@/lib/fantasy/rules";
+import { summarizeGameweekScores } from "@/lib/fantasy/points-presentation";
+import { hasGameweekDeadlinePassed } from "@/lib/fantasy/points-gameweek";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
@@ -262,9 +264,6 @@ export type PlayerPointsRow = {
 
 export type FantasyPointsGameweek = {
   number: number;
-  status: string;
-  scoreComplete: boolean;
-  hasScore: boolean;
 };
 
 export type FantasyPointsSquadMember = FantasySquadMember & {
@@ -286,16 +285,11 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       .select({
         selection: fantasyTeamSelections,
         gameweek: fantasyGameweeks,
-        scoreId: fantasyTeamGameweekScores.id,
       })
       .from(fantasyTeamSelections)
       .innerJoin(
         fantasyGameweeks,
         eq(fantasyTeamSelections.fantasyGameweekId, fantasyGameweeks.id),
-      )
-      .leftJoin(
-        fantasyTeamGameweekScores,
-        eq(fantasyTeamGameweekScores.selectionId, fantasyTeamSelections.id),
       )
       .where(
         and(
@@ -307,24 +301,19 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
   ]);
   if (!season) throw new Error("Fantasy season was not found.");
 
-  const defaultSelection =
-    [...selectionRows]
-      .reverse()
-      .find(
-        (row) =>
-          row.scoreId !== null ||
-          row.gameweek.status === "provisional" ||
-          row.gameweek.status === "final",
-      ) ??
-    selectionRows.find(
-      (row) => row.gameweek.id === activeFantasy.gameweek.id,
-    ) ??
-    selectionRows.at(-1);
+  const now = new Date();
+  const deadlinePassedSelections = selectionRows.filter((row) =>
+    hasGameweekDeadlinePassed(row.gameweek.deadlineAt, now),
+  );
+  const defaultSelection = deadlinePassedSelections.at(-1);
   const selected =
     (Number.isInteger(requestedGameweek) && requestedGameweek! > 0
-      ? selectionRows.find((row) => row.gameweek.number === requestedGameweek)
+      ? deadlinePassedSelections.find(
+          (row) => row.gameweek.number === requestedGameweek,
+        )
       : undefined) ?? defaultSelection;
-  if (!selected) throw new Error("No Fantasy selection was found.");
+  if (!selected)
+    throw new Error("No deadline-passed Fantasy selection was found.");
 
   const [fixtureRows, squadRows, teamScore, gameweekScoreRows] =
     await Promise.all([
@@ -475,34 +464,19 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       members,
     },
   };
-  const averagePoints = gameweekScoreRows.length
-    ? Math.round(
-        gameweekScoreRows.reduce((sum, score) => sum + score.totalPoints, 0) /
-          gameweekScoreRows.length,
-      )
-    : 0;
-  const highestPoints = gameweekScoreRows.reduce(
-    (highest, score) =>
-      score.selectionId === selected.selection.id
-        ? highest
-        : Math.max(highest, score.totalPoints),
-    0,
+  const gameweekSummary = summarizeGameweekScores(
+    gameweekScoreRows,
+    selected.selection.id,
   );
 
   return {
     fantasy,
-    gameweeks: selectionRows.map(({ gameweek, scoreId }) => ({
+    gameweeks: deadlinePassedSelections.map(({ gameweek }) => ({
       number: gameweek.number,
-      status: gameweek.status,
-      scoreComplete: gameweek.scoreComplete,
-      hasScore: scoreId !== null,
     })) satisfies FantasyPointsGameweek[],
     squad: members,
     players: [...byPlayer.values()],
-    gameweekSummary: {
-      averagePoints,
-      highestPoints,
-    },
+    gameweekSummary,
     teamScore: teamScore
       ? {
           status: teamScore.status,

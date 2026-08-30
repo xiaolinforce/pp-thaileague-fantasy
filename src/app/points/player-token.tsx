@@ -17,20 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import type { FantasyPointsSquadMember, PlayerPointsRow } from "@/data/fantasy";
 import { localize } from "@/lib/competition-types";
-
-const breakdownLabels: Record<string, { th: string; en: string }> = {
-  appearance: { th: "ลงสนาม", en: "Appearance" },
-  goals: { th: "ประตู", en: "Goals" },
-  assists: { th: "แอสซิสต์", en: "Assists" },
-  cleanSheet: { th: "คลีนชีต", en: "Clean sheets" },
-  saves: { th: "เซฟ", en: "Saves" },
-  penaltySaves: { th: "เซฟจุดโทษ", en: "Penalty saves" },
-  penaltyMisses: { th: "พลาดจุดโทษ", en: "Penalty misses" },
-  goalsConceded: { th: "เสียประตู", en: "Goals conceded" },
-  yellowCards: { th: "ใบเหลือง", en: "Yellow cards" },
-  redCards: { th: "ใบแดง", en: "Red cards" },
-  ownGoals: { th: "เข้าประตูตัวเอง", en: "Own goals" },
-};
+import { getBreakdownLabel } from "@/lib/fantasy/points-presentation";
 
 export function PointsPlayerToken({
   member,
@@ -163,7 +150,7 @@ export function PointsPlayerToken({
           </div>
           {detailRows.map(([key, value]) => (
             <div key={key}>
-              <span>{breakdownLabels[key]?.[language] ?? key}</span>
+              <span>{getBreakdownLabel(key, language)}</span>
               <strong>{value > 0 ? `+${value}` : value}</strong>
             </div>
           ))}

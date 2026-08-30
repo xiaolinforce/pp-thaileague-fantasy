@@ -1,10 +1,11 @@
-import { ShieldCheck } from "lucide-react";
+import { Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { getFantasyPointsState } from "@/data/fantasy";
 import { getFantasyNavigationAvailability } from "@/data/navigation";
 import { parsePointsGameweek } from "@/lib/fantasy/points-gameweek";
+import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
 import { PointsPlayerToken } from "./player-token";
 
@@ -91,10 +92,12 @@ export default async function PointsPage({
     points.fantasy.selection.activeChip === "triple_captain" ? 3 : 2;
   const playerContribution = (fantasyPlayerId: string) => {
     const rawPoints = resultByPlayer.get(fantasyPlayerId)?.totalPoints ?? 0;
-    return countedIds.has(fantasyPlayerId) &&
-      scoringCaptain?.fantasyPlayerId === fantasyPlayerId
-      ? rawPoints * captainMultiplier
-      : rawPoints;
+    return getDisplayedPlayerPoints({
+      rawPoints,
+      counted: countedIds.has(fantasyPlayerId),
+      isScoringCaptain: scoringCaptain?.fantasyPlayerId === fantasyPlayerId,
+      captainMultiplier,
+    });
   };
   const total = points.teamScore?.totalPoints ?? 0;
   const activeChipLabel =
@@ -140,47 +143,30 @@ export default async function PointsPage({
               <span>คะแนน</span>
             </article>
             <article className="points-score-card points-score-card--supporting">
-              <span>คะแนนสูงสุด</span>
-              <strong>{points.gameweekSummary.highestPoints}</strong>
-              <small>คะแนน</small>
+              <span>คะแนนสูงสุดของทีมอื่น</span>
+              <strong>
+                {points.gameweekSummary.highestOtherManagerPoints ?? "—"}
+              </strong>
+              <small>
+                {points.gameweekSummary.highestOtherManagerPoints === null
+                  ? "ยังไม่มีทีมเปรียบเทียบ"
+                  : "คะแนน"}
+              </small>
             </article>
           </section>
 
-          <section
-            className="points-accounting"
-            aria-label="รายละเอียดคะแนนรวม"
-          >
-            <div>
-              <span>คะแนนตัวจริง</span>
-              <strong>{points.teamScore?.lineupPoints ?? 0}</strong>
-            </div>
-            <div>
-              <span>โบนัสกัปตัน</span>
-              <strong>+{points.teamScore?.captainBonus ?? 0}</strong>
-            </div>
-            {points.fantasy.selection.activeChip === "bench_boost" ? (
-              <div>
-                <span>Bench Boost</span>
-                <strong>+{points.teamScore?.benchPoints ?? 0}</strong>
-              </div>
-            ) : null}
-            <div>
-              <span>หักคะแนน Transfer</span>
-              <strong>−{points.teamScore?.transferPoints ?? 0}</strong>
-            </div>
-            {activeChipLabel ? (
-              <div className="points-active-chip">
-                <span>Chip ที่ใช้</span>
-                <strong>{activeChipLabel}</strong>
-              </div>
-            ) : null}
-            <div className="points-accounting-total">
-              <span>คะแนน Gameweek รวม</span>
-              <strong>{total}</strong>
-            </div>
-          </section>
-
           <section className="product-card points-pitch-card">
+            {activeChipLabel ? (
+              <div className="points-chip-banner">
+                <span className="points-chip-banner__icon" aria-hidden="true">
+                  <Zap size={20} fill="currentColor" />
+                </span>
+                <span className="points-chip-banner__copy">
+                  <small>Chip ที่ใช้ใน Gameweek นี้</small>
+                  <strong>{activeChipLabel}</strong>
+                </span>
+              </div>
+            ) : null}
             <div
               className={`points-pitch${points.squad.length === 0 ? " is-empty" : ""}`}
             >
@@ -259,16 +245,6 @@ export default async function PointsPage({
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-
-            {autoSubstitutions.length > 0 && (
-              <div className="auto-sub-summary">
-                <ShieldCheck size={17} aria-hidden="true" />
-                <span>
-                  Auto-sub {autoSubstitutions.length} —
-                  สนามอัปเดตผู้เล่นตัวจริงแล้ว
-                </span>
               </div>
             )}
           </section>

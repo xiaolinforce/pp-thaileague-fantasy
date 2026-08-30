@@ -22,12 +22,6 @@ export function PointsGameweekSwitcher({
   const selectedIndex = gameweeks.findIndex(
     (gameweek) => gameweek.number === selected,
   );
-  const selectedGameweek = gameweeks[selectedIndex];
-  const scoreStatus = selectedGameweek?.scoreComplete
-    ? translate("คะแนนสุดท้าย")
-    : selectedGameweek?.hasScore
-      ? translate("คะแนนชั่วคราว")
-      : translate("ยังไม่มีคะแนน");
 
   const goToGameweek = (gameweek: number) => {
     startTransition(() => router.push(`/points?gw=${gameweek}`));
@@ -36,7 +30,7 @@ export function PointsGameweekSwitcher({
   return (
     <div
       className={`points-week-switcher${className ? ` ${className}` : ""}`}
-      aria-label={`${translate("เลือก Gameweek ปัจจุบันคือ")} ${selected}${scoreStatus ? `, ${scoreStatus}` : ""}`}
+      aria-label={`${translate("เลือก Gameweek ปัจจุบันคือ")} ${selected}`}
       aria-busy={isPending}
     >
       <button
@@ -49,7 +43,6 @@ export function PointsGameweekSwitcher({
       </button>
       <output className="points-week-current" aria-live="polite">
         <strong>Gameweek {String(selected).padStart(2, "0")}</strong>
-        <small>{scoreStatus}</small>
       </output>
       <button
         type="button"

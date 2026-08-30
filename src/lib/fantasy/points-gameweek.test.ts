@@ -1,7 +1,26 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { parsePointsGameweek } from "./points-gameweek.ts";
+import {
+  hasGameweekDeadlinePassed,
+  parsePointsGameweek,
+} from "./points-gameweek.ts";
+
+test("exposes a Gameweek only when its deadline has passed", () => {
+  const now = new Date("2026-08-31T12:00:00.000Z");
+  assert.equal(
+    hasGameweekDeadlinePassed(new Date("2026-08-31T11:59:59.999Z"), now),
+    true,
+  );
+  assert.equal(
+    hasGameweekDeadlinePassed(new Date("2026-08-31T12:00:00.000Z"), now),
+    true,
+  );
+  assert.equal(
+    hasGameweekDeadlinePassed(new Date("2026-08-31T12:00:00.001Z"), now),
+    false,
+  );
+});
 
 test("accepts an absent or positive canonical Gameweek query", () => {
   assert.deepEqual(parsePointsGameweek(undefined), {

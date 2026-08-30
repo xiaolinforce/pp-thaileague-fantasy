@@ -173,10 +173,11 @@ Enable Points when Gameweek 1 leaves `open`.
   squad revisions do not count as transfers.
 - In Gameweek 1, disable Wildcard and show that it becomes available from
   Gameweek 2. Enforce the same restriction on the server.
-- The Points screen uses URL-backed Gameweek selection and defaults to the most
-  recent Gameweek with provisional or final scoring. Use previous/next arrows
-  around a written Gameweek and scoring status instead of a dropdown. Its pitch
-  is read-only and shows the counted lineup after automatic substitutions. On
+- The Points screen uses URL-backed Gameweek selection, exposes only Gameweeks
+  whose deadlines have passed, and defaults to the most recent eligible
+  Gameweek. Use previous/next arrows around the written Gameweek number without
+  repeating score status in the selector. Its pitch is read-only and shows the
+  counted lineup after automatic substitutions without an auto-sub summary. On
   desktop, match the Team pitch-and-bench width and place the Gameweek selector
   above average, manager, and highest-other-manager points in one row to its
   right. Below the desktop breakpoint, keep those three scores in one row above
@@ -190,11 +191,10 @@ Enable Points when Gameweek 1 leaves `open`.
   visually distinct and also available as text or accessible labels.
 - Deadline and Gameweek status are consequential state. Display their timezone
   and status clearly before allowing squad changes.
-- Provisional and final points must never look identical without a written
-  status label.
-- Show the active chip and a written score calculation containing lineup,
-  captain bonus, counted Bench Boost points, transfer deduction, and final
-  Gameweek total whenever those values are available.
+- Show an active chip as one prominent written callout directly above the pitch.
+  Do not repeat a page-level score calculation above the pitch; show each
+  scoring captain's contribution already multiplied by two, or by three when
+  Triple Captain is active.
 - Point breakdowns should show positive and negative categories individually;
   do not expose only a total when the calculation is under review.
 - Administrative correction screens should show the affected fixture/player,

@@ -391,9 +391,12 @@ const translations: Record<string, string> = {
   โบนัสกัปตัน: "Captain bonus",
   "หักคะแนน Transfer": "Transfer deduction",
   "Chip ที่ใช้": "Active chip",
+  "Chip ที่ใช้ใน Gameweek นี้": "Chip used this Gameweek",
   "คะแนน Gameweek รวม": "Gameweek total",
   "สรุปคะแนน Gameweek": "Gameweek score summary",
   คะแนนเฉลี่ย: "Average score",
+  คะแนนสูงสุดของทีมอื่น: "Highest score by another manager",
+  ยังไม่มีทีมเปรียบเทียบ: "No other manager to compare",
   "ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้":
     "No squad has been saved for this Gameweek",
   "เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน":
