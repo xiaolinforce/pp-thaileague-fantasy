@@ -49,7 +49,9 @@ PP Thai League Fantasy เป็นผลิตภัณฑ์อิสระ �
 - ชื่อผลิตภัณฑ์คือ PP Thai League Fantasy
 - ผลิตภัณฑ์ต้องเป็น Thai-first และใช้คำศัพท์ Fantasy Football ที่ผู้ใช้เข้าใจได้
 - น้ำเสียงต้องชัดเจน ตรงไปตรงมา และไม่สร้างความเข้าใจผิดเกี่ยวกับสถานะ ความสามารถ การบันทึกข้อมูล หรือความสัมพันธ์อย่างเป็นทางการ
-- รายละเอียด visual identity และระบบ interface มีแหล่งอ้างอิงแยกต่างหากใน `DESIGN.md`
+- รายละเอียด visual identity และกฎระบบ interface อยู่ใน `DESIGN.md`, รูปแบบที่
+  พิสูจน์แล้วอยู่ใน `UI_PATTERNS.md` และสถานะการตรวจแต่ละ route อยู่ใน
+  `UI_REVIEW.md`
 
 ## Evidence on Hand
 

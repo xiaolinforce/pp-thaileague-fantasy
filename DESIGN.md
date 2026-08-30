@@ -1,39 +1,95 @@
 # Design guide
 
+## Purpose and ownership
+
+This document is the stable product-wide contract for PP Thai League Fantasy
+interface work. It owns product character, visual foundations, information
+hierarchy, responsive behavior, localization, accessibility, and shared
+interaction rules.
+
+Use the supporting documents for different levels of detail:
+
+- `UI_PATTERNS.md` records reusable interface patterns and the route-specific
+  contracts proven by the current reference implementations.
+- `UI_REVIEW.md` records route maturity, reachable-state coverage, review
+  evidence, and the remaining UI audit backlog.
+- `DOMAIN.md` owns Fantasy rules and lifecycle behavior. Design work must
+  represent those rules accurately rather than reinterpret them.
+
+Do not promote the incidental layout or styling of an unreviewed route into a
+product rule. Update this document only when a rule should apply across the
+product or across a defined page archetype.
+
+## Reference maturity
+
+`/team` and `/points` are the current reference implementations. They have been
+iteratively refined and establish the quality bar for hierarchy, density,
+responsive transformation, Fantasy identity, and state communication.
+
+They are evidence, not universal page templates:
+
+- Team is an interactive Fantasy workspace.
+- Points is a read-only Gameweek summary and detail surface.
+- Other routes have different tasks and may require different compositions.
+- A route marked `Unreviewed` in `UI_REVIEW.md` is not a source of design truth,
+  even when it already uses shared classes or components.
+
+Reference status does not exempt Team or Points from regression checks. New
+states, languages, or viewport behavior must still be verified.
+
 ## Product character
 
-PP Thai League Fantasy should feel like a credible Thai football product: energetic,
-competitive, and warm, while remaining clear enough for repeated squad and
-score-management tasks. The interface combines a dark match-night shell with
-bright orange actions and clean white working surfaces.
+PP Thai League Fantasy should feel like a credible Thai football product:
+energetic, competitive, warm, and dependable during repeated squad and score
+management.
 
 The product is a game interface rather than a generic analytics dashboard.
-Prioritize the manager's current Gameweek, deadline, squad state, and next
-action over decorative statistics.
+Prioritize the manager's current task, consequential Gameweek state, and next
+action over decorative statistics. Football visuals should improve scanning
+and comprehension without competing with names, positions, points, deadlines,
+or controls.
 
-## Visual direction
+## Experience principles
+
+1. **Lead with the task.** Make the immediate purpose and consequential state
+   clear before supporting content.
+2. **Create one reading path.** Use hierarchy, spacing, and grouping so the user
+   can tell what to inspect, decide, and do next.
+3. **Keep actions local.** Place the primary action next to the state it changes
+   and avoid competing primary actions inside one local task.
+4. **Expose consequences.** Deadlines, transfer deductions, lifecycle status,
+   destructive actions, and irreversible effects require written explanation.
+5. **Transform responsively.** Recompose, stack, tab, disclose, or scroll a
+   surface when space changes; do not merely shrink the desktop layout.
+6. **Design every reachable state.** Empty, loading, pending, disabled, error,
+   success, and read-only states are part of the experience, not exceptions.
+7. **Use domain identity consistently.** Kits, positions, tiers, nationality,
+   captaincy, chips, and Gameweek status should mean the same thing everywhere.
+8. **Prefer evidence over imitation.** Extract reusable principles from the
+   reference routes instead of copying their route-specific composition.
+
+## Visual foundations
+
+### Color and surfaces
 
 - Orange is the signature color for primary actions, selected states, points
-  emphasis, and the brand mark.
-- Deep navy anchors the fixed desktop sidebar and dark sports surfaces.
-- Warm gray is the page canvas; white cards separate active work areas.
-- Green communicates positive or completed states; red is reserved for errors
-  and destructive or negative states.
+  emphasis, focus, and the brand mark.
+- Deep navy anchors the application shell and dark match-night surfaces.
+- Warm gray is the page canvas; white surfaces separate active work areas.
+- Green communicates positive or completed states. Red is reserved for errors,
+  destructive actions, and negative states.
 - Cards use generous rounded corners, fine neutral borders, and restrained
-  shadows.
+  shadows. A card must express a meaningful task or grouping; do not wrap every
+  subsection in another card.
 - Club identity appears through curated four-color kit patterns. It supplements
-  written club identity and must not be the only identifier.
-- Player and football visuals should support scanning and squad comprehension,
-  not compete with names, positions, points, or controls.
+  written club identity and must never be the only identifier.
 
-## Tokens and typography
-
-The primary tokens live in `src/app/globals.css`:
+The primary semantic tokens live in `src/app/globals.css`:
 
 | Token                                          | Current role                                |
 | ---------------------------------------------- | ------------------------------------------- |
 | `--orange` / `--orange-deep` / `--orange-soft` | Brand, actions, focus, and selected states. |
-| `--navy`                                       | Sidebar and dark sports surfaces.           |
+| `--navy`                                       | Shell and dark sports surfaces.             |
 | `--ink`                                        | Primary text.                               |
 | `--muted`                                      | Supporting text.                            |
 | `--warm`                                       | Application canvas and secondary surfaces.  |
@@ -41,239 +97,183 @@ The primary tokens live in `src/app/globals.css`:
 | `--line`                                       | Borders and separators.                     |
 | `--green` / `--green-dark`                     | Positive and confirmed states.              |
 
-Use semantic variables and shared component variants instead of adding
-mode-specific or feature-specific hard-coded colors. The current product has
-one light working canvas with a dark sidebar; dark mode is not implemented.
+Use semantic variables and shared variants instead of feature-specific
+hard-coded colors. The current product has a light working canvas with a dark
+shell; dark mode is not implemented.
 
-Mitr is loaded through `next/font` for Thai and Latin text. The root size is
-16px with a 1.5 line height. Preserve readable Thai line height and avoid
-uppercase-dependent meaning. Small labels may be 12px, supporting text 14px,
-and primary reading text 16px or larger. Scores and numeric comparisons should
-use stable alignment and tabular numerals where practical.
+### Typography and data
 
-## Application shell
+Mitr is loaded through `next/font` for Thai and Latin text. Preserve readable
+Thai line height and never rely on uppercase styling to communicate meaning.
+The root reading size is 16px with a 1.5 line height. Compact metadata may use
+12–14px only when it remains legible and is not the sole carrier of a critical
+message.
 
-Desktop uses a fixed 238px navy sidebar and a flexible main canvas. The sidebar
-contains the brand, primary Fantasy navigation, support/settings links, and the
-current session's team identity. Below the desktop breakpoint, preserve this
-same full navigation in a left drawer, opened from a navy Top bar with a
-hamburger control. Reuse `AppShell` and `PageHeader` for product routes.
+Names and labels must tolerate Thai and English expansion. Numeric comparisons
+should use stable alignment and tabular numerals where practical. Truncation is
+acceptable only when the full value remains available through context such as
+a title, accessible name, or detail view.
 
-## Account onboarding
+## Application shell and navigation
 
-The root route presents one compact card with the available actions in this
-order: Guest play, Google, then Email. Keep this screen decision-oriented: the
-hero uses one headline and one supporting sentence, and the action panel avoids
-repeating marketing benefits. Selecting Email replaces the three choices inside
-the same card with the passwordless Email OTP form; a Back action restores the
-choice list without navigating to another route. Guest is the orange primary
-trial action with a person icon and no acknowledgement checkbox. Keep the
-compact TH/EN language switch at the top right of the hero and connect it to the
-same stored preference as the product shell without letting it compete with the
-primary authentication actions. Use an orange-led hero and a warm off-white
-action canvas; the hero starts with the prominent product name instead of
-repeating the full shell brand lockup. The onboarding page explicitly uses Mitr
-for all Thai and Latin copy. A low-contrast football-pitch line pattern may
-support the hero, but it remains decorative behind readable text.
+Reuse `AppShell` and `PageHeader` for authenticated product routes.
 
-Email OTP must visibly expose a labelled email field, Turnstile state, a
-separate labelled six-digit field after sending, disabled/pending states, and a
-plain failure message. The production UI hides methods whose complete provider
-configuration is not enabled. Guest profiles expose an upgrade action; member
-profiles expose sign-out and naming controls. Do not make a Guest name field
-appear editable.
+- Desktop uses a fixed 238px navy sidebar and a flexible main canvas.
+- Mobile and Tablet use a navy Top bar with a hamburger that opens the same full
+  navigation in a left drawer.
+- The drawer preserves primary navigation, support/settings destinations, and
+  the current manager identity. Compact modes must not remove information that
+  Desktop users can reach.
+- The active route is identified structurally and in text treatment, not by
+  color alone.
+- Points remains directly below Team. While Gameweek 1 is `open`, Points is a
+  disabled, non-navigable item and direct `/points` requests return to Team.
+- Preserve visible keyboard focus in both white and navy contexts and provide a
+  skip link to the main content.
 
-Below the desktop breakpoint, navigation is initially hidden in the left drawer
-and opens from the Top bar hamburger. Keep all primary navigation, support,
-settings, and manager identity in the drawer so that mobile and tablet preserve
-the desktop information architecture.
+## Page anatomy and archetypes
 
-The active route must be identified by text treatment and structure, not color
-alone. Page headings should state both the section and the immediate purpose of
-the screen before cards or tables begin.
+Every page should establish, in this order when applicable:
 
-Keep Points directly below Team in the main navigation. While Gameweek 1 is
-`open`, render Points as a disabled, non-navigable item in both the desktop
-sidebar and compact drawer, and redirect direct `/points` requests to Team.
-Enable Points when Gameweek 1 leaves `open`.
+1. semantic page identity and immediate purpose;
+2. consequential status, deadline, or scope selector;
+3. the primary task or primary result;
+4. supporting comparison, explanation, or secondary actions;
+5. a clear recovery path for empty or failed states.
+
+Choose a composition for the route's task rather than defaulting to a dashboard
+grid:
+
+| Archetype             | Current route    | Composition priority                                                  |
+| --------------------- | ---------------- | --------------------------------------------------------------------- |
+| Authentication flow   | `/`, `/upgrade`  | One decision at a time, provider availability, recovery, reassurance. |
+| Interactive workspace | `/team`          | State and deadline, primary work area, local actions, validation.     |
+| Summary and detail    | `/points`        | Scope selector, primary result, comparisons, inspectable breakdown.   |
+| Data browser          | `/fixtures`      | Filters, chronological grouping, scan-friendly rows, empty results.   |
+| Ranking/community     | `/leagues`       | League context, rank, identity, sortable/comparable standings.        |
+| Settings and reading  | `/profile`       | Clear sections, form ownership, save feedback, readable rules.        |
+| Operational tool      | `/admin/fantasy` | Safe task grouping, affected records, consequences, audit context.    |
+
+Only Team and Points currently have reference status. The other archetypes are
+working hypotheses until their routes receive rendered review and the status is
+updated in `UI_REVIEW.md`.
 
 ## Components and interaction
 
-- Use shared primitives under `src/components/ui` for buttons, dialogs, sheets,
+- Use primitives under `src/components/ui` for buttons, dialogs, sheets,
   popovers, selects, toggles, tooltips, toasts, skeletons, and alerts.
-- Use the shared `product-dialog` shell for product modals and dismissible
-  confirmations. Navigation warnings may be closed with their cancel action,
-  close button, Escape, or an outside press without discarding local changes.
-- Use fantasy components for domain identity such as position badges, kits,
-  players, clubs, and Gameweek controls.
-- Keep the primary action close to the state it changes. Disable it while a
-  mutation is pending and provide a clear success or failure result.
+- Use components under `src/components/fantasy` for shell, data states, kits,
+  player and club identity, position, tier, nationality, and Gameweek controls.
+- Do not create a parallel component or token system for an individual route.
+- Use the shared `product-dialog` treatment for product modals and dismissible
+  confirmations. Dialogs need a title, an understandable close path, keyboard
+  behavior, and a layout that survives narrow viewports.
+- Disable a control while its mutation is pending and communicate progress in
+  text. Preserve useful content during transient refreshes where possible.
 - Confirm transfers and consequential administrative changes before applying
-  them. Explain point deductions or irreversible effects in the confirmation.
-- Search, filter, view mode, and Gameweek selection must retain visible labels
-  or accessible names.
-- Preserve previous useful content during transient refreshes where possible;
-  do not replace a populated screen with an unexplained blank state.
-- Tables should align numeric columns, expose written headers, and support
-  horizontal scrolling on narrow screens rather than crushing values.
+  them. Explain deductions or irreversible effects inside the confirmation.
+- Search, filter, sort, view mode, and Gameweek controls require visible labels
+  or accessible names and a clear selected state.
+- Tables use written headers, align numeric columns, and may scroll
+  horizontally when the data is genuinely tabular. Do not crush values into an
+  unreadable pseudo-table.
+- Progressive disclosure is appropriate for supporting controls or detail, not
+  for hiding a required next action or a consequential warning.
 
-## Fantasy-specific presentation
+See `UI_PATTERNS.md` before introducing or changing a reusable composition.
 
-- The Team screen always represents the one Gameweek currently open for squad
-  changes. Show its number and live deadline without previous/next Gameweek
-  controls; historical squads belong on the Points screen.
-- Keep lineup management and player transfers visible in one Team workspace. On
-  desktop, show the pitch and market side by side. Below the desktop breakpoint,
-  provide a two-tab control before the workspace for switching between Squad
-  Players and Player Market, preserving each view's state while the other is
-  hidden. The body of a vacant squad slot
-  is non-interactive and does not move focus or filter the market, while its
-  compact swap action can move the vacancy within the lineup. During an active
-  swap, a valid vacant target becomes interactive and receives the same visible
-  target treatment as a valid player.
-  Keep players who are already in the current draft visible in the market,
-  identify them accessibly as owned, and expose remove instead of transfer-in.
-  A removed player remains eligible to be selected again while the change is
-  unsaved.
-- Expose swap and remove as compact, icon-only actions on every pitch and bench
-  player, with accessible names. Removing a player keeps that lineup slot as a
-  visible position-locked vacancy without selecting it or moving focus to the
-  market. A vacancy exposes only the swap action outside swap mode. Every player
-  and vacancy can initiate a swap with another player or vacancy, including
-  across positions when the resulting formation and bench structure remain
-  valid. A compatible market
-  player fills the first matching vacancy directly; the manager does not need to
-  choose a destination slot first. Saving stays disabled until every vacancy is
-  filled.
-- Show nationality on each pitch and bench player's name frame with 4px
-  left-and-right accents only: Thai-flag colors for Thai players and purple for
-  foreign players. Place the captain or vice-captain marker above the left swap
-  action and the tier badge above the right remove action.
-- A newly provisioned team starts with all 15 pitch and bench slots visibly
-  vacant without an introductory message. Keep the untouched empty draft from
-  triggering an unsaved-change warning, and begin that warning only after the
-  first local selection. Partial squads remain local and cannot be saved.
-- Place a compact secondary auto-fill action beside the Player Market heading.
-  It fills only vacant slots from the full eligible pool, preserves current
-  players, assigns missing captaincy, and leaves the result unsaved and fully
-  editable. Disable it with written pending feedback while calculating, when
-  no vacancy remains, or after the deadline; do not make current market filters
-  alter its candidate pool.
-- Keep the Player Market filters in task order: club, then position and
-  nationality dropdowns, then tier and sort. Nationality offers all players,
-  Thai players, or foreign players and filters the visible market only.
-- Present the cumulative Level 1–3 limits above the Player Market as one compact
-  nine-dot meter grouped into three nominal slots per level. Fill each level's
-  nominal group from left to right, then let Level 2 and Level 3 overflow move
-  backward into unoccupied higher-level circles. Pair an over-limit meter with written status, and
-  keep the cumulative rule available from a keyboard- and touch-accessible
-  explanation control.
-- Show an infinity symbol instead of the stored free-transfer balance in
-  Gameweek 1, with an accessible unlimited-transfer label, because opening
-  squad revisions do not count as transfers.
-- In Gameweek 1, disable Wildcard and show that it becomes available from
-  Gameweek 2. Enforce the same restriction on the server.
-- The Points screen uses URL-backed Gameweek selection, exposes only Gameweeks
-  whose deadlines have passed, and defaults to the most recent eligible
-  Gameweek. Use previous/next arrows around the written Gameweek number without
-  repeating score status in the selector. Its pitch is read-only and shows the
-  counted lineup after automatic substitutions without an auto-sub summary. On
-  desktop, match the Team pitch-and-bench width and place the Gameweek selector
-  above average, manager, and highest points in one row to its
-  right. Below the desktop breakpoint, keep those three scores in one row above
-  the pitch. Open
-  each player's per-category breakdown in the shared product dialog from the
-  pitch or bench instead of repeating a page-level details table.
-- Average and highest points are persisted Gameweek summaries. Both include
-  every scored team whose locked selection contains at least one player; the
-  signed-in team is not excluded. Show zero for both values before any eligible
-  team has a score.
-- Always pair a player name with enough identity to distinguish position and
-  club. Tier and Thai/foreign status should be visible wherever they affect a
-  selection decision.
-- Starting eleven, bench order, captain, vice-captain, and active chip must be
-  visually distinct and also available as text or accessible labels.
-- Deadline and Gameweek status are consequential state. Display their timezone
-  and status clearly before allowing squad changes.
-- Show an active chip as one prominent written callout directly above the pitch.
-  Do not repeat a page-level score calculation above the pitch; show each
-  scoring captain's contribution already multiplied by two, or by three when
-  Triple Captain is active.
-- Point breakdowns should show positive and negative categories individually;
-  do not expose only a total when the calculation is under review.
-- Administrative correction screens should show the affected fixture/player,
-  require a reason where the action supports one, and retain audit context.
+## State communication
+
+Derive reachable states from real data readers, actions, validation,
+authentication gates, and the lifecycle in `DOMAIN.md`. Do not invent
+production behavior merely to fill a design matrix.
+
+Design the applicable default, sparse, dense, empty, loading, pending, success,
+validation-error, server-error, disabled, and read-only states. Fantasy
+surfaces must also distinguish implemented `planned`, `open`, `provisional`,
+and `final` Gameweek behavior, incomplete and valid squads, captaincy, bench
+order, active chips, transfer deductions, no results, and corrected scoring.
+
+- State needs a written label or explanation; color and iconography are
+  supporting signals.
+- Empty states explain what is absent and, when possible, the next valid action.
+- Validation appears close to the affected task and preserves the user's work.
+- Server errors explain recovery without exposing secrets or implementation
+  details.
+- Disabled controls remain understandable; use adjacent copy, a title, or an
+  accessible description when the reason is not already obvious.
+- Prototype or simulated values must never be presented as live production
+  facts.
 
 ## Localization
 
-Thai is the source language and the initial HTML language. English is currently
-provided by `LanguageProvider`, which recursively translates Thai text with a
-client-side dictionary and stores the choice under `thai-fantasy-language`.
-When no preference exists, the browser language selects English only for an
-English-language browser; Thai is the fallback.
+Thai is the source language and initial HTML language. English is currently a
+client-side display preference provided by `LanguageProvider` and stored under
+`thai-fantasy-language`.
 
-This implementation is a prototype convenience, not a route-level i18n system:
+This is a prototype boundary:
 
-- there are no locale-prefixed URLs or localized server metadata;
-- the first server render is Thai before the client restores a preference;
-- dictionary replacement depends on the exact Thai source copy; and
-- Profile settings remain the persistent language preference. A temporary
-  floating language tester is also available throughout the app shell for
-  development: it can be dragged anywhere on screen and remembers its local
-  position. It is not a production navigation control and may be removed after
-  language testing; mobile users can always reach the persistent setting through
-  Profile.
+- URLs and server metadata are not locale-prefixed;
+- the first server render is Thai before a client preference is restored;
+- dictionary replacement depends on exact Thai source copy; and
+- Profile remains the persistent language setting. The floating language
+  tester is a temporary development aid, not production navigation.
 
-Until the localization architecture changes, add Thai source copy and its
-English dictionary entry in the same change. Never rely on automatic partial
-replacement for business-critical warnings without testing the rendered result.
+Add Thai source copy and its English dictionary entry in the same change. Test
+business-critical warnings and actions in both languages; do not rely on
+partial automatic replacement. Layouts must tolerate long Thai and English
+names, labels, numbers, and narrow containers.
 
 ## Responsive behavior
 
-- Use one shared three-mode responsive system across every route: Mobile below
-  768px, Tablet from 768px through 1279px, and Desktop from 1280px upward. These
-  modes have only two viewport cutoffs: 48rem and 80rem.
-- Mobile uses a navy Top bar with a left hamburger that opens the full sidebar
-  drawer, single-column task flows, compact spacing, and full-width controls
-  while preserving readable text and approximately 44px touch targets.
-- Tablet uses the same navy Top bar and full sidebar drawer, then stacks dense
-  primary regions. Two-column supporting grids are acceptable where their
-  content remains readable, but Team, Points, Fixtures, Profile, and
-  administration must not depend on desktop-width columns.
-- Desktop uses the full 238px sidebar and may place primary and supporting
-  regions side by side. The Team pitch and Player Market become side by side
-  only in this mode.
-- Use fluid sizing, `clamp()`, flexible Grid/Flex tracks, and container-aware
-  composition instead of introducing route-specific viewport breakpoints.
-- Use horizontal overflow for genuinely tabular or filter-strip content.
-- Touch targets should be approximately 44px high where practical.
+Use one shared three-mode system with two viewport cutoffs:
 
-Test at 360px and on both sides of the shared cutoffs: 767/768px and
-1279/1280px.
+| Mode    | Width                    | Product behavior                                                    |
+| ------- | ------------------------ | ------------------------------------------------------------------- |
+| Mobile  | below 48rem / 768px      | Top bar and drawer, single-column tasks, compact disclosure.        |
+| Tablet  | 48rem–79.999rem          | Top bar and drawer, stacked dense regions, selective support grids. |
+| Desktop | 80rem / 1280px and above | Full sidebar, wide comparison and workspace compositions.           |
+
+- Use fluid sizing, `clamp()`, flexible Grid/Flex tracks, and container-aware
+  composition instead of route-specific viewport breakpoints.
+- Mobile controls may become full-width; dense parallel workspaces may become
+  tabs; supporting controls may use an accessible accordion.
+- Use horizontal overflow only for genuinely tabular or filter-strip content.
+- Keep practical touch targets near 44px and avoid document-level horizontal
+  overflow.
+- Verify 360px and both sides of the shared cutoffs: 767/768px and
+  1279/1280px.
 
 ## Accessibility and motion
 
 - Use semantic headings, landmarks, lists, forms, and tables.
-- Every input requires a visible label; placeholders are supplemental.
-- Icon-only controls require an accessible name and an understandable focus
-  state.
-- Preserve visible keyboard focus in both white and navy contexts.
-- Never encode lineup role, status, result, or risk solely through color.
-- Dialogs, sheets, selects, toggles, and navigation must work with a keyboard.
-- Respect `prefers-reduced-motion` and avoid motion that is required to
-  understand state changes.
-- Loading, empty, error, disabled, pending, success, provisional, and final
-  states should be explicitly designed wherever applicable.
+- Every input has a visible label; placeholders are supplemental.
+- Icon-only controls require an accessible name and visible focus.
+- Never encode role, status, result, nationality, or risk solely through color.
+- Dialogs, sheets, selects, toggles, filters, and navigation work with a
+  keyboard and preserve a sensible focus path.
+- Keep reading and control order logical at every responsive composition.
+- Support zoom and text growth without clipping critical content or actions.
+- Respect `prefers-reduced-motion`; motion must not be necessary to understand a
+  state change.
+- Status updates use appropriate live regions or focus management without
+  producing duplicate or noisy announcements.
 
-## UI verification checklist
+## Verification contract
 
-Before handing off a visual change, confirm that it:
+Before handing off a visual change:
 
-- reuses the shell, shared primitives, tokens, typography, and domain identity
-  components;
-- works in Thai and English without clipped or untranslated critical copy;
-- remains usable at desktop, tablet, and 360px widths;
-- exposes keyboard focus and accessible labels;
-- distinguishes draft, pending, locked/provisional, final, success, and error
-  states as relevant; and
-- does not present prototype-only or simulated values as live production data.
+1. inspect the rendered route before editing;
+2. identify the route, state, language, and viewport represented by the review;
+3. verify Desktop and Mobile together, plus Tablet when composition changes;
+4. cover applicable empty, loading, pending, error, disabled, success, and
+   read-only states;
+5. verify Thai and English, long content, keyboard focus, and accessible names;
+6. confirm the route uses the shared shell, tokens, primitives, and domain
+   identity rather than a parallel system;
+7. record the result and remaining exclusions in `UI_REVIEW.md`; and
+8. remove any development-only simulation scaffolding before handoff.
+
+Passing automated checks does not replace rendered review. A route becomes a
+reference only after its core states and responsive compositions have evidence,
+not merely because its implementation is complete.

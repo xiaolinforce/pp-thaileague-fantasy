@@ -124,10 +124,13 @@ npm run build
 
 ## Project documentation
 
+- [Product](PRODUCT.md) — users, purpose, positioning, constraints, principles, and brand commitments.
 - [Architecture](ARCHITECTURE.md) — routes, boundaries, data/write flow, and persistence.
 - [Fantasy domain](DOMAIN.md) — vocabulary, squad rules, transfers, chips, scoring, and lifecycle.
 - [Data sources](DATA_SOURCES.md) — provenance, identifiers, import order, and verification.
-- [Design guide](DESIGN.md) — product character, UI system, localization, responsive, and accessibility rules.
+- [Design guide](DESIGN.md) — stable product-wide UI, localization, responsive, and accessibility rules.
+- [UI patterns](UI_PATTERNS.md) — reusable compositions and the Team/Points reference contracts.
+- [UI review status](UI_REVIEW.md) — route maturity, state inventory, evidence, and audit backlog.
 - [Development guide](DEVELOPMENT.md) — setup, commands, database workflow, and checks.
 - [Roadmap](ROADMAP.md) — current prototype, production blockers, next steps, and exclusions.
 - [Decision log](DECISIONS.md) — durable choices and their consequences.

@@ -4,6 +4,44 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-31 — UI guidance separates rules, patterns, and review evidence
+
+**Decision:** Treat `/team` and `/points` as the current design reference
+implementations without making their route-specific layouts universal. Keep
+product-wide interface rules in `DESIGN.md`, proven reusable compositions and
+reference-route contracts in `UI_PATTERNS.md`, and route maturity, state
+coverage, evidence, and audit backlog in `UI_REVIEW.md`. Mark every other
+current route `Unreviewed` until a rendered pass supports a stronger status.
+
+**Context:** The prior design guide mixed global foundations, shared patterns,
+and detailed Team/Points behavior. Existing but unreviewed routes could
+therefore be mistaken for design precedent, while copying the dense Fantasy
+workspace layout would not suit authentication, ranking, settings, data
+browsing, or operational tasks.
+
+**Consequences:** New UI work starts from the route's task archetype and the
+shared design contract, uses Team and Points as a quality bar, and records
+rendered evidence before promoting a route or pattern. Documentation-only
+status does not claim that an unreviewed route is defective, and reference
+status does not remove regression testing.
+
+## 2026-08-31 — Compact navigation uses a Top bar and full drawer
+
+**Decision:** Keep the shared Mobile, Tablet, and Desktop cutoffs at 48rem and
+80rem. Desktop uses the full 238px sidebar. Both Mobile and Tablet use a navy
+Top bar whose hamburger opens the complete navigation, support/settings links,
+and manager identity in a left drawer.
+
+**Context:** The implemented shell now preserves the full Desktop information
+architecture in compact modes. The earlier decision described bottom
+navigation on Mobile and an icon sidebar on Tablet, which no longer matched the
+shell or the current design guide.
+
+**Consequences:** Do not reintroduce bottom navigation or a Tablet-only icon
+sidebar without a new product decision. Responsive route layouts still use the
+same two shared cutoffs, with local adaptation through Grid, Flexbox, fluid
+sizing, tabs, disclosure, or container-aware composition.
+
 ## 2026-08-31 — Gameweek score summaries are persisted
 
 **Decision:** Persist rounded average points and highest points on each Fantasy
@@ -36,6 +74,10 @@ whole operation back. Transactional scoring accepts the active transaction
 client rather than opening an unrelated database session.
 
 ## 2026-08-26 — The interface uses three shared responsive modes
+
+**Navigation treatment superseded on 2026-08-31:** The 48rem and 80rem cutoffs
+remain. Mobile and Tablet now use the shared Top bar and full left drawer;
+Desktop retains the full sidebar.
 
 **Decision:** Use Mobile below 768px, Tablet from 768px through 1279px, and
 Desktop from 1280px upward across every route. Implement these as two shared

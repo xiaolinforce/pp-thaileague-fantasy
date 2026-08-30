@@ -15,13 +15,16 @@ backed by Neon Postgres. Before making a material change, read the documents
 that own the affected concern:
 
 1. `README.md` for product scope, routes, setup, and documentation links.
-2. `ARCHITECTURE.md` for runtime boundaries, data/write flow, and persistence.
-3. `DOMAIN.md` for the implemented Fantasy rules and Gameweek lifecycle.
-4. `DATA_SOURCES.md` for provenance, source identifiers, imports, and seed order.
-5. `DESIGN.md` for UI, localization, responsive, and accessibility rules.
-6. `DEVELOPMENT.md` for commands, migrations, verification, and documentation ownership.
-7. `ROADMAP.md` to distinguish current prototype scope from production-ready behavior.
-8. `DECISIONS.md` before revisiting a durable technical or product choice.
+2. `PRODUCT.md` for users, purpose, positioning, constraints, principles, and brand commitments.
+3. `ARCHITECTURE.md` for runtime boundaries, data/write flow, and persistence.
+4. `DOMAIN.md` for the implemented Fantasy rules and Gameweek lifecycle.
+5. `DATA_SOURCES.md` for provenance, source identifiers, imports, and seed order.
+6. `DESIGN.md` for product-wide UI, localization, responsive, and accessibility rules.
+7. `UI_PATTERNS.md` for reusable compositions and the Team/Points reference contracts.
+8. `UI_REVIEW.md` for route maturity, reachable-state coverage, evidence, and audit priority.
+9. `DEVELOPMENT.md` for commands, migrations, verification, and documentation ownership.
+10. `ROADMAP.md` to distinguish current prototype scope from production-ready behavior.
+11. `DECISIONS.md` before revisiting a durable technical or product choice.
 
 ## Non-negotiable rules
 
@@ -43,6 +46,10 @@ that own the affected concern:
   prototype boundary, not route-level i18n.
 - Reuse the existing application shell, tokens, UI primitives, responsive
   navigation, focus behavior, and loading/error patterns.
+- Treat `/team` and `/points` as the current design reference implementations.
+  Do not treat an `Unreviewed` route in `UI_REVIEW.md` as design precedent, and
+  do not copy Team/Points route-specific geometry into a different page
+  archetype.
 - Do not use `src/lib/fantasy-data.ts` as a new runtime source. Runtime pages
   read through server-only modules under `src/data`.
 - Do not enable production demo writes or expose `/admin/fantasy` as a trusted
@@ -64,5 +71,5 @@ npm run build
 
 For import or seed changes, also run the relevant database verification against
 the intended development branch. Update the owning context document in the same
-change whenever scope, architecture, rules, sources, design, workflow, roadmap,
-or a durable decision changes.
+change whenever scope, architecture, rules, sources, design, UI patterns or
+review evidence, workflow, roadmap, or a durable decision changes.

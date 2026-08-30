@@ -185,13 +185,16 @@ Also confirm as applicable:
 
 ## Documentation ownership
 
-| File              | Update when                                                                         |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| `README.md`       | Product orientation, current scope, routes, or quick start changes.                 |
-| `ARCHITECTURE.md` | Boundaries, routes, data flow, persistence, or security posture changes.            |
-| `DOMAIN.md`       | Fantasy vocabulary, rules, lifecycle, scoring, or ranking changes.                  |
-| `DATA_SOURCES.md` | Source IDs, mappings, normalization, import, or verification changes.               |
-| `DESIGN.md`       | Brand, tokens, localization, components, accessibility, or responsive rules change. |
-| `DEVELOPMENT.md`  | Toolchain, environment, commands, migration, or verification workflow changes.      |
-| `ROADMAP.md`      | Current scope, production blockers, next steps, or out-of-scope decisions change.   |
-| `DECISIONS.md`    | A durable choice is made whose alternatives are likely to be reconsidered.          |
+| File              | Update when                                                                                   |
+| ----------------- | --------------------------------------------------------------------------------------------- |
+| `README.md`       | Product orientation, current scope, routes, quick start, or documentation links change.       |
+| `PRODUCT.md`      | Users, purpose, positioning, constraints, principles, or brand commitments change.            |
+| `ARCHITECTURE.md` | Boundaries, routes, data flow, persistence, or security posture changes.                      |
+| `DOMAIN.md`       | Fantasy vocabulary, rules, lifecycle, scoring, or ranking changes.                            |
+| `DATA_SOURCES.md` | Source IDs, mappings, normalization, import, or verification changes.                         |
+| `DESIGN.md`       | Product-wide brand, hierarchy, localization, accessibility, or responsive rules change.       |
+| `UI_PATTERNS.md`  | A reusable composition or a Team/Points reference interaction changes.                        |
+| `UI_REVIEW.md`    | Route maturity, reachable-state coverage, evidence, exclusions, or audit priority changes.    |
+| `DEVELOPMENT.md`  | Toolchain, environment, commands, migration, verification, or documentation workflow changes. |
+| `ROADMAP.md`      | Current scope, production blockers, next steps, or out-of-scope decisions change.             |
+| `DECISIONS.md`    | A durable choice is made whose alternatives are likely to be reconsidered.                    |
