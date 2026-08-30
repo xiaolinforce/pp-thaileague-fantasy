@@ -2262,16 +2262,6 @@ textarea:focus-visible {
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    scroll-behavior: auto !important;
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-
 /* Shared multi-page product system */
 .side-nav a,
 .sidebar-bottom > a:not(.manager-card) {
@@ -4347,10 +4337,44 @@ textarea:focus-visible {
   flex: 1;
 }
 
+.points-accounting {
+  grid-area: accounting;
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--navy);
+}
+
+.points-accounting > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.points-accounting strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.points-active-chip {
+  padding-top: 6px;
+  border-top: 1px solid var(--line);
+}
+
+.points-accounting-total {
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 15px !important;
+}
+
 .points-pitch-layout {
   grid-template-areas:
     "pitch gameweek"
-    "pitch scores";
+    "pitch scores"
+    "pitch accounting";
   grid-template-columns: minmax(560px, 1.2fr) minmax(360px, 0.8fr);
   grid-template-rows: 44px auto;
   column-gap: 20px;
@@ -4364,6 +4388,7 @@ textarea:focus-visible {
     grid-template-areas:
       "gameweek"
       "scores"
+      "accounting"
       "pitch";
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: 44px auto auto;
@@ -6274,6 +6299,7 @@ textarea:focus-visible {
   .points-pitch-layout {
     grid-template-areas:
       "scores"
+      "accounting"
       "pitch";
     grid-template-columns: 1fr;
     grid-template-rows: auto;
@@ -7710,5 +7736,49 @@ body {
   .squad-chip-toolbar__content {
     height: auto !important;
     padding: 10px 12px 12px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto !important;
+  }
+
+  .spin {
+    animation: none;
+  }
+
+  .modal-backdrop,
+  [data-slot="dialog-content"].product-dialog {
+    animation: fade-in 100ms linear;
+  }
+
+  .auth-choice-stack .auth-button,
+  .primary-button,
+  .player-token,
+  .squad-auto-fill-button,
+  .squad-token-shell,
+  .squad-token-action,
+  .chip-options button,
+  .floating-language-tester {
+    transition:
+      color 100ms linear,
+      border-color 100ms linear,
+      background-color 100ms linear,
+      box-shadow 100ms linear;
+  }
+
+  .auth-choice-stack .auth-button:not(:disabled):hover,
+  .primary-button:hover:not(:disabled),
+  .player-token:hover,
+  .squad-auto-fill-button:hover:not(:disabled),
+  .squad-token-shell:hover,
+  .squad-token-shell.swap-available,
+  .squad-token-shell.swap-available:hover,
+  .vacant-squad-token-shell.swap-available:hover,
+  .squad-token-action:hover:not(:disabled),
+  .chip-options button:hover:not(:disabled),
+  .floating-language-tester:hover {
+    transform: none;
   }
 }

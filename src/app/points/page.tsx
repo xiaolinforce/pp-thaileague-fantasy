@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { getFantasyPointsState } from "@/data/fantasy";
 import { getFantasyNavigationAvailability } from "@/data/navigation";
+import { parsePointsGameweek } from "@/lib/fantasy/points-gameweek";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
 import { PointsPlayerToken } from "./player-token";
 
@@ -23,9 +24,15 @@ export default async function PointsPage({
   if (!navigationAvailability.pointsEnabled) redirect("/team");
 
   const query = await searchParams;
-  const rawGameweek = Array.isArray(query.gw) ? query.gw[0] : query.gw;
-  const requestedGameweek = rawGameweek ? Number(rawGameweek) : undefined;
-  const points = await getFantasyPointsState(requestedGameweek);
+  const parsedGameweek = parsePointsGameweek(query.gw);
+  const points = await getFantasyPointsState(parsedGameweek.requested);
+  const isCanonicalGameweek =
+    parsedGameweek.canonical &&
+    (!parsedGameweek.supplied ||
+      points.fantasy.gameweek.number === parsedGameweek.requested);
+  if (!isCanonicalGameweek) {
+    redirect(`/points?gw=${points.fantasy.gameweek.number}`);
+  }
   const resultByPlayer = new Map(
     points.players.map((player) => [player.fantasyPlayerId, player]),
   );
@@ -90,6 +97,14 @@ export default async function PointsPage({
       : rawPoints;
   };
   const total = points.teamScore?.totalPoints ?? 0;
+  const activeChipLabel =
+    points.fantasy.selection.activeChip === "triple_captain"
+      ? "กัปตัน ×3"
+      : points.fantasy.selection.activeChip === "bench_boost"
+        ? "นับตัวสำรอง"
+        : points.fantasy.selection.activeChip === "wildcard"
+          ? "เปลี่ยนตัวอิสระ"
+          : null;
 
   return (
     <AppShell>
@@ -129,6 +144,40 @@ export default async function PointsPage({
               <strong>{points.gameweekSummary.highestPoints}</strong>
               <small>คะแนน</small>
             </article>
+          </section>
+
+          <section
+            className="points-accounting"
+            aria-label="รายละเอียดคะแนนรวม"
+          >
+            <div>
+              <span>คะแนนตัวจริง</span>
+              <strong>{points.teamScore?.lineupPoints ?? 0}</strong>
+            </div>
+            <div>
+              <span>โบนัสกัปตัน</span>
+              <strong>+{points.teamScore?.captainBonus ?? 0}</strong>
+            </div>
+            {points.fantasy.selection.activeChip === "bench_boost" ? (
+              <div>
+                <span>Bench Boost</span>
+                <strong>+{points.teamScore?.benchPoints ?? 0}</strong>
+              </div>
+            ) : null}
+            <div>
+              <span>หักคะแนน Transfer</span>
+              <strong>−{points.teamScore?.transferPoints ?? 0}</strong>
+            </div>
+            {activeChipLabel ? (
+              <div className="points-active-chip">
+                <span>Chip ที่ใช้</span>
+                <strong>{activeChipLabel}</strong>
+              </div>
+            ) : null}
+            <div className="points-accounting-total">
+              <span>คะแนน Gameweek รวม</span>
+              <strong>{total}</strong>
+            </div>
           </section>
 
           <section className="product-card points-pitch-card">

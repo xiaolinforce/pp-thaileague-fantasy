@@ -240,7 +240,10 @@ export default function ProfilePage() {
     setFormStatus("");
     try {
       const result = await updateFantasyNamesAction({ managerName, teamName });
-      const message = translate(result.message);
+      const message =
+        !result.ok && result.availableAt
+          ? `${translate("เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่")} ${new Intl.DateTimeFormat(language === "th" ? "th-TH" : "en-GB", { dateStyle: "medium" }).format(new Date(result.availableAt))}`
+          : translate(result.message);
       if (!result.ok) {
         setFormError(message);
         toast.error(message);

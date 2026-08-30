@@ -62,6 +62,7 @@ import {
   type LineupPlayer,
   type RuleViolation,
 } from "@/lib/fantasy/rules";
+import { getChipOptionState } from "@/lib/fantasy/chip-state";
 import {
   createEmptySquadDraft,
   getCompleteSelectionMembers,
@@ -256,21 +257,27 @@ function ChipOptions({
         ] as const
       ).map(([chip, label]) => {
         const isActive = activeChip === chip;
-        const isUnavailable =
-          chip === "wildcard" &&
-          gameweekNumber < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek;
+        const optionState = getChipOptionState({
+          chip,
+          gameweekNumber,
+          remaining: chipsRemaining[chip],
+        });
+        const isExhausted = optionState.reason === "exhausted";
+        const isUnavailable = optionState.reason === "not_started";
         return (
           <button
             type="button"
             key={chip}
             className={isActive ? "active" : ""}
-            disabled={interactionsDisabled || isUnavailable}
+            disabled={interactionsDisabled || optionState.disabled}
             aria-pressed={isActive}
             onClick={() => onChipSelect(chip)}
           >
             <span>{translate(label)}</span>
             <p>
-              {isUnavailable
+              {isExhausted
+                ? translate("ใช้ครบแล้ว")
+                : isUnavailable
                 ? translate("ใช้ได้ตั้งแต่ GW2")
                 : translate("เหลือใช้ {count} ครั้ง").replace(
                     "{count}",
@@ -873,13 +880,13 @@ export default function TeamClient({
 
   const saveTeam = () => {
     if (!isEditable) {
-      toast.error("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว");
+      toast.error(translate("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว"));
       return;
     }
     if (!completeSelectionMembers) return;
     if (captaincyValidationMessages.length > 0) {
-      toast.error("บันทึกทีมไม่ได้", {
-        description: captaincyValidationMessages.join(" · "),
+      toast.error(translate("บันทึกทีมไม่ได้"), {
+        description: captaincyValidationMessages.map(translate).join(" · "),
       });
       return;
     }
@@ -890,17 +897,18 @@ export default function TeamClient({
           activeChip,
         });
         if (result.ok) {
-          toast.success(result.message);
+          toast.success(translate(result.message));
           router.refresh();
         } else {
-          toast.error(result.message, {
-            description: result.violations?.join(" · "),
+          toast.error(translate(result.message), {
+            description: result.violations?.map(translate).join(" · "),
           });
         }
       } catch {
-        toast.error("บันทึกทีมไม่สำเร็จ", {
-          description:
+        toast.error(translate("บันทึกทีมไม่สำเร็จ"), {
+          description: translate(
             "การเปลี่ยนแปลงยังไม่ถูกบันทึก กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+          ),
         });
       }
     });

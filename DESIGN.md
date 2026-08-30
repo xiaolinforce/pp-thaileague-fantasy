@@ -131,8 +131,10 @@ Enable Points when Gameweek 1 leaves `open`.
   compact swap action can move the vacancy within the lineup. During an active
   swap, a valid vacant target becomes interactive and receives the same visible
   target treatment as a valid player.
-  Do not list players who are already in the current draft squad; a removed
-  player becomes eligible for the market again while the change is unsaved.
+  Keep players who are already in the current draft visible in the market,
+  identify them accessibly as owned, and expose remove instead of transfer-in.
+  A removed player remains eligible to be selected again while the change is
+  unsaved.
 - Expose swap and remove as compact, icon-only actions on every pitch and bench
   player, with accessible names. Removing a player keeps that lineup slot as a
   visible position-locked vacancy without selecting it or moving focus to the
@@ -190,6 +192,9 @@ Enable Points when Gameweek 1 leaves `open`.
   and status clearly before allowing squad changes.
 - Provisional and final points must never look identical without a written
   status label.
+- Show the active chip and a written score calculation containing lineup,
+  captain bonus, counted Bench Boost points, transfer deduction, and final
+  Gameweek total whenever those values are available.
 - Point breakdowns should show positive and negative categories individually;
   do not expose only a total when the calculation is under review.
 - Administrative correction screens should show the affected fixture/player,

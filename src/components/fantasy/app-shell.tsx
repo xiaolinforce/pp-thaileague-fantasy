@@ -89,7 +89,7 @@ function SidebarContent({
 }) {
   const { requestNavigation } = useNavigationBlocker();
   const { pointsEnabled } = useNavigationAvailability();
-  const { language } = useLanguage();
+  const { language, translate } = useLanguage();
   const pointsDisabledLabel =
     language === "th"
       ? "คะแนน — เปิดใช้งานหลัง Gameweek 1 ปิดรับจัดทีม"
@@ -122,7 +122,7 @@ function SidebarContent({
   return (
     <>
       <Brand />
-      <nav className="side-nav" aria-label="เมนูหลัก">
+      <nav className="side-nav" aria-label={translate("เมนูหลัก")}>
         {navigation.map(({ label, href, icon: Icon }) => {
           const active = pathname === href;
           const disabled = href === "/points" && !pointsEnabled;
@@ -138,7 +138,7 @@ function SidebarContent({
                 title={pointsDisabledLabel}
               >
                 <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
-                <span>{label}</span>
+                <span>{translate(label)}</span>
                 <LockKeyhole
                   className={styles.disabledNavigationLock}
                   strokeWidth={1.8}
@@ -157,7 +157,7 @@ function SidebarContent({
                 children: (
                   <>
                     <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
-                    <span>{label}</span>
+                    <span>{translate(label)}</span>
                     {active && <span className="nav-pip" />}
                   </>
                 ),
@@ -172,7 +172,7 @@ function SidebarContent({
           children: (
             <>
               <CircleHelp size={20} aria-hidden="true" />
-              <span>ช่วยเหลือ</span>
+              <span>{translate("ช่วยเหลือ")}</span>
             </>
           ),
         })}
@@ -181,7 +181,7 @@ function SidebarContent({
           children: (
             <>
               <Settings size={20} aria-hidden="true" />
-              <span>ตั้งค่า</span>
+              <span>{translate("ตั้งค่า")}</span>
             </>
           ),
         })}
@@ -192,9 +192,13 @@ function SidebarContent({
             <>
               <span className="manager-avatar">{initials}</span>
               <span>
-                <strong>{identity?.teamName ?? "บัญชีผู้เล่น"}</strong>
+                <strong>
+                  {identity?.teamName ?? translate("บัญชีผู้เล่น")}
+                </strong>
                 <small>
-                  {identity?.isGuest ? "ผู้เล่น Guest" : "ผู้จัดการทีม"}
+                  {identity?.isGuest
+                    ? translate("ผู้เล่น Guest")
+                    : translate("ผู้จัดการทีม")}
                 </small>
               </span>
               <ChevronRight size={16} aria-hidden="true" />
@@ -282,14 +286,17 @@ type PageHeaderProps = {
   actions?: ReactNode;
 };
 
-export function PageHeader({ actions }: PageHeaderProps) {
-  if (!actions) return null;
-
+export function PageHeader({ title, actions }: PageHeaderProps) {
   return (
     <Localized>
-      <section className="page-intro product-page-intro page-intro--actions-only">
-        <div className="intro-actions">{actions}</div>
-      </section>
+      <>
+        <h1 className="sr-only">{title}</h1>
+        {actions ? (
+          <section className="page-intro product-page-intro page-intro--actions-only">
+            <div className="intro-actions">{actions}</div>
+          </section>
+        ) : null}
+      </>
     </Localized>
   );
 }

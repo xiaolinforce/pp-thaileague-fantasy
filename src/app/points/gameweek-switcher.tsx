@@ -24,9 +24,9 @@ export function PointsGameweekSwitcher({
   );
   const selectedGameweek = gameweeks[selectedIndex];
   const scoreStatus = selectedGameweek?.scoreComplete
-    ? "Final"
+    ? translate("คะแนนสุดท้าย")
     : selectedGameweek?.hasScore
-      ? "Provisional"
+      ? translate("คะแนนชั่วคราว")
       : translate("ยังไม่มีคะแนน");
 
   const goToGameweek = (gameweek: number) => {
@@ -49,6 +49,7 @@ export function PointsGameweekSwitcher({
       </button>
       <output className="points-week-current" aria-live="polite">
         <strong>Gameweek {String(selected).padStart(2, "0")}</strong>
+        <small>{scoreStatus}</small>
       </output>
       <button
         type="button"

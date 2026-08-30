@@ -75,6 +75,9 @@ const translations: Record<string, string> = {
   การตั้งค่านี้จะถูกจดจำในอุปกรณ์เครื่องนี้:
     "This preference is saved on this device",
   ผู้จัดการทีม: "Manager",
+  บัญชีผู้เล่น: "Player account",
+  "ผู้เล่น Guest": "Guest player",
+  อันดับ: "Rank",
   ศูนย์สถิติ: "Stats Centre",
   การแจ้งเตือน: "Notifications",
   ข้ามไปยังเนื้อหาหลัก: "Skip to main content",
@@ -181,6 +184,52 @@ const translations: Record<string, string> = {
   ดูสถิติ: "View Stats",
   เลือกผู้เล่นนี้: "Select Player",
   บันทึกการจัดทีมแล้ว: "Team saved",
+  ยืนยันทีมใหม่แล้ว: "New squad confirmed:",
+  "เลย Deadline ของ Gameweek นี้แล้ว": "This Gameweek deadline has passed",
+  พบรายชื่อนักเตะซ้ำในทีม: "The squad contains duplicate players",
+  ทีมยังไม่ผ่านกติกา: "The squad does not meet the rules",
+  นักเตะหนึ่งคนอยู่ในทีมได้เพียงครั้งเดียว:
+    "Each player can appear in the squad only once",
+  "ทีมต้องมีนักเตะ 15 คน": "The squad must contain 15 players",
+  "จำนวนผู้เล่นตำแหน่ง goalkeeper ต้องเท่ากับ 2":
+    "The squad must contain 2 goalkeepers",
+  "จำนวนผู้เล่นตำแหน่ง defender ต้องเท่ากับ 5":
+    "The squad must contain 5 defenders",
+  "จำนวนผู้เล่นตำแหน่ง midfielder ต้องเท่ากับ 5":
+    "The squad must contain 5 midfielders",
+  "จำนวนผู้เล่นตำแหน่ง forward ต้องเท่ากับ 3":
+    "The squad must contain 3 forwards",
+  "เลือกผู้เล่นจากสโมสรเดียวกันได้ไม่เกิน 3 คน":
+    "Select no more than 3 players from one club",
+  "มีนักเตะต่างชาติได้ไม่เกิน 7 คน": "Select no more than 7 foreign players",
+  "ผู้เล่นระดับ 1–1 รวมกันได้ไม่เกิน 3 คน":
+    "Select no more than 3 Tier 1 players",
+  "ผู้เล่นระดับ 1–2 รวมกันได้ไม่เกิน 6 คน":
+    "Select no more than 6 players across Tiers 1–2",
+  "ผู้เล่นระดับ 1–3 รวมกันได้ไม่เกิน 9 คน":
+    "Select no more than 9 players across Tiers 1–3",
+  ไม่พบระดับ: "Tier",
+  ในกติกาฤดูกาลนี้: "is not defined in this season's rules",
+  นักเตะไม่เปิดให้เลือกในตลาด: "This player is not available in the market",
+  "ต้องเลือกตัวจริง 11 คนและตัวสำรอง 4 คน":
+    "Select 11 starters and 4 substitutes",
+  "ใช้ได้เพียงหนึ่ง Chip ต่อ Gameweek":
+    "Only one chip can be active in a Gameweek",
+  "Chip ชนิดนี้ใช้ได้ 2 ครั้งต่อฤดูกาล":
+    "This chip can be used twice per season",
+  ยกเลิกการเปลี่ยนแปลงและคืนโควต้าแล้ว:
+    "Changes cancelled and transfer allowance restored",
+  ไม่พบทีมตั้งต้นสำหรับยกเลิกการเปลี่ยนแปลง:
+    "No baseline squad is available to restore",
+  "ข้อมูลทีมตั้งต้นไม่ครบ 15 คน":
+    "The baseline squad does not contain 15 players",
+  นักเตะในทีมตั้งต้นบางคนไม่พร้อมให้เลือกแล้ว:
+    "Some players in the baseline squad are no longer eligible",
+  ทีมตั้งต้นไม่ผ่านกติกาปัจจุบัน:
+    "The baseline squad no longer meets the current rules",
+  เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่:
+    "The manager name can be changed again on",
+  ใช้ครบแล้ว: "All uses consumed",
   ดูข้อมูล: "View details for",
   "กำลังบันทึกทีม…": "Saving Team…",
   ยังไม่มีการเปลี่ยนแปลง: "No unsaved changes",
@@ -335,6 +384,14 @@ const translations: Record<string, string> = {
   "Gameweek ก่อนหน้า": "Previous Gameweek",
   "Gameweek ถัดไป": "Next Gameweek",
   ยังไม่มีคะแนน: "No points yet",
+  คะแนนชั่วคราว: "Provisional points",
+  คะแนนสุดท้าย: "Final points",
+  รายละเอียดคะแนนรวม: "Score calculation",
+  คะแนนตัวจริง: "Lineup points",
+  โบนัสกัปตัน: "Captain bonus",
+  "หักคะแนน Transfer": "Transfer deduction",
+  "Chip ที่ใช้": "Active chip",
+  "คะแนน Gameweek รวม": "Gameweek total",
   "สรุปคะแนน Gameweek": "Gameweek score summary",
   คะแนนเฉลี่ย: "Average score",
   "ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้":
