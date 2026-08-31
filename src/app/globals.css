@@ -2409,39 +2409,6 @@ textarea:focus-visible {
   opacity: 0.65;
 }
 
-.manager-menu-inline {
-  min-width: 0;
-}
-
-.manager-menu-inline .manager-menu-panel {
-  margin-top: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
-  overflow: hidden;
-}
-
-.manager-menu-inline .manager-menu-identity,
-.manager-menu-inline .manager-menu-actions {
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.manager-menu-inline .manager-menu-identity span,
-.manager-menu-inline .manager-menu-panel nav a,
-.manager-menu-inline .manager-menu-actions a,
-.manager-menu-inline .manager-menu-actions button {
-  color: #b8c1c6;
-}
-
-.manager-menu-inline .manager-menu-panel nav a:hover,
-.manager-menu-inline .manager-menu-actions a:hover,
-.manager-menu-inline .manager-menu-actions button:hover,
-.manager-menu-inline .manager-menu-panel nav a.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
 /* Compact navigation keeps the desktop information architecture while making
    room for the page task on touch-first viewports. */
 .compact-topbar {
@@ -5172,6 +5139,10 @@ textarea:focus-visible {
 }
 
 /* Fixtures and stats */
+.fixtures-view-tabs {
+  margin: 0 auto 24px;
+}
+
 .page-tabs button {
   display: flex;
   align-items: center;
@@ -8090,10 +8061,6 @@ textarea:focus-visible {
   .help-public-note {
     grid-column: auto;
   }
-
-  .manager-menu-inline .manager-card {
-    padding-inline: 6px;
-  }
 }
 
 /* Final type scale overrides — kept last so legacy component sizes cannot shrink body copy. */
@@ -9130,7 +9097,7 @@ body {
 
 .league-overall-copy > strong {
   color: #fff;
-  font-size: clamp(38px, 6vw, 74px);
+  font-size: 32px;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   letter-spacing: -0.04em;
@@ -9380,6 +9347,13 @@ body {
   color: #a19b94;
 }
 
+.league-private-empty-copy {
+  margin: 8px 0 0;
+  padding: 18px 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
 .league-private-empty > div {
   min-width: 0;
   flex: 1;
@@ -9398,6 +9372,14 @@ body {
 .league-dialog form {
   display: grid;
   gap: 18px;
+}
+
+.league-dialog [data-slot="dialog-footer"].league-dialog-footer {
+  margin: 4px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
 [data-slot="dialog-content"].league-standings-dialog {
@@ -9468,10 +9450,14 @@ body {
   margin-top: 18px;
 }
 
-.league-field span {
+.league-field > span {
   color: var(--ink);
   font-size: 14px;
   font-weight: 500;
+}
+
+.league-dialog .league-field > span {
+  color: var(--orange-deep);
 }
 
 .league-field input {
@@ -9526,6 +9512,12 @@ body {
 .league-form-message.error {
   color: #9d251c;
   background: #fff0ee;
+}
+
+.league-field > .league-form-message.error {
+  margin: 0;
+  padding: 0;
+  background: transparent;
 }
 
 .league-invite-preview {

@@ -14,10 +14,21 @@ const LEAGUE_INVITE_PATTERN = new RegExp(
 );
 
 export function validatePrivateLeagueName(value: string) {
-  return validateFantasyDisplayName(value, {
+  const result = validateFantasyDisplayName(value, {
     minLength: PRIVATE_LEAGUE_NAME_MIN_LENGTH,
     maxLength: PRIVATE_LEAGUE_NAME_MAX_LENGTH,
   });
+  if (
+    !result.ok &&
+    result.message ===
+      `ชื่อต้องมี ${PRIVATE_LEAGUE_NAME_MIN_LENGTH}–${PRIVATE_LEAGUE_NAME_MAX_LENGTH} ตัวอักษร`
+  ) {
+    return {
+      ok: false as const,
+      message: `ชื่อลีกต้องมี ${PRIVATE_LEAGUE_NAME_MIN_LENGTH}–${PRIVATE_LEAGUE_NAME_MAX_LENGTH} ตัวอักษร`,
+    };
+  }
+  return result;
 }
 
 export function normalizeLeagueInviteCode(value: string) {

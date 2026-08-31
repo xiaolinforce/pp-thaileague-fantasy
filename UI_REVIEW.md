@@ -214,7 +214,8 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   duplicated page framing/season label, and a prematurely reachable Stats tab.
   The Stats tab now stays disabled until the actual current Gameweek is beyond
   Gameweek 1; mobile fixture rows put the kickoff time beside two stacked team
-  names.
+  names. The Fixtures/Stats tabs are centered and separated from the Gameweek
+  panel at every supported width instead of overlapping its border.
 - **Known exclusions:** populated official and Fantasy tables, ties, dense
   filters, and large values were not rendered because neither live dataset has
   begun and no production mock path was added. Pure rules cover form, DNP,
@@ -243,18 +244,22 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   inside Client Components, user-name localization escape, 768/1280 table
   clipping, mobile metric visibility, and provisional-score explanation.
   The overview now leads with a rank-only Overall card labelled “อันดับทั้งหมด”
-  / “Overall ranking”; both Overall and Private League list entries open a
-  focused standings dialog instead of navigating away. The Overall dialog has
-  only the standings table plus paginated navigation, and the redundant empty,
-  member-count, score-note, and explanatory surfaces were removed.
-- **Known exclusions:** owner/member create, preview, join, rename, invite rotate,
-  remove, leave, delete, 100-member pagination, mutation errors, and final-score
-  UI were not rendered because the available browser session is a Guest and no
-  safe authenticated fixture exists. Server authorization, transaction limits,
+  / “Overall ranking” with a 32px rank; both Overall and Private League list
+  entries open a focused standings dialog instead of navigating away. The
+  Overall dialog now limits its table to rank, team/manager, and total, plus
+  paginated navigation. The Private section retains a concise bilingual empty
+  message without adding a second empty-state action. Create/Join dialogs use a
+  clean footer, orange labels, and field-level errors; invalid league names can
+  be submitted for validation without disabling the primary action.
+- **Known exclusions:** successful create, preview/join, rename, invite rotate,
+  remove, leave, delete, 100-member pagination, server mutation errors, and
+  final-score UI were not rendered to avoid mutating the signed-in development
+  account or manufacturing data. Server authorization, transaction limits,
   database invariants, TypeScript, lint, and rule tests cover the implementation
   pending that evidence.
-- **Evidence:** bounded in-app Browser captures in the 2026-08-31 implementation
-  task; no mock or simulation route was added.
+- **Evidence:** bounded in-app Browser captures for Guest/responsive states and
+  signed-in Chrome captures for the non-mutating create-validation state in the
+  2026-08-31 implementation task; no mock or simulation route was added.
 - **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
   `npm run db:verify:fantasy`, responsive Browser measurements, Thai/English
   rendered snapshots. The rank dialog, disabled-first-Gameweek Stats tab, and
@@ -273,15 +278,16 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 - **Language:** Thai and English, including Guest device persistence and return
   to Thai after review. Member preference is database-backed by a forward
   migration and Server Action.
-- **Viewports:** 1440px Desktop and 360px Mobile rendered; no document-level
-  horizontal overflow on Profile, Settings, or Rules.
+- **Viewports:** 1440px Desktop, 768px Tablet, and 360px Mobile rendered; no
+  document-level horizontal overflow on Profile, Settings, or Rules.
 - **Keyboard/accessibility:** one semantic manager-menu trigger, Desktop
-  popover, compact inline disclosure, native language radios, headings,
-  regions, contents navigation, accordion FAQ, focus treatment, and written
-  persistence status reviewed.
+  popover shared by Desktop, Tablet, and Mobile, native language radios,
+  headings, regions, contents navigation, accordion FAQ, focus treatment, and
+  written persistence status reviewed.
 - **Issues fixed:** unrelated hash-linked Profile sections, duplicate language
   controls, simulated notification/crest controls, duplicated rule constants,
-  missing public help path, Guest edit affordances, and non-atomic name writes.
+  missing public help path, Guest edit affordances, non-atomic name writes, and
+  the visually inconsistent inline manager menu at Tablet/Mobile widths.
 - **Known exclusions:** member rename success/error/rate-limit UI, member
   language reload, and sign-out failure were not rendered because the available
   Browser identity is a Guest and no production mock path was added.

@@ -25,8 +25,7 @@ import { useRef, useState, type FormEvent, type ReactNode } from "react";
 import type { getLeagueDetail, getLeagueOverview } from "@/data/leagues";
 import {
   normalizeLeagueInviteCode,
-  PRIVATE_LEAGUE_NAME_MAX_LENGTH,
-  PRIVATE_LEAGUE_NAME_MIN_LENGTH,
+  validatePrivateLeagueName,
 } from "@/lib/fantasy/leagues";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import {
@@ -42,7 +41,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -78,10 +76,12 @@ function PendingIcon() {
 }
 
 function FormMessage({
+  id,
   message,
   error,
   messageRef,
 }: {
+  id?: string;
   message: string;
   error?: boolean;
   messageRef?: React.RefObject<HTMLParagraphElement | null>;
@@ -89,6 +89,7 @@ function FormMessage({
   if (!message) return null;
   return (
     <p
+      id={id}
       ref={messageRef}
       className={error ? "league-form-message error" : "league-form-message"}
       role={error ? "alert" : "status"}
@@ -118,6 +119,12 @@ function CreateLeagueDialog({
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (pending) return;
+    const validation = validatePrivateLeagueName(name);
+    if (!validation.ok) {
+      setError(translate(validation.message));
+      window.requestAnimationFrame(() => errorRef.current?.focus());
+      return;
+    }
     setPending(true);
     setError("");
     const result = await createPrivateLeagueAction({ name });
@@ -141,28 +148,28 @@ function CreateLeagueDialog({
           <form onSubmit={submit}>
             <DialogHeader>
               <DialogTitle>สร้างลีกส่วนตัว</DialogTitle>
-              <DialogDescription>
-                ตั้งชื่อลีกสำหรับกลุ่มของคุณ ระบบจะสร้างรหัสเชิญ 8 ตัวให้ทันที
-              </DialogDescription>
             </DialogHeader>
             <label className="league-field">
               <span>ชื่อลีก</span>
               <input
                 value={name}
-                onChange={(event) => setName(event.target.value)}
-                minLength={PRIVATE_LEAGUE_NAME_MIN_LENGTH}
-                maxLength={PRIVATE_LEAGUE_NAME_MAX_LENGTH}
+                onChange={(event) => {
+                  setName(event.target.value);
+                  setError("");
+                }}
                 autoComplete="off"
-                required
                 disabled={pending}
-                aria-describedby="create-league-hint"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "create-league-error" : undefined}
               />
-              <small id="create-league-hint">
-                ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–40 ตัว
-              </small>
+              <FormMessage
+                id="create-league-error"
+                message={error}
+                error
+                messageRef={errorRef}
+              />
             </label>
-            <FormMessage message={error} error messageRef={errorRef} />
-            <DialogFooter>
+            <DialogFooter className="league-dialog-footer">
               <button
                 type="button"
                 className="secondary-button"
@@ -174,7 +181,7 @@ function CreateLeagueDialog({
               <button
                 type="submit"
                 className="primary-button"
-                disabled={pending || name.trim().length < 3}
+                disabled={pending}
                 aria-busy={pending}
               >
                 {pending ? <PendingIcon /> : <Plus aria-hidden="true" />}
@@ -264,9 +271,6 @@ function JoinLeagueDialog({
           <form onSubmit={inspect}>
             <DialogHeader>
               <DialogTitle>เข้าร่วมลีกส่วนตัว</DialogTitle>
-              <DialogDescription>
-                ตรวจสอบชื่อลีกและจำนวนสมาชิกก่อนยืนยันเข้าร่วม
-              </DialogDescription>
             </DialogHeader>
             <label className="league-field">
               <span>รหัสเชิญ 8 ตัว</span>
@@ -287,11 +291,15 @@ function JoinLeagueDialog({
                 spellCheck={false}
                 required
                 disabled={pending}
-                aria-describedby="league-code-hint"
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? "join-league-error" : undefined}
               />
-              <small id="league-code-hint">
-                พิมพ์ตัวเล็กหรือตัวใหญ่ก็ได้ รหัสไม่มี O, 0, I, L และ 1
-              </small>
+              <FormMessage
+                id="join-league-error"
+                message={error}
+                error
+                messageRef={errorRef}
+              />
             </label>
             {preview ? (
               <section className="league-invite-preview" aria-live="polite">
@@ -311,8 +319,7 @@ function JoinLeagueDialog({
                 </div>
               </section>
             ) : null}
-            <FormMessage message={error} error messageRef={errorRef} />
-            <DialogFooter>
+            <DialogFooter className="league-dialog-footer">
               <button
                 type="button"
                 className="secondary-button"
@@ -427,9 +434,9 @@ function LeagueStandingsDialog({
                   <tr>
                     <th scope="col">อันดับ</th>
                     <th scope="col">ทีม / ผู้จัดการ</th>
-                    <th scope="col">GW</th>
+                    {!isOverallHint ? <th scope="col">GW</th> : null}
                     <th scope="col">รวม</th>
-                    <th scope="col">Transfer</th>
+                    {!isOverallHint ? <th scope="col">Transfer</th> : null}
                   </tr>
                 </thead>
                 <tbody>
@@ -451,11 +458,15 @@ function LeagueStandingsDialog({
                           {standing.managerName}
                         </small>
                       </th>
-                      <td>{standing.gameweekPoints.toLocaleString()}</td>
+                      {!isOverallHint ? (
+                        <td>{standing.gameweekPoints.toLocaleString()}</td>
+                      ) : null}
                       <td className="league-total-cell">
                         {standing.totalPoints.toLocaleString()}
                       </td>
-                      <td>{standing.transferCount.toLocaleString()}</td>
+                      {!isOverallHint ? (
+                        <td>{standing.transferCount.toLocaleString()}</td>
+                      ) : null}
                     </tr>
                   ))}
                 </tbody>
@@ -648,7 +659,9 @@ export function LeagueOverview({
                 </li>
               ))}
             </ul>
-          ) : null}
+          ) : (
+            <p className="league-private-empty-copy">ยังไม่มีลีกส่วนตัว</p>
+          )}
         </section>
 
         {!overview.isGuest ? (

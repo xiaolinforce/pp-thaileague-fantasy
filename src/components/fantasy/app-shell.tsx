@@ -108,13 +108,11 @@ function ManagerMenu({
   identity,
   initials,
   pathname,
-  inline = false,
   onNavigate,
 }: {
   identity: AppIdentity;
   initials: string;
   pathname: string;
-  inline?: boolean;
   onNavigate?: () => void;
 }) {
   const router = useRouter();
@@ -169,7 +167,6 @@ function ManagerMenu({
       className={`manager-card manager-menu-trigger${accountRouteActive ? " active" : ""}`}
       aria-label={translate("เปิดเมนูผู้จัดการทีม")}
       aria-expanded={open}
-      onClick={inline ? () => setOpen((current) => !current) : undefined}
     >
       <span className="manager-avatar" aria-hidden="true">
         {initials}
@@ -255,15 +252,6 @@ function ManagerMenu({
     </div>
   );
 
-  if (inline) {
-    return (
-      <div className="manager-menu-inline">
-        {trigger}
-        {open ? menu : null}
-      </div>
-    );
-  }
-
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger render={trigger} />
@@ -283,13 +271,11 @@ function SidebarContent({
   pathname,
   identity,
   initials,
-  inlineManagerMenu = false,
   onNavigate,
 }: {
   pathname: string;
   identity: AppIdentity;
   initials: string;
-  inlineManagerMenu?: boolean;
   onNavigate?: () => void;
 }) {
   const { requestNavigation } = useNavigationBlocker();
@@ -376,7 +362,6 @@ function SidebarContent({
           identity={identity}
           initials={initials}
           pathname={pathname}
-          inline={inlineManagerMenu}
           onNavigate={onNavigate}
         />
       </div>
@@ -439,7 +424,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                   pathname={pathname}
                   identity={identity}
                   initials={initials}
-                  inlineManagerMenu
                   onNavigate={() => setMenuOpen(false)}
                 />
               </aside>

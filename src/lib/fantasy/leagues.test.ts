@@ -41,8 +41,14 @@ test("validates private league names with the shared name policy", () => {
     ok: true,
     value: "เพื่อน ไทยลีก",
   });
-  assert.equal(validatePrivateLeagueName("ab").ok, false);
-  assert.equal(validatePrivateLeagueName("a".repeat(41)).ok, false);
+  assert.deepEqual(validatePrivateLeagueName("ab"), {
+    ok: false,
+    message: "ชื่อลีกต้องมี 3–40 ตัวอักษร",
+  });
+  assert.deepEqual(validatePrivateLeagueName("a".repeat(41)), {
+    ok: false,
+    message: "ชื่อลีกต้องมี 3–40 ตัวอักษร",
+  });
   assert.equal(validatePrivateLeagueName("Official Friends").ok, false);
   assert.equal(validatePrivateLeagueName("League 🏆").ok, false);
 });

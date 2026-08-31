@@ -523,6 +523,7 @@ const translations: Record<string, string> = {
   "สร้างกลุ่มใหม่หรือใช้รหัสเชิญ 8 ตัวจากเจ้าของลีก":
     "Create a new group or use an eight-character code from a league owner",
   สมัครสมาชิก: "Sign up",
+  ยังไม่มีลีกส่วนตัว: "No private leagues yet",
   กรอกรหัสเชิญ: "Enter invite code",
   "คะแนน Gameweek นี้ยังเป็นคะแนนชั่วคราว และอาจเปลี่ยนหลังตรวจแมตช์ตกค้าง":
     "This Gameweek is provisional and may change after postponed matches are reviewed",
@@ -746,6 +747,7 @@ const translations: Record<string, string> = {
   "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อได้ กรุณาสมัครสมาชิกก่อน":
     "Guest players cannot change names. Create an account first.",
   "ชื่อต้องมี 3–30 ตัวอักษร": "Names must contain 3–30 characters",
+  "ชื่อลีกต้องมี 3–40 ตัวอักษร": "League names must contain 3–40 characters",
   "ใช้ได้เฉพาะภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ -":
     "Use only Thai or English letters, numbers, spaces, and . _ -",
   ชื่อนี้อาจทำให้เข้าใจผิดว่าเป็นทีมงานหรือบัญชีทางการ:
