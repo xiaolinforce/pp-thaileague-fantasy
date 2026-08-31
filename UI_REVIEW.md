@@ -25,20 +25,20 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
-| Route            | Archetype             | Status      | Current basis and next review focus                                                                                               |
-| ---------------- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `/team`          | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                       |
-| `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                         |
-| `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                   |
-| `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                        |
-| `/fixtures`      | Data browser          | In progress | Local Gameweek browsing and URL-backed stat/filter states implemented; populated-season evidence remains pending upstream data.   |
-| `/leagues`       | Ranking/community     | In progress | Overall/Guest and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
-| `/profile`       | Account identity      | In progress | Guest/read-only and responsive states reviewed; member mutation evidence remains pending.                                         |
-| `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                        |
-| `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                      |
-| `/help`          | Long-form reading     | Reviewed    | Public bilingual FAQ, rules path, and real Facebook support destination reviewed.                                                 |
-| `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                        |
-| `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                      |
+| Route            | Archetype             | Status      | Current basis and next review focus                                                                                                                  |
+| ---------------- | --------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/team`          | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                                          |
+| `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                                            |
+| `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                      |
+| `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                           |
+| `/fixtures`      | Data browser          | In progress | Local Gameweek browsing and URL-backed stat/filter states implemented; populated-season evidence remains pending upstream data.                      |
+| `/leagues`       | Ranking/community     | In progress | Team-only Overall/Guest identity and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
+| `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                |
+| `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                           |
+| `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                         |
+| `/help`          | Long-form reading     | Reviewed    | Public bilingual FAQ, rules path, and real Facebook support destination reviewed.                                                                    |
+| `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                                           |
+| `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                                         |
 
 The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
@@ -143,9 +143,9 @@ a state is not implemented rather than inventing it.
 
 ### Profile, settings, rules, and help
 
-- Guest read-only names and upgrade action;
-- member editable names, unchanged form, validation error, pending save,
-  success, server error, and rename limits;
+- Guest read-only team name and upgrade action;
+- member editable team name, unchanged form, duplicate/format validation,
+  pending save, success, server error, and seasonal rename limit;
 - member language setting and post-reload database persistence;
 - public long rules content, section navigation, FAQ, and support link; and
 - sign-out pending/failure behavior.
@@ -193,6 +193,42 @@ Verification commands:
 Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
+
+### 2026-09-01 — Team name as the sole public identity
+
+- **Route and task:** shared shell, `/profile`, and `/leagues`; remove the
+  redundant manager display name and use the season team name everywhere the
+  Fantasy identity is public.
+- **Status:** Profile and Leagues remain In progress; this pass adds complete
+  Guest/read-only identity evidence without claiming member mutation coverage.
+- **Data/auth/Gameweek state:** real Guest session on the confirmed Neon branch,
+  22 preserved manager/team histories, 22 unique seasonal team names, automatic
+  Overall membership, and an open Gameweek 1. No account, selection, or score
+  fixture was manufactured.
+- **Language:** Thai and English after changing the real Guest device
+  preference, restored to Thai after review. User-provided team names remain
+  outside dictionary replacement.
+- **Viewports:** 1440px Desktop, 768px Tablet, and 360px Mobile; Profile, shell,
+  drawer, account popover, and Overall standings had no document-level overflow.
+- **Keyboard/accessibility:** semantic Profile regions, read-only Guest state,
+  named shell/drawer controls, team-only row headers, written current-team badge,
+  and translated standings-dialog labels reviewed.
+- **Issues fixed:** duplicate public manager/team names, manager cooldown state,
+  repeated Guest identity in the account popover, manager names in standings,
+  and a portal localization gap that left the standings dialog in Thai while
+  the rest of the route displayed English.
+- **Known exclusions:** member rename success, duplicate-name rejection,
+  exhausted three-change limit, and server/network error UI were not rendered
+  because the available Browser identity is a Guest and no production mock or
+  database mutation was introduced for visual evidence. Server validation, the
+  case-insensitive unique database index, transaction locking, and database
+  verification cover these paths pending member evidence.
+- **Evidence:** bounded in-app Browser inspection during the 2026-09-01
+  implementation task; no mock, fixture override, or simulation route was added.
+- **Verification:** migration `0012_thick_silver_fox` on the confirmed Neon
+  branch, `npm run db:verify:fantasy`, Thai/English DOM snapshots, responsive
+  overflow measurements, and the complete project checks listed in the final
+  implementation handoff.
 
 ### 2026-09-01 — Fixtures current-Gameweek browsing
 
@@ -281,7 +317,7 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   The overview now leads with a rank-only Overall card labelled “อันดับทั้งหมด”
   / “Overall ranking” with a 32px rank; both Overall and Private League list
   entries open a focused standings dialog instead of navigating away. The
-  Overall dialog now limits its table to rank, team/manager, and total, plus
+  Overall dialog now limits its table to rank, team identity, and total, plus
   paginated navigation. The Private section retains a concise bilingual empty
   message without adding a second empty-state action. Create/Join dialogs use a
   clean footer, orange labels, and field-level errors; invalid league names can
@@ -311,7 +347,7 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   evidence covers 320px and 767px, with constrained modal regression checks at
   768px and 1280px.
 
-### 2026-08-31 — Manager account surfaces and public guidance
+### 2026-08-31 — Account surfaces and public guidance
 
 - **Route and task:** `/profile`, `/settings`, `/rules`, and `/help`; separate
   identity, preference, rules, and support tasks behind one manager menu and

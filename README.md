@@ -43,7 +43,7 @@ production-readiness work.
 | `/leagues`       | Overall standings plus Private League creation and joining.        |
 | `/leagues/[id]`  | Member-only standings and owner/member League controls.            |
 | `/fixtures`      | Competition fixtures and supporting statistics.                    |
-| `/profile`       | Account and team identity; member naming or Guest upgrade.         |
+| `/profile`       | Account details, the public team name, or Guest upgrade.           |
 | `/settings`      | Interface language preference for the current identity/device.     |
 | `/rules`         | Public rules generated from the executable Fantasy configuration.  |
 | `/help`          | Public FAQ, rules recovery path, and official Facebook contact.    |

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
-  createGuestNames,
+  createGuestTeamName,
   normalizeFantasyName,
   validateFantasyName,
 } from "../auth/names.ts";
@@ -31,8 +31,6 @@ test("rejects short, unsupported, and impersonating names", () => {
   assert.equal(validateFantasyName("ทีมเหี้ย").ok, false);
 });
 
-test("creates non-editable guest name patterns", () => {
-  const names = createGuestNames();
-  assert.match(names.managerName, /^guest-[A-Z2-9]{6}$/);
-  assert.match(names.teamName, /^guest-team-[A-Z2-9]{6}$/);
+test("creates a non-editable guest team-name pattern", () => {
+  assert.match(createGuestTeamName(), /^guest-team-[A-Z2-9]{6}$/);
 });

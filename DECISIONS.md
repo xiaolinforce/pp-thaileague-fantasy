@@ -4,6 +4,25 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-01 — The team name is the only public Fantasy identity
+
+**Decision:** Use `fantasy_teams.name` as the sole public display name across
+the application. Team names are unique within a Fantasy season using
+case-insensitive comparison, and members may rename a team up to three times
+per season. Better Auth provider names remain internal authentication metadata.
+Keep the manager record for account ownership, Guest linking, status, language
+preference, and historical continuity, but do not store a second manager name.
+
+**Context:** The interface exposed both a manager display name and a team name
+for the same account. Profile, the account menu, and League standings repeated
+those identities without adding a distinct product purpose.
+
+**Consequences:** Remove manager display-name and cooldown columns through a
+forward migration, preserve every existing team name, and enforce the seasonal
+name invariant in PostgreSQL as well as server validation. Guest provisioning
+retries random team-name collisions. Profile and standings show one team name,
+while abandoned Guest managers and historical teams remain intact.
+
 ## 2026-08-31 — Account tasks use separate routes behind one manager menu
 
 **Decision:** Keep Team, Points, Leagues, and Fixtures as the primary product

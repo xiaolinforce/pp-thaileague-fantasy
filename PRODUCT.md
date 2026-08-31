@@ -35,6 +35,7 @@ PP Thai League Fantasy เป็นผลิตภัณฑ์อิสระ �
 - ขอบเขตปัจจุบันคือ Thai League 1 ฤดูกาล 2026/27
 - รองรับ Passwordless Email OTP, Google OAuth และ Guest account แบบผูกกับอุปกรณ์
 - หนึ่งบัญชีมี manager identity หนึ่งรายการและทีมหนึ่งทีมต่อฤดูกาล
+- ชื่อทีมเป็นชื่อสาธารณะเพียงชื่อเดียว ต้องไม่ซ้ำภายในฤดูกาลเดียวกัน และชื่อจาก authentication provider ไม่ถูกนำมาแสดงในเกม
 - squad มีผู้เล่น 15 คนและต้องผ่านข้อกำหนด formation, club, nationality, tier, deadline, transfer, captaincy และ chip
 - ภาษาไทยเป็นภาษาต้นทาง ภาษาอังกฤษเป็น display preference ฝั่ง client ไม่ใช่ route-level localization โดยสมาชิกเก็บค่าไว้กับ manager ในฐานข้อมูล ส่วน Guest เก็บในอุปกรณ์ปัจจุบัน
 - ข้อมูลการแข่งขันถูกนำเข้าจาก Thai League official API และหน้า squad สาธารณะของ Transfermarkt ก่อน runtime; หน้าเว็บอ่านจากฐานข้อมูลที่ persist แล้ว

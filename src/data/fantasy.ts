@@ -42,7 +42,6 @@ export type FantasyState = {
   team: {
     id: string;
     name: string;
-    managerName: string;
     freeTransfers: number;
   };
   gameweek: {
@@ -70,7 +69,7 @@ export async function getFantasyState(): Promise<FantasyState> {
   const fantasySeason = profile.season;
   const gameweek = profile.gameweek;
   const selection = profile.selection;
-  const current = { team: profile.team, manager: profile.manager };
+  const current = { team: profile.team };
 
   const members = await db
     .select()
@@ -115,7 +114,6 @@ export async function getFantasyState(): Promise<FantasyState> {
     team: {
       id: current.team.id,
       name: current.team.name,
-      managerName: current.manager.displayName,
       freeTransfers: current.team.freeTransfers,
     },
     gameweek: {

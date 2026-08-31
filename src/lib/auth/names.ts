@@ -55,15 +55,12 @@ export function validateFantasyName(value: string) {
 
 const RANDOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-export function createGuestNames() {
+export function createGuestTeamName() {
   const bytes = new Uint8Array(6);
   crypto.getRandomValues(bytes);
   const suffix = Array.from(
     bytes,
     (value) => RANDOM_ALPHABET[value % RANDOM_ALPHABET.length],
   ).join("");
-  return {
-    managerName: `guest-${suffix}`,
-    teamName: `guest-team-${suffix}`,
-  };
+  return `guest-team-${suffix}`;
 }

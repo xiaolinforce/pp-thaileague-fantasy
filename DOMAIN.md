@@ -266,7 +266,7 @@ Invite codes contain exactly eight uppercase characters from
 `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, excluding `I`, `L`, `O`, `0`, and `1`.
 Input is case-insensitive and display is uppercase. League names may duplicate,
 contain 3–40 characters, and follow the same character, reserved-name, and
-abuse policy as manager/team names. Cup leagues, head-to-head scoring, public
+abuse policy as team names. Cup leagues, head-to-head scoring, public
 League sharing, and live price changes are not implemented.
 
 ## Accounts, Guests, and names
@@ -283,12 +283,13 @@ League sharing, and live price changes are not implemented.
   shape plus one goalkeeper and three outfield bench slots. No player snapshot
   or transfer revision is stored until the manager saves a valid 15-player
   squad; the opening squad does not count as transfers.
-- Guest manager and team names are random and cannot be edited. Member names
-  may duplicate, are 3–30 characters, and accept Thai, English, digits, spaces,
-  period, underscore, and hyphen after whitespace normalization and abuse/
-  impersonation filtering.
-- A member may change the manager name once every 30 days and the team name up
-  to three times per season.
+- The team name is the only public Fantasy display identity. Authentication
+  provider names are internal metadata and are not displayed as a second name.
+- Guest team names are random and cannot be edited. Member team names are 3–30
+  characters and accept Thai, English, digits, spaces, period, underscore, and
+  hyphen after whitespace normalization and abuse/impersonation filtering.
+- Team names are unique per Fantasy season with case-insensitive comparison. A
+  member may change the team name up to three times per season.
 - Upgrading a Guest to a new member preserves the Guest manager/team. If the
   destination account already owns a team, that account team wins: the Guest
   manager becomes `abandoned`, stays in historical rankings, and is not merged.

@@ -114,6 +114,12 @@ should use stable alignment and tabular numerals where practical. Truncation is
 acceptable only when the full value remains available through context such as
 a title, accessible name, or detail view.
 
+The Fantasy team name is the only public account display identity. Use it for
+the shell avatar, Profile, points context, and League standings; do not expose a
+second manager, provider, or authentication name beside it. Email may appear
+only as private account context where the signed-in user is already viewing
+their own account controls.
+
 ## Application shell and navigation
 
 Reuse `AppShell` and `PageHeader` for authenticated product routes.

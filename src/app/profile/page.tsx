@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
-import { updateFantasyNamesAction } from "@/app/fantasy-actions";
+import { updateFantasyTeamNameAction } from "@/app/fantasy-actions";
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useAppIdentity } from "@/components/fantasy/identity";
 import { useLanguage } from "@/components/fantasy/i18n";
@@ -27,18 +27,14 @@ export default function ProfilePage() {
   const router = useRouter();
   const { language, translate } = useLanguage();
   const identity = useAppIdentity();
-  const [managerName, setManagerName] = useState(identity?.managerName ?? "");
   const [teamName, setTeamName] = useState(identity?.teamName ?? "");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [formStatus, setFormStatus] = useState("");
   const formErrorRef = useRef<HTMLParagraphElement>(null);
 
-  const managerNameLocked = Boolean(identity?.managerNameChangeAvailableAt);
   const teamNameLocked = (identity?.teamNameChangesRemaining ?? 0) <= 0;
-  const hasNameChanges =
-    managerName.trim() !== (identity?.managerName ?? "") ||
-    teamName.trim() !== (identity?.teamName ?? "");
+  const hasNameChanges = teamName.trim() !== (identity?.teamName ?? "");
 
   useEffect(() => {
     if (!hasNameChanges) return;
@@ -57,11 +53,8 @@ export default function ProfilePage() {
     setFormError("");
     setFormStatus("");
     try {
-      const result = await updateFantasyNamesAction({ managerName, teamName });
-      const message =
-        !result.ok && result.availableAt
-          ? `${translate("เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่")} ${new Intl.DateTimeFormat(language === "th" ? "th-TH" : "en-GB", { dateStyle: "medium" }).format(new Date(result.availableAt))}`
-          : translate(result.message);
+      const result = await updateFantasyTeamNameAction({ teamName });
+      const message = translate(result.message);
       if (!result.ok) {
         setFormError(message);
         toast.error(message);
@@ -75,8 +68,8 @@ export default function ProfilePage() {
     } catch {
       const message =
         language === "th"
-          ? "บันทึกชื่อไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
-          : "Could not save the names. Check your connection and try again.";
+          ? "บันทึกชื่อทีมไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+          : "Could not save the team name. Check your connection and try again.";
       setFormError(message);
       toast.error(message);
       window.requestAnimationFrame(() => formErrorRef.current?.focus());
@@ -90,8 +83,8 @@ export default function ProfilePage() {
       <main id="main-content" className="content product-content account-page">
         <header className="account-page-header">
           <div>
-            <h1>โปรไฟล์ผู้จัดการทีม</h1>
-            <p>จัดการชื่อที่ใช้แสดงและข้อมูลทีมแฟนตาซีของคุณ</p>
+            <h1>โปรไฟล์ทีม</h1>
+            <p>จัดการข้อมูลบัญชีและชื่อทีมแฟนตาซีของคุณ</p>
           </div>
           <span className="account-status-pill">
             {identity?.isGuest ? "บัญชี Guest" : "บัญชีสมาชิก"}
@@ -107,50 +100,21 @@ export default function ProfilePage() {
               <span
                 className="profile-avatar profile-heading-avatar"
                 aria-hidden="true"
+                data-localize="off"
               >
-                {initialsFor(identity?.managerName, "G")}
+                {initialsFor(identity?.teamName, "G")}
               </span>
               <div>
                 <h2 id="account-heading">ข้อมูลบัญชี</h2>
                 <p>
                   {identity?.isGuest
-                    ? "Guest ใช้ชื่อสุ่มและเปลี่ยนชื่อไม่ได้"
-                    : managerNameLocked
-                      ? language === "th"
-                        ? `เปลี่ยนชื่อผู้จัดการได้อีกครั้งหลัง ${new Intl.DateTimeFormat("th-TH", { dateStyle: "medium" }).format(new Date(identity?.managerNameChangeAvailableAt ?? ""))}`
-                        : `Manager name can be changed again after ${new Intl.DateTimeFormat("en-GB", { dateStyle: "medium" }).format(new Date(identity?.managerNameChangeAvailableAt ?? ""))}`
-                      : "เปลี่ยนชื่อผู้จัดการได้ โดยจะเปลี่ยนครั้งถัดไปได้ใน 30 วัน"}
+                    ? "Guest ไม่มีอีเมลและใช้ได้บนอุปกรณ์นี้"
+                    : "บัญชีนี้ใช้เก็บทีมและการตั้งค่าข้ามอุปกรณ์"}
                 </p>
               </div>
             </div>
 
             <div className="profile-fields-grid">
-              {identity?.isGuest ? (
-                <div className="settings-readonly-field">
-                  <span>ชื่อที่แสดง</span>
-                  <strong>{identity.managerName}</strong>
-                </div>
-              ) : (
-                <label>
-                  <span>ชื่อที่แสดง</span>
-                  <input
-                    name="managerName"
-                    value={managerName}
-                    onChange={(event) => setManagerName(event.target.value)}
-                    disabled={managerNameLocked}
-                    required
-                    minLength={3}
-                    maxLength={30}
-                    autoComplete="nickname"
-                    spellCheck={false}
-                    aria-describedby="manager-name-help"
-                  />
-                  <small id="manager-name-help">
-                    ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–30
-                    ตัวอักษร
-                  </small>
-                </label>
-              )}
               <div className="settings-readonly-field">
                 <span>อีเมล</span>
                 <strong>
@@ -179,7 +143,7 @@ export default function ProfilePage() {
               {identity?.isGuest ? (
                 <div className="team-name-readonly">
                   <span>ชื่อทีม</span>
-                  <strong>{identity.teamName}</strong>
+                  <strong data-localize="off">{identity.teamName}</strong>
                   <p>Guest ใช้ชื่อทีมแบบสุ่มและเปลี่ยนไม่ได้</p>
                 </div>
               ) : (
@@ -195,8 +159,12 @@ export default function ProfilePage() {
                     maxLength={30}
                     autoComplete="off"
                     spellCheck={false}
-                    aria-describedby="team-name-help"
+                    aria-describedby="team-name-format team-name-help"
                   />
+                  <small id="team-name-format">
+                    ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–30
+                    ตัวอักษร ชื่อทีมต้องไม่ซ้ำในฤดูกาลเดียวกัน
+                  </small>
                   <small id="team-name-help">
                     {teamNameLocked
                       ? "ใช้สิทธิ์เปลี่ยนชื่อทีมครบแล้วสำหรับฤดูกาลนี้"
@@ -238,7 +206,7 @@ export default function ProfilePage() {
                 ) : (
                   <Save size={17} aria-hidden="true" />
                 )}
-                {saving ? "กำลังบันทึก…" : "บันทึกการเปลี่ยนแปลง"}
+                {saving ? "กำลังบันทึก…" : "บันทึกชื่อทีม"}
               </button>
             </div>
           )}

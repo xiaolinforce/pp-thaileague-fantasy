@@ -61,7 +61,6 @@ export type FantasyActionResult =
       ok: false;
       message: string;
       violations?: string[];
-      availableAt?: string;
     };
 
 export type FantasyAutoFillResult =
@@ -177,91 +176,62 @@ export async function suggestFantasyAutoFillAction(input: {
   };
 }
 
-export async function updateFantasyNamesAction(input: {
-  managerName: string;
+function isUniqueViolation(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  if ("code" in error && error.code === "23505") return true;
+  return "cause" in error && isUniqueViolation(error.cause);
+}
+
+export async function updateFantasyTeamNameAction(input: {
   teamName: string;
 }): Promise<FantasyActionResult> {
   const profile = await requireFantasyProfile();
   if (profile.isAnonymous) {
     return {
       ok: false,
-      message: "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อได้ กรุณาสมัครสมาชิกก่อน",
+      message: "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อทีมได้ กรุณาสมัครสมาชิกก่อน",
     };
   }
-  const managerName = validateFantasyName(input.managerName);
-  const teamName = validateFantasyName(input.teamName);
-  if (!managerName.ok || !teamName.ok) {
+  const teamName = validateFantasyName(String(input?.teamName ?? ""));
+  if (!teamName.ok) {
     return {
       ok: false,
-      message:
-        (!managerName.ok ? managerName.message : teamName.message) ??
-        "ชื่อไม่ถูกต้อง",
+      message: teamName.message ?? "ชื่อไม่ถูกต้อง",
     };
   }
-  const result = await transactionDb.transaction(async (tx) => {
-    const managerRows = await tx
-      .select()
-      .from(fantasyManagers)
-      .where(eq(fantasyManagers.id, profile.manager.id))
-      .for("update")
-      .limit(1);
-    const teamRows = await tx
-      .select()
-      .from(fantasyTeams)
-      .where(
-        and(
-          eq(fantasyTeams.id, profile.team.id),
-          eq(fantasyTeams.managerId, profile.manager.id),
-        ),
-      )
-      .for("update")
-      .limit(1);
-    const currentManager = managerRows[0];
-    const currentTeam = teamRows[0];
-    if (!currentManager || !currentTeam) {
-      return {
-        ok: false,
-        message: "ไม่พบบัญชีหรือทีมที่ต้องการแก้ไข",
-      } as const;
-    }
+  let result: FantasyActionResult;
+  try {
+    result = await transactionDb.transaction(async (tx) => {
+      const teamRows = await tx
+        .select()
+        .from(fantasyTeams)
+        .where(
+          and(
+            eq(fantasyTeams.id, profile.team.id),
+            eq(fantasyTeams.managerId, profile.manager.id),
+          ),
+        )
+        .for("update")
+        .limit(1);
+      const currentTeam = teamRows[0];
+      if (!currentTeam) {
+        return {
+          ok: false,
+          message: "ไม่พบทีมที่ต้องการแก้ไข",
+        } as const;
+      }
 
-    const now = new Date();
-    const managerChanged = managerName.value !== currentManager.displayName;
-    const teamChanged = teamName.value !== currentTeam.name;
-    if (
-      managerChanged &&
-      currentManager.nameChangeAvailableAt &&
-      currentManager.nameChangeAvailableAt > now
-    ) {
-      return {
-        ok: false,
-        message: `เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่ ${currentManager.nameChangeAvailableAt.toLocaleDateString("th-TH")}`,
-        availableAt: currentManager.nameChangeAvailableAt.toISOString(),
-      } as const;
-    }
-    if (teamChanged && currentTeam.nameChangesUsed >= 3) {
-      return {
-        ok: false,
-        message: "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว",
-      } as const;
-    }
-    if (!managerChanged && !teamChanged) {
-      return { ok: true, message: "ไม่มีข้อมูลที่เปลี่ยนแปลง" } as const;
-    }
+      if (teamName.value === currentTeam.name) {
+        return { ok: true, message: "ไม่มีข้อมูลที่เปลี่ยนแปลง" } as const;
+      }
+      if (currentTeam.nameChangesUsed >= 3) {
+        return {
+          ok: false,
+          message: "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว",
+        } as const;
+      }
 
-    if (managerChanged) {
-      const nextChange = new Date(now);
-      nextChange.setUTCDate(nextChange.getUTCDate() + 30);
-      await tx
-        .update(fantasyManagers)
-        .set({
-          displayName: managerName.value,
-          nameChangeAvailableAt: nextChange,
-          updatedAt: now,
-        })
-        .where(eq(fantasyManagers.id, currentManager.id));
-    }
-    if (teamChanged) {
+      const now = new Date();
       await tx
         .update(fantasyTeams)
         .set({
@@ -270,9 +240,17 @@ export async function updateFantasyNamesAction(input: {
           updatedAt: now,
         })
         .where(eq(fantasyTeams.id, currentTeam.id));
+      return { ok: true, message: "บันทึกชื่อทีมเรียบร้อยแล้ว" } as const;
+    });
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      return {
+        ok: false,
+        message: "ชื่อทีมนี้ถูกใช้แล้วในฤดูกาลนี้",
+      };
     }
-    return { ok: true, message: "บันทึกชื่อเรียบร้อยแล้ว" } as const;
-  });
+    throw error;
+  }
 
   if (!result.ok) return result;
   revalidateFantasyPages();

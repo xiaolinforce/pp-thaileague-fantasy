@@ -125,10 +125,12 @@ League mutations use the same client and lock the current team plus target
 league with `FOR UPDATE`, so the 10-owned, 20-membership, and 100-team limits
 remain valid under concurrent requests.
 
-Member profile-name edits lock and reload the manager/team pair before an
-atomic transaction writes both permitted names. Member language changes write
-`fantasy_managers.preferred_language`; Guests never call that mutation and use
-the local `thai-fantasy-language` preference instead.
+Member team-name edits lock and reload the season team before writing the
+normalized name and incrementing its seasonal rename count. A case-insensitive
+database unique index prevents two teams in the same season from sharing a
+name, including concurrent edits. Member language changes write
+`fantasy_managers.preferred_language`; Guests never call either mutation and
+use the local `thai-fantasy-language` preference instead.
 
 Authentication providers are independently opt-in and also subject to
 `AUTH_PRODUCTION_READY`. This deployment gate prevents accidental public use
@@ -137,8 +139,10 @@ session and role checks on each mutation.
 
 ## Account lifecycle
 
-Anonymous users receive a 30-day sliding Better Auth session, a random manager
-and team name, and no naming controls. Expiry removes access, not Fantasy rows;
+Anonymous users receive a 30-day sliding Better Auth session, a random unique
+team name, and no naming controls. The team name is the only public Fantasy
+display identity; Better Auth provider names remain internal authentication
+metadata. Expiry removes access, not Fantasy rows;
 the team remains in historical standings. Guest sign-out invalidates only the
 current session, so the next anonymous sign-in creates a new Guest identity and
 team instead of reclaiming the prior Guest. Linking a Guest to a new member

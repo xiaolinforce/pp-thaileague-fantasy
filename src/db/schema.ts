@@ -968,11 +968,7 @@ export const fantasyManagers = pgTable(
     authUserId: text("auth_user_id").references(() => authUsers.id, {
       onDelete: "set null",
     }),
-    displayName: text("display_name").notNull(),
     status: fantasyManagerStatusEnum("status").default("guest").notNull(),
-    nameChangeAvailableAt: timestamp("name_change_available_at", {
-      withTimezone: true,
-    }),
     preferredLanguage: varchar("preferred_language", { length: 2 }),
     ...timestamps,
   },
@@ -1006,6 +1002,10 @@ export const fantasyTeams = pgTable(
     uniqueIndex("fantasy_teams_season_manager_unique").on(
       table.fantasySeasonId,
       table.managerId,
+    ),
+    uniqueIndex("fantasy_teams_season_name_unique").on(
+      table.fantasySeasonId,
+      sql`lower(${table.name})`,
     ),
     index("fantasy_teams_season_active_idx").on(
       table.fantasySeasonId,

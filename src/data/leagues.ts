@@ -7,7 +7,6 @@ import { db } from "@/db";
 import {
   fantasyLeagueMembers,
   fantasyLeagues,
-  fantasyManagers,
   fantasyTeamGameweekScores,
   fantasyTeamSelections,
   fantasyTeams,
@@ -23,7 +22,6 @@ import {
 export type LeagueStanding = {
   teamId: string;
   teamName: string;
-  managerName: string;
   joinedAt: string;
   gameweekPoints: number;
   totalPoints: number;
@@ -49,14 +47,12 @@ async function getStandingsForLeagues(input: {
       joinedAt: fantasyLeagueMembers.joinedAt,
       teamId: fantasyTeams.id,
       teamName: fantasyTeams.name,
-      managerName: fantasyManagers.displayName,
     })
     .from(fantasyLeagueMembers)
     .innerJoin(
       fantasyTeams,
       eq(fantasyLeagueMembers.fantasyTeamId, fantasyTeams.id),
     )
-    .innerJoin(fantasyManagers, eq(fantasyTeams.managerId, fantasyManagers.id))
     .where(inArray(fantasyLeagueMembers.fantasyLeagueId, leagueIds));
   const teamIds = [...new Set(memberRows.map((row) => row.teamId))];
   const scoreRows = teamIds.length
@@ -90,7 +86,6 @@ async function getStandingsForLeagues(input: {
         return {
           teamId: row.teamId,
           teamName: row.teamName,
-          managerName: row.managerName,
           joinedAt: row.joinedAt.toISOString(),
           gameweekPoints: score?.gameweekPoints ?? 0,
           totalPoints: score?.totalPoints ?? 0,

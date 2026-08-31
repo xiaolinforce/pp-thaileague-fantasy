@@ -14,7 +14,7 @@ import {
   fantasyTeams,
   fantasyTransferRevisions,
 } from "@/db/schema";
-import { createGuestNames } from "@/lib/auth/names";
+import { createGuestTeamName } from "@/lib/auth/names";
 import { THAI_LEAGUE_FANTASY_RULES } from "@/lib/fantasy/rules";
 
 export const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
@@ -118,6 +118,43 @@ async function ensureInitialSelection(
   return selection;
 }
 
+async function ensureSeasonTeam(input: {
+  season: typeof fantasySeasons.$inferSelect;
+  manager: typeof fantasyManagers.$inferSelect;
+}) {
+  const existingTeam = await db.query.fantasyTeams.findFirst({
+    where: and(
+      eq(fantasyTeams.fantasySeasonId, input.season.id),
+      eq(fantasyTeams.managerId, input.manager.id),
+    ),
+  });
+  if (existingTeam) return existingTeam;
+
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const teamRows = await db
+      .insert(fantasyTeams)
+      .values({
+        fantasySeasonId: input.season.id,
+        managerId: input.manager.id,
+        name: createGuestTeamName(),
+        freeTransfers: input.season.weeklyFreeTransfers,
+      })
+      .onConflictDoNothing()
+      .returning();
+    if (teamRows[0]) return teamRows[0];
+
+    const concurrentTeam = await db.query.fantasyTeams.findFirst({
+      where: and(
+        eq(fantasyTeams.fantasySeasonId, input.season.id),
+        eq(fantasyTeams.managerId, input.manager.id),
+      ),
+    });
+    if (concurrentTeam) return concurrentTeam;
+  }
+
+  throw new Error("A unique Fantasy team name could not be generated.");
+}
+
 export async function ensureFantasyProfile(input: {
   authUserId: string;
   isAnonymous: boolean;
@@ -129,12 +166,10 @@ export async function ensureFantasyProfile(input: {
   let manager = existingManager;
   let created = false;
   if (!manager) {
-    const names = createGuestNames();
     const inserted = await db
       .insert(fantasyManagers)
       .values({
         authUserId: input.authUserId,
-        displayName: names.managerName,
         status: input.isAnonymous ? "guest" : "member",
       })
       .onConflictDoNothing()
@@ -155,26 +190,7 @@ export async function ensureFantasyProfile(input: {
       .returning();
     manager = rows[0] ?? manager;
   }
-  const names = createGuestNames();
-  const teamRows = await db
-    .insert(fantasyTeams)
-    .values({
-      fantasySeasonId: season.id,
-      managerId: manager.id,
-      name: names.teamName,
-      freeTransfers: season.weeklyFreeTransfers,
-    })
-    .onConflictDoNothing()
-    .returning();
-  const team =
-    teamRows[0] ??
-    (await db.query.fantasyTeams.findFirst({
-      where: and(
-        eq(fantasyTeams.fantasySeasonId, season.id),
-        eq(fantasyTeams.managerId, manager.id),
-      ),
-    }));
-  if (!team) throw new Error("Fantasy team could not be created.");
+  const team = await ensureSeasonTeam({ season, manager });
   const overallLeagues = await db
     .select({ id: fantasyLeagues.id })
     .from(fantasyLeagues)

@@ -396,113 +396,112 @@ function LeagueStandingsDialog({
       : `Page ${league?.pagination.page ?? 1} / ${league?.pagination.pageCount ?? 1}`;
 
   return (
-    <Dialog open={Boolean(leagueId)} onOpenChange={onOpenChange}>
-      <DialogContent className="product-dialog league-standings-dialog">
-        <DialogHeader>
-          <DialogTitle>
-            {isOverallHint ? (
-              "อันดับทั้งหมด"
-            ) : league ? (
-              <span data-localize="off">{league.name}</span>
-            ) : (
-              "ตารางอันดับ"
-            )}
-          </DialogTitle>
-        </DialogHeader>
+    <Localized>
+      <Dialog open={Boolean(leagueId)} onOpenChange={onOpenChange}>
+        <DialogContent className="product-dialog league-standings-dialog">
+          <DialogHeader>
+            <DialogTitle>
+              {isOverallHint ? (
+                "อันดับทั้งหมด"
+              ) : league ? (
+                <span data-localize="off">{league.name}</span>
+              ) : (
+                "ตารางอันดับ"
+              )}
+            </DialogTitle>
+          </DialogHeader>
 
-        {loading ? (
-          <div className="league-dialog-state" role="status">
-            <PendingIcon />
-            <span>กำลังโหลดตารางอันดับ…</span>
-          </div>
-        ) : error ? (
-          <div className="league-dialog-state error" role="alert">
-            <span>{error}</span>
-            <button
-              type="button"
-              className="secondary-button"
-              onClick={() => onPageChange(1)}
-            >
-              ลองอีกครั้ง
-            </button>
-          </div>
-        ) : league ? (
-          <>
-            <div className="league-table-scroll" tabIndex={0}>
-              <table className="league-standings-table">
-                <thead>
-                  <tr>
-                    <th scope="col">อันดับ</th>
-                    <th scope="col">ทีม / ผู้จัดการ</th>
-                    {!isOverallHint ? <th scope="col">GW</th> : null}
-                    <th scope="col">รวม</th>
-                    {!isOverallHint ? <th scope="col">Transfer</th> : null}
-                  </tr>
-                </thead>
-                <tbody>
-                  {league.standings.map((standing) => (
-                    <tr
-                      className={standing.mine ? "mine" : undefined}
-                      key={standing.teamId}
-                    >
-                      <td className="league-rank-cell">{standing.rank}</td>
-                      <th scope="row">
-                        <span className="league-team-name">
-                          <span data-localize="off">{standing.teamName}</span>
-                          {standing.mine ? <i>คุณ</i> : null}
-                          {standing.owner ? (
-                            <i className="owner">เจ้าของ</i>
-                          ) : null}
-                        </span>
-                        <small data-localize="off">
-                          {standing.managerName}
-                        </small>
-                      </th>
-                      {!isOverallHint ? (
-                        <td>{standing.gameweekPoints.toLocaleString()}</td>
-                      ) : null}
-                      <td className="league-total-cell">
-                        {standing.totalPoints.toLocaleString()}
-                      </td>
-                      {!isOverallHint ? (
-                        <td>{standing.transferCount.toLocaleString()}</td>
-                      ) : null}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {loading ? (
+            <div className="league-dialog-state" role="status">
+              <PendingIcon />
+              <span>กำลังโหลดตารางอันดับ…</span>
             </div>
-            {league.pagination.pageCount > 1 ? (
-              <nav
-                className="league-dialog-pagination"
-                aria-label={translate("หน้าตารางอันดับ")}
+          ) : error ? (
+            <div className="league-dialog-state error" role="alert">
+              <span>{error}</span>
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => onPageChange(1)}
               >
-                <button
-                  type="button"
-                  className="secondary-button"
-                  disabled={league.pagination.page === 1 || loading}
-                  onClick={() => onPageChange(league.pagination.page - 1)}
+                ลองอีกครั้ง
+              </button>
+            </div>
+          ) : league ? (
+            <>
+              <div className="league-table-scroll" tabIndex={0}>
+                <table className="league-standings-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">อันดับ</th>
+                      <th scope="col">ทีม</th>
+                      {!isOverallHint ? <th scope="col">GW</th> : null}
+                      <th scope="col">รวม</th>
+                      {!isOverallHint ? <th scope="col">Transfer</th> : null}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {league.standings.map((standing) => (
+                      <tr
+                        className={standing.mine ? "mine" : undefined}
+                        key={standing.teamId}
+                      >
+                        <td className="league-rank-cell">{standing.rank}</td>
+                        <th scope="row">
+                          <span className="league-team-name">
+                            <span data-localize="off">{standing.teamName}</span>
+                            {standing.mine ? <i>คุณ</i> : null}
+                            {standing.owner ? (
+                              <i className="owner">เจ้าของ</i>
+                            ) : null}
+                          </span>
+                        </th>
+                        {!isOverallHint ? (
+                          <td>{standing.gameweekPoints.toLocaleString()}</td>
+                        ) : null}
+                        <td className="league-total-cell">
+                          {standing.totalPoints.toLocaleString()}
+                        </td>
+                        {!isOverallHint ? (
+                          <td>{standing.transferCount.toLocaleString()}</td>
+                        ) : null}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {league.pagination.pageCount > 1 ? (
+                <nav
+                  className="league-dialog-pagination"
+                  aria-label={translate("หน้าตารางอันดับ")}
                 >
-                  <ChevronLeft aria-hidden="true" /> ก่อนหน้า
-                </button>
-                <strong>{pageLabel}</strong>
-                <button
-                  type="button"
-                  className="secondary-button"
-                  disabled={
-                    league.pagination.page === league.pagination.pageCount ||
-                    loading
-                  }
-                  onClick={() => onPageChange(league.pagination.page + 1)}
-                >
-                  ถัดไป <ChevronRight aria-hidden="true" />
-                </button>
-              </nav>
-            ) : null}
-          </>
-        ) : null}
-      </DialogContent>
-    </Dialog>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={league.pagination.page === 1 || loading}
+                    onClick={() => onPageChange(league.pagination.page - 1)}
+                  >
+                    <ChevronLeft aria-hidden="true" /> ก่อนหน้า
+                  </button>
+                  <strong>{pageLabel}</strong>
+                  <button
+                    type="button"
+                    className="secondary-button"
+                    disabled={
+                      league.pagination.page === league.pagination.pageCount ||
+                      loading
+                    }
+                    onClick={() => onPageChange(league.pagination.page + 1)}
+                  >
+                    ถัดไป <ChevronRight aria-hidden="true" />
+                  </button>
+                </nav>
+              ) : null}
+            </>
+          ) : null}
+        </DialogContent>
+      </Dialog>
+    </Localized>
   );
 }
 
@@ -901,7 +900,7 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                 <thead>
                   <tr>
                     <th scope="col">อันดับ</th>
-                    <th scope="col">ทีม / ผู้จัดการ</th>
+                    <th scope="col">ทีม</th>
                     <th scope="col">GW</th>
                     <th scope="col">รวม</th>
                     <th scope="col">Transfer</th>
@@ -927,9 +926,6 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                             <i className="owner">เจ้าของ</i>
                           ) : null}
                         </span>
-                        <small data-localize="off">
-                          {standing.managerName}
-                        </small>
                       </th>
                       <td>{standing.gameweekPoints.toLocaleString()}</td>
                       <td className="league-total-cell">

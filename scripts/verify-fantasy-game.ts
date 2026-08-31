@@ -52,6 +52,7 @@ async function verifyFantasyGame() {
 
   const leagueIntegrity = await db.execute<{
     seeded_managers: number;
+    duplicate_team_names: number;
     missing_overall_leagues: number;
     teams_missing_overall: number;
     private_owners_missing_membership: number;
@@ -62,6 +63,14 @@ async function verifyFantasyGame() {
   }>(sql`
     select
       (select count(*)::int from fantasy_managers where status = 'seeded') as seeded_managers,
+      (
+        select count(*)::int from (
+          select fantasy_season_id, lower(name)
+          from fantasy_teams
+          group by fantasy_season_id, lower(name)
+          having count(*) > 1
+        ) duplicates
+      ) as duplicate_team_names,
       (
         select count(*)::int
         from fantasy_seasons season
@@ -143,7 +152,7 @@ async function verifyFantasyGame() {
     );
   }
   console.log(
-    "leagueIntegrity: no demo managers; Overall and Private League invariants verified",
+    "leagueIntegrity: unique seasonal team names; no demo managers; Overall and Private League invariants verified",
   );
 
   const gameweekRows = await db

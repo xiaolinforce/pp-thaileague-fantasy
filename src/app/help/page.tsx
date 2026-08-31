@@ -49,9 +49,9 @@ export default function HelpPage() {
                 "Private League ใช้ได้เฉพาะสมาชิก ตรวจรหัสเชิญ 8 ตัวอักษรและจำนวนลีกที่เข้าร่วม หากเป็น Guest ให้สมัครสมาชิกก่อน ส่วน Overall League เข้าร่วมให้อัตโนมัติทุกบัญชี",
             },
             {
-              question: "เปลี่ยนชื่อผู้จัดการหรือชื่อทีมได้บ่อยแค่ไหน?",
+              question: "เปลี่ยนชื่อทีมได้บ่อยแค่ไหน?",
               answer:
-                "สมาชิกเปลี่ยนชื่อผู้จัดการได้ทุก 30 วัน และเปลี่ยนชื่อทีมได้สูงสุด 3 ครั้งต่อฤดูกาล Guest ใช้ชื่อที่ระบบสร้างและแก้ไขไม่ได้",
+                "สมาชิกเปลี่ยนชื่อทีมได้สูงสุด 3 ครั้งต่อฤดูกาล โดยชื่อทีมต้องไม่ซ้ำกับทีมอื่นในฤดูกาลเดียวกัน Guest ใช้ชื่อทีมที่ระบบสร้างและแก้ไขไม่ได้",
             },
             {
               question: "ข้อมูลหรือหน้าจอไม่อัปเดตควรทำอย่างไร?",
@@ -82,9 +82,9 @@ export default function HelpPage() {
                 "Private Leagues are member-only. Check the eight-character invite code and your membership limit. Guests must upgrade first; every team already joins Overall automatically.",
             },
             {
-              question: "How often can I rename my manager or team?",
+              question: "How often can I rename my team?",
               answer:
-                "Members can change a manager name every 30 days and a team name up to three times per season. Guest names are generated and read-only.",
+                "Members can rename a team up to three times per season. Team names must be unique within that season. Guest team names are generated and read-only.",
             },
             {
               question:

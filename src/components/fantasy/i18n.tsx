@@ -236,8 +236,6 @@ const translations: Record<string, string> = {
     "Some players in the baseline squad are no longer eligible",
   ทีมตั้งต้นไม่ผ่านกติกาปัจจุบัน:
     "The baseline squad no longer meets the current rules",
-  เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่:
-    "The manager name can be changed again on",
   ใช้ครบแล้ว: "All uses consumed",
   ดูข้อมูล: "View details for",
   "กำลังบันทึกทีม…": "Saving Team…",
@@ -467,7 +465,6 @@ const translations: Record<string, string> = {
   รหัสเชิญเพื่อน: "Invite Code",
   "ใช้ได้ถึง 31 สิงหาคม": "Valid until 31 August",
   แชร์ลีก: "Share League",
-  "ทีม / ผู้จัดการ": "Team / Manager",
   รวม: "Total",
   การเปลี่ยนแปลง: "Movement",
   คุณ: "You",
@@ -646,17 +643,17 @@ const translations: Record<string, string> = {
     "Choose another position to view player rankings",
 
   // Profile and settings
-  โปรไฟล์ผู้จัดการทีม: "Manager profile",
-  จัดการชื่อที่ใช้แสดงและข้อมูลทีมแฟนตาซีของคุณ:
-    "Manage your display name and Fantasy team details",
+  โปรไฟล์ทีม: "Team profile",
+  จัดการข้อมูลบัญชีและชื่อทีมแฟนตาซีของคุณ:
+    "Manage your account details and Fantasy team name",
   "บัญชี Guest": "Guest account",
   บัญชีสมาชิก: "Member account",
   บัญชีของฉัน: "My Account",
   โปรไฟล์และการตั้งค่า: "Profile & Settings",
   "จัดการข้อมูลทีม การแจ้งเตือน และอ่านกติกาของเกม":
     "Manage your team details, notifications, and game rules",
-  "จัดการชื่อบัญชีและทีม เลือกภาษา และตรวจสอบกติกาที่ใช้งานจริง":
-    "Manage your account and team names, choose a language, and review the active rules",
+  "จัดการชื่อทีม เลือกภาษา และตรวจสอบกติกาที่ใช้งานจริง":
+    "Manage your team name, choose a language, and review the active rules",
   ข้อมูลผู้เล่นปัจจุบัน: "Current player details",
   "ส่วนต่าง ๆ ของโปรไฟล์": "Profile sections",
   บันทึกการเปลี่ยนแปลง: "Save Changes",
@@ -666,16 +663,15 @@ const translations: Record<string, string> = {
   กติกาเกม: "Game Rules",
   ความเป็นส่วนตัว: "Privacy",
   ข้อมูลที่ใช้แสดงในเกม: "Information shown in the game",
-  ชื่อที่แสดง: "Display Name",
   อีเมล: "Email",
-  "Guest ใช้ชื่อสุ่มและเปลี่ยนชื่อไม่ได้":
-    "Guests use a generated name that cannot be changed",
-  "เปลี่ยนชื่อผู้จัดการได้ โดยจะเปลี่ยนครั้งถัดไปได้ใน 30 วัน":
-    "You can change the manager name; the next change will be available in 30 days",
-  เปลี่ยนชื่อผู้จัดการได้อีกครั้งหลัง:
-    "Manager name can be changed again after",
+  "Guest ไม่มีอีเมลและใช้ได้บนอุปกรณ์นี้":
+    "Guests do not have an email and use this account on this device",
+  บัญชีนี้ใช้เก็บทีมและการตั้งค่าข้ามอุปกรณ์:
+    "This account keeps your team and settings across devices",
   "ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–30 ตัวอักษร":
     "Use 3–30 Thai or English letters, numbers, spaces, and . _ -",
+  "ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–30 ตัวอักษร ชื่อทีมต้องไม่ซ้ำในฤดูกาลเดียวกัน":
+    "Use 3–30 Thai or English letters, numbers, spaces, and . _ -. Team names must be unique within the season",
   จังหวัด: "Province",
   กรุงเทพมหานคร: "Bangkok",
   เชียงใหม่: "Chiang Mai",
@@ -691,7 +687,7 @@ const translations: Record<string, string> = {
     "All team-name changes have been used for this season",
   เปลี่ยนชื่อทีมได้อีก: "Team-name changes remaining:",
   ครั้งในฤดูกาลนี้: "this season",
-  บันทึกชื่อบัญชีและทีม: "Save Account & Team Names",
+  บันทึกชื่อทีม: "Save Team Name",
   "ต้องการเก็บทีมไว้ข้ามอุปกรณ์?": "Want to keep this team across devices?",
   "สมัครสมาชิกแล้วใช้ทีม Guest เดิมต่อได้":
     "Create an account and continue with this Guest team",
@@ -743,9 +739,9 @@ const translations: Record<string, string> = {
   บันทึกการตั้งค่าแล้ว: "Settings saved",
   "กำลังบันทึก…": "Saving…",
   "กำลังออกจากระบบ…": "Signing out…",
-  บันทึกชื่อเรียบร้อยแล้ว: "Names saved",
-  "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อได้ กรุณาสมัครสมาชิกก่อน":
-    "Guest players cannot change names. Create an account first.",
+  บันทึกชื่อทีมเรียบร้อยแล้ว: "Team name saved",
+  "ผู้เล่น Guest ไม่สามารถเปลี่ยนชื่อทีมได้ กรุณาสมัครสมาชิกก่อน":
+    "Guest players cannot rename a team. Create an account first.",
   "ชื่อต้องมี 3–30 ตัวอักษร": "Names must contain 3–30 characters",
   "ชื่อลีกต้องมี 3–40 ตัวอักษร": "League names must contain 3–40 characters",
   "ใช้ได้เฉพาะภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ -":
@@ -755,6 +751,9 @@ const translations: Record<string, string> = {
   ชื่อนี้มีคำที่ไม่อนุญาต: "This name contains a prohibited term",
   "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว":
     "All 3 team-name changes have already been used",
+  ชื่อทีมนี้ถูกใช้แล้วในฤดูกาลนี้:
+    "This team name is already used in this season",
+  ไม่พบทีมที่ต้องการแก้ไข: "The team could not be found",
   ชื่อไม่ถูกต้อง: "The name is invalid",
   การเปลี่ยนแปลงระดับ: "Tier Changes",
   กติกาที่ระบบใช้ตรวจทีมและคำนวณคะแนน:

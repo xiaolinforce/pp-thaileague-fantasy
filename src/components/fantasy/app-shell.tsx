@@ -172,7 +172,11 @@ function ManagerMenu({
         {initials}
       </span>
       <span className="manager-card-copy">
-        <strong>{identity?.teamName ?? translate("เริ่มเล่น Fantasy")}</strong>
+        {identity ? (
+          <strong data-localize="off">{identity.teamName}</strong>
+        ) : (
+          <strong>{translate("เริ่มเล่น Fantasy")}</strong>
+        )}
         <small>
           {identity
             ? identity.isGuest
@@ -192,13 +196,17 @@ function ManagerMenu({
   const menu = (
     <div className="manager-menu-panel">
       <div className="manager-menu-identity">
-        <strong>
-          {identity?.managerName ?? translate("เริ่มเล่น Fantasy")}
-        </strong>
+        {identity ? (
+          <strong data-localize="off">{identity.teamName}</strong>
+        ) : (
+          <strong>{translate("เริ่มเล่น Fantasy")}</strong>
+        )}
         <span>
-          {identity?.email ??
-            identity?.teamName ??
-            translate("เริ่มจัดทีมไทยลีกของคุณ")}
+          {identity
+            ? identity.isGuest
+              ? translate("ผู้เล่น Guest")
+              : (identity.email ?? translate("บัญชีสมาชิก"))
+            : translate("เริ่มจัดทีมไทยลีกของคุณ")}
         </span>
       </div>
       <nav aria-label={translate("เมนูผู้จัดการทีม")}>
@@ -373,7 +381,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const identity = useAppIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
-  const initials = (identity?.managerName ?? "Guest")
+  const initials = (identity?.teamName ?? "Guest")
     .split(/\s+/)
     .map((part) => part[0])
     .join("")
