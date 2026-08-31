@@ -91,6 +91,7 @@ export type CompetitionDataset = {
   fixtures: CompetitionFixtureView[];
   clubs: CompetitionClubView[];
   matchweeks: number[];
+  currentGameweek: number | null;
   statistics: CompetitionStatisticsView;
 };
 

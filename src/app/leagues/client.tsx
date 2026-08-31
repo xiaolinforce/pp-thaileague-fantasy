@@ -9,7 +9,6 @@ import {
   DoorOpen,
   KeyRound,
   LoaderCircle,
-  LockKeyhole,
   Plus,
   RefreshCw,
   Settings2,
@@ -52,6 +51,7 @@ import { toast } from "@/components/ui/sonner";
 import {
   createPrivateLeagueAction,
   deletePrivateLeagueAction,
+  getLeagueDetailAction,
   joinPrivateLeagueAction,
   leavePrivateLeagueAction,
   previewPrivateLeagueInviteAction,
@@ -65,6 +65,13 @@ type LeagueOverviewState = Awaited<ReturnType<typeof getLeagueOverview>>;
 type LeagueDetailState = NonNullable<
   Awaited<ReturnType<typeof getLeagueDetail>>
 >;
+type SelectedLeague = {
+  id: string;
+  isOverallHint: boolean;
+  league: LeagueDetailState | null;
+  loading: boolean;
+  error: string;
+};
 
 function PendingIcon() {
   return <LoaderCircle className="spin" size={16} aria-hidden="true" />;
@@ -95,9 +102,11 @@ function FormMessage({
 function CreateLeagueDialog({
   open,
   onOpenChange,
+  onLeagueCreated,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLeagueCreated: (leagueId: string) => void;
 }) {
   const router = useRouter();
   const { translate } = useLanguage();
@@ -121,7 +130,7 @@ function CreateLeagueDialog({
     toast.success(translate(result.message));
     onOpenChange(false);
     setName("");
-    router.push(`/leagues/${result.leagueId}`);
+    if (result.leagueId) onLeagueCreated(result.leagueId);
     router.refresh();
   };
 
@@ -131,7 +140,7 @@ function CreateLeagueDialog({
         <DialogContent className="product-dialog league-dialog">
           <form onSubmit={submit}>
             <DialogHeader>
-              <DialogTitle>สร้าง Private League</DialogTitle>
+              <DialogTitle>สร้างลีกส่วนตัว</DialogTitle>
               <DialogDescription>
                 ตั้งชื่อลีกสำหรับกลุ่มของคุณ ระบบจะสร้างรหัสเชิญ 8 ตัวให้ทันที
               </DialogDescription>
@@ -183,10 +192,12 @@ function JoinLeagueDialog({
   open,
   onOpenChange,
   initialCode,
+  onLeagueOpened,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialCode: string;
+  onLeagueOpened: (leagueId: string) => void;
 }) {
   const router = useRouter();
   const { translate } = useLanguage();
@@ -233,7 +244,7 @@ function JoinLeagueDialog({
     }
     toast.success(translate(result.message));
     onOpenChange(false);
-    router.push(`/leagues/${result.leagueId}`);
+    if (result.leagueId) onLeagueOpened(result.leagueId);
     router.refresh();
   };
 
@@ -252,7 +263,7 @@ function JoinLeagueDialog({
         <DialogContent className="product-dialog league-dialog">
           <form onSubmit={inspect}>
             <DialogHeader>
-              <DialogTitle>เข้าร่วม Private League</DialogTitle>
+              <DialogTitle>เข้าร่วมลีกส่วนตัว</DialogTitle>
               <DialogDescription>
                 ตรวจสอบชื่อลีกและจำนวนสมาชิกก่อนยืนยันเข้าร่วม
               </DialogDescription>
@@ -324,13 +335,16 @@ function JoinLeagueDialog({
                   {pending ? "กำลังเข้าร่วม…" : "ยืนยันเข้าร่วม"}
                 </button>
               ) : preview?.league.alreadyMember ? (
-                <Link
-                  href={`/leagues/${preview.league.id}`}
+                <button
+                  type="button"
                   className="primary-button"
-                  onClick={() => onOpenChange(false)}
+                  onClick={() => {
+                    onOpenChange(false);
+                    onLeagueOpened(preview.league.id);
+                  }}
                 >
                   เปิดลีกนี้
-                </Link>
+                </button>
               ) : (
                 <button
                   type="submit"
@@ -350,6 +364,137 @@ function JoinLeagueDialog({
   );
 }
 
+function LeagueStandingsDialog({
+  leagueId,
+  isOverallHint,
+  league,
+  loading,
+  error,
+  onOpenChange,
+  onPageChange,
+}: {
+  leagueId: string | null;
+  isOverallHint: boolean;
+  league: LeagueDetailState | null;
+  loading: boolean;
+  error: string;
+  onOpenChange: (open: boolean) => void;
+  onPageChange: (page: number) => void;
+}) {
+  const { language, translate } = useLanguage();
+
+  const pageLabel =
+    language === "th"
+      ? `หน้า ${league?.pagination.page ?? 1} / ${league?.pagination.pageCount ?? 1}`
+      : `Page ${league?.pagination.page ?? 1} / ${league?.pagination.pageCount ?? 1}`;
+
+  return (
+    <Dialog open={Boolean(leagueId)} onOpenChange={onOpenChange}>
+      <DialogContent className="product-dialog league-standings-dialog">
+        <DialogHeader>
+          <DialogTitle>
+            {isOverallHint ? (
+              "อันดับทั้งหมด"
+            ) : league ? (
+              <span data-localize="off">{league.name}</span>
+            ) : (
+              "ตารางอันดับ"
+            )}
+          </DialogTitle>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="league-dialog-state" role="status">
+            <PendingIcon />
+            <span>กำลังโหลดตารางอันดับ…</span>
+          </div>
+        ) : error ? (
+          <div className="league-dialog-state error" role="alert">
+            <span>{error}</span>
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={() => onPageChange(1)}
+            >
+              ลองอีกครั้ง
+            </button>
+          </div>
+        ) : league ? (
+          <>
+            <div className="league-table-scroll" tabIndex={0}>
+              <table className="league-standings-table">
+                <thead>
+                  <tr>
+                    <th scope="col">อันดับ</th>
+                    <th scope="col">ทีม / ผู้จัดการ</th>
+                    <th scope="col">GW</th>
+                    <th scope="col">รวม</th>
+                    <th scope="col">Transfer</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {league.standings.map((standing) => (
+                    <tr
+                      className={standing.mine ? "mine" : undefined}
+                      key={standing.teamId}
+                    >
+                      <td className="league-rank-cell">{standing.rank}</td>
+                      <th scope="row">
+                        <span className="league-team-name">
+                          <span data-localize="off">{standing.teamName}</span>
+                          {standing.mine ? <i>คุณ</i> : null}
+                          {standing.owner ? (
+                            <i className="owner">เจ้าของ</i>
+                          ) : null}
+                        </span>
+                        <small data-localize="off">
+                          {standing.managerName}
+                        </small>
+                      </th>
+                      <td>{standing.gameweekPoints.toLocaleString()}</td>
+                      <td className="league-total-cell">
+                        {standing.totalPoints.toLocaleString()}
+                      </td>
+                      <td>{standing.transferCount.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {league.pagination.pageCount > 1 ? (
+              <nav
+                className="league-dialog-pagination"
+                aria-label={translate("หน้าตารางอันดับ")}
+              >
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={league.pagination.page === 1 || loading}
+                  onClick={() => onPageChange(league.pagination.page - 1)}
+                >
+                  <ChevronLeft aria-hidden="true" /> ก่อนหน้า
+                </button>
+                <strong>{pageLabel}</strong>
+                <button
+                  type="button"
+                  className="secondary-button"
+                  disabled={
+                    league.pagination.page === league.pagination.pageCount ||
+                    loading
+                  }
+                  onClick={() => onPageChange(league.pagination.page + 1)}
+                >
+                  ถัดไป <ChevronRight aria-hidden="true" />
+                </button>
+              </nav>
+            ) : null}
+          </>
+        ) : null}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function LeagueOverview({
   overview,
   initialJoinCode,
@@ -357,83 +502,79 @@ export function LeagueOverview({
   overview: LeagueOverviewState;
   initialJoinCode: string;
 }) {
+  const { translate } = useLanguage();
   const [createOpen, setCreateOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(
     Boolean(initialJoinCode) && !overview.isGuest,
   );
+  const [selectedLeague, setSelectedLeague] = useState<SelectedLeague | null>(
+    null,
+  );
+
+  const openLeague = async (
+    leagueId: string,
+    isOverallHint: boolean,
+    page = 1,
+  ) => {
+    setSelectedLeague({
+      id: leagueId,
+      isOverallHint,
+      league: null,
+      loading: true,
+      error: "",
+    });
+    try {
+      const result = await getLeagueDetailAction({ leagueId, page });
+      if (!result.ok) {
+        setSelectedLeague({
+          id: leagueId,
+          isOverallHint,
+          league: null,
+          loading: false,
+          error: translate(result.message),
+        });
+        return;
+      }
+      setSelectedLeague({
+        id: leagueId,
+        isOverallHint,
+        league: result.league,
+        loading: false,
+        error: "",
+      });
+    } catch {
+      setSelectedLeague({
+        id: leagueId,
+        isOverallHint,
+        league: null,
+        loading: false,
+        error: translate("โหลดตารางอันดับไม่สำเร็จ กรุณาลองอีกครั้ง"),
+      });
+    }
+  };
 
   return (
     <Localized>
       <>
-        <header className="league-page-heading">
-          <div>
-            <h2>ลีกของฉัน</h2>
-            <p>
-              ติดตามอันดับ Overall และแข่งขันกับกลุ่มเพื่อนด้วยคะแนน Classic
-              ตลอดฤดูกาล
-            </p>
-          </div>
-          {overview.isGuest ? (
-            <Link href="/upgrade" className="primary-button">
-              สมัครสมาชิกเพื่อใช้ Private League
-            </Link>
-          ) : (
-            <div className="league-heading-actions">
-              <button
-                type="button"
-                className="secondary-button"
-                onClick={() => setJoinOpen(true)}
-              >
-                <KeyRound aria-hidden="true" /> เข้าร่วมลีก
-              </button>
-              <button
-                type="button"
-                className="primary-button"
-                onClick={() => setCreateOpen(true)}
-                disabled={
-                  overview.limits.owned >= overview.limits.ownerLimit ||
-                  overview.limits.memberships >= overview.limits.membershipLimit
-                }
-              >
-                <Plus aria-hidden="true" /> สร้างลีก
-              </button>
-            </div>
-          )}
-        </header>
-
         {overview.overall ? (
-          <Link
-            href={`/leagues/${overview.overall.id}`}
+          <button
+            type="button"
             className="league-overall-surface"
+            onClick={() => {
+              if (overview.overall) void openLeague(overview.overall.id, true);
+            }}
           >
             <span className="league-overall-mark" aria-hidden="true">
               <Trophy />
             </span>
             <div className="league-overall-copy">
-              <h3 data-localize="off">{overview.overall.name}</h3>
-              <p>
-                {overview.overall.memberCount} ผู้จัดการ · Gameweek{" "}
-                {String(overview.gameweek.number).padStart(2, "0")}
-              </p>
+              <span>อันดับทั้งหมด</span>
+              <strong>{overview.overall.rank?.toLocaleString() ?? "—"}</strong>
             </div>
-            <dl className="league-overall-result">
-              <div>
-                <dt>อันดับของคุณ</dt>
-                <dd>#{overview.overall.rank ?? "—"}</dd>
-              </div>
-              <div>
-                <dt>คะแนน GW</dt>
-                <dd>{overview.overall.gameweekPoints.toLocaleString()}</dd>
-              </div>
-              <div>
-                <dt>คะแนนรวม</dt>
-                <dd>{overview.overall.totalPoints.toLocaleString()}</dd>
-              </div>
-            </dl>
-            <span className="league-open-label">
-              ดูอันดับ <ChevronRight aria-hidden="true" />
+            <span className="league-open-caret" aria-hidden="true">
+              <ChevronRight />
             </span>
-          </Link>
+          </button>
         ) : (
           <section className="league-system-state" role="alert">
             <Trophy aria-hidden="true" />
@@ -449,15 +590,34 @@ export function LeagueOverview({
           aria-labelledby="private-heading"
         >
           <div className="league-section-heading">
-            <div>
-              <h2 id="private-heading">Private League</h2>
-              <p>ลีกที่คุณเป็นสมาชิกจะปรากฏเฉพาะกับคนในกลุ่ม</p>
-            </div>
+            <h2 id="private-heading">ลีกส่วนตัว</h2>
+            {overview.isGuest ? (
+              <Link href="/upgrade" className="primary-button">
+                สมัครสมาชิก
+              </Link>
+            ) : null}
             {!overview.isGuest ? (
-              <span>
-                {overview.limits.memberships} /{" "}
-                {overview.limits.membershipLimit} ลีก
-              </span>
+              <div className="league-heading-actions">
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => setJoinOpen(true)}
+                >
+                  <KeyRound aria-hidden="true" /> เข้าร่วมลีก
+                </button>
+                <button
+                  type="button"
+                  className="primary-button"
+                  onClick={() => setCreateOpen(true)}
+                  disabled={
+                    overview.limits.owned >= overview.limits.ownerLimit ||
+                    overview.limits.memberships >=
+                      overview.limits.membershipLimit
+                  }
+                >
+                  <Plus aria-hidden="true" /> สร้างลีก
+                </button>
+              </div>
             ) : null}
           </div>
 
@@ -465,7 +625,10 @@ export function LeagueOverview({
             <ul className="league-private-list">
               {overview.privateLeagues.map((league) => (
                 <li key={league.id}>
-                  <Link href={`/leagues/${league.id}`}>
+                  <button
+                    type="button"
+                    onClick={() => void openLeague(league.id, false)}
+                  >
                     <span className="league-list-rank">
                       #{league.rank ?? "—"}
                     </span>
@@ -481,64 +644,45 @@ export function LeagueOverview({
                       <strong>{league.totalPoints.toLocaleString()}</strong>
                     </span>
                     <ChevronRight aria-hidden="true" />
-                  </Link>
+                  </button>
                 </li>
               ))}
             </ul>
-          ) : (
-            <div className="league-private-empty">
-              <span aria-hidden="true">
-                <LockKeyhole />
-              </span>
-              <div>
-                <h3>
-                  {overview.isGuest
-                    ? "Private League สำหรับสมาชิก"
-                    : "ยังไม่มี Private League"}
-                </h3>
-                <p>
-                  {overview.isGuest
-                    ? "สมัครสมาชิกเพื่อสร้างลีกหรือเข้าร่วมกลุ่มของเพื่อน"
-                    : "สร้างกลุ่มใหม่หรือใช้รหัสเชิญ 8 ตัวจากเจ้าของลีก"}
-                </p>
-              </div>
-              {overview.isGuest ? (
-                <Link href="/upgrade" className="secondary-button">
-                  สมัครสมาชิก
-                </Link>
-              ) : (
-                <button
-                  type="button"
-                  className="secondary-button"
-                  onClick={() => setJoinOpen(true)}
-                >
-                  กรอกรหัสเชิญ
-                </button>
-              )}
-            </div>
-          )}
+          ) : null}
         </section>
-
-        {!overview.gameweek.scoreComplete ? (
-          <p className="league-score-note" role="status">
-            คะแนน Gameweek นี้ยังเป็นคะแนนชั่วคราว
-            และอาจเปลี่ยนหลังตรวจแมตช์ตกค้าง
-          </p>
-        ) : null}
 
         {!overview.isGuest ? (
           <>
             <CreateLeagueDialog
               open={createOpen}
               onOpenChange={setCreateOpen}
+              onLeagueCreated={(leagueId) => void openLeague(leagueId, false)}
             />
             <JoinLeagueDialog
               open={joinOpen}
               onOpenChange={setJoinOpen}
               initialCode={initialJoinCode}
+              onLeagueOpened={(leagueId) => void openLeague(leagueId, false)}
             />
           </>
         ) : null}
+        <LeagueStandingsDialog
+          leagueId={selectedLeague?.id ?? null}
+          isOverallHint={selectedLeague?.isOverallHint ?? false}
+          league={selectedLeague?.league ?? null}
+          loading={selectedLeague?.loading ?? false}
+          error={selectedLeague?.error ?? ""}
+          onOpenChange={(open) => !open && setSelectedLeague(null)}
+          onPageChange={(page) => {
+            if (selectedLeague) {
+              void openLeague(
+                selectedLeague.id,
+                selectedLeague.isOverallHint,
+                page,
+              );
+            }
+          }}
+        />
       </>
     </Localized>
   );

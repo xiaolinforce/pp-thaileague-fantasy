@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
-import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { AppShell } from "@/components/fantasy/app-shell";
 import { ClubColor } from "@/components/fantasy/club-colors";
 import { GameweekSelector } from "@/components/fantasy/gameweek-selector";
 import {
@@ -79,8 +79,11 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
   const { language } = useLanguage();
   const [visibleCount, setVisibleCount] = useState(25);
   const text = (th: string, en: string) => (language === "th" ? th : en);
-  const view: MainView =
+  const requestedView: MainView =
     searchParams.get("view") === "stats" ? "stats" : "fixtures";
+  const statisticsEnabled = (data.currentGameweek ?? 1) > 1;
+  const view: MainView =
+    statisticsEnabled && requestedView === "stats" ? "stats" : "fixtures";
   const statsView: StatsView =
     searchParams.get("stats") === "football" ? "football" : "fantasy";
   const requestedWeek = Number(searchParams.get("week"));
@@ -201,41 +204,43 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
   return (
     <AppShell>
       <main id="main-content" className="content product-content fixtures-page">
-        <PageHeader
-          title="โปรแกรมและสถิติ"
-          actions={
-            <Tabs
-              value={view}
-              onValueChange={(value) =>
-                updateUrl({ view: value === "stats" ? "stats" : null })
+        <h1 className="sr-only">โปรแกรมและสถิติ</h1>
+        <Tabs
+          value={view}
+          onValueChange={(value) =>
+            updateUrl({ view: value === "stats" ? "stats" : null })
+          }
+        >
+          <TabsList className="segment-tabs page-tabs fixtures-view-tabs">
+            <TabsTrigger value="fixtures">
+              <CalendarDays size={16} aria-hidden="true" />
+              โปรแกรม
+            </TabsTrigger>
+            <TabsTrigger
+              value="stats"
+              disabled={!statisticsEnabled}
+              aria-describedby={
+                !statisticsEnabled ? "stats-unavailable-hint" : undefined
+              }
+              title={
+                !statisticsEnabled
+                  ? text(
+                      "สถิติจะเปิดหลัง Gameweek แรกสิ้นสุดลง",
+                      "Statistics unlock after Gameweek 1 ends",
+                    )
+                  : undefined
               }
             >
-              <TabsList className="segment-tabs page-tabs">
-                <TabsTrigger value="fixtures">
-                  <CalendarDays size={16} aria-hidden="true" />
-                  โปรแกรม
-                </TabsTrigger>
-                <TabsTrigger value="stats">
-                  <BarChart3 size={16} aria-hidden="true" />
-                  สถิติ
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
-          }
-        />
-
-        <section
-          className="fixtures-page-intro"
-          aria-labelledby="fixtures-title"
-        >
-          <div>
-            <h2 id="fixtures-title">โปรแกรมและสถิติ</h2>
-            <p>
-              ติดตามโปรแกรมจริงและเปรียบเทียบผลงานนักเตะจากข้อมูลที่ตรวจสอบได้
-            </p>
-          </div>
-          <span>{localize(data.season, language)}</span>
-        </section>
+              <BarChart3 size={16} aria-hidden="true" />
+              สถิติ
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+        {!statisticsEnabled ? (
+          <p id="stats-unavailable-hint" className="sr-only">
+            สถิติจะเปิดหลัง Gameweek แรกสิ้นสุดลง
+          </p>
+        ) : null}
 
         {view === "fixtures" ? (
           <>

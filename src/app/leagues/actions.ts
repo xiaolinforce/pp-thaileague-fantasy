@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { getPrivateLeagueInvitePreview } from "@/data/leagues";
+import { getLeagueDetail, getPrivateLeagueInvitePreview } from "@/data/leagues";
 import { requireFantasyProfile } from "@/lib/auth/context";
 import {
   validateLeagueInviteCode,
@@ -40,6 +40,13 @@ export type LeagueInvitePreviewResult =
         full: boolean;
       };
       inviteCode: string;
+    }
+  | { ok: false; message: string };
+
+export type LeagueDetailResult =
+  | {
+      ok: true;
+      league: NonNullable<Awaited<ReturnType<typeof getLeagueDetail>>>;
     }
   | { ok: false; message: string };
 
@@ -141,6 +148,27 @@ export async function previewPrivateLeagueInviteAction(input: {
     return {
       ok: false,
       message: "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+    };
+  }
+}
+
+export async function getLeagueDetailAction(input: {
+  leagueId: string;
+  page?: number;
+}): Promise<LeagueDetailResult> {
+  const requestedPage = Number(input?.page);
+  const page =
+    Number.isInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1;
+  try {
+    const league = await getLeagueDetail(String(input?.leagueId ?? ""), page);
+    if (!league) {
+      return { ok: false, message: "ไม่พบลีกนี้ หรือคุณไม่ได้เป็นสมาชิก" };
+    }
+    return { ok: true, league };
+  } catch {
+    return {
+      ok: false,
+      message: "โหลดตารางอันดับไม่สำเร็จ กรุณาลองอีกครั้ง",
     };
   }
 }

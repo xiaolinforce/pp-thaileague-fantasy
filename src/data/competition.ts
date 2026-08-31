@@ -463,6 +463,7 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
     fixtures: fixtureViews,
     clubs: clubViews.sort((a, b) => a.name.en.localeCompare(b.name.en)),
     matchweeks: [...new Set(fixtureViews.map((fixture) => fixture.matchweek))],
+    currentGameweek: currentFantasyGameweek?.number ?? null,
     statistics: {
       fantasy: {
         available: fantasyPointRows.length > 0,

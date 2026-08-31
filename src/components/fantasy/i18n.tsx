@@ -42,6 +42,9 @@ const translations: Record<string, string> = {
   โหลดข้อมูลการแข่งขันไม่สำเร็จ: "Unable to load competition data",
   โหลดคะแนนไม่สำเร็จ: "Unable to load points",
   โหลดตารางอันดับไม่สำเร็จ: "Unable to load standings",
+  "กำลังโหลดตารางอันดับ…": "Loading standings…",
+  "โหลดตารางอันดับไม่สำเร็จ กรุณาลองอีกครั้ง":
+    "Could not load the standings. Please try again.",
   โหลดโปรไฟล์ไม่สำเร็จ: "Unable to load profile",
   โหลดการตั้งค่าไม่สำเร็จ: "Unable to load settings",
   โหลดเครื่องมือผู้ดูแลไม่สำเร็จ: "Unable to load admin tools",
@@ -459,6 +462,8 @@ const translations: Record<string, string> = {
   มินิลีกส่วนตัว: "Private Mini-league",
   ผู้จัดการ: "managers",
   ลีกทั้งหมด: "Overall League",
+  อันดับทั้งหมด: "Overall ranking",
+  ลีกส่วนตัว: "Private Leagues",
   รหัสเชิญเพื่อน: "Invite Code",
   "ใช้ได้ถึง 31 สิงหาคม": "Valid until 31 August",
   แชร์ลีก: "Share League",
@@ -482,6 +487,7 @@ const translations: Record<string, string> = {
   "ติดตามอันดับ Overall และแข่งขันกับกลุ่มเพื่อนด้วยคะแนน Classic ตลอดฤดูกาล":
     "Track your Overall rank and compete with friends through season-long Classic scoring",
   "สมัครสมาชิกเพื่อใช้ Private League": "Sign up to use Private Leagues",
+  สร้างลีกส่วนตัว: "Create a Private League",
   สร้างลีก: "Create League",
   "ตั้งชื่อลีกสำหรับกลุ่มของคุณ ระบบจะสร้างรหัสเชิญ 8 ตัวให้ทันที":
     "Name your group and an eight-character invite code will be created immediately",
@@ -491,6 +497,7 @@ const translations: Record<string, string> = {
   ยกเลิก: "Cancel",
   "กำลังสร้างลีก…": "Creating league…",
   "เข้าร่วม Private League": "Join a Private League",
+  เข้าร่วมลีกส่วนตัว: "Join a Private League",
   ตรวจสอบชื่อลีกและจำนวนสมาชิกก่อนยืนยันเข้าร่วม:
     "Review the league name and member count before joining",
   "รหัสเชิญ 8 ตัว": "Eight-character invite code",
@@ -614,6 +621,8 @@ const translations: Record<string, string> = {
   "วิเคราะห์โปรแกรม ฟอร์ม และตัวเลขสำคัญก่อนจัดทีม":
     "Analyse fixtures, form, and key numbers before selecting your team",
   สถิติ: "Stats",
+  "สถิติจะเปิดหลัง Gameweek แรกสิ้นสุดลง":
+    "Statistics unlock after Gameweek 1 ends",
   "21–23 สิงหาคม 2026": "21–23 August 2026",
   "ศุกร์ 21 สิงหาคม": "Friday 21 August",
   ความยากโปรแกรม: "Fixture Difficulty",

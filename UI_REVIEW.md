@@ -210,7 +210,11 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   headings, named controls, and language selection by radio control reviewed.
 - **Issues fixed:** hard-coded leader values, zero-value pseudo-ranking,
   incorrect form denominator, local-only filter state, mobile horizontal stats
-  rows, missing source/provenance copy, and simulated TBC kickoff overrides.
+  rows, missing source/provenance copy, simulated TBC kickoff overrides,
+  duplicated page framing/season label, and a prematurely reachable Stats tab.
+  The Stats tab now stays disabled until the actual current Gameweek is beyond
+  Gameweek 1; mobile fixture rows put the kickoff time beside two stacked team
+  names.
 - **Known exclusions:** populated official and Fantasy tables, ties, dense
   filters, and large values were not rendered because neither live dataset has
   begun and no production mock path was added. Pure rules cover form, DNP,
@@ -238,6 +242,11 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 - **Issues fixed:** guest/private hierarchy, real empty state, English coverage
   inside Client Components, user-name localization escape, 768/1280 table
   clipping, mobile metric visibility, and provisional-score explanation.
+  The overview now leads with a rank-only Overall card labelled “อันดับทั้งหมด”
+  / “Overall ranking”; both Overall and Private League list entries open a
+  focused standings dialog instead of navigating away. The Overall dialog has
+  only the standings table plus paginated navigation, and the redundant empty,
+  member-count, score-note, and explanatory surfaces were removed.
 - **Known exclusions:** owner/member create, preview, join, rename, invite rotate,
   remove, leave, delete, 100-member pagination, mutation errors, and final-score
   UI were not rendered because the available browser session is a Guest and no
@@ -248,7 +257,8 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   task; no mock or simulation route was added.
 - **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
   `npm run db:verify:fantasy`, responsive Browser measurements, Thai/English
-  rendered snapshots.
+  rendered snapshots. The rank dialog, disabled-first-Gameweek Stats tab, and
+  stacked mobile fixtures were rechecked in the in-app Browser.
 
 ### 2026-08-31 — Manager account surfaces and public guidance
 

@@ -7396,17 +7396,38 @@ textarea:focus-visible {
   .fixture-row {
     width: 100%;
     min-width: 0;
-    grid-template-columns: minmax(0, 1fr) 18px 24px 18px minmax(0, 1fr);
-    column-gap: 4px;
-    row-gap: 8px;
-    padding: 12px 10px;
+    grid-template-areas:
+      "time home"
+      "time away";
+    grid-template-columns: 54px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 9px;
+    padding: 14px 13px;
   }
 
   .fixture-row time {
-    grid-column: 1 / -1;
-    padding-bottom: 7px;
-    border-bottom: 1px solid #f0eeeb;
+    grid-area: time;
+    align-self: start;
+    padding-top: 2px;
     line-height: 1;
+  }
+
+  .fixture-row .fixture-club {
+    display: block;
+    text-align: left;
+  }
+
+  .fixture-row .fixture-club.home {
+    grid-area: home;
+  }
+
+  .fixture-row .fixture-club:not(.home) {
+    grid-area: away;
+  }
+
+  .fixture-row .club-color,
+  .fixture-row .fixture-vs {
+    display: none;
   }
 
   .fixture-row time,
@@ -9040,17 +9061,21 @@ body {
 }
 
 .league-overall-surface {
+  width: 100%;
+  border: 0;
   display: grid;
-  grid-template-columns: auto minmax(170px, 1fr) minmax(340px, auto) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 22px;
-  min-height: 152px;
-  margin-bottom: 30px;
-  padding: 24px 26px;
+  gap: 20px;
+  min-height: 128px;
+  margin: 0 0 32px;
+  padding: 22px 26px;
   border-radius: 16px;
   color: #fff;
   background: var(--navy);
   box-shadow: 0 18px 34px rgba(21, 29, 36, 0.18);
+  cursor: pointer;
+  text-align: left;
   text-decoration: none;
   transition:
     transform 160ms ease-out,
@@ -9066,7 +9091,7 @@ body {
 }
 
 .league-overall-surface:focus-visible,
-.league-private-list a:focus-visible,
+.league-private-list button:focus-visible,
 .league-back-link:focus-visible,
 .league-pagination a:focus-visible,
 .league-row-action:focus-visible,
@@ -9093,21 +9118,40 @@ body {
 
 .league-overall-copy {
   min-width: 0;
+  display: grid;
+  gap: 4px;
 }
 
-.league-overall-copy h3 {
-  margin: 0;
+.league-overall-copy > span {
+  color: #b9c2c8;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.league-overall-copy > strong {
   color: #fff;
-  font-size: clamp(20px, 2.4vw, 28px);
-  font-weight: 600;
-  line-height: 1.25;
+  font-size: clamp(38px, 6vw, 74px);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  line-height: 0.95;
   overflow-wrap: anywhere;
 }
 
-.league-overall-copy p {
-  margin: 6px 0 0;
-  color: #b9c2c8;
-  font-size: 14px;
+.league-open-caret {
+  display: grid;
+  width: 52px;
+  height: 52px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.league-open-caret svg {
+  width: 27px;
+  height: 27px;
 }
 
 .league-overall-result,
@@ -9261,7 +9305,28 @@ body {
   transition: background-color 140ms ease-out;
 }
 
+.league-private-list button {
+  width: 100%;
+  border: 0;
+  display: grid;
+  grid-template-columns: 76px minmax(190px, 1fr) minmax(95px, auto) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 84px;
+  padding: 12px 18px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 140ms ease-out;
+}
+
 .league-private-list a:hover {
+  color: inherit;
+  background: #fbfaf8;
+}
+
+.league-private-list button:hover {
   color: inherit;
   background: #fbfaf8;
 }
@@ -9311,6 +9376,10 @@ body {
   color: #a19b94;
 }
 
+.league-private-list button > svg {
+  color: #a19b94;
+}
+
 .league-private-empty > div {
   min-width: 0;
   flex: 1;
@@ -9329,6 +9398,68 @@ body {
 .league-dialog form {
   display: grid;
   gap: 18px;
+}
+
+[data-slot="dialog-content"].league-standings-dialog {
+  width: min(980px, calc(100% - 32px));
+  max-width: 980px;
+  gap: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.league-standings-dialog [data-slot="dialog-header"] {
+  padding: 24px 56px 18px 24px;
+}
+
+.league-standings-dialog .league-table-scroll {
+  max-height: min(62dvh, 620px);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+.league-standings-dialog .league-standings-table {
+  min-width: 0;
+}
+
+.league-standings-dialog .league-standings-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.league-dialog-state {
+  display: flex;
+  min-height: 220px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 24px;
+  color: var(--muted);
+}
+
+.league-dialog-state.error {
+  flex-direction: column;
+  color: #9d251c;
+}
+
+.league-dialog-pagination {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 20px;
+}
+
+.league-dialog-pagination .secondary-button:last-child {
+  justify-self: end;
+}
+
+.league-dialog-pagination strong {
+  color: var(--muted);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .league-field {
@@ -9792,9 +9923,19 @@ body {
   }
 
   .league-overall-surface {
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: 14px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 12px;
     padding: 19px;
+  }
+
+  .league-overall-mark {
+    width: 52px;
+    height: 52px;
+  }
+
+  .league-open-caret {
+    width: 48px;
+    height: 48px;
   }
 
   .league-overall-result {
@@ -9805,16 +9946,12 @@ body {
     padding: 11px 10px;
   }
 
-  .league-open-label {
-    grid-column: 1 / -1;
-    justify-content: flex-end;
-  }
-
   .league-section-heading {
     align-items: flex-start;
   }
 
-  .league-private-list a {
+  .league-private-list a,
+  .league-private-list button {
     grid-template-columns: 58px minmax(0, 1fr) auto;
     gap: 10px;
     padding-inline: 13px;
@@ -9940,11 +10077,34 @@ body {
   .league-dialog [data-slot="dialog-footer"] {
     align-items: stretch;
   }
+
+  [data-slot="dialog-content"].league-standings-dialog {
+    width: calc(100% - 24px);
+  }
+
+  .league-standings-dialog [data-slot="dialog-header"] {
+    padding: 20px 48px 16px 20px;
+  }
+
+  .league-standings-dialog .league-table-scroll {
+    max-height: 58dvh;
+  }
+
+  .league-dialog-pagination {
+    gap: 8px;
+    padding: 14px;
+  }
+
+  .league-dialog-pagination .secondary-button {
+    min-height: 38px;
+    padding-inline: 10px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .league-overall-surface,
   .league-private-list a,
+  .league-private-list button,
   .league-field input {
     transition: none;
   }

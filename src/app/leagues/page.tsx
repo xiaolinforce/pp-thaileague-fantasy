@@ -1,4 +1,4 @@
-import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { AppShell } from "@/components/fantasy/app-shell";
 import { getLeagueOverview } from "@/data/leagues";
 import { LeagueOverview } from "./client";
 
@@ -17,7 +17,7 @@ export default async function LeaguesPage({
   return (
     <AppShell>
       <main id="main-content" className="content product-content league-page">
-        <PageHeader title="ลีก" />
+        <h1 className="sr-only">ลีก</h1>
         <LeagueOverview
           key={initialJoinCode}
           overview={overview}
