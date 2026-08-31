@@ -145,6 +145,10 @@ slots, but persist player snapshots and transfer revision 1 only when the user
 first saves a valid 15-player squad. Existing teams and seeded demo squads are
 not cleared or rebuilt.
 
+**Superseded on 2026-08-31:** Real account teams remain untouched, but all
+flagged demo managers, squads, and leagues were deliberately removed when
+Classic leagues moved to real provisioned teams only.
+
 **Context:** Automatically assigned players made the opening experience feel
 preselected and reduced the manager's ownership of the first squad. The current
 selection model already permits a draft selection with no player rows, so an
@@ -339,3 +343,23 @@ static UI dataset.
 access stays server-only. The selected Neon branch determines the environment,
 so migrations and seeds require an explicit target check. The old static
 `src/lib/fantasy-data.ts` file is not a runtime source of truth.
+
+## 2026-08-31 — Classic leagues contain only real provisioned teams
+
+**Decision:** Maintain one automatic Overall Classic league per Fantasy season
+for every Guest and member team. Private Classic leagues are member-only,
+invite-only groups with an owner, an eight-character unambiguous invite code,
+and limits of 10 owned leagues, 20 memberships, and 100 teams per league.
+Owners cannot leave; deleting a league removes only the league and memberships.
+
+**Context:** Seeded opponents and a demo Private League made standings look
+populated but could not support trustworthy membership or management. Guests
+still need a useful zero-friction competition while private groups require a
+stable authenticated owner and privacy boundary.
+
+**Consequences:** Fantasy seeds never create manager/team/score/Private League
+records. Private mutations reauthorize the current member, lock fresh database
+rows, validate limits transactionally, and append an audit row. Invite input is
+case-insensitive but stored/displayed uppercase from an alphabet that excludes
+`I`, `L`, `O`, `0`, and `1`. League detail is available only to members, and
+only the owner receives the active invite code.

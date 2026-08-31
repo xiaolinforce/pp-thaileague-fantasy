@@ -1,9 +1,10 @@
 import { loadEnvConfig } from "@next/env";
-import { and, asc, count, eq, ne } from "drizzle-orm";
+import { and, asc, count, eq, ne, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/neon-http";
 
 import {
   fantasyGameweeks,
+  fantasyLeagueAuditLog,
   fantasyLeagueMembers,
   fantasyLeagues,
   fantasyManagers,
@@ -40,6 +41,7 @@ const tables = {
   fantasyTierDefinitions,
   fantasyLeagues,
   fantasyLeagueMembers,
+  fantasyLeagueAuditLog,
 };
 
 async function verifyFantasyGame() {
@@ -47,6 +49,102 @@ async function verifyFantasyGame() {
     const result = await db.select({ count: count() }).from(table);
     console.log(`${name}: ${result[0].count}`);
   }
+
+  const leagueIntegrity = await db.execute<{
+    seeded_managers: number;
+    missing_overall_leagues: number;
+    teams_missing_overall: number;
+    private_owners_missing_membership: number;
+    cross_season_memberships: number;
+    private_leagues_over_member_limit: number;
+    teams_over_membership_limit: number;
+    teams_over_owner_limit: number;
+  }>(sql`
+    select
+      (select count(*)::int from fantasy_managers where status = 'seeded') as seeded_managers,
+      (
+        select count(*)::int
+        from fantasy_seasons season
+        where not exists (
+          select 1 from fantasy_leagues league
+          where league.fantasy_season_id = season.id and league.type = 'overall'
+        )
+      ) as missing_overall_leagues,
+      (
+        select count(*)::int
+        from fantasy_teams team
+        where not exists (
+          select 1
+          from fantasy_leagues league
+          inner join fantasy_league_members member
+            on member.fantasy_league_id = league.id
+          where league.fantasy_season_id = team.fantasy_season_id
+            and league.type = 'overall'
+            and member.fantasy_team_id = team.id
+        )
+      ) as teams_missing_overall,
+      (
+        select count(*)::int
+        from fantasy_leagues league
+        where league.type = 'private'
+          and not exists (
+            select 1 from fantasy_league_members member
+            where member.fantasy_league_id = league.id
+              and member.fantasy_team_id = league.owner_team_id
+          )
+      ) as private_owners_missing_membership,
+      (
+        select count(*)::int
+        from fantasy_league_members member
+        inner join fantasy_leagues league on league.id = member.fantasy_league_id
+        inner join fantasy_teams team on team.id = member.fantasy_team_id
+        where league.fantasy_season_id <> team.fantasy_season_id
+      ) as cross_season_memberships,
+      (
+        select count(*)::int from (
+          select member.fantasy_league_id
+          from fantasy_league_members member
+          inner join fantasy_leagues league on league.id = member.fantasy_league_id
+          where league.type = 'private'
+          group by member.fantasy_league_id
+          having count(*) > 100
+        ) oversized_leagues
+      ) as private_leagues_over_member_limit,
+      (
+        select count(*)::int from (
+          select member.fantasy_team_id
+          from fantasy_league_members member
+          inner join fantasy_leagues league on league.id = member.fantasy_league_id
+          where league.type = 'private'
+          group by member.fantasy_team_id
+          having count(*) > 20
+        ) oversized_memberships
+      ) as teams_over_membership_limit,
+      (
+        select count(*)::int from (
+          select league.owner_team_id
+          from fantasy_leagues league
+          where league.type = 'private'
+          group by league.owner_team_id
+          having count(*) > 10
+        ) oversized_ownerships
+      ) as teams_over_owner_limit
+  `);
+  const leagueIssues = leagueIntegrity.rows[0];
+  if (!leagueIssues) throw new Error("League integrity query returned no row.");
+  const failedLeagueChecks = Object.entries(leagueIssues).filter(
+    ([, value]) => Number(value) !== 0,
+  );
+  if (failedLeagueChecks.length > 0) {
+    throw new Error(
+      `League integrity failed: ${failedLeagueChecks
+        .map(([name, value]) => `${name}=${value}`)
+        .join(", ")}.`,
+    );
+  }
+  console.log(
+    "leagueIntegrity: no demo managers; Overall and Private League invariants verified",
+  );
 
   const gameweekRows = await db
     .select({

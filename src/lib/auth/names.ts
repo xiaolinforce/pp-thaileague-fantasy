@@ -17,15 +17,17 @@ export function normalizeFantasyName(value: string) {
   return value.trim().replace(/\s+/g, " ");
 }
 
-export function validateFantasyName(value: string) {
+export function validateFantasyDisplayName(
+  value: string,
+  options: { minLength?: number; maxLength?: number } = {},
+) {
   const normalized = normalizeFantasyName(value);
-  if (
-    normalized.length < NAME_MIN_LENGTH ||
-    normalized.length > NAME_MAX_LENGTH
-  ) {
+  const minLength = options.minLength ?? NAME_MIN_LENGTH;
+  const maxLength = options.maxLength ?? NAME_MAX_LENGTH;
+  if (normalized.length < minLength || normalized.length > maxLength) {
     return {
       ok: false as const,
-      message: `ชื่อต้องมี ${NAME_MIN_LENGTH}–${NAME_MAX_LENGTH} ตัวอักษร`,
+      message: `ชื่อต้องมี ${minLength}–${maxLength} ตัวอักษร`,
     };
   }
   if (!NAME_PATTERN.test(normalized)) {
@@ -45,6 +47,10 @@ export function validateFantasyName(value: string) {
     return { ok: false as const, message: "ชื่อนี้มีคำที่ไม่อนุญาต" };
   }
   return { ok: true as const, value: normalized };
+}
+
+export function validateFantasyName(value: string) {
+  return validateFantasyDisplayName(value);
 }
 
 const RANDOM_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";

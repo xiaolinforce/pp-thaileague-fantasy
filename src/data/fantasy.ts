@@ -8,9 +8,6 @@ import {
   clubs,
   clubVisualIdentities,
   fantasyGameweeks,
-  fantasyLeagueMembers,
-  fantasyLeagues,
-  fantasyManagers,
   fantasyPlayerMatchPoints,
   fantasyPlayerMatchStats,
   fantasyPlayers,
@@ -40,17 +37,6 @@ export type FantasySquadMember = {
   captainRole: "none" | "captain" | "vice_captain";
 };
 
-export type ClassicStanding = {
-  teamId: string;
-  teamName: string;
-  managerName: string;
-  gameweekPoints: number;
-  totalPoints: number;
-  transferCount: number;
-  rank: number;
-  mine: boolean;
-};
-
 export type FantasyState = {
   seasonId: string;
   team: {
@@ -76,13 +62,6 @@ export type FantasyState = {
     members: FantasySquadMember[];
   };
   chipsRemaining: Record<FantasyChip, number>;
-  leagues: Array<{
-    id: string;
-    name: string;
-    type: "overall" | "private";
-    inviteCode: string | null;
-    standings: ClassicStanding[];
-  }>;
 };
 
 export async function getFantasyState(): Promise<FantasyState> {
@@ -131,87 +110,6 @@ export async function getFantasyState(): Promise<FantasyState> {
     }
   }
 
-  const [leagueRows, memberRows, scoreRows] = await Promise.all([
-    db
-      .select()
-      .from(fantasyLeagues)
-      .where(eq(fantasyLeagues.fantasySeasonId, fantasySeason.id)),
-    db
-      .select({
-        member: fantasyLeagueMembers,
-        team: fantasyTeams,
-        manager: fantasyManagers,
-      })
-      .from(fantasyLeagueMembers)
-      .innerJoin(
-        fantasyTeams,
-        eq(fantasyLeagueMembers.fantasyTeamId, fantasyTeams.id),
-      )
-      .innerJoin(
-        fantasyManagers,
-        eq(fantasyTeams.managerId, fantasyManagers.id),
-      ),
-    db
-      .select({
-        score: fantasyTeamGameweekScores,
-        selection: fantasyTeamSelections,
-      })
-      .from(fantasyTeamGameweekScores)
-      .innerJoin(
-        fantasyTeamSelections,
-        eq(fantasyTeamGameweekScores.selectionId, fantasyTeamSelections.id),
-      ),
-  ]);
-  const scoresByTeam = new Map<string, { total: number; gameweek: number }>();
-  for (const row of scoreRows) {
-    const current = scoresByTeam.get(row.selection.fantasyTeamId) ?? {
-      total: 0,
-      gameweek: 0,
-    };
-    current.total += row.score.totalPoints;
-    if (row.selection.fantasyGameweekId === gameweek.id) {
-      current.gameweek = row.score.totalPoints;
-    }
-    scoresByTeam.set(row.selection.fantasyTeamId, current);
-  }
-  const transfersByTeam = new Map<string, number>();
-  for (const row of allSelections) {
-    const item = row.fantasy_team_selections;
-    if (item.status !== "locked" || item.activeChip === "wildcard") continue;
-    transfersByTeam.set(
-      item.fantasyTeamId,
-      (transfersByTeam.get(item.fantasyTeamId) ?? 0) + item.netTransferCount,
-    );
-  }
-
-  const leagues = leagueRows.map((league) => {
-    const standings = memberRows
-      .filter((row) => row.member.fantasyLeagueId === league.id)
-      .map((row) => ({
-        teamId: row.team.id,
-        teamName: row.team.name,
-        managerName: row.manager.displayName,
-        gameweekPoints: scoresByTeam.get(row.team.id)?.gameweek ?? 0,
-        totalPoints: scoresByTeam.get(row.team.id)?.total ?? 0,
-        transferCount: transfersByTeam.get(row.team.id) ?? 0,
-        mine: row.team.id === current.team.id,
-      }))
-      .sort(
-        (a, b) =>
-          b.totalPoints - a.totalPoints ||
-          a.transferCount - b.transferCount ||
-          a.teamName.localeCompare(b.teamName),
-      )
-      .map((row, index) => ({ ...row, rank: index + 1 }));
-    return {
-      id: league.id,
-      name: league.name,
-      type: league.type,
-      inviteCode: league.inviteCode,
-      standings,
-    };
-  });
-
   return {
     seasonId: fantasySeason.id,
     team: {
@@ -250,7 +148,6 @@ export async function getFantasyState(): Promise<FantasyState> {
       bench_boost: fantasySeason.chipUsesPerSeason - chipUses.bench_boost,
       wildcard: fantasySeason.chipUsesPerSeason - chipUses.wildcard,
     },
-    leagues,
   };
 }
 

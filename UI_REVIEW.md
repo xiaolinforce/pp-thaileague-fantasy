@@ -25,17 +25,17 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
-| Route            | Archetype             | Status     | Current basis and next review focus                                             |
-| ---------------- | --------------------- | ---------- | ------------------------------------------------------------------------------- |
-| `/team`          | Interactive workspace | Reference  | Refined baseline for hierarchy, responsive transformation, and local state.     |
-| `/points`        | Summary and detail    | Reference  | Refined baseline for primary result, comparison, detail, and empty state.       |
-| `/`              | Authentication flow   | Unreviewed | Audit Guest, provider availability, Email OTP stages, errors, and compact flow. |
-| `/upgrade`       | Authentication flow   | Unreviewed | Audit preservation messaging, provider states, cancellation, and recovery.      |
-| `/fixtures`      | Data browser          | Unreviewed | Audit browsing, list density, statistics, filters, and empty results.           |
-| `/leagues`       | Ranking/community     | Unreviewed | Audit league context, hierarchy, large values, and narrow standings.            |
-| `/profile`       | Settings and reading  | Unreviewed | Audit navigation, Guest/member variants, forms, feedback, and long rules.       |
-| `/admin/fantasy` | Operational tool      | Unreviewed | Audit authorized workflows, lifecycle safety, corrections, and dense data.      |
-| `/auth/complete` | System transition     | Unreviewed | Audit waiting, failure/retry, redirect clarity, and assistive announcements.    |
+| Route            | Archetype             | Status      | Current basis and next review focus                                                                                               |
+| ---------------- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `/team`          | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                       |
+| `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                         |
+| `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                   |
+| `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                        |
+| `/fixtures`      | Data browser          | Unreviewed  | Audit browsing, list density, statistics, filters, and empty results.                                                             |
+| `/leagues`       | Ranking/community     | In progress | Overall/Guest and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
+| `/profile`       | Settings and reading  | Unreviewed  | Audit navigation, Guest/member variants, forms, feedback, and long rules.                                                         |
+| `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                        |
+| `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                      |
 
 The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
@@ -190,6 +190,34 @@ Verification commands:
 Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
+
+### 2026-08-31 — League overview and Overall detail
+
+- **Route and task:** `/leagues` and `/leagues/[leagueId]`; replace demo
+  standings with real Overall/Private League UI and owner/member controls.
+- **Status:** Unreviewed → In progress.
+- **Data/auth/Gameweek state:** real Guest session, automatic Overall membership,
+  22 real/historical Guest teams, provisional Gameweek 1, and no Private League.
+- **Language:** Thai and English after changing the persisted Profile setting.
+- **Viewports:** 360, 767, 768, 1279, 1280, and 1440px; no document or standings
+  overflow after the responsive table correction.
+- **Keyboard/accessibility:** semantic headings/table/row headers, skip link,
+  mobile drawer keyboard/pointer operation, written status, named compact
+  controls, dialog primitives, and reduced-motion rule reviewed.
+- **Issues fixed:** guest/private hierarchy, real empty state, English coverage
+  inside Client Components, user-name localization escape, 768/1280 table
+  clipping, mobile metric visibility, and provisional-score explanation.
+- **Known exclusions:** owner/member create, preview, join, rename, invite rotate,
+  remove, leave, delete, 100-member pagination, mutation errors, and final-score
+  UI were not rendered because the available browser session is a Guest and no
+  safe authenticated fixture exists. Server authorization, transaction limits,
+  database invariants, TypeScript, lint, and rule tests cover the implementation
+  pending that evidence.
+- **Evidence:** bounded in-app Browser captures in the 2026-08-31 implementation
+  task; no mock or simulation route was added.
+- **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
+  `npm run db:verify:fantasy`, responsive Browser measurements, Thai/English
+  rendered snapshots.
 
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final

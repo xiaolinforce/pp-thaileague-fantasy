@@ -17,7 +17,8 @@
   stat overrides, transfer revisions, and application-level admin audit entries.
 - Versioned preseason player ranking with contiguous overall/position ranks,
   source confidence, review CSV, and deterministic 5%/15%/20%/remaining tiers.
-- Overall and Private Classic demo standings.
+- Real Overall and invite-only Private Classic standings with transactional
+  owner/member limits, owner controls, and audit history.
 - Idempotent competition and Fantasy seed workflows with database verification.
 
 ## Production readiness blockers
@@ -52,9 +53,8 @@ substitute for those authorization checks.
 
 - Move season/tournament IDs and Fantasy season selection into a central season
   registry rather than repeating a slug or identifier across scripts/actions.
-- Replace or remove the unused static `src/lib/fantasy-data.ts` prototype.
-- Extend `db:verify:fantasy` beyond published-ranking assertions to cover every
-  squad, selection, league, and Gameweek invariant.
+- Extend database-backed integration coverage for concurrent Private League
+  create/join/remove/delete workflows.
 - Review low-confidence preseason projections and add stable-ID source matches
   or approved manual adjustments before production entry opens.
 - Add import fixtures and adapter tests so upstream schema drift fails before a
@@ -72,7 +72,6 @@ substitute for those authorization checks.
 
 ## Later capabilities
 
-- Joining and creating real private leagues.
 - Notifications for deadlines, player availability, and reviewed score changes.
 - Managed player news, availability, suspension, and injury data.
 - Approved live or scheduled match-stat ingestion and score review workflows.

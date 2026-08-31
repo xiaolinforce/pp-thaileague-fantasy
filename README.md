@@ -19,6 +19,8 @@ Classic league standings.
   Boost, Wildcard, free transfers, and transfer-point deductions.
 - Ranking-weighted squad auto-fill that completes vacant slots, targets the
   full tier allocation, and keeps the result editable until the manager saves.
+- Real Overall and invite-only Private Classic leagues with owner controls,
+  membership limits, audit history, and no seeded competitors.
 - FPL-inspired scoring without bonus/BPS or Defensive Contributions, with a
   Thai Fantasy-specific 10 points for a goalkeeper goal.
 - Competition import from the Thai League official API and public Transfermarkt
@@ -37,7 +39,8 @@ production-readiness work.
 | `/upgrade`       | Upgrade the current Guest while preserving its team when possible. |
 | `/team`          | Lineup, captaincy, chips, player discovery, and squad revisions.   |
 | `/points`        | Gameweek score and category breakdown.                             |
-| `/leagues`       | Overall and Private Classic standings.                             |
+| `/leagues`       | Overall standings plus Private League creation and joining.        |
+| `/leagues/[id]`  | Member-only standings and owner/member League controls.            |
 | `/fixtures`      | Competition fixtures and supporting statistics.                    |
 | `/profile`       | Prototype manager settings, language, and game rules.              |
 | `/admin/fantasy` | Internal match stats, classification, locking, and finalization.   |
@@ -84,16 +87,17 @@ the imported database during normal runtime.
 - Import competition data before seeding the dependent Fantasy records.
 - Inspect the configured database with `npm run db:studio`.
 
-The Fantasy seed is idempotent for the configured season. Its first pass creates
-Gameweeks, seeded league opponents, two Classic leagues, and safe fallback tier
-metadata. Run it again after ranking publication to populate deterministic demo
-squads from the reviewed four-tier classifications.
+The Fantasy seed is idempotent for the configured season. It creates or updates
+Gameweeks, player classifications, safe fallback tier metadata, and the single
+Overall Classic league. It never creates managers, teams, squads, scores, or
+Private Leagues. Every real Guest or member team is enrolled in Overall during
+provisioning, and rerunning the seed backfills any missing Overall membership.
 The ranking command publishes a versioned 1-to-all player order and derives
 four levels from the active ranked pool: Level 1 is 5%, Level 2 is the next
 15%, Level 3 is the next 20%, and Level 4 is the remaining 60%. A
 real account or Guest receives an empty opening draft and chooses all 15 players
-before the first save. Seeded demo managers continue to use deterministic valid
-squads so standings and scoring fixtures remain useful.
+before the first save. Standings therefore contain only real account-owned or
+historically preserved Guest teams.
 All player mutations derive the team from the current server session; admin
 mutations additionally require `role=admin`.
 

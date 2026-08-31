@@ -135,7 +135,6 @@ export async function ensureFantasyProfile(input: {
       .values({
         authUserId: input.authUserId,
         displayName: names.managerName,
-        isDemo: false,
         status: input.isAnonymous ? "guest" : "member",
       })
       .onConflictDoNothing()

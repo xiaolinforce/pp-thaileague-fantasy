@@ -910,8 +910,7 @@ export const fantasyManagers = pgTable(
       onDelete: "set null",
     }),
     displayName: text("display_name").notNull(),
-    isDemo: boolean("is_demo").default(true).notNull(),
-    status: fantasyManagerStatusEnum("status").default("seeded").notNull(),
+    status: fantasyManagerStatusEnum("status").default("guest").notNull(),
     nameChangeAvailableAt: timestamp("name_change_available_at", {
       withTimezone: true,
     }),
@@ -919,7 +918,6 @@ export const fantasyManagers = pgTable(
   },
   (table) => [
     uniqueIndex("fantasy_managers_auth_user_unique").on(table.authUserId),
-    index("fantasy_managers_demo_idx").on(table.isDemo),
     index("fantasy_managers_status_idx").on(table.status),
   ],
 );
@@ -1194,15 +1192,29 @@ export const fantasyLeagues = pgTable(
       .references(() => fantasySeasons.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     type: fantasyLeagueTypeEnum("type").notNull(),
-    inviteCode: varchar("invite_code", { length: 32 }),
-    isDemo: boolean("is_demo").default(false).notNull(),
+    ownerTeamId: uuid("owner_team_id").references(() => fantasyTeams.id, {
+      onDelete: "restrict",
+    }),
+    inviteCode: varchar("invite_code", { length: 8 }),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("fantasy_leagues_invite_code_unique").on(table.inviteCode),
+    uniqueIndex("fantasy_leagues_overall_season_unique")
+      .on(table.fantasySeasonId)
+      .where(sql`${table.type} = 'overall'`),
     index("fantasy_leagues_season_type_idx").on(
       table.fantasySeasonId,
       table.type,
+    ),
+    index("fantasy_leagues_owner_idx").on(table.ownerTeamId),
+    check(
+      "fantasy_leagues_name_length_check",
+      sql`char_length(${table.name}) between 3 and 40`,
+    ),
+    check(
+      "fantasy_leagues_type_fields_check",
+      sql`(${table.type} = 'overall' and ${table.ownerTeamId} is null and ${table.inviteCode} is null) or (${table.type} = 'private' and ${table.ownerTeamId} is not null and ${table.inviteCode} ~ '^[A-HJ-KM-NP-Z2-9]{8}$')`,
     ),
   ],
 );
@@ -1228,6 +1240,36 @@ export const fantasyLeagueMembers = pgTable(
       table.fantasyTeamId,
     ),
     index("fantasy_league_members_team_idx").on(table.fantasyTeamId),
+  ],
+);
+
+export const fantasyLeagueAuditLog = pgTable(
+  "fantasy_league_audit_log",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id, { onDelete: "cascade" }),
+    fantasyLeagueId: uuid("fantasy_league_id").notNull(),
+    actorTeamId: uuid("actor_team_id").references(() => fantasyTeams.id, {
+      onDelete: "set null",
+    }),
+    targetTeamId: uuid("target_team_id").references(() => fantasyTeams.id, {
+      onDelete: "set null",
+    }),
+    action: varchar("action", { length: 80 }).notNull(),
+    details: jsonb("details").$type<Record<string, unknown>>(),
+    ...timestamps,
+  },
+  (table) => [
+    index("fantasy_league_audit_league_created_idx").on(
+      table.fantasyLeagueId,
+      table.createdAt,
+    ),
+    index("fantasy_league_audit_actor_created_idx").on(
+      table.actorTeamId,
+      table.createdAt,
+    ),
   ],
 );
 

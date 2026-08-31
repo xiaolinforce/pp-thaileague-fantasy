@@ -118,10 +118,11 @@ identifiers.
 
 The Fantasy seed is idempotent for the configured season. It derives Gameweeks
 from the first stored kickoff in each imported matchweek, sets the deadline 90
-minutes earlier, creates tier definitions and effective player tiers, and
-creates Overall and Private Classic leagues. Before a four-tier ranking exists,
-demo selections remain empty; rerunning the seed after publication builds valid
-demo squads from the reviewed classifications.
+minutes earlier, creates tier definitions and effective player tiers, ensures
+the single Overall Classic league, and backfills every real season team into
+Overall. It does not create managers, teams, selections, scores, or Private
+Leagues. Those records originate only from authenticated/Guest provisioning and
+player actions.
 
 For the 2026/27 prototype, fixtures 49-56, 73-80, and 129-136 have curated
 simulated kickoff overrides because the upstream schedule supplied the pairings

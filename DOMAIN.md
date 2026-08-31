@@ -240,10 +240,26 @@ Classic standings sort by:
 1. Total points, highest first.
 2. Counted transfers, lowest first.
 3. Team name, locale order.
+4. Team ID as an invisible deterministic fallback when names also match.
 
-The current application has Overall and Private Classic leagues. Seeded
-opponents keep local standings populated during development. Cup
-leagues, head-to-head scoring, and live price changes are not implemented.
+Every Guest and member team joins the season's single Overall Classic league
+automatically and cannot leave it. Guests may view and compete in Overall but
+cannot create, join, or manage Private Leagues.
+
+Private Classic leagues are invite-only and visible only to their members. A
+member may own at most 10 and belong to at most 20 Private Leagues in one
+season; each League holds at most 100 teams. Creation enrolls the owner as the
+first member. Owners may rename the League, rotate its invite code, remove
+other members, or delete the League, but cannot leave or remove themselves.
+Deletion removes only the League and memberships; teams, selections, scores,
+and historical Fantasy results remain unchanged.
+
+Invite codes contain exactly eight uppercase characters from
+`ABCDEFGHJKMNPQRSTUVWXYZ23456789`, excluding `I`, `L`, `O`, `0`, and `1`.
+Input is case-insensitive and display is uppercase. League names may duplicate,
+contain 3–40 characters, and follow the same character, reserved-name, and
+abuse policy as manager/team names. Cup leagues, head-to-head scoring, public
+League sharing, and live price changes are not implemented.
 
 ## Accounts, Guests, and names
 

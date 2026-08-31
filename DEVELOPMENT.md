@@ -80,14 +80,14 @@ Open `http://localhost:3006`.
 | `npm run db:migrate`                      | Apply committed Drizzle migrations.                                   |
 | `npm run db:studio`                       | Open Drizzle Studio for the configured database.                      |
 | `npm run db:seed:competition`             | Fetch, normalize, and upsert competition data.                        |
-| `npm run db:seed:fantasy`                 | Create or refresh Fantasy configuration and demo state.               |
+| `npm run db:seed:fantasy`                 | Refresh Fantasy configuration, player tiers, and Overall membership.  |
 | `npm run db:rank:players`                 | Preview or explicitly publish a versioned player ranking.             |
 | `npm run db:seed:club-colors`             | Reapply the curated club visual identity registry.                    |
 | `npm run db:normalize:clubs`              | Apply explicit club display-name normalization.                       |
 | `npm run db:normalize:club-short-names`   | Apply curated Thai/English club short names.                          |
 | `npm run db:normalize:player-short-names` | Preview or apply sourced Thai and derived English player short names. |
 | `npm run db:verify:competition`           | Assert expected source/import structure.                              |
-| `npm run db:verify:fantasy`               | Verify Fantasy counts, rankings, Gameweek continuity, and active GW.  |
+| `npm run db:verify:fantasy`               | Verify Fantasy, ranking, Gameweek, and League invariants.             |
 | `npm run db:apply:fixture-kickoffs`       | Preview TBC kickoff overrides; apply with exact `--branch-id`.        |
 | `npm run db:verify:transaction`           | Prove rollback on the exact development branch.                       |
 

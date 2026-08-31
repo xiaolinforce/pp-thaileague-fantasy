@@ -315,7 +315,6 @@ const translations: Record<string, string> = {
   รอบันทึก: "Pending save",
   ต่างชาติ: "Foreign",
   "L1 / พรีเมียม": "L1 / premium",
-  ยกเลิก: "Cancel",
   ทุกระดับ: "All tiers",
   ทุกสัญชาติ: "All nationalities",
   นักเตะไทย: "Thai players",
@@ -476,6 +475,122 @@ const translations: Record<string, string> = {
   ยังไม่มีลีกสำหรับทีมนี้: "No leagues are available for this team yet",
   ลีกโดยรวมและมินิลีกจะแสดงที่นี่เมื่อพร้อมใช้งาน:
     "The overall league and mini-leagues will appear here when available",
+  "ติดตามอันดับ Overall และแข่งขันกับกลุ่มเพื่อนด้วยคะแนน Classic ตลอดฤดูกาล":
+    "Track your Overall rank and compete with friends through season-long Classic scoring",
+  "สมัครสมาชิกเพื่อใช้ Private League": "Sign up to use Private Leagues",
+  สร้างลีก: "Create League",
+  "ตั้งชื่อลีกสำหรับกลุ่มของคุณ ระบบจะสร้างรหัสเชิญ 8 ตัวให้ทันที":
+    "Name your group and an eight-character invite code will be created immediately",
+  ชื่อลีก: "League name",
+  "ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–40 ตัว":
+    "Use Thai or English letters, numbers, spaces, and . _ -; 3–40 characters",
+  ยกเลิก: "Cancel",
+  "กำลังสร้างลีก…": "Creating league…",
+  "เข้าร่วม Private League": "Join a Private League",
+  ตรวจสอบชื่อลีกและจำนวนสมาชิกก่อนยืนยันเข้าร่วม:
+    "Review the league name and member count before joining",
+  "รหัสเชิญ 8 ตัว": "Eight-character invite code",
+  "พิมพ์ตัวเล็กหรือตัวใหญ่ก็ได้ รหัสไม่มี O, 0, I, L และ 1":
+    "Uppercase and lowercase are both accepted; codes exclude O, 0, I, L, and 1",
+  สมาชิก: "members",
+  ทีมของคุณอยู่ในลีกนี้แล้ว: "Your team is already in this league",
+  ลีกนี้มีสมาชิกครบแล้ว: "This league is full",
+  พร้อมเข้าร่วมด้วยทีมปัจจุบัน: "Ready to join with your current team",
+  "กำลังเข้าร่วม…": "Joining…",
+  ยืนยันเข้าร่วม: "Confirm and join",
+  เปิดลีกนี้: "Open this league",
+  "กำลังตรวจสอบ…": "Checking…",
+  ตรวจสอบรหัส: "Check code",
+  ลีกที่คุณเป็นสมาชิกจะปรากฏเฉพาะกับคนในกลุ่ม:
+    "Only group members can see leagues you have joined",
+  คุณเป็นเจ้าของ: "You are the owner",
+  คะแนนรวม: "Total points",
+  "Private League สำหรับสมาชิก": "Private Leagues are for members",
+  "ยังไม่มี Private League": "No Private Leagues yet",
+  สมัครสมาชิกเพื่อสร้างลีกหรือเข้าร่วมกลุ่มของเพื่อน:
+    "Sign up to create a league or join a group of friends",
+  "สร้างกลุ่มใหม่หรือใช้รหัสเชิญ 8 ตัวจากเจ้าของลีก":
+    "Create a new group or use an eight-character code from a league owner",
+  สมัครสมาชิก: "Sign up",
+  กรอกรหัสเชิญ: "Enter invite code",
+  "คะแนน Gameweek นี้ยังเป็นคะแนนชั่วคราว และอาจเปลี่ยนหลังตรวจแมตช์ตกค้าง":
+    "This Gameweek is provisional and may change after postponed matches are reviewed",
+  "ยังไม่พบ Overall League": "Overall League is not available yet",
+  กรุณาติดต่อผู้ดูแลก่อนเริ่มแข่งขันในฤดูกาลนี้:
+    "Contact an administrator before competing this season",
+  กลับไปลีกของฉัน: "Back to My Leagues",
+  "Overall Classic": "Overall Classic",
+  "Private Classic": "Private Classic",
+  อันดับของคุณ: "Your rank",
+  "คะแนน GW": "GW points",
+  ตารางอันดับ: "Standings",
+  "เรียงจากคะแนนรวม แล้วใช้ Transfer ที่น้อยกว่าเป็นตัวตัดสิน":
+    "Ranked by total points, then by fewer transfers",
+  จัดการสมาชิก: "Manage member",
+  เจ้าของ: "Owner",
+  นำออก: "Remove",
+  หน้าตารางอันดับ: "Standings pages",
+  ก่อนหน้า: "Previous",
+  หน้า: "Page",
+  ถัดไป: "Next",
+  อันดับนี้สรุปแล้ว: "These standings are final",
+  อันดับอาจเปลี่ยนหลังอัปเดตคะแนน:
+    "Standings may change after points are updated",
+  ข้อมูลและการจัดการลีก: "League information and management",
+  ลีกของผู้เล่นทุกคน: "League for every manager",
+  "ทุกทีมเข้าร่วม Overall อัตโนมัติและไม่สามารถออกจากลีกนี้ได้":
+    "Every team joins Overall automatically and cannot leave it",
+  เชิญสมาชิก: "Invite members",
+  แชร์รหัสหรือลิงก์นี้กับสมาชิกที่เข้าสู่ระบบแล้ว:
+    "Share this code or link with a signed-in member",
+  คัดลอกรหัส: "Copy code",
+  คัดลอกลิงก์: "Copy link",
+  สร้างรหัสใหม่: "Generate new code",
+  ตั้งค่าลีก: "League settings",
+  บันทึกชื่อ: "Save name",
+  ลบลีก: "Delete league",
+  "สมาชิก Private League": "Private League member",
+  อันดับนี้เห็นได้เฉพาะสมาชิกของลีกเท่านั้น:
+    "Only members of this league can see these standings",
+  ออกจากลีก: "Leave league",
+  "กำลังดำเนินการ…": "Working…",
+  นำสมาชิกออก: "Remove member",
+  ลบลีกถาวร: "Delete league permanently",
+  คัดลอกรหัสแล้ว: "Invite code copied",
+  คัดลอกลิงก์เชิญแล้ว: "Invite link copied",
+  "คัดลอกไม่สำเร็จ กรุณาเลือกรหัสแล้วคัดลอกด้วยตนเอง":
+    "Could not copy. Select the code and copy it manually",
+  "สร้างรหัสเชิญใหม่แล้ว รหัสเดิมใช้ไม่ได้อีกต่อไป":
+    "A new invite code was created; the old code no longer works",
+  นำสมาชิกออกจากลีกแล้ว: "Member removed from the league",
+  เปลี่ยนชื่อลีกเรียบร้อยแล้ว: "League name updated",
+  "บัญชี Guest ต้องสมัครสมาชิกก่อนใช้ Private League":
+    "Guest accounts must sign up before using Private Leagues",
+  "ไม่พบลีกจากรหัสนี้ หรือรหัสหมดอายุแล้ว":
+    "No league was found for this code, or the code has expired",
+  "รหัสลีกต้องมี 8 ตัว และใช้เฉพาะตัวอักษรอังกฤษหรือตัวเลขที่กำหนด":
+    "A league code must contain eight approved English letters or numbers",
+  "คุณสร้าง Private League ครบ 10 ลีกแล้ว":
+    "You have reached the limit of 10 owned Private Leagues",
+  "คุณเป็นสมาชิก Private League ครบ 20 ลีกแล้ว":
+    "You have reached the limit of 20 Private League memberships",
+  "ลีกนี้มีสมาชิกครบ 100 ทีมแล้ว": "This league has reached 100 teams",
+  เฉพาะเจ้าของลีกเท่านั้นที่ทำรายการนี้ได้:
+    "Only the league owner can perform this action",
+  "เจ้าของลีกออกจากลีกไม่ได้ หากไม่ใช้ลีกแล้วให้ลบลีกแทน":
+    "A league owner cannot leave; delete the league if it is no longer needed",
+  "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง":
+    "Could not complete the league action. Check your connection and try again",
+  "ไม่พบลีกจากข้อมูลนี้ หรือรหัสเชิญหมดอายุแล้ว":
+    "The league was not found, or its invite code has expired",
+  ทีมนี้ไม่ได้เป็นสมาชิกของลีก: "This team is not a league member",
+  ไม่สามารถนำเจ้าของลีกออกได้: "The league owner cannot be removed",
+  "สร้างรหัสเชิญไม่สำเร็จ กรุณาลองอีกครั้ง":
+    "Could not generate an invite code. Try again",
+  "สร้าง Private League เรียบร้อยแล้ว": "Private League created",
+  "เข้าร่วม Private League เรียบร้อยแล้ว": "Joined the Private League",
+  "ออกจาก Private League แล้ว": "Left the Private League",
+  "ลบ Private League แล้ว": "Private League deleted",
 
   // Fixtures and stats
   ข้อมูลการแข่งขัน: "Match Centre",
@@ -833,6 +948,7 @@ function localizeNode(
 
   if (isValidElement(node)) {
     const element = node as ReactElement<Record<string, unknown>>;
+    if (element.props["data-localize"] === "off") return element;
     const localizedProps: Record<string, unknown> = {};
     for (const key of [
       "placeholder",

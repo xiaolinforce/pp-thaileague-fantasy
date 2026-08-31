@@ -35,7 +35,8 @@ Better Auth owns passwordless Email OTP, Google OAuth, anonymous Guest users,
 reference auth users without making historical teams dependent on the auth row.
 Auth cookies use the application-specific `pp-thaileague-fantasy` prefix so
 local sessions do not collide with other applications served from `localhost`.
-Seeded managers remain ranking fixtures and are not sign-in identities.
+League standings contain only provisioned Guest or member teams; seeds do not
+create synthetic manager identities.
 
 ## Main boundaries
 
@@ -50,6 +51,7 @@ Seeded managers remain ranking fixtures and are not sign-in identities.
 | Player ranking           | `src/lib/fantasy/ranking.ts`         | Pure preseason projection, deterministic ordering, confidence, and tier-boundary derivation.        |
 | Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                      |
 | Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.         |
+| League operations        | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.      |
 | Transactional email      | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                      |
 | Scoring                  | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                      |
 | Score persistence        | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                               |
@@ -58,9 +60,8 @@ Seeded managers remain ranking fixtures and are not sign-in identities.
 | Imports and operations   | `scripts`                            | Competition import, fantasy seed, player ranking, normalization, club identities, and verification. |
 | External-source adapters | `scripts/sources`                    | Thai League API, Transfermarkt, and curated normalization/visual identity records.                  |
 
-`src/lib/fantasy-data.ts` is an unused static prototype dataset. Runtime routes
-read from `src/data` and the database. Do not build new behavior on the static
-file; remove it in a deliberate cleanup once no design reference depends on it.
+Runtime routes read from `src/data` and PostgreSQL. The legacy static Fantasy
+dataset has been removed and must not be reintroduced as a runtime fallback.
 
 ## Route model
 
@@ -70,7 +71,8 @@ file; remove it in a deliberate cleanup once no design reference depends on it.
 | `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google.                                      |
 | `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.            |
 | `/points`        | Server-renders the selected Gameweek score and its breakdown.                                 |
-| `/leagues`       | Server-renders Overall and Private Classic standings.                                         |
+| `/leagues`       | Server-loads the current team's Overall and Private League summaries.                         |
+| `/leagues/[id]`  | Authorizes membership, then renders paginated standings and role-appropriate controls.        |
 | `/fixtures`      | Server-loads competition fixtures, then delegates interactive browsing to a Client Component. |
 | `/profile`       | Authenticated account/team naming, sign-out or Guest upgrade, settings, and game rules.       |
 | `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                 |
@@ -104,20 +106,21 @@ the normal save action remains the only confirmation boundary.
 
 ## Write flow
 
-1. The team, transfer, or admin UI invokes an action in
-   `src/app/fantasy-actions.ts`.
+1. Team, transfer, League, or admin UI invokes its owning Server Action.
 2. The action resolves the account-owned team from the session; admin actions
    additionally reload and require the `admin` role.
 3. The server reloads current database snapshots and validates deadlines,
    squad composition, lineup, chips, and transfer settlement.
-4. Drizzle writes selections, revisions, stats, classifications, or Gameweek
-   state. Administrative corrections also append application-level audit rows.
+4. Drizzle writes selections, revisions, League memberships, stats,
+   classifications, or Gameweek state. League and administrative operations
+   append application-level audit rows.
 5. Affected fantasy routes are revalidated.
 
 Ordinary reads and fixed query batches use the Neon HTTP client. Gameweek lock
-and finalization use the transaction-capable Neon serverless client, lock the
-affected rows with `FOR UPDATE`, and commit selection settlement, next-week
-provisioning, status transitions, and score recalculation as one unit.
+and finalization use the transaction-capable Neon serverless client. Private
+League mutations use the same client and lock the current team plus target
+league with `FOR UPDATE`, so the 10-owned, 20-membership, and 100-team limits
+remain valid under concurrent requests.
 
 Authentication providers are independently opt-in and also subject to
 `AUTH_PRODUCTION_READY`. This deployment gate prevents accidental public use
@@ -183,7 +186,7 @@ The schema is organized into four related groups:
 - Fantasy configuration and play: Fantasy seasons, Gameweeks, tier definitions,
   player classifications, versioned ranking runs and player projections,
   managers, teams, selections, selection snapshots, transfer revisions,
-  leagues, and memberships.
+  leagues, memberships, and League audit history.
 - Scoring and review: match stats, stat overrides, player match points, team
   Gameweek scores, and the fantasy admin audit log.
 

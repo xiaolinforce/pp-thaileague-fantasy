@@ -8,26 +8,16 @@ import {
   fantasyGameweeks,
   fantasyLeagueMembers,
   fantasyLeagues,
-  fantasyManagers,
   fantasyPlayers,
-  fantasyPlayerRankings,
   fantasyPlayerTiers,
-  fantasyRankingRuns,
   fantasySeasons,
   fantasyTeams,
-  fantasyTeamSelectionPlayers,
-  fantasyTeamSelections,
   fantasyTierDefinitions,
-  fantasyTransferRevisions,
   fixtures,
   playerRegistrations,
   players,
 } from "../src/db/schema";
-import {
-  getCumulativeTierLimits,
-  getDeadline,
-  type FantasyPosition,
-} from "../src/lib/fantasy/rules.ts";
+import { getDeadline, type FantasyPosition } from "../src/lib/fantasy/rules.ts";
 
 loadEnvConfig(process.cwd());
 
@@ -36,16 +26,6 @@ if (!databaseUrl) throw new Error("DATABASE_URL is not configured.");
 
 const db = drizzle(databaseUrl);
 const COMPETITION_SEASON_EXTERNAL_ID = "224";
-
-const demoTeams = [
-  ["Piyawat K.", "PIYA FC"],
-  ["Nattapong S.", "Siam Strikers"],
-  ["Kawin P.", "Bangkok Ballers"],
-  ["Thanawat C.", "Isan United"],
-  ["Akarin T.", "Southern Waves"],
-  ["Phurin J.", "Lanna Eleven"],
-  ["Methas K.", "Chonburi Sharks"],
-] as const;
 
 function isThaiRegistration(nationality: string | null) {
   if (!nationality) return false;
@@ -63,56 +43,6 @@ function toFantasyPosition(position: string): FantasyPosition | null {
   if (position === "midfielder") return "midfielder";
   if (position === "forward") return "forward";
   return null;
-}
-
-async function findOrCreateManager(displayName: string) {
-  const existing = await db
-    .select()
-    .from(fantasyManagers)
-    .where(
-      and(
-        eq(fantasyManagers.displayName, displayName),
-        eq(fantasyManagers.isDemo, true),
-      ),
-    )
-    .limit(1);
-  if (existing[0]) return existing[0];
-  const inserted = await db
-    .insert(fantasyManagers)
-    .values({ displayName, isDemo: true })
-    .returning();
-  return inserted[0];
-}
-
-async function findOrCreateLeague({
-  fantasySeasonId,
-  name,
-  type,
-  inviteCode,
-  isDemo,
-}: {
-  fantasySeasonId: string;
-  name: string;
-  type: "overall" | "private";
-  inviteCode?: string;
-  isDemo: boolean;
-}) {
-  const existing = await db
-    .select()
-    .from(fantasyLeagues)
-    .where(
-      and(
-        eq(fantasyLeagues.fantasySeasonId, fantasySeasonId),
-        eq(fantasyLeagues.name, name),
-      ),
-    )
-    .limit(1);
-  if (existing[0]) return existing[0];
-  const inserted = await db
-    .insert(fantasyLeagues)
-    .values({ fantasySeasonId, name, type, inviteCode, isDemo })
-    .returning();
-  return inserted[0];
 }
 
 async function seedFantasyGame() {
@@ -243,10 +173,6 @@ async function seedFantasyGame() {
     .where(eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id))
     .orderBy(asc(fantasyGameweeks.number));
   const firstGameweek = gameweekRows[0];
-  const activeGameweek =
-    gameweekRows.find((gameweek) => gameweek.number === nextGameweek.number) ??
-    firstGameweek;
-
   const registrationRows = await db
     .select({
       registration: playerRegistrations,
@@ -318,276 +244,46 @@ async function seedFantasyGame() {
       });
   }
 
-  const tiers = await db
+  const existingOverall = await db
     .select()
-    .from(fantasyPlayerTiers)
-    .where(eq(fantasyPlayerTiers.effectiveGameweekId, firstGameweek.id));
-  const tierByPlayer = new Map(
-    tiers.map((tier) => [tier.fantasyPlayerId, tier.level]),
-  );
-  const registrationByPlayer = new Map(
-    availableRegistrations.map((row) => [row.player.id, row]),
-  );
-  const candidates = fantasyPlayerRows.flatMap((fantasyPlayer) => {
-    const registration = registrationByPlayer.get(fantasyPlayer.playerId);
-    const tier = tierByPlayer.get(fantasyPlayer.id);
-    if (!registration || !tier) return [];
-    return [
-      {
-        fantasyPlayer,
-        tier,
-        clubId: registration.entry.clubId,
-        position: fantasyPlayer.lockedPosition as FantasyPosition,
-      },
-    ];
-  });
-  const publishedRankings = await db
-    .select()
-    .from(fantasyRankingRuns)
+    .from(fantasyLeagues)
     .where(
       and(
-        eq(fantasyRankingRuns.fantasySeasonId, fantasySeason.id),
-        eq(fantasyRankingRuns.status, "published"),
+        eq(fantasyLeagues.fantasySeasonId, fantasySeason.id),
+        eq(fantasyLeagues.type, "overall"),
       ),
     )
     .limit(1);
-  const publishedRanking = publishedRankings[0];
-  const publishedLevelFour = publishedRanking
-    ? await db
-        .select({ id: fantasyPlayerRankings.id })
-        .from(fantasyPlayerRankings)
-        .where(
-          and(
-            eq(fantasyPlayerRankings.rankingRunId, publishedRanking.id),
-            eq(fantasyPlayerRankings.tierLevel, 4),
-          ),
-        )
-        .limit(1)
-    : [];
-  const canSeedDemoSquads = publishedLevelFour.length > 0;
-
-  const required: Record<FantasyPosition, number> = {
-    goalkeeper: 2,
-    defender: 5,
-    midfielder: 5,
-    forward: 3,
-  };
-  const selected: typeof candidates = [];
-  const clubCounts = new Map<string, number>();
-  for (const position of canSeedDemoSquads
-    ? (Object.keys(required) as FantasyPosition[])
-    : []) {
-    const pool = candidates
-      .filter((candidate) => candidate.position === position)
-      .sort(
-        (a, b) =>
-          b.tier - a.tier ||
-          Number(b.fantasyPlayer.isThai) - Number(a.fantasyPlayer.isThai),
-      );
-    for (const candidate of pool) {
-      if (
-        selected.filter((item) => item.position === position).length >=
-        required[position]
-      )
-        break;
-      if ((clubCounts.get(candidate.clubId) ?? 0) >= 3) continue;
-      const next = [...selected, candidate];
-      if (next.filter((item) => !item.fantasyPlayer.isThai).length > 7)
-        continue;
-      if (
-        getCumulativeTierLimits().some(
-          ({ level, limit }) =>
-            next.filter((item) => item.tier <= level).length > limit,
-        )
-      )
-        continue;
-      selected.push(candidate);
-      clubCounts.set(
-        candidate.clubId,
-        (clubCounts.get(candidate.clubId) ?? 0) + 1,
-      );
-    }
-  }
-  if (canSeedDemoSquads && selected.length !== 15)
-    throw new Error(`Could only build a ${selected.length}-player demo squad.`);
-
-  const managersAndTeams: Array<{
-    managerId: string;
-    teamId: string;
-    index: number;
-  }> = [];
-  for (const [index, [managerName, teamName]] of demoTeams.entries()) {
-    const manager = await findOrCreateManager(managerName);
-    const teamRows = await db
-      .insert(fantasyTeams)
-      .values({
-        fantasySeasonId: fantasySeason.id,
-        managerId: manager.id,
-        name: teamName,
-        freeTransfers: 2,
-      })
-      .onConflictDoUpdate({
-        target: [fantasyTeams.fantasySeasonId, fantasyTeams.managerId],
-        set: { name: teamName, isActive: true, updatedAt: new Date() },
-      })
-      .returning();
-    managersAndTeams.push({
-      managerId: manager.id,
-      teamId: teamRows[0].id,
-      index,
-    });
-  }
-
-  for (const demo of managersAndTeams) {
-    const selectionRows = await db
-      .insert(fantasyTeamSelections)
-      .values({
-        fantasyTeamId: demo.teamId,
-        fantasyGameweekId: activeGameweek.id,
-        status: "draft",
-        freeTransfersBefore: 2,
-      })
-      .onConflictDoUpdate({
-        target: [
-          fantasyTeamSelections.fantasyTeamId,
-          fantasyTeamSelections.fantasyGameweekId,
-        ],
-        set: { updatedAt: new Date() },
-      })
-      .returning();
-    const selection = selectionRows[0];
-    const existingMembers = await db
-      .select({ id: fantasyTeamSelectionPlayers.id })
-      .from(fantasyTeamSelectionPlayers)
-      .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
-    if (existingMembers.length > 0) continue;
-    if (!canSeedDemoSquads) continue;
-
-    const starterLimits: Record<FantasyPosition, number> = {
-      goalkeeper: 1,
-      defender: 4,
-      midfielder: 4,
-      forward: 2,
-    };
-    const starterCounts = new Map<FantasyPosition, number>();
-    const starterIds = new Set<string>();
-    for (const candidate of selected) {
-      const count = starterCounts.get(candidate.position) ?? 0;
-      if (count < starterLimits[candidate.position]) {
-        starterIds.add(candidate.fantasyPlayer.id);
-        starterCounts.set(candidate.position, count + 1);
-      }
-    }
-    const bench = selected.filter(
-      (candidate) => !starterIds.has(candidate.fantasyPlayer.id),
-    );
-    const benchOrderByPlayer = new Map<string, number>();
-    const reserveGoalkeeper = bench.find(
-      (candidate) => candidate.position === "goalkeeper",
-    );
-    if (reserveGoalkeeper)
-      benchOrderByPlayer.set(reserveGoalkeeper.fantasyPlayer.id, 0);
-    bench
-      .filter((candidate) => candidate.position !== "goalkeeper")
-      .forEach((candidate, index) =>
-        benchOrderByPlayer.set(candidate.fantasyPlayer.id, index + 1),
-      );
-    const captain = selected.find(
-      (candidate) =>
-        starterIds.has(candidate.fantasyPlayer.id) &&
-        candidate.position === "midfielder",
-    );
-    const viceCaptain = selected.find(
-      (candidate) =>
-        starterIds.has(candidate.fantasyPlayer.id) &&
-        candidate.position === "forward",
-    );
-
-    const selectionPlayerValues: Array<
-      typeof fantasyTeamSelectionPlayers.$inferInsert
-    > = selected.map((candidate) => ({
-      selectionId: selection.id,
-      fantasyPlayerId: candidate.fantasyPlayer.id,
-      clubIdSnapshot: candidate.clubId,
-      positionSnapshot: candidate.position,
-      tierSnapshot: candidate.tier,
-      isThaiSnapshot: candidate.fantasyPlayer.isThai,
-      lineupRole: starterIds.has(candidate.fantasyPlayer.id)
-        ? "starter"
-        : "bench",
-      benchOrder: starterIds.has(candidate.fantasyPlayer.id)
-        ? null
-        : (benchOrderByPlayer.get(candidate.fantasyPlayer.id) ?? null),
-      captainRole:
-        candidate.fantasyPlayer.id === captain?.fantasyPlayer.id
-          ? "captain"
-          : candidate.fantasyPlayer.id === viceCaptain?.fantasyPlayer.id
-            ? "vice_captain"
-            : "none",
-    }));
-    await db.insert(fantasyTeamSelectionPlayers).values(selectionPlayerValues);
-  }
-
-  for (const demo of managersAndTeams) {
-    const selectionRows = await db
-      .select()
-      .from(fantasyTeamSelections)
-      .where(
-        and(
-          eq(fantasyTeamSelections.fantasyTeamId, demo.teamId),
-          eq(fantasyTeamSelections.fantasyGameweekId, activeGameweek.id),
-        ),
-      )
-      .limit(1);
-    const selection = selectionRows[0];
-    if (!selection) continue;
-    const existingRevision = await db
-      .select({ id: fantasyTransferRevisions.id })
-      .from(fantasyTransferRevisions)
-      .where(eq(fantasyTransferRevisions.selectionId, selection.id))
-      .limit(1);
-    if (existingRevision[0]) continue;
-    const members = await db
-      .select()
-      .from(fantasyTeamSelectionPlayers)
-      .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
-    await db.insert(fantasyTransferRevisions).values({
-      selectionId: selection.id,
-      revision: 1,
-      status: "confirmed",
-      squad: members.map((member) => member.fantasyPlayerId),
-      lineup: { members },
-      activeChip: selection.activeChip,
-      netTransferCount: 0,
-      transferPoints: 0,
-    });
-  }
-
-  const overallLeague = await findOrCreateLeague({
-    fantasySeasonId: fantasySeason.id,
-    name: "Thailand Overall",
-    type: "overall",
-    isDemo: true,
-  });
-  const privateLeague = await findOrCreateLeague({
-    fantasySeasonId: fantasySeason.id,
-    name: "Thai Fantasy Friends",
-    type: "private",
-    inviteCode: "THAI-26-FAN",
-    isDemo: true,
-  });
-  for (const team of managersAndTeams) {
+  const overallLeague =
+    existingOverall[0] ??
+    (
+      await db
+        .insert(fantasyLeagues)
+        .values({
+          fantasySeasonId: fantasySeason.id,
+          name: "Thailand Overall",
+          type: "overall",
+        })
+        .returning()
+    )[0];
+  const seasonTeams = await db
+    .select({ id: fantasyTeams.id })
+    .from(fantasyTeams)
+    .where(eq(fantasyTeams.fantasySeasonId, fantasySeason.id));
+  if (seasonTeams.length > 0) {
     await db
       .insert(fantasyLeagueMembers)
-      .values([
-        { fantasyLeagueId: overallLeague.id, fantasyTeamId: team.teamId },
-        { fantasyLeagueId: privateLeague.id, fantasyTeamId: team.teamId },
-      ])
+      .values(
+        seasonTeams.map((team) => ({
+          fantasyLeagueId: overallLeague.id,
+          fantasyTeamId: team.id,
+        })),
+      )
       .onConflictDoNothing();
   }
 
   console.log(
-    `Seeded ${fantasyPlayerRows.length} fantasy players, ${gameweekRows.length} Gameweeks, ${managersAndTeams.length} demo teams, and 2 Classic leagues.`,
+    `Seeded ${fantasyPlayerRows.length} fantasy players, ${gameweekRows.length} Gameweeks, and the Overall Classic league.`,
   );
 }
 
