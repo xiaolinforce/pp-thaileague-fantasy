@@ -186,6 +186,15 @@ recalculation persists average and highest points on the Gameweek from every
 scored selection that contains at least one player. Points pages read those
 stored summaries instead of aggregating every team on each request.
 
+The same scoring transaction rebuilds the current Overall Classic standings.
+It aggregates season totals once, applies the deterministic Classic
+tie-breakers, and persists one latest rank row for every ranked team. Overall
+reads use the indexed stored rank directly: the overview fetches only the
+current team's row and the dialog fetches ranks 1–100. Correcting an earlier
+Gameweek retains the latest provisional/final Gameweek as the standings marker
+while refreshing cumulative totals. Private League standings remain calculated
+on read until they adopt the same persisted workflow.
+
 The Fixtures and Stats read model keeps two datasets separate. Official
 current-season player aggregates are imported into
 `competition_player_season_stats` with source identifiers, payload, identity
@@ -208,7 +217,7 @@ The schema is organized into four related groups:
 - Fantasy configuration and play: Fantasy seasons, Gameweeks, tier definitions,
   player classifications, versioned ranking runs and player projections,
   managers, teams, selections, selection snapshots, transfer revisions,
-  leagues, memberships, and League audit history.
+  leagues, memberships, latest League standings, and League audit history.
 - Scoring and review: match stats, stat overrides, player match points, team
   Gameweek scores, and the fantasy admin audit log.
 

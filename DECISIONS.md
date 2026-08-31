@@ -4,6 +4,26 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-01 — Overall ranks are persisted with Gameweek scoring
+
+**Decision:** Persist one current standing row per ranked team and League,
+including rank, total points, latest Gameweek points, counted transfers, score
+status, and the Gameweek through which it was computed. Rebuild Overall in the
+same transaction as score recalculation, retain only the latest standings, and
+return ranks 1–100 in the Overall dialog. Keep the schema reusable for Private
+Leagues, but leave their current read-time ranking and pagination unchanged.
+
+**Context:** Re-aggregating and sorting every Overall member on each overview or
+dialog request makes page cost grow with the full player population even though
+the public table needs only the leaders and the current user's rank.
+
+**Consequences:** Overall requests use indexed standing lookups and never sort
+season scores. Every ranked team's current position is persisted so the outer
+card can read its own row directly. A team provisioned after the latest refresh
+shows “รออัปเดตอันดับ” until the next provisional/final scoring pass. Rank
+history is deliberately unavailable; adding movement or historical standings
+would require a separate snapshot model.
+
 ## 2026-09-01 — The team name is the only public Fantasy identity
 
 **Decision:** Use `fantasy_teams.name` as the sole public display name across

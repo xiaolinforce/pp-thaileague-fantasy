@@ -1,12 +1,13 @@
 import "server-only";
 
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, count, eq, inArray, lte, sql } from "drizzle-orm";
 import { connection } from "next/server";
 
 import { db } from "@/db";
 import {
   fantasyLeagueMembers,
   fantasyLeagues,
+  fantasyLeagueStandings,
   fantasyTeamGameweekScores,
   fantasyTeamSelections,
   fantasyTeams,
@@ -14,9 +15,11 @@ import {
 import { requireFantasyProfile } from "@/lib/auth/context";
 import {
   LEAGUE_STANDINGS_PAGE_SIZE,
+  OVERALL_STANDINGS_LIMIT,
   PRIVATE_LEAGUE_MEMBER_LIMIT,
   PRIVATE_LEAGUE_MEMBERSHIP_LIMIT,
   PRIVATE_LEAGUE_OWNER_LIMIT,
+  rankLeagueStandings,
 } from "@/lib/fantasy/leagues";
 
 export type LeagueStanding = {
@@ -79,29 +82,23 @@ async function getStandingsForLeagues(input: {
 
   for (const leagueId of leagueIds) {
     const league = leagueById.get(leagueId)!;
-    const standings = memberRows
-      .filter((row) => row.leagueId === leagueId)
-      .map((row) => {
-        const score = scoreByTeam.get(row.teamId);
-        return {
-          teamId: row.teamId,
-          teamName: row.teamName,
-          joinedAt: row.joinedAt.toISOString(),
-          gameweekPoints: score?.gameweekPoints ?? 0,
-          totalPoints: score?.totalPoints ?? 0,
-          transferCount: score?.transferCount ?? 0,
-          mine: row.teamId === input.currentTeamId,
-          owner: row.teamId === league.ownerTeamId,
-        };
-      })
-      .sort(
-        (a, b) =>
-          b.totalPoints - a.totalPoints ||
-          a.transferCount - b.transferCount ||
-          a.teamName.localeCompare(b.teamName, "th") ||
-          a.teamId.localeCompare(b.teamId),
-      )
-      .map((row, index) => ({ ...row, rank: index + 1 }));
+    const standings = rankLeagueStandings(
+      memberRows
+        .filter((row) => row.leagueId === leagueId)
+        .map((row) => {
+          const score = scoreByTeam.get(row.teamId);
+          return {
+            teamId: row.teamId,
+            teamName: row.teamName,
+            joinedAt: row.joinedAt.toISOString(),
+            gameweekPoints: score?.gameweekPoints ?? 0,
+            totalPoints: score?.totalPoints ?? 0,
+            transferCount: score?.transferCount ?? 0,
+            mine: row.teamId === input.currentTeamId,
+            owner: row.teamId === league.ownerTeamId,
+          };
+        }),
+    );
     standingsByLeague.set(leagueId, standings);
   }
   return standingsByLeague;
@@ -124,12 +121,53 @@ export async function getLeagueOverview() {
       ),
     );
   const leagues = leagueRows.map((row) => row.league);
-  const standingsByLeague = await getStandingsForLeagues({
-    leagues,
-    currentTeamId: profile.team.id,
-    gameweekId: profile.gameweek.id,
-  });
-  const summaries = leagues.map((league) => {
+  const overallLeague = leagues.find((league) => league.type === "overall");
+  const privateLeagueRows = leagues.filter(
+    (league) => league.type === "private",
+  );
+  const [standingsByLeague, overallMemberCountRows, overallStandingRows] =
+    await Promise.all([
+      getStandingsForLeagues({
+        leagues: privateLeagueRows,
+        currentTeamId: profile.team.id,
+        gameweekId: profile.gameweek.id,
+      }),
+      overallLeague
+        ? db
+            .select({ count: count() })
+            .from(fantasyLeagueMembers)
+            .where(eq(fantasyLeagueMembers.fantasyLeagueId, overallLeague.id))
+        : Promise.resolve([]),
+      overallLeague
+        ? db
+            .select()
+            .from(fantasyLeagueStandings)
+            .where(
+              and(
+                eq(fantasyLeagueStandings.fantasyLeagueId, overallLeague.id),
+                eq(fantasyLeagueStandings.fantasyTeamId, profile.team.id),
+              ),
+            )
+            .limit(1)
+        : Promise.resolve([]),
+    ]);
+  const overallStanding = overallStandingRows[0];
+  const overall = overallLeague
+    ? {
+        id: overallLeague.id,
+        name: overallLeague.name,
+        type: overallLeague.type,
+        memberCount: overallMemberCountRows[0]?.count ?? 0,
+        rank: overallStanding?.rank ?? null,
+        gameweekPoints: overallStanding?.gameweekPoints ?? 0,
+        totalPoints: overallStanding?.totalPoints ?? 0,
+        isOwner: false,
+        updatedAt: (
+          overallStanding?.computedAt ?? overallLeague.updatedAt
+        ).toISOString(),
+      }
+    : null;
+  const summaries = privateLeagueRows.map((league) => {
     const standings = standingsByLeague.get(league.id) ?? [];
     const mine = standings.find((standing) => standing.mine);
     return {
@@ -159,7 +197,7 @@ export async function getLeagueOverview() {
       number: profile.gameweek.number,
       scoreComplete: profile.gameweek.scoreComplete,
     },
-    overall: summaries.find((league) => league.type === "overall") ?? null,
+    overall,
     privateLeagues,
     limits: {
       owned: privateLeagues.filter((league) => league.isOwner).length,
@@ -191,6 +229,73 @@ export async function getLeagueDetail(leagueId: string, requestedPage = 1) {
     .limit(1);
   const league = rows[0]?.league;
   if (!league) return null;
+  if (league.type === "overall") {
+    const [memberCountRows, standingRows] = await Promise.all([
+      db
+        .select({ count: count() })
+        .from(fantasyLeagueMembers)
+        .where(eq(fantasyLeagueMembers.fantasyLeagueId, league.id)),
+      db
+        .select({
+          teamId: fantasyTeams.id,
+          teamName: fantasyTeams.name,
+          joinedAt: fantasyLeagueMembers.joinedAt,
+          gameweekPoints: fantasyLeagueStandings.gameweekPoints,
+          totalPoints: fantasyLeagueStandings.totalPoints,
+          transferCount: fantasyLeagueStandings.transferCount,
+          rank: fantasyLeagueStandings.rank,
+        })
+        .from(fantasyLeagueStandings)
+        .innerJoin(
+          fantasyTeams,
+          eq(fantasyLeagueStandings.fantasyTeamId, fantasyTeams.id),
+        )
+        .innerJoin(
+          fantasyLeagueMembers,
+          and(
+            eq(
+              fantasyLeagueStandings.fantasyLeagueId,
+              fantasyLeagueMembers.fantasyLeagueId,
+            ),
+            eq(
+              fantasyLeagueStandings.fantasyTeamId,
+              fantasyLeagueMembers.fantasyTeamId,
+            ),
+          ),
+        )
+        .where(
+          and(
+            eq(fantasyLeagueStandings.fantasyLeagueId, league.id),
+            lte(fantasyLeagueStandings.rank, OVERALL_STANDINGS_LIMIT),
+          ),
+        )
+        .orderBy(asc(fantasyLeagueStandings.rank)),
+    ]);
+    return {
+      id: league.id,
+      name: league.name,
+      type: league.type,
+      inviteCode: null,
+      memberCount: memberCountRows[0]?.count ?? 0,
+      isOwner: false,
+      myStanding: null,
+      standings: standingRows.map((standing) => ({
+        ...standing,
+        joinedAt: standing.joinedAt.toISOString(),
+        mine: false,
+        owner: false,
+      })),
+      pagination: {
+        page: 1,
+        pageCount: 1,
+        pageSize: OVERALL_STANDINGS_LIMIT,
+      },
+      gameweek: {
+        number: profile.gameweek.number,
+        scoreComplete: profile.gameweek.scoreComplete,
+      },
+    };
+  }
   const standings =
     (
       await getStandingsForLeagues({

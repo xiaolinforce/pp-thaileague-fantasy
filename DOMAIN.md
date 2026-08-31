@@ -250,6 +250,14 @@ Classic standings sort by:
 3. Team name, locale order.
 4. Team ID as an invisible deterministic fallback when names also match.
 
+Overall ranks are rebuilt in the same transaction as provisional/final score
+recalculation and stored as the latest standings only; historical rank snapshots
+are not retained. The database stores the rank of every team present at that
+refresh, while the Overall dialog exposes only ranks 1–100 and does not repeat
+the current team's own-rank callout. A newly provisioned team has no rank row
+until the next refresh, so its Overall card shows “รออัปเดตอันดับ”. Private
+League standings continue to be derived on read and paginated in groups of 25.
+
 Every Guest and member team joins the season's single Overall Classic league
 automatically and cannot leave it. Guests may view and compete in Overall but
 cannot create, join, or manage Private Leagues.

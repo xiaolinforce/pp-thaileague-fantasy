@@ -1307,6 +1307,50 @@ export const fantasyLeagueMembers = pgTable(
   ],
 );
 
+export const fantasyLeagueStandings = pgTable(
+  "fantasy_league_standings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasyLeagueId: uuid("fantasy_league_id")
+      .notNull()
+      .references(() => fantasyLeagues.id, { onDelete: "cascade" }),
+    fantasyTeamId: uuid("fantasy_team_id")
+      .notNull()
+      .references(() => fantasyTeams.id, { onDelete: "cascade" }),
+    throughGameweekId: uuid("through_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "cascade" }),
+    status: fantasyScoreStatusEnum("status").notNull(),
+    rank: integer("rank").notNull(),
+    gameweekPoints: integer("gameweek_points").default(0).notNull(),
+    totalPoints: integer("total_points").default(0).notNull(),
+    transferCount: integer("transfer_count").default(0).notNull(),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("fantasy_league_standings_league_team_unique").on(
+      table.fantasyLeagueId,
+      table.fantasyTeamId,
+    ),
+    uniqueIndex("fantasy_league_standings_league_rank_unique").on(
+      table.fantasyLeagueId,
+      table.rank,
+    ),
+    index("fantasy_league_standings_team_league_idx").on(
+      table.fantasyTeamId,
+      table.fantasyLeagueId,
+    ),
+    index("fantasy_league_standings_gameweek_idx").on(table.throughGameweekId),
+    check(
+      "fantasy_league_standings_values_check",
+      sql`${table.rank} >= 1 and ${table.transferCount} >= 0`,
+    ),
+  ],
+);
+
 export const fantasyLeagueAuditLog = pgTable(
   "fantasy_league_audit_log",
   {

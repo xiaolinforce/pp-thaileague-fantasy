@@ -18,8 +18,9 @@
   stat overrides, transfer revisions, and application-level admin audit entries.
 - Versioned preseason player ranking with contiguous overall/position ranks,
   source confidence, review CSV, and deterministic 5%/15%/20%/remaining tiers.
-- Real Overall and invite-only Private Classic standings with transactional
-  owner/member limits, owner controls, and audit history.
+- Persisted latest Overall ranks with a Top 100 read model, plus invite-only
+  Private Classic standings with transactional owner/member limits, owner
+  controls, and audit history.
 - Idempotent competition and Fantasy seed workflows with database verification.
 
 ## Production readiness blockers

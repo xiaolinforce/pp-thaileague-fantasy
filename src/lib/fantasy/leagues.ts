@@ -6,12 +6,36 @@ export const PRIVATE_LEAGUE_OWNER_LIMIT = 10;
 export const PRIVATE_LEAGUE_MEMBERSHIP_LIMIT = 20;
 export const PRIVATE_LEAGUE_MEMBER_LIMIT = 100;
 export const LEAGUE_STANDINGS_PAGE_SIZE = 25;
+export const OVERALL_STANDINGS_LIMIT = 100;
 export const LEAGUE_INVITE_CODE_LENGTH = 8;
 export const LEAGUE_INVITE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 
 const LEAGUE_INVITE_PATTERN = new RegExp(
   `^[${LEAGUE_INVITE_ALPHABET}]{${LEAGUE_INVITE_CODE_LENGTH}}$`,
 );
+
+const teamNameCollator = new Intl.Collator("th", { sensitivity: "base" });
+
+export type UnrankedLeagueStanding = {
+  teamId: string;
+  teamName: string;
+  totalPoints: number;
+  transferCount: number;
+};
+
+export function rankLeagueStandings<T extends UnrankedLeagueStanding>(
+  standings: T[],
+) {
+  return [...standings]
+    .sort(
+      (a, b) =>
+        b.totalPoints - a.totalPoints ||
+        a.transferCount - b.transferCount ||
+        teamNameCollator.compare(a.teamName, b.teamName) ||
+        a.teamId.localeCompare(b.teamId),
+    )
+    .map((standing, index) => ({ ...standing, rank: index + 1 }));
+}
 
 export function validatePrivateLeagueName(value: string) {
   const result = validateFantasyDisplayName(value, {

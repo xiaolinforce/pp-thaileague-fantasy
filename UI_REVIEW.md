@@ -25,20 +25,20 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
-| Route            | Archetype             | Status      | Current basis and next review focus                                                                                                                  |
-| ---------------- | --------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/team`          | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                                          |
-| `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                                            |
-| `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                      |
-| `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                           |
-| `/fixtures`      | Data browser          | In progress | Local Gameweek browsing and URL-backed stat/filter states implemented; populated-season evidence remains pending upstream data.                      |
-| `/leagues`       | Ranking/community     | In progress | Team-only Overall/Guest identity and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
-| `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                |
-| `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                           |
-| `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                         |
-| `/help`          | Long-form reading     | Reviewed    | Public bilingual FAQ, rules path, and real Facebook support destination reviewed.                                                                    |
-| `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                                           |
-| `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                                         |
+| Route            | Archetype             | Status      | Current basis and next review focus                                                                                                                                   |
+| ---------------- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/team`          | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                                                           |
+| `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                                                             |
+| `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                                       |
+| `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                                            |
+| `/fixtures`      | Data browser          | In progress | Local Gameweek browsing and URL-backed stat/filter states implemented; populated-season evidence remains pending upstream data.                                       |
+| `/leagues`       | Ranking/community     | In progress | Persisted Overall waiting/Top 100 states and responsive language modes reviewed; populated Top 100 and authenticated Private operations still need rendered evidence. |
+| `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                 |
+| `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                            |
+| `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                                          |
+| `/help`          | Long-form reading     | Reviewed    | Public bilingual FAQ, rules path, and real Facebook support destination reviewed.                                                                                     |
+| `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                                                            |
+| `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                                                          |
 
 The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
@@ -194,6 +194,33 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-01 — Persisted Overall Top 100
+
+- **Route and task:** `/leagues`; replace request-time Overall aggregation and
+  pagination with persisted current ranks and a single Top 100 dialog.
+- **Status:** remains In progress.
+- **Data/auth/Gameweek state:** confirmed development Neon branch, 22 Overall
+  members, open Gameweek 1, and no provisional/final scoring state. The backfill
+  correctly produced no rank rows, so the real reachable state is “รออัปเดตอันดับ”.
+- **Language:** Thai source copy and English dictionary cover the waiting card,
+  Top 100 title, and no-updated-rank dialog state; both modes were rendered and
+  the Guest device preference was restored to Thai after review.
+- **Viewports/accessibility:** default Desktop and 360×800 Mobile; the dialog
+  remains constrained on Desktop, becomes a full-height Mobile surface, keeps a
+  named close control and status message, and produces no document overflow.
+- **Issues fixed:** Overall overview/detail reads no longer aggregate or sort all
+  season scores. The card reads the current team's stored row, the dialog reads
+  only indexed ranks 1–100, pagination is removed from Overall, and the own-rank
+  badge/callout remains outside the dialog. Private League pagination is unchanged.
+- **Known exclusions:** a populated Top 100, a current team below rank 100, and
+  provisional/final rank refresh were not rendered because Gameweek 1 is still
+  open and no scoring or account data was manufactured.
+- **Evidence:** bounded in-app Browser DOM and screenshot inspection of the real
+  waiting card and empty Top 100 dialog in Thai/English; the URL remained
+  `/leagues` while opening the dialog and no page-level pagination was present.
+- **Verification:** rule tests, schema generation/migration, League backfill,
+  Fantasy database invariants, and responsive Browser measurements.
+
 ### 2026-09-01 — Team name as the sole public identity
 
 - **Route and task:** shared shell, `/profile`, and `/leagues`; remove the
@@ -318,7 +345,8 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   / “Overall ranking” with a 32px rank; both Overall and Private League list
   entries open a focused standings dialog instead of navigating away. The
   Overall dialog now limits its table to rank, team identity, and total, plus
-  paginated navigation. The Private section retains a concise bilingual empty
+  a later persisted Top 100 contract without pagination. The Private section
+  retains a concise bilingual empty
   message without adding a second empty-state action. Create/Join dialogs use a
   clean footer, orange labels, and field-level errors; invalid league names can
   be submitted for validation without disabling the primary action. The empty

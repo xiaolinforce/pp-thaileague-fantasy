@@ -222,7 +222,9 @@ function ManagerMenu({
           .filter(
             (item) =>
               (!item.requiresIdentity || Boolean(identity)) &&
-              (!item.requiresAdmin || identity?.role === "admin"),
+              (!("requiresAdmin" in item) ||
+                !item.requiresAdmin ||
+                identity?.role === "admin"),
           )
           .map(({ label, href, icon: Icon }) => {
             const active = pathname === href;

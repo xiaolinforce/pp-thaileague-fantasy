@@ -7,6 +7,7 @@ import {
   fantasyLeagueAuditLog,
   fantasyLeagueMembers,
   fantasyLeagues,
+  fantasyLeagueStandings,
   fantasyManagers,
   fantasyPlayers,
   fantasyPlayerRankings,
@@ -41,6 +42,7 @@ const tables = {
   fantasyTierDefinitions,
   fantasyLeagues,
   fantasyLeagueMembers,
+  fantasyLeagueStandings,
   fantasyLeagueAuditLog,
 };
 
@@ -60,6 +62,10 @@ async function verifyFantasyGame() {
     private_leagues_over_member_limit: number;
     teams_over_membership_limit: number;
     teams_over_owner_limit: number;
+    invalid_standing_memberships: number;
+    cross_season_standings: number;
+    non_contiguous_standing_ranks: number;
+    mixed_standing_gameweeks: number;
   }>(sql`
     select
       (select count(*)::int from fantasy_managers where status = 'seeded') as seeded_managers,
@@ -137,7 +143,41 @@ async function verifyFantasyGame() {
           group by league.owner_team_id
           having count(*) > 10
         ) oversized_ownerships
-      ) as teams_over_owner_limit
+      ) as teams_over_owner_limit,
+      (
+        select count(*)::int
+        from fantasy_league_standings standing
+        where not exists (
+          select 1 from fantasy_league_members member
+          where member.fantasy_league_id = standing.fantasy_league_id
+            and member.fantasy_team_id = standing.fantasy_team_id
+        )
+      ) as invalid_standing_memberships,
+      (
+        select count(*)::int
+        from fantasy_league_standings standing
+        inner join fantasy_leagues league on league.id = standing.fantasy_league_id
+        inner join fantasy_teams team on team.id = standing.fantasy_team_id
+        inner join fantasy_gameweeks gameweek on gameweek.id = standing.through_gameweek_id
+        where league.fantasy_season_id <> team.fantasy_season_id
+          or league.fantasy_season_id <> gameweek.fantasy_season_id
+      ) as cross_season_standings,
+      (
+        select count(*)::int from (
+          select fantasy_league_id
+          from fantasy_league_standings
+          group by fantasy_league_id
+          having min(rank) <> 1 or max(rank) <> count(*)
+        ) invalid_ranks
+      ) as non_contiguous_standing_ranks,
+      (
+        select count(*)::int from (
+          select fantasy_league_id
+          from fantasy_league_standings
+          group by fantasy_league_id
+          having count(distinct through_gameweek_id) > 1
+        ) mixed_gameweeks
+      ) as mixed_standing_gameweeks
   `);
   const leagueIssues = leagueIntegrity.rows[0];
   if (!leagueIssues) throw new Error("League integrity query returned no row.");
@@ -152,7 +192,7 @@ async function verifyFantasyGame() {
     );
   }
   console.log(
-    "leagueIntegrity: unique seasonal team names; no demo managers; Overall and Private League invariants verified",
+    "leagueIntegrity: unique seasonal team names; memberships and persisted standings verified",
   );
 
   const gameweekRows = await db

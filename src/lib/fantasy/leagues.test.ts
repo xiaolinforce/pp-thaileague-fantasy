@@ -5,9 +5,33 @@ import {
   createLeagueInviteCode,
   LEAGUE_INVITE_ALPHABET,
   normalizeLeagueInviteCode,
+  rankLeagueStandings,
   validateLeagueInviteCode,
   validatePrivateLeagueName,
 } from "./leagues.ts";
+
+test("ranks Classic standings with deterministic tie-breakers", () => {
+  const standings = [
+    { teamId: "d", teamName: "Delta", totalPoints: 80, transferCount: 2 },
+    { teamId: "c", teamName: "Charlie", totalPoints: 90, transferCount: 4 },
+    { teamId: "b", teamName: "Bravo", totalPoints: 90, transferCount: 2 },
+    { teamId: "a", teamName: "Alpha", totalPoints: 90, transferCount: 2 },
+  ];
+
+  assert.deepEqual(
+    rankLeagueStandings(standings).map(({ teamId, rank }) => ({
+      teamId,
+      rank,
+    })),
+    [
+      { teamId: "a", rank: 1 },
+      { teamId: "b", rank: 2 },
+      { teamId: "c", rank: 3 },
+      { teamId: "d", rank: 4 },
+    ],
+  );
+  assert.equal(standings[0].teamId, "d");
+});
 
 test("normalizes invite codes without accepting ambiguous characters", () => {
   assert.equal(normalizeLeagueInviteCode("  abcd2345 "), "ABCD2345");

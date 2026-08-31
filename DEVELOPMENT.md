@@ -83,6 +83,7 @@ Open `http://localhost:3006`.
 | `npm run db:seed:competition`             | Fetch, normalize, and upsert competition data.                        |
 | `npm run db:seed:fantasy`                 | Refresh Fantasy configuration, player tiers, and Overall membership.  |
 | `npm run db:rank:players`                 | Preview or explicitly publish a versioned player ranking.             |
+| `npm run db:rank:leagues`                 | Backfill the latest persisted Overall standings after scoring exists. |
 | `npm run db:seed:club-colors`             | Reapply the curated club visual identity registry.                    |
 | `npm run db:normalize:clubs`              | Apply explicit club display-name normalization.                       |
 | `npm run db:normalize:club-short-names`   | Apply curated Thai/English club short names.                          |
@@ -134,6 +135,16 @@ npm run db:verify:fantasy
 Confirm the Neon branch before both commands because preview reads current
 players and publication writes ranking runs, rankings, effective tiers, draft
 snapshots, and an audit row. Published versions are not rebuilt in place.
+
+### League standings workflow
+
+Gameweek lock, finalization, and later score corrections rebuild current
+Overall standings in the scoring transaction. A new schema deployment can run
+`npm run db:rank:leagues` once after confirming the Neon branch; seasons without
+a provisional or final Gameweek are intentionally skipped. Run
+`npm run db:verify:fantasy` afterward to verify membership, season, contiguous
+rank, and Gameweek-marker invariants. The command stores every current Overall
+rank, not only the Top 100 returned by the dialog.
 
 ## Working conventions
 

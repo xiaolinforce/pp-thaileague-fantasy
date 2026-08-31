@@ -13,17 +13,34 @@ import {
   fantasySeasons,
   fixtures,
 } from "@/db/schema";
+import {
+  refreshOverallLeagueStandings,
+  type LeagueStandingsDatabase,
+} from "./league-standings-service.ts";
 import { summarizeGameweekScores } from "./points-presentation.ts";
 import { resolveTeamScore, type GameweekPlayerResult } from "./scoring.ts";
 
 type ScoringDatabase = Pick<
   typeof transactionDb,
-  "query" | "select" | "insert" | "update"
->;
+  "query" | "select" | "insert" | "update" | "delete"
+> &
+  LeagueStandingsDatabase;
 
 export async function recalculateGameweek(
   fantasyGameweekId: string,
-  database: ScoringDatabase = transactionDb,
+  database?: ScoringDatabase,
+) {
+  if (!database) {
+    return transactionDb.transaction((tx) =>
+      recalculateGameweekInTransaction(fantasyGameweekId, tx),
+    );
+  }
+  return recalculateGameweekInTransaction(fantasyGameweekId, database);
+}
+
+async function recalculateGameweekInTransaction(
+  fantasyGameweekId: string,
+  database: ScoringDatabase,
 ) {
   const gameweek = await database.query.fantasyGameweeks.findFirst({
     where: eq(fantasyGameweeks.id, fantasyGameweekId),
@@ -140,10 +157,15 @@ export async function recalculateGameweek(
       updatedAt: new Date(),
     })
     .where(eq(fantasyGameweeks.id, gameweek.id));
+  const leagueStandings = await refreshOverallLeagueStandings(
+    gameweek.fantasySeasonId,
+    database,
+  );
 
   return {
     selections: selections.length,
     players: resultByPlayer.size,
+    leagueStandings,
     ...gameweekSummary,
   };
 }

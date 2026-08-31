@@ -402,7 +402,7 @@ function LeagueStandingsDialog({
           <DialogHeader>
             <DialogTitle>
               {isOverallHint ? (
-                "อันดับทั้งหมด"
+                "100 อันดับแรก"
               ) : league ? (
                 <span data-localize="off">{league.name}</span>
               ) : (
@@ -429,48 +429,56 @@ function LeagueStandingsDialog({
             </div>
           ) : league ? (
             <>
-              <div className="league-table-scroll" tabIndex={0}>
-                <table className="league-standings-table">
-                  <thead>
-                    <tr>
-                      <th scope="col">อันดับ</th>
-                      <th scope="col">ทีม</th>
-                      {!isOverallHint ? <th scope="col">GW</th> : null}
-                      <th scope="col">รวม</th>
-                      {!isOverallHint ? <th scope="col">Transfer</th> : null}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {league.standings.map((standing) => (
-                      <tr
-                        className={standing.mine ? "mine" : undefined}
-                        key={standing.teamId}
-                      >
-                        <td className="league-rank-cell">{standing.rank}</td>
-                        <th scope="row">
-                          <span className="league-team-name">
-                            <span data-localize="off">{standing.teamName}</span>
-                            {standing.mine ? <i>คุณ</i> : null}
-                            {standing.owner ? (
-                              <i className="owner">เจ้าของ</i>
-                            ) : null}
-                          </span>
-                        </th>
-                        {!isOverallHint ? (
-                          <td>{standing.gameweekPoints.toLocaleString()}</td>
-                        ) : null}
-                        <td className="league-total-cell">
-                          {standing.totalPoints.toLocaleString()}
-                        </td>
-                        {!isOverallHint ? (
-                          <td>{standing.transferCount.toLocaleString()}</td>
-                        ) : null}
+              {league.standings.length > 0 ? (
+                <div className="league-table-scroll" tabIndex={0}>
+                  <table className="league-standings-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">อันดับ</th>
+                        <th scope="col">ทีม</th>
+                        {!isOverallHint ? <th scope="col">GW</th> : null}
+                        <th scope="col">รวม</th>
+                        {!isOverallHint ? <th scope="col">Transfer</th> : null}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {league.pagination.pageCount > 1 ? (
+                    </thead>
+                    <tbody>
+                      {league.standings.map((standing) => (
+                        <tr
+                          className={standing.mine ? "mine" : undefined}
+                          key={standing.teamId}
+                        >
+                          <td className="league-rank-cell">{standing.rank}</td>
+                          <th scope="row">
+                            <span className="league-team-name">
+                              <span data-localize="off">
+                                {standing.teamName}
+                              </span>
+                              {standing.mine ? <i>คุณ</i> : null}
+                              {standing.owner ? (
+                                <i className="owner">เจ้าของ</i>
+                              ) : null}
+                            </span>
+                          </th>
+                          {!isOverallHint ? (
+                            <td>{standing.gameweekPoints.toLocaleString()}</td>
+                          ) : null}
+                          <td className="league-total-cell">
+                            {standing.totalPoints.toLocaleString()}
+                          </td>
+                          {!isOverallHint ? (
+                            <td>{standing.transferCount.toLocaleString()}</td>
+                          ) : null}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="league-dialog-state" role="status">
+                  <span>ยังไม่มีอันดับที่อัปเดต</span>
+                </div>
+              )}
+              {!isOverallHint && league.pagination.pageCount > 1 ? (
                 <nav
                   className="league-dialog-pagination"
                   aria-label={translate("หน้าตารางอันดับ")}
@@ -579,7 +587,13 @@ export function LeagueOverview({
             </span>
             <div className="league-overall-copy">
               <span>อันดับทั้งหมด</span>
-              <strong>{overview.overall.rank?.toLocaleString() ?? "—"}</strong>
+              <strong
+                className={
+                  overview.overall.rank === null ? "waiting" : undefined
+                }
+              >
+                {overview.overall.rank?.toLocaleString() ?? "รออัปเดตอันดับ"}
+              </strong>
             </div>
             <span className="league-open-caret" aria-hidden="true">
               <ChevronRight />

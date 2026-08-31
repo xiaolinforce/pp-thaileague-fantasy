@@ -21,7 +21,8 @@ Classic league standings.
 - Ranking-weighted squad auto-fill that completes vacant slots, targets the
   full tier allocation, and keeps the result editable until the manager saves.
 - Real Overall and invite-only Private Classic leagues with owner controls,
-  membership limits, audit history, and no seeded competitors.
+  membership limits, audit history, persisted latest Overall ranks, and no
+  seeded competitors.
 - FPL-inspired scoring without bonus/BPS or Defensive Contributions, with a
   Thai Fantasy-specific 10 points for a goalkeeper goal.
 - Competition import from the Thai League official API and public Transfermarkt
@@ -71,6 +72,7 @@ npm run db:verify:competition
 npm run db:seed:fantasy
 npm run db:rank:players -- --publish
 npm run db:seed:fantasy
+npm run db:rank:leagues
 npm run db:verify:fantasy
 npm run dev
 ```
@@ -102,6 +104,10 @@ four levels from the active ranked pool: Level 1 is 5%, Level 2 is the next
 real account or Guest receives an empty opening draft and chooses all 15 players
 before the first save. Standings therefore contain only real account-owned or
 historically preserved Guest teams.
+The League ranking command backfills current Overall standings only after a
+provisional or final Gameweek exists; normal scoring recalculation keeps those
+latest rows current afterward. Runtime Overall reads fetch the current team's
+stored rank and the Top 100 rather than aggregating the full season.
 All player mutations derive the team from the current server session; admin
 mutations additionally require `role=admin`.
 

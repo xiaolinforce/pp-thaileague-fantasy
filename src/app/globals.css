@@ -9105,6 +9105,12 @@ body {
   overflow-wrap: anywhere;
 }
 
+.league-overall-copy > strong.waiting {
+  font-size: clamp(17px, 2.2vw, 22px);
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
 .league-open-caret {
   display: grid;
   width: 52px;

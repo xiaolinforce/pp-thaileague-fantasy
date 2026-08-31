@@ -19,6 +19,7 @@
     "db:seed:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/seed-competition-data.ts",
     "db:seed:fantasy": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/seed-fantasy-game.ts",
     "db:rank:players": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/rank-fantasy-players.ts",
+    "db:rank:leagues": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/backfill-league-standings.ts",
     "db:seed:club-colors": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/seed-club-visual-identities.ts",
     "db:studio": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs studio",
     "db:verify:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-competition-data.ts",
