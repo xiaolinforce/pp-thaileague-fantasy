@@ -78,6 +78,12 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
   const searchParams = useSearchParams();
   const { language } = useLanguage();
   const [visibleCount, setVisibleCount] = useState(25);
+  const [week, setWeek] = useState(() =>
+    data.currentGameweek !== null &&
+    data.matchweeks.includes(data.currentGameweek)
+      ? data.currentGameweek
+      : (data.matchweeks[0] ?? 1),
+  );
   const text = (th: string, en: string) => (language === "th" ? th : en);
   const requestedView: MainView =
     searchParams.get("view") === "stats" ? "stats" : "fixtures";
@@ -86,10 +92,6 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
     statisticsEnabled && requestedView === "stats" ? "stats" : "fixtures";
   const statsView: StatsView =
     searchParams.get("stats") === "football" ? "football" : "fantasy";
-  const requestedWeek = Number(searchParams.get("week"));
-  const week = data.matchweeks.includes(requestedWeek)
-    ? requestedWeek
-    : (data.matchweeks[0] ?? 1);
   const requestedPosition = searchParams.get("position");
   const position: PositionFilter = ["GK", "DEF", "MID", "FWD"].includes(
     requestedPosition ?? "",
@@ -247,7 +249,7 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
             <GameweekSelector
               week={week}
               max={data.matchweeks.at(-1) ?? 30}
-              onChange={(nextWeek) => updateUrl({ week: nextWeek })}
+              onChange={setWeek}
             />
             <div className="fixtures-layout">
               <section

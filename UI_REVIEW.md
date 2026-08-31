@@ -31,7 +31,7 @@ when new behavior invalidates prior coverage.
 | `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                         |
 | `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                   |
 | `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                        |
-| `/fixtures`      | Data browser          | In progress | URL-backed browsing and real preseason stat states implemented; populated-season evidence remains pending upstream data.          |
+| `/fixtures`      | Data browser          | In progress | Local Gameweek browsing and URL-backed stat/filter states implemented; populated-season evidence remains pending upstream data.   |
 | `/leagues`       | Ranking/community     | In progress | Overall/Guest and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
 | `/profile`       | Account identity      | In progress | Guest/read-only and responsive states reviewed; member mutation evidence remains pending.                                         |
 | `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                        |
@@ -193,6 +193,38 @@ Verification commands:
 Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
+
+### 2026-09-01 — Fixtures current-Gameweek browsing
+
+- **Route and task:** `/fixtures`; start fixture browsing at the current
+  Gameweek and keep previous/next selection local to the page instead of
+  navigating with a `week` query parameter.
+- **Status:** In progress → In progress.
+- **Data/auth/Gameweek state:** real Guest session and imported development
+  fixtures; the open current Gameweek was GW1, with eight fixtures rendered in
+  each inspected Gameweek.
+- **Language:** English rendered in the persisted Guest preference. No source
+  copy or translation entry changed; the existing Thai coverage remains
+  applicable to the unchanged selector labels and fixture content.
+- **Viewports:** default Desktop and 360px Mobile rendered. The selector and
+  fixture list retained their existing responsive composition, and the Mobile
+  document width matched its client width without horizontal overflow.
+- **Keyboard/accessibility:** the shared selector retained named previous/next
+  buttons, its disabled first-Gameweek state, and the written current Gameweek.
+- **Issues fixed:** `/fixtures` now defaults to `currentGameweek`, falls back to
+  the first imported matchweek when necessary, and changes Gameweeks entirely
+  in Client Component state. Repeated previous/next interactions left the URL
+  at `/fixtures`, updated the fixture rows immediately, and produced no new
+  request in the development server log.
+- **Known exclusions:** a missing current Gameweek and a Gameweek with no
+  fixtures were not manufactured for rendered evidence; the implemented
+  fallback and existing empty state cover those paths pending natural data.
+- **Evidence:** bounded in-app Browser inspection against an isolated clean
+  development copy using the real development database; no mock, simulation
+  route, or production behavior was added.
+- **Verification:** `npm run test:rules`, `npm run test:email`, `npm run types`,
+  `npm run lint`, production build, targeted Prettier check, Desktop/Mobile DOM
+  inspection, URL observation, and development-server request logs.
 
 ### 2026-08-31 — Fixtures and player statistics
 
