@@ -54,11 +54,17 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
           role: current.role,
         })
       : null;
+  const initialLanguage =
+    identity && !identity.isGuest ? (identity.preferredLanguage ?? "th") : null;
   const identityKey = JSON.stringify(identity);
   return (
-    <html lang="th" className={mitr.variable} suppressHydrationWarning>
+    <html
+      lang={initialLanguage ?? "th"}
+      className={mitr.variable}
+      suppressHydrationWarning
+    >
       <body>
-        <LanguageProvider>
+        <LanguageProvider initialLanguage={initialLanguage}>
           <NavigationAvailabilityProvider availability={navigationAvailability}>
             <NavigationBlockerProvider>
               <IdentityProvider key={identityKey} identity={identity}>

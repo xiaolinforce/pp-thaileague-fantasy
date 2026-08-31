@@ -973,11 +973,16 @@ export const fantasyManagers = pgTable(
     nameChangeAvailableAt: timestamp("name_change_available_at", {
       withTimezone: true,
     }),
+    preferredLanguage: varchar("preferred_language", { length: 2 }),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("fantasy_managers_auth_user_unique").on(table.authUserId),
     index("fantasy_managers_status_idx").on(table.status),
+    check(
+      "fantasy_managers_preferred_language_check",
+      sql`${table.preferredLanguage} is null or ${table.preferredLanguage} in ('th', 'en')`,
+    ),
   ],
 );
 

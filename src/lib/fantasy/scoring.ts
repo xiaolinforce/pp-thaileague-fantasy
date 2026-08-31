@@ -37,14 +37,14 @@ export type PlayerPoints = {
   breakdown: PointsBreakdown;
 };
 
-const GOAL_POINTS: Record<FantasyPosition, number> = {
+export const GOAL_POINTS: Record<FantasyPosition, number> = {
   goalkeeper: 10,
   defender: 6,
   midfielder: 5,
   forward: 4,
 };
 
-const CLEAN_SHEET_POINTS: Record<FantasyPosition, number> = {
+export const CLEAN_SHEET_POINTS: Record<FantasyPosition, number> = {
   goalkeeper: 4,
   defender: 4,
   midfielder: 1,

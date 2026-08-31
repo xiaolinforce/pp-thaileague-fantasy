@@ -11,9 +11,10 @@ Classic league standings.
 - Thai League 1 season 2026/27.
 - Passwordless Email OTP, Google OAuth, and device-bound Guest accounts through Better Auth.
 - One manager identity per account, with one automatically provisioned empty team draft per season.
-- Landing, team selection, transfers, points, leagues, fixtures,
-  profile/rules, and internal Fantasy administration screens.
-- Thai source interface with a client-side English display preference.
+- Landing, team selection, transfers, points, leagues, fixtures, profile,
+  settings, public rules/help, and internal Fantasy administration screens.
+- Thai source interface with an English display preference persisted per member
+  account and stored on the current device for Guests.
 - Fifteen-player squads, valid FPL-style formations, tier and Thai-player
   limits, automatic substitutions, captain/vice-captain, Triple Captain, Bench
   Boost, Wildcard, free transfers, and transfer-point deductions.
@@ -42,7 +43,10 @@ production-readiness work.
 | `/leagues`       | Overall standings plus Private League creation and joining.        |
 | `/leagues/[id]`  | Member-only standings and owner/member League controls.            |
 | `/fixtures`      | Competition fixtures and supporting statistics.                    |
-| `/profile`       | Prototype manager settings, language, and game rules.              |
+| `/profile`       | Account and team identity; member naming or Guest upgrade.         |
+| `/settings`      | Interface language preference for the current identity/device.     |
+| `/rules`         | Public rules generated from the executable Fantasy configuration.  |
+| `/help`          | Public FAQ, rules recovery path, and official Facebook contact.    |
 | `/admin/fantasy` | Internal match stats, classification, locking, and finalization.   |
 
 ## Getting started
@@ -120,6 +124,7 @@ both Email OTP and Google even if their individual flags are set.
 ```bash
 npm run test:rules
 npm run test:email
+npm run test:auth
 npm run types
 npm run lint
 npm run format:check

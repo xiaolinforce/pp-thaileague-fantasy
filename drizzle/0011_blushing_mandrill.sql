@@ -1,0 +1,2 @@
+ALTER TABLE "fantasy_managers" ADD COLUMN "preferred_language" varchar(2);--> statement-breakpoint
+ALTER TABLE "fantasy_managers" ADD CONSTRAINT "fantasy_managers_preferred_language_check" CHECK ("fantasy_managers"."preferred_language" is null or "fantasy_managers"."preferred_language" in ('th', 'en'));

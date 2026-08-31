@@ -172,6 +172,11 @@ The following are product constraints, not yet reference visual patterns:
   send/verify, failure, and recovery must remain explicit.
 - Guest profiles expose upgrade rather than editable identity fields. Member
   profiles expose permitted naming and sign-out controls.
+- Keep Team, Points, Leagues, and Fixtures as primary navigation. Put Profile,
+  Settings, Game Rules, Help, upgrade, and sign-out in one manager menu; use an
+  upward Desktop popover and an inline expandable section in the compact drawer.
+- Profile owns account/team identity only. Settings owns language persistence,
+  while public Rules and Help remain reachable without an authenticated identity.
 - Administrative actions show the affected fixture, player, or Gameweek,
   explain the consequence, request a reason where supported, and retain audit
   context.

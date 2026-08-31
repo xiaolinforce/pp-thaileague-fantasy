@@ -8,13 +8,10 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useRef,
   useState,
   type ReactElement,
   type ReactNode,
 } from "react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
 export type Language = "th" | "en";
 
 const translations: Record<string, string> = {
@@ -40,11 +37,13 @@ const translations: Record<string, string> = {
   กำลังโหลดคะแนน: "Loading points",
   กำลังโหลดตารางอันดับ: "Loading standings",
   กำลังโหลดโปรไฟล์: "Loading profile",
+  กำลังโหลดการตั้งค่า: "Loading settings",
   กำลังโหลดเครื่องมือผู้ดูแล: "Loading admin tools",
   โหลดข้อมูลการแข่งขันไม่สำเร็จ: "Unable to load competition data",
   โหลดคะแนนไม่สำเร็จ: "Unable to load points",
   โหลดตารางอันดับไม่สำเร็จ: "Unable to load standings",
   โหลดโปรไฟล์ไม่สำเร็จ: "Unable to load profile",
+  โหลดการตั้งค่าไม่สำเร็จ: "Unable to load settings",
   โหลดเครื่องมือผู้ดูแลไม่สำเร็จ: "Unable to load admin tools",
   กรุณาตรวจสอบการเชื่อมต่อฐานข้อมูลแล้วลองอีกครั้ง:
     "Please check the database connection and try again",
@@ -54,6 +53,10 @@ const translations: Record<string, string> = {
     "Try loading the latest leagues and standings again. Your saved points are safe",
   "ลองโหลดข้อมูลบัญชี ทีม ภาษา และกติกาของคุณอีกครั้ง":
     "Try loading your account, team, language, and rules again",
+  ลองโหลดข้อมูลบัญชีและทีมของคุณอีกครั้ง:
+    "Try loading your account and team details again",
+  ลองโหลดการตั้งค่าบัญชีและภาษาอีกครั้ง:
+    "Try loading your account and language settings again",
   "ตรวจสอบสิทธิ์และการเชื่อมต่อข้อมูล แล้วลองเปิดเครื่องมือผู้ดูแลอีกครั้ง":
     "Check your access and data connection, then try opening the admin tools again",
   ลองอีกครั้ง: "Try again",
@@ -68,6 +71,11 @@ const translations: Record<string, string> = {
   ออกจากหน้านี้: "Leave this page",
   ช่วยเหลือ: "Help",
   ตั้งค่า: "Settings",
+  เมนูผู้จัดการทีม: "Manager menu",
+  เปิดเมนูผู้จัดการทีม: "Open manager menu",
+  "เริ่มเล่น Fantasy": "Start playing Fantasy",
+  ยังไม่มีทีม: "No team yet",
+  เริ่มจัดทีมไทยลีกของคุณ: "Start building your Thai League squad",
   ภาษา: "Language",
   เลือกภาษาที่ใช้แสดงผลบนเว็บไซต์:
     "Choose the language used across the website",
@@ -118,8 +126,6 @@ const translations: Record<string, string> = {
   "สามารถสมัครสมาชิกภายหลังได้ มาลองเล่นกันก่อน":
     "You can create an account later. Let's try it first",
   "เล่นแบบ Guest": "Play as Guest",
-  "บัญชี Guest": "Guest account",
-  บัญชีสมาชิก: "Member account",
   สมัครสมาชิกเพื่อเก็บทีม: "Create an account to save this team",
   ออกจากระบบ: "Sign out",
   "Guest ไม่มีอีเมล": "Guest has no email",
@@ -333,8 +339,6 @@ const translations: Record<string, string> = {
     "Search, compare, and strengthen your squad before the deadline",
   ยืนยันการซื้อขาย: "Confirm Transfers",
   "ยืนยันการซื้อขาย?": "Confirm transfers?",
-  "ตรวจสอบรายชื่อนักเตะและงบประมาณให้เรียบร้อยก่อนยืนยัน รายการนี้ยังเป็นข้อมูลเกมจำลอง":
-    "Review your players and budget before confirming. This is still simulated game data.",
   กลับไปตรวจสอบ: "Review again",
   ยืนยัน: "Confirm",
   ยืนยันการซื้อขายแล้ว: "Transfers confirmed",
@@ -632,6 +636,11 @@ const translations: Record<string, string> = {
     "Choose another position to view player rankings",
 
   // Profile and settings
+  โปรไฟล์ผู้จัดการทีม: "Manager profile",
+  จัดการชื่อที่ใช้แสดงและข้อมูลทีมแฟนตาซีของคุณ:
+    "Manage your display name and Fantasy team details",
+  "บัญชี Guest": "Guest account",
+  บัญชีสมาชิก: "Member account",
   บัญชีของฉัน: "My Account",
   โปรไฟล์และการตั้งค่า: "Profile & Settings",
   "จัดการข้อมูลทีม การแจ้งเตือน และอ่านกติกาของเกม":
@@ -663,6 +672,8 @@ const translations: Record<string, string> = {
   ชลบุรี: "Chonburi",
   ทีมโปรด: "Favourite Club",
   ชื่อและอัตลักษณ์ทีมแฟนตาซี: "Your fantasy team's name and identity",
+  ชื่อทีมที่แสดงในคะแนนและตารางอันดับ:
+    "The team name shown in points and standings",
   ชื่อทีม: "Team Name",
   "Guest ใช้ชื่อทีมแบบสุ่มและเปลี่ยนไม่ได้":
     "Guests use a generated team name that cannot be changed",
@@ -671,6 +682,20 @@ const translations: Record<string, string> = {
   เปลี่ยนชื่อทีมได้อีก: "Team-name changes remaining:",
   ครั้งในฤดูกาลนี้: "this season",
   บันทึกชื่อบัญชีและทีม: "Save Account & Team Names",
+  "ต้องการเก็บทีมไว้ข้ามอุปกรณ์?": "Want to keep this team across devices?",
+  "สมัครสมาชิกแล้วใช้ทีม Guest เดิมต่อได้":
+    "Create an account and continue with this Guest team",
+  เลือกภาษาที่ใช้แสดงผลให้เหมาะกับการใช้งานของคุณ:
+    "Choose the display language that works for you",
+  เปลี่ยนภาษาไทยและอังกฤษได้ทันที:
+    "Switch between Thai and English immediately",
+  "Guest จะบันทึกการตั้งค่านี้ไว้ในอุปกรณ์เครื่องนี้":
+    "Guests save this preference on the current device",
+  สมาชิกจะซิงก์การตั้งค่านี้กับบัญชีและอุปกรณ์อื่น:
+    "Members sync this preference with their account and other devices",
+  บันทึกภาษาบนอุปกรณ์เครื่องนี้แล้ว: "Language saved on this device",
+  บันทึกภาษาสำหรับบัญชีนี้แล้ว: "Language saved for this account",
+  "กำลังบันทึกภาษา…": "Saving language…",
   "เปลี่ยนชื่อทีมได้ไม่เกิน 3 ครั้งต่อฤดูกาล":
     "You can rename your team up to three times per season",
   เปลี่ยนตราทีม: "Change Crest",
@@ -889,10 +914,24 @@ function translateToEnglish(text: string) {
   return `${leading}${translated}${trailing}`;
 }
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("th");
+export function LanguageProvider({
+  children,
+  initialLanguage = null,
+}: {
+  children: ReactNode;
+  initialLanguage?: Language | null;
+}) {
+  const [language, setLanguageState] = useState<Language>(
+    initialLanguage ?? "th",
+  );
 
   useEffect(() => {
+    if (initialLanguage) {
+      const frame = window.requestAnimationFrame(() =>
+        setLanguageState(initialLanguage),
+      );
+      return () => window.cancelAnimationFrame(frame);
+    }
     const stored = window.localStorage.getItem("thai-fantasy-language");
     const preferred: Language =
       stored === "th" || stored === "en"
@@ -904,7 +943,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       setLanguageState(preferred),
     );
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [initialLanguage]);
 
   const setLanguage = (nextLanguage: Language) => {
     setLanguageState(nextLanguage);
@@ -986,21 +1025,40 @@ export function Localized({ children }: { children: ReactNode }) {
   return <>{localizeNode(children, translate)}</>;
 }
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({
+  disabled = false,
+  describedBy,
+  onValueChange,
+}: {
+  disabled?: boolean;
+  describedBy?: string;
+  onValueChange?: (language: Language) => void;
+} = {}) {
   const { language, setLanguage } = useLanguage();
   return (
-    <RadioGroup
+    <div
       className="language-switcher"
-      value={language}
-      onValueChange={(value) => setLanguage(value as Language)}
+      role="radiogroup"
       aria-label="Language"
+      aria-describedby={describedBy}
     >
       <label
         className={
           language === "th" ? "language-option active" : "language-option"
         }
       >
-        <RadioGroupItem value="th" />
+        <input
+          type="radio"
+          name="interface-language"
+          value="th"
+          checked={language === "th"}
+          disabled={disabled}
+          onChange={() => {
+            if (language === "th" || disabled) return;
+            if (onValueChange) onValueChange("th");
+            else setLanguage("th");
+          }}
+        />
         <span>
           <b>TH</b>
           <small>ไทย</small>
@@ -1011,164 +1069,23 @@ export function LanguageSwitcher() {
           language === "en" ? "language-option active" : "language-option"
         }
       >
-        <RadioGroupItem value="en" />
+        <input
+          type="radio"
+          name="interface-language"
+          value="en"
+          checked={language === "en"}
+          disabled={disabled}
+          onChange={() => {
+            if (language === "en" || disabled) return;
+            if (onValueChange) onValueChange("en");
+            else setLanguage("en");
+          }}
+        />
         <span>
           <b>EN</b>
           <small>English</small>
         </span>
       </label>
-    </RadioGroup>
-  );
-}
-
-export function FloatingLanguageTester() {
-  const buttonRef = useRef<HTMLButtonElement>(null);
-  const dragRef = useRef<{
-    pointerId: number;
-    startX: number;
-    startY: number;
-    startLeft: number;
-    startTop: number;
-    left: number;
-    top: number;
-    moved: boolean;
-  } | null>(null);
-  const ignoreClickRef = useRef(false);
-  const [position, setPosition] = useState<{
-    left: number;
-    top: number;
-  } | null>(null);
-  const { language, setLanguage } = useLanguage();
-  const nextLanguage = language === "th" ? "en" : "th";
-  const label = language === "th" ? "Switch to English" : "เปลี่ยนเป็นภาษาไทย";
-
-  const constrainPosition = (
-    left: number,
-    top: number,
-    width: number,
-    height: number,
-  ) => ({
-    left: Math.min(
-      Math.max(8, left),
-      Math.max(8, window.innerWidth - width - 8),
-    ),
-    top: Math.min(
-      Math.max(8, top),
-      Math.max(8, window.innerHeight - height - 8),
-    ),
-  });
-
-  useEffect(() => {
-    const stored = window.localStorage.getItem("thai-fantasy-language-tester");
-    if (!stored) return;
-
-    try {
-      const parsed: unknown = JSON.parse(stored);
-      if (
-        typeof parsed === "object" &&
-        parsed !== null &&
-        "left" in parsed &&
-        "top" in parsed &&
-        typeof parsed.left === "number" &&
-        typeof parsed.top === "number"
-      ) {
-        const rect = buttonRef.current?.getBoundingClientRect();
-        if (rect) {
-          setPosition(
-            constrainPosition(parsed.left, parsed.top, rect.width, rect.height),
-          );
-        }
-      }
-    } catch {
-      window.localStorage.removeItem("thai-fantasy-language-tester");
-    }
-  }, []);
-
-  const moveButton = (clientX: number, clientY: number) => {
-    const drag = dragRef.current;
-    const button = buttonRef.current;
-    if (!drag || !button) return;
-
-    const next = constrainPosition(
-      drag.startLeft + clientX - drag.startX,
-      drag.startTop + clientY - drag.startY,
-      button.offsetWidth,
-      button.offsetHeight,
-    );
-    drag.left = next.left;
-    drag.top = next.top;
-    setPosition(next);
-  };
-
-  return (
-    <button
-      ref={buttonRef}
-      type="button"
-      className="floating-language-tester"
-      onPointerDown={(event) => {
-        const rect = event.currentTarget.getBoundingClientRect();
-        dragRef.current = {
-          pointerId: event.pointerId,
-          startX: event.clientX,
-          startY: event.clientY,
-          startLeft: rect.left,
-          startTop: rect.top,
-          left: rect.left,
-          top: rect.top,
-          moved: false,
-        };
-        event.currentTarget.setPointerCapture(event.pointerId);
-      }}
-      onPointerMove={(event) => {
-        const drag = dragRef.current;
-        if (!drag || drag.pointerId !== event.pointerId) return;
-
-        if (
-          !drag.moved &&
-          Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) >
-            4
-        ) {
-          drag.moved = true;
-        }
-        if (drag.moved) moveButton(event.clientX, event.clientY);
-      }}
-      onPointerUp={(event) => {
-        const drag = dragRef.current;
-        if (!drag || drag.pointerId !== event.pointerId) return;
-
-        if (drag.moved) {
-          window.localStorage.setItem(
-            "thai-fantasy-language-tester",
-            JSON.stringify({ left: drag.left, top: drag.top }),
-          );
-          ignoreClickRef.current = true;
-        }
-        dragRef.current = null;
-      }}
-      onPointerCancel={() => {
-        dragRef.current = null;
-      }}
-      onClick={() => {
-        if (ignoreClickRef.current) {
-          ignoreClickRef.current = false;
-          return;
-        }
-        setLanguage(nextLanguage);
-      }}
-      aria-label={label}
-      title={label}
-      style={
-        position
-          ? {
-              left: position.left,
-              top: position.top,
-              right: "auto",
-              bottom: "auto",
-            }
-          : undefined
-      }
-    >
-      {nextLanguage.toUpperCase()}
-    </button>
+    </div>
   );
 }

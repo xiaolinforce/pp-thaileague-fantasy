@@ -74,7 +74,10 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 | `/leagues`       | Server-loads the current team's Overall and Private League summaries.                         |
 | `/leagues/[id]`  | Authorizes membership, then renders paginated standings and role-appropriate controls.        |
 | `/fixtures`      | Server-loads competition fixtures, then delegates interactive browsing to a Client Component. |
-| `/profile`       | Authenticated account/team naming, sign-out or Guest upgrade, settings, and game rules.       |
+| `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                        |
+| `/settings`      | Authenticated language preference; member value persists on the manager row.                  |
+| `/rules`         | Public long-form rules built from shared executable rule and scoring constants.               |
+| `/help`          | Public FAQ and real support destinations; no account data is required.                        |
 | `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                 |
 
 The root layout provides Mitr, the language context, shared tooltips, and toast
@@ -106,7 +109,7 @@ the normal save action remains the only confirmation boundary.
 
 ## Write flow
 
-1. Team, transfer, League, or admin UI invokes its owning Server Action.
+1. Team, transfer, profile, settings, League, or admin UI invokes its owning Server Action.
 2. The action resolves the account-owned team from the session; admin actions
    additionally reload and require the `admin` role.
 3. The server reloads current database snapshots and validates deadlines,
@@ -121,6 +124,11 @@ and finalization use the transaction-capable Neon serverless client. Private
 League mutations use the same client and lock the current team plus target
 league with `FOR UPDATE`, so the 10-owned, 20-membership, and 100-team limits
 remain valid under concurrent requests.
+
+Member profile-name edits lock and reload the manager/team pair before an
+atomic transaction writes both permitted names. Member language changes write
+`fantasy_managers.preferred_language`; Guests never call that mutation and use
+the local `thai-fantasy-language` preference instead.
 
 Authentication providers are independently opt-in and also subject to
 `AUTH_PRODUCTION_READY`. This deployment gate prevents accidental public use

@@ -39,6 +39,7 @@ import { calculatePlayerPoints } from "@/lib/fantasy/scoring";
 import { recalculateGameweek } from "@/lib/fantasy/scoring-service";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { validateFantasyName } from "@/lib/auth/names";
+import { parseInterfaceLanguage } from "@/lib/auth/preferences";
 import { getFantasyAutoFillCandidates } from "@/data/fantasy-auto-fill";
 import { autoFillSquadDraft } from "@/lib/fantasy/auto-fill";
 import { createGameweekCarryover } from "@/lib/fantasy/gameweek-carryover";
@@ -197,48 +198,111 @@ export async function updateFantasyNamesAction(input: {
         "ชื่อไม่ถูกต้อง",
     };
   }
-  const now = new Date();
-  const managerChanged = managerName.value !== profile.manager.displayName;
-  const teamChanged = teamName.value !== profile.team.name;
-  if (
-    managerChanged &&
-    profile.manager.nameChangeAvailableAt &&
-    profile.manager.nameChangeAvailableAt > now
-  ) {
-    return {
-      ok: false,
-      message: `เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่ ${profile.manager.nameChangeAvailableAt.toLocaleDateString("th-TH")}`,
-      availableAt: profile.manager.nameChangeAvailableAt.toISOString(),
-    };
-  }
-  if (teamChanged && profile.team.nameChangesUsed >= 3) {
-    return { ok: false, message: "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว" };
-  }
-  if (managerChanged) {
-    const nextChange = new Date(now);
-    nextChange.setUTCDate(nextChange.getUTCDate() + 30);
-    await db
-      .update(fantasyManagers)
-      .set({
-        displayName: managerName.value,
-        nameChangeAvailableAt: nextChange,
-        updatedAt: now,
-      })
-      .where(eq(fantasyManagers.id, profile.manager.id));
-  }
-  if (teamChanged) {
-    await db
-      .update(fantasyTeams)
-      .set({
-        name: teamName.value,
-        nameChangesUsed: profile.team.nameChangesUsed + 1,
-        updatedAt: now,
-      })
-      .where(eq(fantasyTeams.id, profile.team.id));
-  }
+  const result = await transactionDb.transaction(async (tx) => {
+    const managerRows = await tx
+      .select()
+      .from(fantasyManagers)
+      .where(eq(fantasyManagers.id, profile.manager.id))
+      .for("update")
+      .limit(1);
+    const teamRows = await tx
+      .select()
+      .from(fantasyTeams)
+      .where(
+        and(
+          eq(fantasyTeams.id, profile.team.id),
+          eq(fantasyTeams.managerId, profile.manager.id),
+        ),
+      )
+      .for("update")
+      .limit(1);
+    const currentManager = managerRows[0];
+    const currentTeam = teamRows[0];
+    if (!currentManager || !currentTeam) {
+      return {
+        ok: false,
+        message: "ไม่พบบัญชีหรือทีมที่ต้องการแก้ไข",
+      } as const;
+    }
+
+    const now = new Date();
+    const managerChanged = managerName.value !== currentManager.displayName;
+    const teamChanged = teamName.value !== currentTeam.name;
+    if (
+      managerChanged &&
+      currentManager.nameChangeAvailableAt &&
+      currentManager.nameChangeAvailableAt > now
+    ) {
+      return {
+        ok: false,
+        message: `เปลี่ยนชื่อผู้จัดการได้อีกครั้งวันที่ ${currentManager.nameChangeAvailableAt.toLocaleDateString("th-TH")}`,
+        availableAt: currentManager.nameChangeAvailableAt.toISOString(),
+      } as const;
+    }
+    if (teamChanged && currentTeam.nameChangesUsed >= 3) {
+      return {
+        ok: false,
+        message: "ใช้สิทธิ์เปลี่ยนชื่อทีมครบ 3 ครั้งแล้ว",
+      } as const;
+    }
+    if (!managerChanged && !teamChanged) {
+      return { ok: true, message: "ไม่มีข้อมูลที่เปลี่ยนแปลง" } as const;
+    }
+
+    if (managerChanged) {
+      const nextChange = new Date(now);
+      nextChange.setUTCDate(nextChange.getUTCDate() + 30);
+      await tx
+        .update(fantasyManagers)
+        .set({
+          displayName: managerName.value,
+          nameChangeAvailableAt: nextChange,
+          updatedAt: now,
+        })
+        .where(eq(fantasyManagers.id, currentManager.id));
+    }
+    if (teamChanged) {
+      await tx
+        .update(fantasyTeams)
+        .set({
+          name: teamName.value,
+          nameChangesUsed: currentTeam.nameChangesUsed + 1,
+          updatedAt: now,
+        })
+        .where(eq(fantasyTeams.id, currentTeam.id));
+    }
+    return { ok: true, message: "บันทึกชื่อเรียบร้อยแล้ว" } as const;
+  });
+
+  if (!result.ok) return result;
   revalidateFantasyPages();
   revalidatePath("/profile");
-  return { ok: true, message: "บันทึกชื่อเรียบร้อยแล้ว" };
+  revalidatePath("/", "layout");
+  return result;
+}
+
+export async function updateInterfaceLanguageAction(input: {
+  language: unknown;
+}): Promise<FantasyActionResult> {
+  const profile = await requireFantasyProfile();
+  if (profile.isAnonymous) {
+    return {
+      ok: false,
+      message: "Guest บันทึกภาษาไว้ในอุปกรณ์เครื่องนี้เท่านั้น",
+    };
+  }
+  const language = parseInterfaceLanguage(input.language);
+  if (!language) {
+    return { ok: false, message: "ภาษาที่เลือกไม่ถูกต้อง" };
+  }
+
+  await db
+    .update(fantasyManagers)
+    .set({ preferredLanguage: language, updatedAt: new Date() })
+    .where(eq(fantasyManagers.id, profile.manager.id));
+  revalidatePath("/settings");
+  revalidatePath("/", "layout");
+  return { ok: true, message: "บันทึกภาษาสำหรับบัญชีนี้แล้ว" };
 }
 
 async function getCurrentPlayerSnapshots(

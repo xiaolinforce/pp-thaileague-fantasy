@@ -33,7 +33,10 @@ when new behavior invalidates prior coverage.
 | `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                        |
 | `/fixtures`      | Data browser          | In progress | URL-backed browsing and real preseason stat states implemented; populated-season evidence remains pending upstream data.          |
 | `/leagues`       | Ranking/community     | In progress | Overall/Guest and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
-| `/profile`       | Settings and reading  | Unreviewed  | Audit navigation, Guest/member variants, forms, feedback, and long rules.                                                         |
+| `/profile`       | Account identity      | In progress | Guest/read-only and responsive states reviewed; member mutation evidence remains pending.                                         |
+| `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                        |
+| `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                      |
+| `/help`          | Long-form reading     | Reviewed    | Public bilingual FAQ, rules path, and real Facebook support destination reviewed.                                                 |
 | `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                        |
 | `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                      |
 
@@ -45,8 +48,8 @@ change does not claim that every state has fresh screenshot evidence.
 
 1. **Fixtures and Leagues:** establish data-browser and ranking patterns shared
    by the remaining competition surfaces.
-2. **Profile:** establish settings, long-form rules, Guest/member variants, and
-   form-feedback patterns.
+2. **Account surfaces:** complete member-state evidence for Profile and
+   Settings, then retain Rules and Help as the reviewed reading pattern.
 3. **Onboarding, Upgrade, and auth completion:** establish the complete
    authentication journey and provider-unavailable behavior.
 4. **Fantasy Admin:** review last because it is role-protected, state-dense, and
@@ -138,13 +141,13 @@ a state is not implemented rather than inventing it.
   totals, and provisional/final labels; and
 - narrow table navigation without losing row identity.
 
-### Profile
+### Profile, settings, rules, and help
 
 - Guest read-only names and upgrade action;
 - member editable names, unchanged form, validation error, pending save,
   success, server error, and rename limits;
-- language setting and post-reload persistence;
-- long rules content and section navigation; and
+- member language setting and post-reload database persistence;
+- public long rules content, section navigation, FAQ, and support link; and
 - sign-out pending/failure behavior.
 
 ### Fantasy Admin
@@ -246,6 +249,39 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 - **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
   `npm run db:verify:fantasy`, responsive Browser measurements, Thai/English
   rendered snapshots.
+
+### 2026-08-31 — Manager account surfaces and public guidance
+
+- **Route and task:** `/profile`, `/settings`, `/rules`, and `/help`; separate
+  identity, preference, rules, and support tasks behind one manager menu and
+  remove the floating development language control.
+- **Status:** Profile/Settings Unreviewed → In progress; Rules/Help Unreviewed →
+  Reviewed.
+- **Data/auth/Gameweek state:** real Guest session and persisted Guest manager,
+  team, and Overall membership; member actions were reviewed against fresh
+  locked database state without manufacturing a member UI fixture.
+- **Language:** Thai and English, including Guest device persistence and return
+  to Thai after review. Member preference is database-backed by a forward
+  migration and Server Action.
+- **Viewports:** 1440px Desktop and 360px Mobile rendered; no document-level
+  horizontal overflow on Profile, Settings, or Rules.
+- **Keyboard/accessibility:** one semantic manager-menu trigger, Desktop
+  popover, compact inline disclosure, native language radios, headings,
+  regions, contents navigation, accordion FAQ, focus treatment, and written
+  persistence status reviewed.
+- **Issues fixed:** unrelated hash-linked Profile sections, duplicate language
+  controls, simulated notification/crest controls, duplicated rule constants,
+  missing public help path, Guest edit affordances, and non-atomic name writes.
+- **Known exclusions:** member rename success/error/rate-limit UI, member
+  language reload, and sign-out failure were not rendered because the available
+  Browser identity is a Guest and no production mock path was added.
+- **Evidence:** Desktop and Mobile in-app Browser captures under the task's
+  `profile-build` evidence directory; no mock, fixture override, or demo route
+  was added.
+- **Verification:** `npm run test:auth`, `npm run test:rules`, `npm run
+test:email`, `npm run types`, `npm run lint`, `npm run format:check`, `npm run
+build`, migration on the confirmed Neon development branch, responsive DOM
+  and overflow inspection.
 
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final

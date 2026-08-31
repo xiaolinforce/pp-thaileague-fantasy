@@ -4,6 +4,30 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-08-31 — Account tasks use separate routes behind one manager menu
+
+**Decision:** Keep Team, Points, Leagues, and Fixtures as the primary product
+navigation. Consolidate Profile, Settings, public Game Rules, public Help,
+Guest upgrade, and sign-out in a single manager menu. Profile owns account/team
+identity, Settings owns language, and Rules/Help are independent public routes.
+Use neutral initial avatars and do not expose a crest upload/selection workflow.
+
+Member language preference persists on the Fantasy manager row. Guest language
+remains a device preference and never creates an account mutation. Rules copy
+is generated from the shared executable Fantasy configuration and exported
+scoring constants instead of duplicated sample values.
+
+**Context:** The previous Profile combined unrelated identity, settings, help,
+and long-form rules behind hash links, while a floating development language
+control duplicated navigation. The product owner requested one manager entry
+point, a separate rules page, real Facebook support, and no simulated UI data.
+
+**Consequences:** Add a forward migration for `preferred_language`, keep
+`/profile` and `/settings` identity-gated, and keep `/rules` and `/help` public.
+Future account preferences belong in Settings, rules changes must update the
+executable source and derived copy together, and crest controls require a new
+product decision plus a persisted model.
+
 ## 2026-08-31 — UI guidance separates rules, patterns, and review evidence
 
 **Decision:** Treat `/team` and `/points` as the current design reference
@@ -189,7 +213,7 @@ explicit Thai Fantasy ruleset. Bonus and defensive contribution data are not
 part of the approved input/review workflow.
 
 **Consequences:** Scoring differences must stay explicit in `DOMAIN.md`, the
-profile rules, and automated tests. Do not introduce an upstream FPL rule merely
+public Rules page, and automated tests. Do not introduce an upstream FPL rule merely
 because it exists there; it requires a new product decision and source data.
 
 ## 2026-08-17 — Historical selections store player classification snapshots

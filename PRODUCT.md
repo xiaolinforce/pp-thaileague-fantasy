@@ -36,7 +36,7 @@ PP Thai League Fantasy เป็นผลิตภัณฑ์อิสระ �
 - รองรับ Passwordless Email OTP, Google OAuth และ Guest account แบบผูกกับอุปกรณ์
 - หนึ่งบัญชีมี manager identity หนึ่งรายการและทีมหนึ่งทีมต่อฤดูกาล
 - squad มีผู้เล่น 15 คนและต้องผ่านข้อกำหนด formation, club, nationality, tier, deadline, transfer, captaincy และ chip
-- ภาษาไทยเป็นภาษาต้นทาง ปัจจุบันภาษาอังกฤษเป็น display preference ฝั่ง client ไม่ใช่ route-level localization
+- ภาษาไทยเป็นภาษาต้นทาง ภาษาอังกฤษเป็น display preference ฝั่ง client ไม่ใช่ route-level localization โดยสมาชิกเก็บค่าไว้กับ manager ในฐานข้อมูล ส่วน Guest เก็บในอุปกรณ์ปัจจุบัน
 - ข้อมูลการแข่งขันถูกนำเข้าจาก Thai League official API และหน้า squad สาธารณะของ Transfermarkt ก่อน runtime; หน้าเว็บอ่านจากฐานข้อมูลที่ persist แล้ว
 - ประวัติทีม คะแนน selection snapshot, transfer revision และ audit context ต้องไม่ถูกเขียนทับจากข้อมูลผู้เล่นปัจจุบัน
 - Guest team และประวัติคะแนนต้องคงอยู่แม้ session หมดอายุหรือบัญชีถูกเชื่อมโยงในภายหลัง
@@ -57,7 +57,7 @@ PP Thai League Fantasy เป็นผลิตภัณฑ์อิสระ �
 
 - ข้อมูลการแข่งขัน Thai League 1 และ provenance ของแหล่งข้อมูลถูกบันทึกใน `DATA_SOURCES.md` และ persisted ผ่าน import/seed workflow
 - กฎ Fantasy ที่ใช้งานจริงถูกบันทึกใน `DOMAIN.md` และมี executable source of truth ภายใต้ `src/lib/fantasy`
-- เส้นทางหลักตั้งแต่ onboarding, team management, points, leagues, fixtures, profile/rules จนถึง internal administration มี implementation ใน `src/app`
+- เส้นทางหลักตั้งแต่ onboarding, team management, points, leagues, fixtures, profile, settings, public rules/help จนถึง internal administration มี implementation ใน `src/app`
 - มี automated tests สำหรับกฎ Fantasy, scoring behavior และ email provider routing
 - มี club visual identities, player/club data และหน้าจอผลิตภัณฑ์ที่ใช้งานเป็นหลักฐานภายใน repository
 - ยังไม่มีหลักฐาน testimonials, จำนวนผู้ใช้งาน, commercial traction, licensing, การรับรองจาก Thai League หรือ production-readiness; งานในอนาคตต้องไม่สร้างข้อความอ้างเหล่านี้ขึ้นเอง

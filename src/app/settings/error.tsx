@@ -6,8 +6,8 @@ export default function Error({ reset }: { error: Error; reset: () => void }) {
   return (
     <CompetitionError
       reset={reset}
-      title="โหลดโปรไฟล์ไม่สำเร็จ"
-      description="ลองโหลดข้อมูลบัญชีและทีมของคุณอีกครั้ง"
+      title="โหลดการตั้งค่าไม่สำเร็จ"
+      description="ลองโหลดการตั้งค่าบัญชีและภาษาอีกครั้ง"
     />
   );
 }

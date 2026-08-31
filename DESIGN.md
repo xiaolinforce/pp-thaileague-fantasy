@@ -121,9 +121,10 @@ Reuse `AppShell` and `PageHeader` for authenticated product routes.
 - Desktop uses a fixed 238px navy sidebar and a flexible main canvas.
 - Mobile and Tablet use a navy Top bar with a hamburger that opens the same full
   navigation in a left drawer.
-- The drawer preserves primary navigation, support/settings destinations, and
-  the current manager identity. Compact modes must not remove information that
-  Desktop users can reach.
+- The four primary destinations are Team, Points, Leagues, and Fixtures.
+  Profile, Settings, Game Rules, Help, Guest upgrade, and sign-out live in the
+  manager menu at the bottom of the Desktop sidebar and inside the compact
+  drawer. Compact modes must not remove information that Desktop users can reach.
 - The active route is identified structurally and in text treatment, not by
   color alone.
 - Points remains directly below Team. While Gameweek 1 is `open`, Points is a
@@ -144,15 +145,17 @@ Every page should establish, in this order when applicable:
 Choose a composition for the route's task rather than defaulting to a dashboard
 grid:
 
-| Archetype             | Current route    | Composition priority                                                  |
-| --------------------- | ---------------- | --------------------------------------------------------------------- |
-| Authentication flow   | `/`, `/upgrade`  | One decision at a time, provider availability, recovery, reassurance. |
-| Interactive workspace | `/team`          | State and deadline, primary work area, local actions, validation.     |
-| Summary and detail    | `/points`        | Scope selector, primary result, comparisons, inspectable breakdown.   |
-| Data browser          | `/fixtures`      | Filters, chronological grouping, scan-friendly rows, empty results.   |
-| Ranking/community     | `/leagues`       | League context, rank, identity, sortable/comparable standings.        |
-| Settings and reading  | `/profile`       | Clear sections, form ownership, save feedback, readable rules.        |
-| Operational tool      | `/admin/fantasy` | Safe task grouping, affected records, consequences, audit context.    |
+| Archetype             | Current route     | Composition priority                                                  |
+| --------------------- | ----------------- | --------------------------------------------------------------------- |
+| Authentication flow   | `/`, `/upgrade`   | One decision at a time, provider availability, recovery, reassurance. |
+| Interactive workspace | `/team`           | State and deadline, primary work area, local actions, validation.     |
+| Summary and detail    | `/points`         | Scope selector, primary result, comparisons, inspectable breakdown.   |
+| Data browser          | `/fixtures`       | Filters, chronological grouping, scan-friendly rows, empty results.   |
+| Ranking/community     | `/leagues`        | League context, rank, identity, sortable/comparable standings.        |
+| Account identity      | `/profile`        | Clear ownership, editable/read-only fields, save or upgrade feedback. |
+| Settings              | `/settings`       | One preference task, persistence scope, pending and result feedback.  |
+| Long-form reading     | `/rules`, `/help` | Contents, readable sections, recovery and real support destinations.  |
+| Operational tool      | `/admin/fantasy`  | Safe task grouping, affected records, consequences, audit context.    |
 
 Only Team and Points currently have reference status. The other archetypes are
 working hypotheses until their routes receive rendered review and the status is
@@ -207,17 +210,18 @@ order, active chips, transfer deductions, no results, and corrected scoring.
 
 ## Localization
 
-Thai is the source language and initial HTML language. English is currently a
-client-side display preference provided by `LanguageProvider` and stored under
-`thai-fantasy-language`.
+Thai is the source language and fallback HTML language. English is currently a
+client-side display preference provided by `LanguageProvider`. A member's
+preference is loaded from `fantasy_managers.preferred_language`; a Guest's
+preference is stored on the device under `thai-fantasy-language`.
 
 This is a prototype boundary:
 
 - URLs and server metadata are not locale-prefixed;
-- the first server render is Thai before a client preference is restored;
+- public pages and Guests without a stored preference first render in Thai;
 - dictionary replacement depends on exact Thai source copy; and
-- Profile remains the persistent language setting. The floating language
-  tester is a temporary development aid, not production navigation.
+- Settings is the only production language control; there is no floating
+  development language control in the product UI.
 
 Add Thai source copy and its English dictionary entry in the same change. Test
 business-critical warnings and actions in both languages; do not rely on

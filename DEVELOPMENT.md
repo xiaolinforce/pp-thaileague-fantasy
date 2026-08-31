@@ -72,6 +72,7 @@ Open `http://localhost:3006`.
 | `npm run lint`                            | Run ESLint.                                                           |
 | `npm run types`                           | Run TypeScript without emitting files.                                |
 | `npm run test:email`                      | Run transactional email routing and fallback tests.                   |
+| `npm run test:auth`                       | Run authentication preference parsing tests.                          |
 | `npm run test:rules`                      | Run squad, transfer, deadline, scoring, and substitution tests.       |
 | `npm run format:check`                    | Check repository formatting with Prettier.                            |
 | `npm run format`                          | Rewrite formatting across the repository; use intentionally.          |
@@ -164,6 +165,7 @@ checks before handoff:
 ```bash
 npm run test:rules
 npm run test:email
+npm run test:auth
 npm run types
 npm run lint
 npm run format:check

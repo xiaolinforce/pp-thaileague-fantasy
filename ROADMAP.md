@@ -3,9 +3,10 @@
 ## Current prototype
 
 - Thai League 1 2026/27 competition data imported into Neon Postgres.
-- Thai-first responsive landing, squad, transfers, points, leagues,
-  fixtures, profile/rules, and internal Fantasy administration screens.
-- Client-side Thai/English display preference.
+- Thai-first responsive landing, squad, transfers, points, leagues, fixtures,
+  profile, settings, public rules/help, and internal Fantasy administration screens.
+- Client-side Thai/English display preference persisted per member manager and
+  stored on the current device for Guests.
 - Email OTP, Google, and device-bound Guest identities with 30-day sliding sessions.
 - Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,

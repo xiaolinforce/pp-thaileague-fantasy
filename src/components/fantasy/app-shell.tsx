@@ -1,26 +1,26 @@
 "use client";
 
 import {
+  BookOpenText,
   CalendarDays,
-  ChevronRight,
+  ChevronDown,
   CircleHelp,
   ListChecks,
   LockKeyhole,
+  LogIn,
+  LogOut,
   Menu,
   Settings,
   Shirt,
   Trophy,
+  UserPlus,
   UserRound,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useState, type ReactNode } from "react";
-import {
-  FloatingLanguageTester,
-  Localized,
-  useLanguage,
-} from "@/components/fantasy/i18n";
+import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { useNavigationAvailability } from "@/components/fantasy/navigation-availability";
 import {
   Sheet,
@@ -32,6 +32,13 @@ import {
 } from "@/components/ui/sheet";
 import { useAppIdentity } from "@/components/fantasy/identity";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { toast } from "@/components/ui/sonner";
+import { authClient } from "@/lib/auth/client";
 import type { AppIdentity } from "@/lib/auth/types";
 import styles from "./app-shell.module.css";
 
@@ -44,12 +51,6 @@ const navigation = [
     shortLabel: "โปรแกรม",
     href: "/fixtures",
     icon: CalendarDays,
-  },
-  {
-    label: "โปรไฟล์และกติกา",
-    shortLabel: "โปรไฟล์",
-    href: "/profile",
-    icon: UserRound,
   },
 ];
 
@@ -76,15 +77,219 @@ export function Brand({ compact = false }: { compact?: boolean }) {
   );
 }
 
+const accountNavigation = [
+  {
+    label: "โปรไฟล์",
+    href: "/profile",
+    icon: UserRound,
+    requiresIdentity: true,
+  },
+  {
+    label: "ตั้งค่า",
+    href: "/settings",
+    icon: Settings,
+    requiresIdentity: true,
+  },
+  {
+    label: "กติกาเกม",
+    href: "/rules",
+    icon: BookOpenText,
+    requiresIdentity: false,
+  },
+  {
+    label: "ช่วยเหลือ",
+    href: "/help",
+    icon: CircleHelp,
+    requiresIdentity: false,
+  },
+] as const;
+
+function ManagerMenu({
+  identity,
+  initials,
+  pathname,
+  inline = false,
+  onNavigate,
+}: {
+  identity: AppIdentity;
+  initials: string;
+  pathname: string;
+  inline?: boolean;
+  onNavigate?: () => void;
+}) {
+  const router = useRouter();
+  const { requestNavigation } = useNavigationBlocker();
+  const { language, translate } = useLanguage();
+  const [open, setOpen] = useState(false);
+  const [signingOut, setSigningOut] = useState(false);
+  const accountRouteActive = accountNavigation.some(
+    ({ href }) => pathname === href,
+  );
+
+  const closeAndNavigate = (
+    event: Parameters<typeof requestNavigation>[0],
+    href: string,
+  ) => {
+    if (!requestNavigation(event, href)) return;
+    setOpen(false);
+    onNavigate?.();
+  };
+
+  const signOut = async () => {
+    if (signingOut) return;
+    setSigningOut(true);
+    try {
+      const result = await authClient.signOut();
+      if (result.error) {
+        toast.error(
+          language === "th"
+            ? "ออกจากระบบไม่สำเร็จ กรุณาลองอีกครั้ง"
+            : "Could not sign out. Please try again.",
+        );
+        return;
+      }
+      setOpen(false);
+      onNavigate?.();
+      router.replace("/");
+      router.refresh();
+    } catch {
+      toast.error(
+        language === "th"
+          ? "ออกจากระบบไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง"
+          : "Could not sign out. Check your connection and try again.",
+      );
+    } finally {
+      setSigningOut(false);
+    }
+  };
+
+  const trigger = (
+    <button
+      type="button"
+      className={`manager-card manager-menu-trigger${accountRouteActive ? " active" : ""}`}
+      aria-label={translate("เปิดเมนูผู้จัดการทีม")}
+      aria-expanded={open}
+      onClick={inline ? () => setOpen((current) => !current) : undefined}
+    >
+      <span className="manager-avatar" aria-hidden="true">
+        {initials}
+      </span>
+      <span className="manager-card-copy">
+        <strong>{identity?.teamName ?? translate("เริ่มเล่น Fantasy")}</strong>
+        <small>
+          {identity
+            ? identity.isGuest
+              ? translate("ผู้เล่น Guest")
+              : translate("ผู้จัดการทีม")
+            : translate("ยังไม่มีทีม")}
+        </small>
+      </span>
+      <ChevronDown
+        className={open ? "manager-menu-chevron open" : "manager-menu-chevron"}
+        size={17}
+        aria-hidden="true"
+      />
+    </button>
+  );
+
+  const menu = (
+    <div className="manager-menu-panel">
+      <div className="manager-menu-identity">
+        <strong>
+          {identity?.managerName ?? translate("เริ่มเล่น Fantasy")}
+        </strong>
+        <span>
+          {identity?.email ??
+            identity?.teamName ??
+            translate("เริ่มจัดทีมไทยลีกของคุณ")}
+        </span>
+      </div>
+      <nav aria-label={translate("เมนูผู้จัดการทีม")}>
+        {accountNavigation
+          .filter((item) => !item.requiresIdentity || identity)
+          .map(({ label, href, icon: Icon }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                href={href}
+                className={active ? "active" : undefined}
+                aria-current={active ? "page" : undefined}
+                onNavigate={(event) => closeAndNavigate(event, href)}
+                key={href}
+              >
+                <Icon size={18} aria-hidden="true" />
+                <span>{translate(label)}</span>
+              </Link>
+            );
+          })}
+      </nav>
+      <div className="manager-menu-actions">
+        {!identity ? (
+          <Link href="/" onNavigate={(event) => closeAndNavigate(event, "/")}>
+            <LogIn size={18} aria-hidden="true" />
+            <span>{translate("เริ่มเล่น")}</span>
+          </Link>
+        ) : identity.isGuest ? (
+          <Link
+            href="/upgrade"
+            onNavigate={(event) => closeAndNavigate(event, "/upgrade")}
+          >
+            <UserPlus size={18} aria-hidden="true" />
+            <span>{translate("สมัครสมาชิก")}</span>
+          </Link>
+        ) : null}
+        {identity ? (
+          <button
+            type="button"
+            onClick={signOut}
+            disabled={signingOut}
+            aria-busy={signingOut}
+          >
+            <LogOut size={18} aria-hidden="true" />
+            <span>
+              {translate(signingOut ? "กำลังออกจากระบบ…" : "ออกจากระบบ")}
+            </span>
+          </button>
+        ) : null}
+      </div>
+    </div>
+  );
+
+  if (inline) {
+    return (
+      <div className="manager-menu-inline">
+        {trigger}
+        {open ? menu : null}
+      </div>
+    );
+  }
+
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger render={trigger} />
+      <PopoverContent
+        className="manager-menu-popover"
+        side="top"
+        align="start"
+        sideOffset={10}
+      >
+        {menu}
+      </PopoverContent>
+    </Popover>
+  );
+}
+
 function SidebarContent({
   pathname,
   identity,
   initials,
+  inlineManagerMenu = false,
   onNavigate,
 }: {
   pathname: string;
   identity: AppIdentity;
   initials: string;
+  inlineManagerMenu?: boolean;
   onNavigate?: () => void;
 }) {
   const { requestNavigation } = useNavigationBlocker();
@@ -124,7 +329,7 @@ function SidebarContent({
       <Brand />
       <nav className="side-nav" aria-label={translate("เมนูหลัก")}>
         {navigation.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href;
+          const active = pathname === href || pathname.startsWith(`${href}/`);
           const disabled = href === "/points" && !pointsEnabled;
 
           if (disabled) {
@@ -167,44 +372,13 @@ function SidebarContent({
         })}
       </nav>
       <div className="sidebar-bottom">
-        {linkFor({
-          href: "/profile#rules",
-          children: (
-            <>
-              <CircleHelp size={20} aria-hidden="true" />
-              <span>{translate("ช่วยเหลือ")}</span>
-            </>
-          ),
-        })}
-        {linkFor({
-          href: "/profile#language",
-          children: (
-            <>
-              <Settings size={20} aria-hidden="true" />
-              <span>{translate("ตั้งค่า")}</span>
-            </>
-          ),
-        })}
-        {linkFor({
-          href: "/profile",
-          className: "manager-card",
-          children: (
-            <>
-              <span className="manager-avatar">{initials}</span>
-              <span>
-                <strong>
-                  {identity?.teamName ?? translate("บัญชีผู้เล่น")}
-                </strong>
-                <small>
-                  {identity?.isGuest
-                    ? translate("ผู้เล่น Guest")
-                    : translate("ผู้จัดการทีม")}
-                </small>
-              </span>
-              <ChevronRight size={16} aria-hidden="true" />
-            </>
-          ),
-        })}
+        <ManagerMenu
+          identity={identity}
+          initials={initials}
+          pathname={pathname}
+          inline={inlineManagerMenu}
+          onNavigate={onNavigate}
+        />
       </div>
     </>
   );
@@ -226,7 +400,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         <a className="skip-link" href="#main-content">
           ข้ามไปยังเนื้อหาหลัก
         </a>
-        <FloatingLanguageTester />
         <aside className="sidebar">
           <SidebarContent
             pathname={pathname}
@@ -266,6 +439,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   pathname={pathname}
                   identity={identity}
                   initials={initials}
+                  inlineManagerMenu
                   onNavigate={() => setMenuOpen(false)}
                 />
               </aside>
