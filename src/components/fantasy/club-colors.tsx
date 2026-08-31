@@ -3,18 +3,20 @@ export function ClubColor({
   secondaryColor,
   label,
   size = "medium",
+  className,
 }: {
   color: string;
   secondaryColor?: string;
   label: string;
   size?: "small" | "medium" | "large";
+  className?: string;
 }) {
   const hasSecondaryColor =
     secondaryColor && secondaryColor.toLowerCase() !== color.toLowerCase();
 
   return (
     <span
-      className={`club-color color-${size}`}
+      className={`club-color color-${size}${className ? ` ${className}` : ""}`}
       role="img"
       aria-label={label}
       style={{

@@ -272,6 +272,7 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                         <ClubColor
                           color={fixture.home.colors[0]}
                           secondaryColor={fixture.home.colors[1]}
+                          className="fixture-club-color fixture-club-color--home"
                           label={text(
                             `สีประจำทีม ${localize(fixture.home.name, language)}`,
                             `${localize(fixture.home.name, language)} team colours`,
@@ -281,6 +282,7 @@ export default function FixturesClient({ data }: { data: CompetitionDataset }) {
                         <ClubColor
                           color={fixture.away.colors[0]}
                           secondaryColor={fixture.away.colors[1]}
+                          className="fixture-club-color fixture-club-color--away"
                           label={text(
                             `สีประจำทีม ${localize(fixture.away.name, language)}`,
                             `${localize(fixture.away.name, language)} team colours`,

@@ -215,7 +215,10 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   The Stats tab now stays disabled until the actual current Gameweek is beyond
   Gameweek 1; mobile fixture rows put the kickoff time beside two stacked team
   names. The Fixtures/Stats tabs are centered and separated from the Gameweek
-  panel at every supported width instead of overlapping its border.
+  panel at every supported width instead of overlapping its border. On compact
+  screens, a kickoff is vertically centered beside the two clubs and each club
+  retains its color marker; the Tablet fixture list now fits without a
+  horizontal scrollbar.
 - **Known exclusions:** populated official and Fantasy tables, ties, dense
   filters, and large values were not rendered because neither live dataset has
   begun and no production mock path was added. Pure rules cover form, DNP,
@@ -250,7 +253,12 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   paginated navigation. The Private section retains a concise bilingual empty
   message without adding a second empty-state action. Create/Join dialogs use a
   clean footer, orange labels, and field-level errors; invalid league names can
-  be submitted for validation without disabling the primary action.
+  be submitted for validation without disabling the primary action. The empty
+  Private League message is a full-width centered surface, while member Join
+  and Create actions form equal-width touch targets beneath the section heading
+  on Mobile and Tablet. Product dialogs and confirmation dialogs become
+  edge-to-edge, safe-area-aware full-screen surfaces on Mobile; Tablet and
+  Desktop retain the constrained modal layout.
 - **Known exclusions:** successful create, preview/join, rename, invite rotate,
   remove, leave, delete, 100-member pagination, server mutation errors, and
   final-score UI were not rendered to avoid mutating the signed-in development
@@ -287,7 +295,9 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 - **Issues fixed:** unrelated hash-linked Profile sections, duplicate language
   controls, simulated notification/crest controls, duplicated rule constants,
   missing public help path, Guest edit affordances, non-atomic name writes, and
-  the visually inconsistent inline manager menu at Tablet/Mobile widths.
+  the visually inconsistent inline manager menu at Tablet/Mobile widths. The
+  compact drawer now keeps the manager trigger at full width so its Desktop
+  popover has a stable, readable anchor at every compact breakpoint.
 - **Known exclusions:** member rename success/error/rate-limit UI, member
   language reload, and sign-out failure were not rendered because the available
   Browser identity is a Guest and no production mock path was added.

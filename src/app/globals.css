@@ -9348,10 +9348,18 @@ body {
 }
 
 .league-private-empty-copy {
+  width: 100%;
+  min-height: 112px;
   margin: 8px 0 0;
-  padding: 18px 0;
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: 15px;
   color: var(--muted);
+  display: grid;
+  place-items: center;
+  background: var(--paper);
   font-size: 14px;
+  text-align: center;
 }
 
 .league-private-empty > div {
@@ -10103,5 +10111,124 @@ body {
 
   .league-overall-surface:hover {
     transform: none;
+  }
+}
+
+/* Final compact layout corrections for the app shell, leagues, and fixtures. */
+@media (width < 80rem) {
+  .drawer-sidebar .sidebar-bottom > .manager-menu-trigger {
+    width: 100%;
+    min-height: 64px;
+    height: auto;
+    justify-content: flex-start;
+    padding: 20px 6px 2px;
+  }
+
+  .drawer-sidebar .manager-card-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .drawer-sidebar .manager-menu-chevron {
+    display: block;
+  }
+
+  [data-slot="popover-content"].manager-menu-popover {
+    width: min(286px, calc(100vw - 24px));
+    max-height: calc(100dvh - 24px);
+    overflow-y: auto;
+  }
+
+  .league-section-heading {
+    align-items: start;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .league-heading-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .league-heading-actions > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    justify-content: center;
+  }
+}
+
+@media (48rem <= width < 80rem) {
+  .fixture-list-card {
+    overflow-x: hidden;
+  }
+
+  .fixture-row {
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: 46px minmax(0, 1fr) 18px 20px 18px minmax(0, 1fr);
+    gap: 6px;
+    padding-inline: 14px;
+  }
+}
+
+@media (width < 48rem) {
+  :is(
+    [data-slot="dialog-content"],
+    [data-slot="alert-dialog-content"]
+  ).product-dialog {
+    inset: 0;
+    width: 100dvw;
+    min-height: 100dvh;
+    max-width: none;
+    max-height: none;
+    height: 100dvh;
+    padding: max(20px, env(safe-area-inset-top))
+      max(20px, env(safe-area-inset-right))
+      max(20px, env(safe-area-inset-bottom))
+      max(20px, env(safe-area-inset-left));
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+    translate: 0 !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  [data-slot="dialog-content"].product-dialog > [data-slot="dialog-close"],
+  [data-slot="dialog-content"].product-dialog .modal-close {
+    top: max(12px, env(safe-area-inset-top));
+    right: max(12px, env(safe-area-inset-right));
+  }
+
+  .fixture-row {
+    grid-template-areas:
+      "time home-color home"
+      "time away-color away";
+    grid-template-columns: 54px 18px minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 10px;
+  }
+
+  .fixture-row time {
+    align-self: center;
+    padding-top: 0;
+  }
+
+  .fixture-row .fixture-club-color {
+    display: block;
+    justify-self: start;
+  }
+
+  .fixture-row .fixture-club-color--home {
+    grid-area: home-color;
+  }
+
+  .fixture-row .fixture-club-color--away {
+    grid-area: away-color;
   }
 }
