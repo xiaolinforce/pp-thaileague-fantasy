@@ -15,6 +15,7 @@ import {
   Trophy,
   UserPlus,
   UserRound,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -101,6 +102,13 @@ const accountNavigation = [
     href: "/help",
     icon: CircleHelp,
     requiresIdentity: false,
+  },
+  {
+    label: "แอดมิน",
+    href: "/admin/fantasy",
+    icon: ShieldCheck,
+    requiresIdentity: true,
+    requiresAdmin: true,
   },
 ] as const;
 
@@ -211,7 +219,11 @@ function ManagerMenu({
       </div>
       <nav aria-label={translate("เมนูผู้จัดการทีม")}>
         {accountNavigation
-          .filter((item) => !item.requiresIdentity || identity)
+          .filter(
+            (item) =>
+              (!item.requiresIdentity || Boolean(identity)) &&
+              (!item.requiresAdmin || identity?.role === "admin"),
+          )
           .map(({ label, href, icon: Icon }) => {
             const active = pathname === href;
             return (

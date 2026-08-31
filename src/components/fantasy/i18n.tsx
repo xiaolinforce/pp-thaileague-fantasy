@@ -77,6 +77,7 @@ const translations: Record<string, string> = {
   เมนูผู้จัดการทีม: "Manager menu",
   เปิดเมนูผู้จัดการทีม: "Open manager menu",
   "เริ่มเล่น Fantasy": "Start playing Fantasy",
+  แอดมิน: "Admin",
   ยังไม่มีทีม: "No team yet",
   เริ่มจัดทีมไทยลีกของคุณ: "Start building your Thai League squad",
   ภาษา: "Language",
