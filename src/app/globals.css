@@ -10193,16 +10193,88 @@ body {
     border: 0;
     border-radius: 0;
     box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
     transform: none;
     translate: 0 !important;
     overflow-y: auto;
     overscroll-behavior: contain;
   }
 
+  [data-slot="dialog-content"].product-dialog > [data-slot="dialog-footer"],
+  [data-slot="alert-dialog-content"].product-dialog
+    > [data-slot="alert-dialog-footer"] {
+    margin-top: auto;
+  }
+
+  [data-slot="dialog-content"].product-dialog > .modal-actions {
+    margin-inline: 0;
+    margin-bottom: 0;
+    padding: 16px 0 0;
+    border-radius: 0;
+    background: transparent;
+  }
+
   [data-slot="dialog-content"].product-dialog > [data-slot="dialog-close"],
   [data-slot="dialog-content"].product-dialog .modal-close {
     top: max(12px, env(safe-area-inset-top));
     right: max(12px, env(safe-area-inset-right));
+  }
+
+  [data-slot="dialog-content"].league-dialog form {
+    min-height: 0;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  [data-slot="dialog-content"].league-dialog .league-field {
+    margin-top: 0;
+    gap: 6px;
+    flex: 0 0 auto;
+  }
+
+  [data-slot="dialog-content"].league-dialog .league-field input {
+    height: 44px;
+    min-height: 44px;
+    max-height: 44px;
+  }
+
+  [data-slot="dialog-content"].league-dialog .league-dialog-footer {
+    margin-top: auto;
+  }
+
+  [data-slot="dialog-content"].league-standings-dialog {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .league-standings-dialog [data-slot="dialog-header"] {
+    padding: max(20px, env(safe-area-inset-top))
+      max(48px, calc(env(safe-area-inset-right) + 44px)) 16px
+      max(20px, env(safe-area-inset-left));
+  }
+
+  .league-standings-dialog .league-table-scroll {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .league-standings-dialog .league-dialog-state {
+    min-height: 0;
+    height: 100%;
+  }
+
+  .league-standings-dialog .league-dialog-pagination {
+    padding-bottom: max(14px, env(safe-area-inset-bottom));
   }
 
   .fixture-row {

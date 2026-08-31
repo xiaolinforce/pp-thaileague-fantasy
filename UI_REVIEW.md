@@ -290,7 +290,11 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   and Create actions form equal-width touch targets beneath the section heading
   on Mobile and Tablet. Product dialogs and confirmation dialogs become
   edge-to-edge, safe-area-aware full-screen surfaces on Mobile; Tablet and
-  Desktop retain the constrained modal layout.
+  Desktop retain the constrained modal layout. The Mobile flow keeps form
+  controls at their intrinsic touch height with actions anchored below the
+  task, while standings reserve every remaining viewport row for the scrollable
+  table. Create, Join, Overall, and player-detail dialogs were rechecked after
+  the shared layout correction.
 - **Known exclusions:** successful create, preview/join, rename, invite rotate,
   remove, leave, delete, 100-member pagination, server mutation errors, and
   final-score UI were not rendered to avoid mutating the signed-in development
@@ -303,7 +307,9 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 - **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
   `npm run db:verify:fantasy`, responsive Browser measurements, Thai/English
   rendered snapshots. The rank dialog, disabled-first-Gameweek Stats tab, and
-  stacked mobile fixtures were rechecked in the in-app Browser.
+  stacked mobile fixtures were rechecked in the in-app Browser. Mobile dialog
+  evidence covers 320px and 767px, with constrained modal regression checks at
+  768px and 1280px.
 
 ### 2026-08-31 — Manager account surfaces and public guidance
 
