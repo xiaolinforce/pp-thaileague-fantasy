@@ -213,6 +213,14 @@ least 60 minutes. Zero minutes scores zero appearance points.
 Fantasy assists override source assists when a reviewed value exists. The game
 intentionally excludes FPL bonus/BPS and Defensive Contributions.
 
+Player form is a presentation value derived from scored match facts, not a
+projection. It is the arithmetic mean of the player's Fantasy points across
+the club's latest five finished fixtures. A finished club fixture without a
+player match-stat row contributes zero, so not playing is included rather than
+silently omitted. Before the club has five finished fixtures, the mean uses all
+finished fixtures available; before any are finished, form is zero and the
+statistics UI remains in its explicit no-data state.
+
 ## Automatic substitutions and captaincy
 
 For a normal Gameweek, a starter with zero minutes may be replaced by the first

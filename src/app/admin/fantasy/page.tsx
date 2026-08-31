@@ -233,7 +233,7 @@ export default async function FantasyAdminPage() {
                   <input
                     name="reason"
                     required
-                    defaultValue="ข้อมูลจากไทยลีกสำหรับการทดสอบ"
+                    placeholder="URL เอกสารต้นทาง หรือเหตุผลการแก้ไข"
                   />
                 </label>
                 <button className="primary-button" type="submit">

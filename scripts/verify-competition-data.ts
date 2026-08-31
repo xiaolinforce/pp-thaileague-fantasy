@@ -28,6 +28,7 @@ type FixtureSummaryRow = {
   first_kickoff: string;
   last_kickoff: string;
   fixtures_without_venue: number;
+  fixtures_time_tbc: number;
 };
 
 async function verifyCompetitionData() {
@@ -131,7 +132,8 @@ async function verifyCompetitionData() {
       count(distinct matchweek)::int as matchweek_count,
       min(kickoff_at)::text as first_kickoff,
       max(kickoff_at)::text as last_kickoff,
-      count(*) filter (where venue_id is null)::int as fixtures_without_venue
+      count(*) filter (where venue_id is null)::int as fixtures_without_venue,
+      count(*) filter (where kickoff_at is null and status = 'time_tbc')::int as fixtures_time_tbc
     from fixtures
   `);
 

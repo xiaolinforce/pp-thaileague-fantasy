@@ -593,6 +593,19 @@ const translations: Record<string, string> = {
   "ลบ Private League แล้ว": "Private League deleted",
 
   // Fixtures and stats
+  ติดตามโปรแกรมจริงและเปรียบเทียบผลงานนักเตะจากข้อมูลที่ตรวจสอบได้:
+    "Follow verified fixtures and compare player performance",
+  สถิติผู้เล่น: "Player statistics",
+  แยกตัวเลขฟุตบอลทางการออกจากคะแนนที่คำนวณตามกติกาแฟนตาซี:
+    "Official football statistics are separated from rule-based Fantasy points",
+  แฟนตาซี: "Fantasy",
+  สถิติการแข่งขัน: "Match stats",
+  ฤดูกาลนี้ยังไม่มีสถิติ: "No statistics are available this season yet",
+  ไม่พบนักเตะตามตัวกรอง: "No players match these filters",
+  ลองล้างคำค้นหาหรือเลือกตัวกรองอื่น:
+    "Clear the search or choose different filters",
+  "URL เอกสารต้นทาง หรือเหตุผลการแก้ไข":
+    "Source document URL or correction reason",
   ข้อมูลการแข่งขัน: "Match Centre",
   "วิเคราะห์โปรแกรม ฟอร์ม และตัวเลขสำคัญก่อนจัดทีม":
     "Analyse fixtures, form, and key numbers before selecting your team",
@@ -605,11 +618,8 @@ const translations: Record<string, string> = {
   กลาง: "Medium",
   ยาก: "Hard",
   ดาวซัลโว: "Top Scorer",
-  "8 ประตู": "8 goals",
   แอสซิสต์สูงสุด: "Most Assists",
-  "6 แอสซิสต์": "6 assists",
   คลีนชีตสูงสุด: "Most Clean Sheets",
-  "5 คลีนชีต": "5 clean sheets",
   อันดับผู้เล่น: "Player Rankings",
   ทุกตำแหน่ง: "All Positions",
   กรองตำแหน่งผู้เล่น: "Filter players by position",

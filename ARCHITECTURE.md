@@ -174,6 +174,15 @@ recalculation persists average and highest points on the Gameweek from every
 scored selection that contains at least one player. Points pages read those
 stored summaries instead of aggregating every team on each request.
 
+The Fixtures and Stats read model keeps two datasets separate. Official
+current-season player aggregates are imported into
+`competition_player_season_stats` with source identifiers, payload, identity
+match method, and import timestamp. Reviewed per-match Fantasy inputs and
+derived points remain in the Fantasy scoring tables. Runtime requests read only
+the database; they never fetch Thai League or synthesize leader values. The
+client receives explicit availability metadata and renders a truthful empty
+state until each dataset exists.
+
 ## Persistence model
 
 The schema is organized into four related groups:
@@ -182,7 +191,8 @@ The schema is organized into four related groups:
   rate-limit state, and privacy-safe email delivery attempts.
 
 - Competition: competitions, seasons, competition seasons, venues, clubs,
-  visual identities, entries, players, registrations, and fixtures.
+  visual identities, entries, players, registrations, fixtures, and sourced
+  player season aggregates.
 - Fantasy configuration and play: Fantasy seasons, Gameweeks, tier definitions,
   player classifications, versioned ranking runs and player projections,
   managers, teams, selections, selection snapshots, transfer revisions,

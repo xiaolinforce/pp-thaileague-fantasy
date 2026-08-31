@@ -637,6 +637,65 @@ export const fixtures = pgTable(
   ],
 );
 
+export const competitionPlayerSeasonStats = pgTable(
+  "competition_player_season_stats",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    competitionSeasonId: uuid("competition_season_id")
+      .notNull()
+      .references(() => competitionSeasons.id, { onDelete: "cascade" }),
+    competitionEntryId: uuid("competition_entry_id")
+      .notNull()
+      .references(() => competitionEntries.id, { onDelete: "cascade" }),
+    playerId: uuid("player_id")
+      .notNull()
+      .references(() => players.id, { onDelete: "cascade" }),
+    sourceName: text("source_name").notNull(),
+    sourceUrl: text("source_url").notNull(),
+    sourceExternalId: text("source_external_id").notNull(),
+    sourcePersonId: text("source_person_id").notNull(),
+    matchMethod: varchar("match_method", { length: 40 }).notNull(),
+    appearances: smallint("appearances").default(0).notNull(),
+    starts: smallint("starts").default(0).notNull(),
+    minutes: integer("minutes").default(0).notNull(),
+    goals: smallint("goals").default(0).notNull(),
+    sourceAssists: smallint("source_assists").default(0).notNull(),
+    cleanSheets: smallint("clean_sheets").default(0).notNull(),
+    goalsConceded: smallint("goals_conceded").default(0).notNull(),
+    penaltyGoals: smallint("penalty_goals").default(0).notNull(),
+    penaltyMisses: smallint("penalty_misses").default(0).notNull(),
+    yellowCards: smallint("yellow_cards").default(0).notNull(),
+    redCards: smallint("red_cards").default(0).notNull(),
+    ownGoals: smallint("own_goals").default(0).notNull(),
+    sourcePayload: jsonb("source_payload")
+      .$type<Record<string, unknown>>()
+      .notNull(),
+    importedAt: timestamp("imported_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("competition_player_season_stats_source_unique").on(
+      table.competitionSeasonId,
+      table.sourceName,
+      table.sourceExternalId,
+    ),
+    index("competition_player_season_stats_player_idx").on(
+      table.competitionSeasonId,
+      table.playerId,
+    ),
+    index("competition_player_season_stats_entry_idx").on(
+      table.competitionSeasonId,
+      table.competitionEntryId,
+    ),
+    check(
+      "competition_player_season_stats_nonnegative_check",
+      sql`${table.appearances} >= 0 and ${table.starts} >= 0 and ${table.minutes} >= 0 and ${table.goals} >= 0 and ${table.sourceAssists} >= 0 and ${table.cleanSheets} >= 0 and ${table.goalsConceded} >= 0 and ${table.penaltyGoals} >= 0 and ${table.penaltyMisses} >= 0 and ${table.yellowCards} >= 0 and ${table.redCards} >= 0 and ${table.ownGoals} >= 0`,
+    ),
+  ],
+);
+
 export const fantasySeasons = pgTable(
   "fantasy_seasons",
   {

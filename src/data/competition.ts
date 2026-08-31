@@ -7,6 +7,7 @@ import {
   clubs,
   clubVisualIdentities,
   competitionEntries,
+  competitionPlayerSeasonStats,
   competitionSeasons,
   fixtures,
   fantasyGameweeks,
@@ -21,6 +22,11 @@ import {
   players,
   venues,
 } from "@/db/schema";
+import {
+  addSeasonStatTotals,
+  calculateFiveFixtureForm,
+  EMPTY_SEASON_STAT_TOTALS,
+} from "@/lib/fantasy/competition-stats";
 import type {
   CompetitionClubView,
   ClubColorPalette,
@@ -32,6 +38,8 @@ import type {
 } from "@/lib/competition-types";
 
 const COMPETITION_SEASON_EXTERNAL_ID = "224";
+const OFFICIAL_PLAYER_STATS_SOURCE_URL =
+  "https://competition.tl.prod.c0d1um.io/thaileague/api/player-public/all_players_search/?tournament=224";
 
 const DEFAULT_CLUB_COLORS: ClubColorPalette = [
   "#E7E5E4",
@@ -118,6 +126,10 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
       .orderBy(asc(fixtures.matchweek), asc(fixtures.kickoffAt)),
     db.select().from(venues),
   ]);
+  const officialStatRows = await db
+    .select()
+    .from(competitionPlayerSeasonStats)
+    .where(eq(competitionPlayerSeasonStats.competitionSeasonId, season.id));
 
   const fantasySeason = await db.query.fantasySeasons.findFirst({
     where: eq(fantasySeasons.competitionSeasonId, season.id),
@@ -345,7 +357,6 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
             (a, b) => b.matchweek - a.matchweek,
           )
         : [];
-      const recentPoints = matchPoints.slice(0, 5);
       const pointsByFixtureId = new Map(
         matchPoints.map((match) => [match.fixtureId, match.points]),
       );
@@ -385,15 +396,8 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
           position,
           price: tier,
           points: matchPoints.reduce((sum, item) => sum + item.points, 0),
-          form:
-            recentPoints.length > 0
-              ? Number(
-                  (
-                    recentPoints.reduce((sum, item) => sum + item.points, 0) /
-                    recentPoints.length
-                  ).toFixed(1),
-                )
-              : 0,
+          form: calculateFiveFixtureForm(recentMatches),
+          fantasyAppearances: matchPoints.length,
           selected:
             fantasyPlayer && selectionCount > 0
               ? Number(
@@ -416,11 +420,75 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
     },
   );
 
+  const officialTotalsByPlayerId = new Map<
+    string,
+    typeof EMPTY_SEASON_STAT_TOTALS
+  >();
+  for (const row of officialStatRows) {
+    officialTotalsByPlayerId.set(
+      row.playerId,
+      addSeasonStatTotals(
+        officialTotalsByPlayerId.get(row.playerId) ?? EMPTY_SEASON_STAT_TOTALS,
+        {
+          appearances: row.appearances,
+          starts: row.starts,
+          minutes: row.minutes,
+          goals: row.goals,
+          sourceAssists: row.sourceAssists,
+          cleanSheets: row.cleanSheets,
+          goalsConceded: row.goalsConceded,
+          penaltyGoals: row.penaltyGoals,
+          penaltyMisses: row.penaltyMisses,
+          yellowCards: row.yellowCards,
+          redCards: row.redCards,
+          ownGoals: row.ownGoals,
+        },
+      ),
+    );
+  }
+  const latestFantasyUpdate = fantasyPointRows.reduce<Date | null>(
+    (latest, row) =>
+      !latest || row.stats.updatedAt > latest ? row.stats.updatedAt : latest,
+    null,
+  );
+  const latestOfficialUpdate = officialStatRows.reduce<Date | null>(
+    (latest, row) =>
+      !latest || row.importedAt > latest ? row.importedAt : latest,
+    null,
+  );
+
   return {
     season: localized(season.nameTh, season.nameEn, "2026/27"),
     players: playerViews,
     fixtures: fixtureViews,
     clubs: clubViews.sort((a, b) => a.name.en.localeCompare(b.name.en)),
     matchweeks: [...new Set(fixtureViews.map((fixture) => fixture.matchweek))],
+    statistics: {
+      fantasy: {
+        available: fantasyPointRows.length > 0,
+        lastUpdatedAt: latestFantasyUpdate?.toISOString() ?? null,
+      },
+      football: {
+        available: officialStatRows.length > 0,
+        lastUpdatedAt: latestOfficialUpdate?.toISOString() ?? null,
+        sourceUrl:
+          officialStatRows[0]?.sourceUrl ?? OFFICIAL_PLAYER_STATS_SOURCE_URL,
+        players: [...officialTotalsByPlayerId].map(([playerId, totals]) => ({
+          playerId,
+          appearances: totals.appearances,
+          starts: totals.starts,
+          minutes: totals.minutes,
+          goals: totals.goals,
+          assists: totals.sourceAssists,
+          cleanSheets: totals.cleanSheets,
+          goalsConceded: totals.goalsConceded,
+          penaltyGoals: totals.penaltyGoals,
+          penaltyMisses: totals.penaltyMisses,
+          yellowCards: totals.yellowCards,
+          redCards: totals.redCards,
+          ownGoals: totals.ownGoals,
+        })),
+      },
+    },
   };
 }

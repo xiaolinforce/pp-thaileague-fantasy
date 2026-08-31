@@ -31,7 +31,7 @@ when new behavior invalidates prior coverage.
 | `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                         |
 | `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                   |
 | `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                        |
-| `/fixtures`      | Data browser          | Unreviewed  | Audit browsing, list density, statistics, filters, and empty results.                                                             |
+| `/fixtures`      | Data browser          | In progress | URL-backed browsing and real preseason stat states implemented; populated-season evidence remains pending upstream data.          |
 | `/leagues`       | Ranking/community     | In progress | Overall/Guest and responsive language modes reviewed; authenticated Private operations still need rendered owner/member evidence. |
 | `/profile`       | Settings and reading  | Unreviewed  | Audit navigation, Guest/member variants, forms, feedback, and long rules.                                                         |
 | `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                        |
@@ -190,6 +190,34 @@ Verification commands:
 Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
+
+### 2026-08-31 — Fixtures and player statistics
+
+- **Route and task:** `/fixtures`; remove simulated statistics and kickoff
+  values, separate official football facts from Fantasy-derived points, and
+  harden the responsive data browser.
+- **Status:** Unreviewed → In progress.
+- **Data/auth/Gameweek state:** real Guest session, 240 imported fixtures, 24
+  official TBC kickoffs, 494 registered players, and the real preseason state
+  of zero official/Fantasy player-stat rows.
+- **Language:** Thai and English after changing the persisted Profile setting.
+- **Viewports:** default desktop and 360px mobile rendered; URL-backed Fantasy
+  and match-stat tabs and the current-season empty states were verified.
+- **Keyboard/accessibility:** semantic tabs, source note, status message,
+  headings, named controls, and language selection by radio control reviewed.
+- **Issues fixed:** hard-coded leader values, zero-value pseudo-ranking,
+  incorrect form denominator, local-only filter state, mobile horizontal stats
+  rows, missing source/provenance copy, and simulated TBC kickoff overrides.
+- **Known exclusions:** populated official and Fantasy tables, ties, dense
+  filters, and large values were not rendered because neither live dataset has
+  begun and no production mock path was added. Pure rules cover form, DNP,
+  source identity matching, and transferred-player aggregation pending live
+  populated evidence.
+- **Evidence:** bounded in-app Browser inspection in the 2026-08-31
+  implementation task; no mock or simulation route was added.
+- **Verification:** `npm run test:rules`, `npm run types`,
+  `npm run db:verify:competition`, `npm run db:verify:player-stats`, official
+  importer preview, Thai/English DOM snapshots, and desktop/mobile screenshots.
 
 ### 2026-08-31 — League overview and Overall detail
 

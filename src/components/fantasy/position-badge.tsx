@@ -10,7 +10,11 @@ export function PositionBadge({
 }) {
   return (
     <span
-      className={cn("position-badge", `position-${position.toLowerCase()}`, className)}
+      className={cn(
+        "position-badge",
+        `position-${position.toLowerCase()}`,
+        className,
+      )}
     >
       {position}
     </span>

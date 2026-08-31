@@ -88,7 +88,8 @@ Open `http://localhost:3006`.
 | `npm run db:normalize:player-short-names` | Preview or apply sourced Thai and derived English player short names. |
 | `npm run db:verify:competition`           | Assert expected source/import structure.                              |
 | `npm run db:verify:fantasy`               | Verify Fantasy, ranking, Gameweek, and League invariants.             |
-| `npm run db:apply:fixture-kickoffs`       | Preview TBC kickoff overrides; apply with exact `--branch-id`.        |
+| `npm run db:import:player-stats`          | Preview official current-season stats; apply with exact branch id.    |
+| `npm run db:verify:player-stats`          | Verify stored official current-season player-stat rows.               |
 | `npm run db:verify:transaction`           | Prove rollback on the exact development branch.                       |
 
 Database commands use a small Windows Node user-info compatibility shim. Keep

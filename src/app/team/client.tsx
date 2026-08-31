@@ -161,9 +161,7 @@ function GameweekDetails({
                 const month = parts.find(
                   (part) => part.type === "month",
                 )?.value;
-                const hour = parts.find(
-                  (part) => part.type === "hour",
-                )?.value;
+                const hour = parts.find((part) => part.type === "hour")?.value;
                 const minute = parts.find(
                   (part) => part.type === "minute",
                 )?.value;
@@ -278,11 +276,11 @@ function ChipOptions({
               {isExhausted
                 ? translate("ใช้ครบแล้ว")
                 : isUnavailable
-                ? translate("ใช้ได้ตั้งแต่ GW2")
-                : translate("เหลือใช้ {count} ครั้ง").replace(
-                    "{count}",
-                    String(chipsRemaining[chip]),
-                  )}
+                  ? translate("ใช้ได้ตั้งแต่ GW2")
+                  : translate("เหลือใช้ {count} ครั้ง").replace(
+                      "{count}",
+                      String(chipsRemaining[chip]),
+                    )}
             </p>
           </button>
         );
@@ -1133,9 +1131,7 @@ export default function TeamClient({
                   gameweekNumber={fantasy.gameweek.number}
                   interactionsDisabled={interactionsDisabled}
                   onChipSelect={(chip) =>
-                    setActiveChip((current) =>
-                      current === chip ? null : chip,
-                    )
+                    setActiveChip((current) => (current === chip ? null : chip))
                   }
                   translate={translate}
                 />
@@ -1190,9 +1186,7 @@ export default function TeamClient({
                     onClick={autoFillVacancies}
                     aria-busy={isAutoFilling}
                     title={
-                      !isEditable
-                        ? translate("ปิดรับการจัดทีมแล้ว")
-                        : undefined
+                      !isEditable ? translate("ปิดรับการจัดทีมแล้ว") : undefined
                     }
                   >
                     {isAutoFilling ? (

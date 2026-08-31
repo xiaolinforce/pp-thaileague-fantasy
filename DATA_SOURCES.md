@@ -124,12 +124,34 @@ Overall. It does not create managers, teams, selections, scores, or Private
 Leagues. Those records originate only from authenticated/Guest provisioning and
 player actions.
 
-For the 2026/27 prototype, fixtures 49-56, 73-80, and 129-136 have curated
-simulated kickoff overrides because the upstream schedule supplied the pairings
-as time TBC. `db:apply:fixture-kickoffs` applies these values only while the
-stored kickoff is null, requires the exact Neon branch id when applying, and
-never replaces a confirmed imported kickoff. The overrides provide complete
-Gameweek deadlines until an official import supplies authoritative times.
+Fixtures without an official kickoff remain `time_tbc` with a null timestamp.
+The application does not synthesize kickoff dates or times. Re-running the
+competition import replaces stored fixture facts with the latest official API
+values, including returning an unconfirmed kickoff to TBC when appropriate.
+
+## Current-season player statistics
+
+`npm run db:import:player-stats` reads the current tournament's public Thai
+League aggregate-player endpoint and is preview-only by default. It matches a
+player only by a unique normalized English name within the same official club.
+Reviewed exceptions belong in
+`scripts/sources/current-player-stat-overrides.ts`, keyed by stable Thai League
+person ID and stable Transfermarkt player ID. The importer refuses to write if
+any identity is unmatched or ambiguous and requires both `--apply` and the
+exact Neon `--branch-id`.
+
+Stored rows preserve the official source row and person identifiers, source
+URL, complete payload, match method, import time, and non-negative aggregate
+facts. Multiple official rows for the same player, such as after a transfer,
+are combined only in the read model. The UI shows a truthful current-season
+empty state while the upstream endpoint contains no rows; it does not fall back
+to prior-season or projected values.
+
+Fantasy points remain a separate derived dataset. Per-match inputs entered by
+an authorized administrator store their reference/reason and audit context,
+and the scoring engine recalculates points. Form is the mean Fantasy points
+from the player's club's last five finished fixtures; a fixture in which the
+player did not appear contributes zero.
 
 The seed recognizes a Thai nationality from normalized source text as an
 initial value only. Reviewed Thai-status and tier corrections belong in the

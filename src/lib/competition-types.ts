@@ -24,6 +24,7 @@ export type CompetitionPlayerView = {
   isThai: boolean;
   points: number;
   form: number;
+  fantasyAppearances: number;
   selected: number;
   next: LocalizedText;
   recentMatches: Array<{
@@ -33,6 +34,35 @@ export type CompetitionPlayerView = {
   }>;
   color: string;
   accent: string;
+};
+
+export type CompetitionFootballStatView = {
+  playerId: string;
+  appearances: number;
+  starts: number;
+  minutes: number;
+  goals: number;
+  assists: number;
+  cleanSheets: number;
+  goalsConceded: number;
+  penaltyGoals: number;
+  penaltyMisses: number;
+  yellowCards: number;
+  redCards: number;
+  ownGoals: number;
+};
+
+export type CompetitionStatisticsView = {
+  fantasy: {
+    available: boolean;
+    lastUpdatedAt: string | null;
+  };
+  football: {
+    available: boolean;
+    lastUpdatedAt: string | null;
+    sourceUrl: string | null;
+    players: CompetitionFootballStatView[];
+  };
 };
 
 export type CompetitionClubView = {
@@ -61,6 +91,7 @@ export type CompetitionDataset = {
   fixtures: CompetitionFixtureView[];
   clubs: CompetitionClubView[];
   matchweeks: number[];
+  statistics: CompetitionStatisticsView;
 };
 
 export function localize(value: LocalizedText, language: AppLanguage) {

@@ -619,9 +619,7 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
   const changedBy = `${admin.user.email} (${admin.user.id})`;
   const fixtureId = String(formData.get("fixtureId") ?? "");
   const fantasyPlayerId = String(formData.get("fantasyPlayerId") ?? "");
-  const reason = String(
-    formData.get("reason") ?? "แก้ไขข้อมูลสำหรับการทดสอบ",
-  ).trim();
+  const reason = String(formData.get("reason") ?? "").trim();
   if (!fixtureId || !fantasyPlayerId || !reason) {
     throw new Error("Fixture, player and correction reason are required.");
   }
@@ -655,6 +653,24 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
   ]);
   if (!fixture || !fantasyPlayer)
     throw new Error("Fixture or fantasy player was not found.");
+  const fantasySeason = await db.query.fantasySeasons.findFirst({
+    where: eq(fantasySeasons.competitionSeasonId, fixture.competitionSeasonId),
+  });
+  if (!fantasySeason || fantasyPlayer.fantasySeasonId !== fantasySeason.id) {
+    throw new Error("The selected player does not belong to this season.");
+  }
+  const validRegistration = await db.query.playerRegistrations.findFirst({
+    where: and(
+      eq(playerRegistrations.playerId, fantasyPlayer.playerId),
+      inArray(playerRegistrations.competitionEntryId, [
+        fixture.homeEntryId,
+        fixture.awayEntryId,
+      ]),
+    ),
+  });
+  if (!validRegistration) {
+    throw new Error("The selected player is not registered for this fixture.");
+  }
   const existing = await db.query.fantasyPlayerMatchStats.findFirst({
     where: and(
       eq(fantasyPlayerMatchStats.fixtureId, fixtureId),
@@ -666,8 +682,9 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
     .values({
       fixtureId,
       fantasyPlayerId,
-      status: existing ? "corrected" : "imported",
-      sourceName: "thai-league-admin",
+      status: existing ? "corrected" : "reviewed",
+      sourceName: "PP Fantasy admin review",
+      sourcePayload: { entryMethod: "admin", reference: reason },
       ...values,
       reviewedAt: new Date(),
     })
@@ -678,6 +695,8 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
       ],
       set: {
         status: "corrected",
+        sourceName: "PP Fantasy admin review",
+        sourcePayload: { entryMethod: "admin", reference: reason },
         ...values,
         reviewedAt: new Date(),
         updatedAt: new Date(),
@@ -728,18 +747,13 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
     before: existing ?? null,
     after: values,
   });
-  const fantasySeason = await db.query.fantasySeasons.findFirst({
-    where: eq(fantasySeasons.competitionSeasonId, fixture.competitionSeasonId),
+  const gameweek = await db.query.fantasyGameweeks.findFirst({
+    where: and(
+      eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id),
+      eq(fantasyGameweeks.number, fixture.matchweek),
+    ),
   });
-  if (fantasySeason) {
-    const gameweek = await db.query.fantasyGameweeks.findFirst({
-      where: and(
-        eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id),
-        eq(fantasyGameweeks.number, fixture.matchweek),
-      ),
-    });
-    if (gameweek) await recalculateGameweek(gameweek.id);
-  }
+  if (gameweek) await recalculateGameweek(gameweek.id);
   revalidateFantasyPages();
 }
 
