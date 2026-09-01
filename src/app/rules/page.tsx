@@ -9,7 +9,10 @@ import { buildFantasyRuleSections } from "@/lib/fantasy/rule-content";
 export default function RulesPage() {
   const { language } = useLanguage();
   const sections = useMemo(
-    () => buildFantasyRuleSections(language),
+    () =>
+      buildFantasyRuleSections(language).filter(
+        (section) => section.id !== "results",
+      ),
     [language],
   );
 

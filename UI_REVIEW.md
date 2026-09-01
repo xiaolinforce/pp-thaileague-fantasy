@@ -644,6 +644,18 @@ build`, migration on the confirmed Neon development branch, responsive DOM
 - **Verification:** layout detector returned no findings; formatting, lint,
   types, and production build checks follow this refinement.
 
+### 2026-09-02 — Rules scope refinement
+
+- **Route and task:** `/rules`; remove the Postponed Matches & Rankings topic
+  from both the contents navigation and the rendered reading flow without
+  changing the shared executable rules.
+- **Evidence:** in-app Browser rendered Thai and English at 1440px, plus Thai
+  at 360px. Both the contents list and article now contain five matching
+  sections, with no document-level horizontal overflow. The persisted language
+  preference was restored to Thai after review.
+- **Verification:** formatting, lint, types, and production build checks follow
+  this refinement.
+
 ### 2026-09-02 — Account copy and Guest league refinement
 
 - **Route and task:** `/profile`, `/settings`, `/leagues`, and `/rules`; make
