@@ -52,6 +52,9 @@ export function PointsPlayerToken({
       : member.captainRole === "vice_captain"
         ? "V"
         : null;
+  const captainPoints = result?.totalPoints ?? points;
+  const captainPointsDisplay =
+    captainPoints > 0 ? `+${captainPoints}` : `${captainPoints}`;
   const detailRows = Object.entries(result?.breakdown ?? {}).filter(
     ([, value]) => value !== 0,
   );
@@ -153,7 +156,7 @@ export function PointsPlayerToken({
               <span>
                 {language === "th" ? "ตัวคูณกัปตัน" : "Captain multiplier"}
               </span>
-              <strong>×{multiplier}</strong>
+              <strong>{captainPointsDisplay}</strong>
             </div>
           )}
         </div>
