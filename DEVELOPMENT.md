@@ -184,8 +184,10 @@ Scores are regenerated from the preserved locked selection, while the other
 through the Team screen are in PostgreSQL and can be preserved; an unsaved
 browser draft is intentionally invisible to the runner. Use
 `--primary-team=<team name>` when automatic signed-in-team detection could be
-ambiguous. Like named Gameweek presets, progression clears Private Leagues;
-apply the desired League overlay afterward when needed.
+ambiguous. If that team joined after earlier Gameweeks, progression records an
+empty locked selection and zero points for those missing weeks instead of
+backdating its current squad. Like named Gameweek presets, progression clears
+Private Leagues; apply the desired League overlay afterward when needed.
 
 The scenario runner is intentionally destructive inside the selected Fantasy
 season on its disposable branch. Do not point it at the shared development or

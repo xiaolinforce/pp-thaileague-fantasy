@@ -1183,21 +1183,18 @@ async function applyGameweekScenario(
     for (let gameweek = 1; gameweek <= plan.selectionThrough; gameweek += 1) {
       const exact = preservedByGameweek.get(gameweek) ?? null;
       if (exact) latest = exact;
-      if (!latest) {
-        throw new Error(
-          `Cannot advance: the primary tester team has no selection to carry into GW${gameweek}.`,
-        );
-      }
       const status = gameweek <= plan.scoredThrough ? "locked" : "draft";
       const activeChip =
-        gameweek < 2 && latest.activeChip === "wildcard"
+        gameweek < 2 && latest?.activeChip === "wildcard"
           ? null
           : (exact?.activeChip ?? null);
+      const freeTransfersBefore =
+        exact?.freeTransfersBefore ??
+        latest?.freeTransfersAfter ??
+        latest?.freeTransfersBefore ??
+        (gameweek === 1 ? 2 : 4);
       const settlement = settleTransfers({
-        freeTransfersBefore:
-          exact?.freeTransfersBefore ??
-          latest.freeTransfersAfter ??
-          latest.freeTransfersBefore,
+        freeTransfersBefore,
         transferCount: exact?.netTransferCount ?? 0,
         wildcard: activeChip === "wildcard",
       });
@@ -1207,10 +1204,7 @@ async function applyGameweekScenario(
         gameweek,
         status,
         activeChip,
-        freeTransfersBefore:
-          exact?.freeTransfersBefore ??
-          latest.freeTransfersAfter ??
-          latest.freeTransfersBefore,
+        freeTransfersBefore,
         freeTransfersAfter:
           status === "locked"
             ? settlement.freeTransfersAfter
@@ -1228,7 +1222,7 @@ async function applyGameweekScenario(
             : null,
         createdAt: exact?.createdAt ?? new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        members: latest.members.map((member) => ({ ...member })),
+        members: (latest?.members ?? []).map((member) => ({ ...member })),
         revisions: carried ? [] : exact.revisions,
       };
       primaryAdvanceStates.set(gameweek, state);
@@ -1853,10 +1847,15 @@ async function applyGameweekScenario(
           updated_at = now()
       from (
         select selection.fantasy_gameweek_id,
-               round(avg(score.total_points))::int as average_points,
-               max(score.total_points)::int as highest_points
+               coalesce(round(avg(score.total_points)), 0)::int as average_points,
+               coalesce(max(score.total_points), 0)::int as highest_points
         from fantasy_team_gameweek_scores score
         join fantasy_team_selections selection on selection.id = score.selection_id
+        where exists (
+          select 1
+          from fantasy_team_selection_players member
+          where member.selection_id = selection.id
+        )
         group by selection.fantasy_gameweek_id
       ) summary
       where gw.id = summary.fantasy_gameweek_id
@@ -2321,11 +2320,16 @@ async function verifyGameweekScenario(
       (select count(*)::int
        from fantasy_gameweeks gw
        join lateral (
-         select round(avg(score.total_points))::int as average_points,
-                max(score.total_points)::int as highest_points
+         select coalesce(round(avg(score.total_points)), 0)::int as average_points,
+                coalesce(max(score.total_points), 0)::int as highest_points
          from fantasy_team_gameweek_scores score
          join fantasy_team_selections selection on selection.id = score.selection_id
          where selection.fantasy_gameweek_id = gw.id
+           and exists (
+             select 1
+             from fantasy_team_selection_players member
+             where member.selection_id = selection.id
+           )
        ) summary on true
        where gw.fantasy_season_id = ${seasonId}::uuid
          and gw.status in ('provisional', 'final')
