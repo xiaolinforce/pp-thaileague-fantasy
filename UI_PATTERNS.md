@@ -107,7 +107,9 @@ proven behaviors unless a deliberate product decision replaces them:
 - Represent the one Gameweek currently open for squad changes. Show its number,
   live deadline, and editability without historical previous/next controls.
 - Keep lineup management and player discovery in one workspace. Desktop shows
-  pitch and market side by side; Tablet and Mobile use state-preserving tabs.
+  pitch and market side by side; Tablet and Mobile use state-preserving tabs
+  that remain available below the compact Top bar after the manager scrolls
+  past their original position.
 - A new team presents 15 visible position-locked vacancies. An untouched empty
   draft does not trigger an unsaved-change warning; a partial squad stays local
   and cannot be saved.

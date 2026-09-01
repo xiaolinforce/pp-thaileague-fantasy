@@ -199,6 +199,38 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-01 — Sticky compact Team workspace tabs
+
+- **Route and task:** `/team`; keep the Squad and Player Market workspace
+  controls reachable after a manager scrolls past their original position on
+  Mobile and Tablet.
+- **Status:** remains Reference.
+- **Data/auth/Gameweek state:** real signed-in Gameweek 2 squad. The Squad and
+  Player Market views were switched locally; no squad, transfer, chip, account,
+  or database state was saved.
+- **Language:** Thai source labels were rendered. The existing English
+  translations and localization path are unchanged; no new user-facing copy
+  was introduced.
+- **Viewports/accessibility:** rendered at 360px and 768px, with DOM checks at
+  767px, 1279px, and 1280px. In compact modes the tabs remain exactly below the
+  66px Top bar while scrolling, retain their selected state, and keep a visible
+  keyboard focus outline. At 1280px the tabs remain hidden and the Desktop
+  workspace is unchanged.
+- **Issues fixed:** the compact workspace tabs now use their Tabs root as the
+  sticky containing element, avoiding the self-bounded behavior of applying
+  sticky positioning to the nested tab list. The sticky surface uses the page
+  canvas color so scrolled content does not show through behind it.
+- **Known exclusions:** no deadline-passed state was manufactured because the
+  navigation control is independent of editability. English was not toggled on
+  the signed-in account to avoid changing its persisted preference for a
+  copy-neutral layout change.
+- **Evidence:** bounded in-app Browser screenshots and DOM measurements against
+  the real local `/team` route; no fixture override, simulation path, or
+  database write was introduced.
+- **Verification:** `npm run test:rules`, `npm run test:email`, `npm run
+test:auth`, `npm run types`, `npm run lint`, `npm run format:check`, and `npm
+run build`.
+
 ### 2026-09-01 — Per-vacancy player-removal Undo
 
 - **Route and task:** `/team`; let a manager reverse an accidental player

@@ -1213,6 +1213,7 @@ export default function TeamClient({
         </section>
 
         <Tabs
+          className="team-workspace-tabs-sticky"
           value={workspaceView}
           onValueChange={(value) =>
             setWorkspaceView(value as "squad" | "market")

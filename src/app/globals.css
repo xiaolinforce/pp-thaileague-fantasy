@@ -6988,7 +6988,7 @@ textarea:focus-visible {
 
   .team-workspace-tabs-sticky {
     position: sticky;
-    top: 66px;
+    top: var(--compact-topbar-height);
     z-index: 19;
     margin-bottom: 8px;
     background: var(--warm);
@@ -8926,6 +8926,8 @@ body {
   }
 
   .main-shell {
+    --compact-topbar-height: 66px;
+
     width: 100%;
     margin-left: 0;
   }
@@ -8934,7 +8936,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 20;
-    height: 66px;
+    height: var(--compact-topbar-height);
     padding: 0 18px 0 10px;
     display: flex;
     align-items: center;
