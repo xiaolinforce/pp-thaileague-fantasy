@@ -1,6 +1,5 @@
 "use client";
 
-import { ShieldCheck } from "lucide-react";
 import { useMemo } from "react";
 
 import { AppShell } from "@/components/fantasy/app-shell";
@@ -38,22 +37,6 @@ export default function RulesPage() {
           </nav>
 
           <article className="product-card rules-document">
-            <div className="rules-source-note">
-              <ShieldCheck aria-hidden="true" />
-              <div>
-                <strong>
-                  {language === "th"
-                    ? "ใช้กติกาชุดเดียวกับระบบเกม"
-                    : "Backed by the same rules as the game"}
-                </strong>
-                <span>
-                  {language === "th"
-                    ? "ค่าจำนวนทีม โควต้า Transfer และ Chips อ่านจากกติกากลางของระบบ ไม่ใช่ข้อมูลตัวอย่าง"
-                    : "Squad, quota, transfer, and chip values come from the shared executable rules—not sample data."}
-                </span>
-              </div>
-            </div>
-
             {sections.map((section) => (
               <section
                 className="rules-document-section"

@@ -633,6 +633,33 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   `npm run test:email`, `npm run test:auth`, `npm run types`, `npm run lint`,
   `npm run format:check`, and `npm run build`.
 
+### 2026-09-02 — Account copy and Guest league refinement
+
+- **Route and task:** `/profile`, `/settings`, `/leagues`, and `/rules`; make
+  account cards consistent in width, simplify language labels, refine rename
+  guidance, and reduce Guest and rules surfaces to their essential actions.
+- **Data/auth state:** the available development session resolved as a member.
+  No fixture, mock route, or account-state override was introduced.
+- **Language and responsive evidence:** Thai and English were rendered and the
+  persisted setting was restored to Thai. At 360px, the language labels remain
+  readable and Profile has no document-level horizontal overflow. Desktop
+  computed widths confirm both Profile and Settings cards are 760px; the rename
+  helper is 12px with the same 12px inset as the text input.
+- **Accessibility:** native labelled language radios remain intact; Settings
+  removes only the redundant persistence copy. Profile retains labelled regions
+  and the team-name help association.
+- **Issues fixed:** language labels now show only `ไทย` and `English`; the
+  redundant Settings persistence copy and Rules source card are removed. Guest
+  messaging now explains account benefits, and the Guest Private League state
+  no longer presents a duplicate sign-up button.
+- **Known exclusions:** Guest-only Profile and Private League states could not
+  be rendered with the available member session; their conditional copy and
+  action removal were source-reviewed. Name-save success, duplicate, and limit
+  states were not submitted to avoid mutating the real team-name state.
+- **Verification:** in-app Browser DOM and computed-style inspection at Desktop
+  and 360px; Thai/English rendered checks; followed by project type, lint,
+  formatting, and production-build checks.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

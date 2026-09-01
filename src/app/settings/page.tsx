@@ -75,14 +75,8 @@ export default function SettingsPage() {
           <div className="language-preference-panel">
             <LanguageSwitcher
               disabled={saving}
-              describedBy="language-persistence-help"
               onValueChange={changeLanguage}
             />
-            <small id="language-persistence-help">
-              {identity?.isGuest
-                ? "Guest จะบันทึกการตั้งค่านี้ไว้ในอุปกรณ์เครื่องนี้"
-                : "สมาชิกจะซิงก์การตั้งค่านี้กับบัญชีและอุปกรณ์อื่น"}
-            </small>
           </div>
 
           <div className="settings-save-status" aria-live="polite">

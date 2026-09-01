@@ -201,6 +201,10 @@ export default function ProfilePage() {
                 </span>
                 <h2 id="guest-heading">บัญชี Guest</h2>
               </div>
+              <p className="account-guest-description">
+                สมัครสมาชิกเพื่อเก็บทีมนี้ไว้ เล่นต่อได้ทุกอุปกรณ์
+                และเข้าร่วมลีกส่วนตัวกับเพื่อน
+              </p>
               <div className="account-card-action-row">
                 <Link href="/upgrade" className="primary-button">
                   สมัครสมาชิก

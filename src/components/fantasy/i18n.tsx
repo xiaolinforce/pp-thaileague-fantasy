@@ -541,6 +541,8 @@ const translations: Record<string, string> = {
     "Create a new group or use an eight-character code from a league owner",
   สมัครสมาชิก: "Sign up",
   ยังไม่มีลีกส่วนตัว: "No private leagues yet",
+  ต้องสมัครสมาชิกเพื่อเข้าร่วมลีกเล่นกับเพื่อน:
+    "Sign up to join a league and play with friends",
   กรอกรหัสเชิญ: "Enter invite code",
   "คะแนน Gameweek นี้ยังเป็นคะแนนชั่วคราว และอาจเปลี่ยนหลังตรวจแมตช์ตกค้าง":
     "This Gameweek is provisional and may change after postponed matches are reviewed",
@@ -667,6 +669,8 @@ const translations: Record<string, string> = {
   จัดการข้อมูลบัญชีและชื่อทีมแฟนตาซีของคุณ:
     "Manage your account details and Fantasy team name",
   "บัญชี Guest": "Guest account",
+  "สมัครสมาชิกเพื่อเก็บทีมนี้ไว้ เล่นต่อได้ทุกอุปกรณ์ และเข้าร่วมลีกส่วนตัวกับเพื่อน":
+    "Sign up to save this team, continue on any device, and join Private Leagues with friends",
   บัญชีสมาชิก: "Member account",
   บัญชีของฉัน: "My Account",
   โปรไฟล์และการตั้งค่า: "Profile & Settings",
@@ -717,8 +721,6 @@ const translations: Record<string, string> = {
     "Switch between Thai and English immediately",
   "Guest จะบันทึกการตั้งค่านี้ไว้ในอุปกรณ์เครื่องนี้":
     "Guests save this preference on the current device",
-  สมาชิกจะซิงก์การตั้งค่านี้กับบัญชีและอุปกรณ์อื่น:
-    "Members sync this preference with their account and other devices",
   บันทึกภาษาบนอุปกรณ์เครื่องนี้แล้ว: "Language saved on this device",
   บันทึกภาษาสำหรับบัญชีนี้แล้ว: "Language saved for this account",
   "กำลังบันทึกภาษา…": "Saving language…",
@@ -1089,10 +1091,7 @@ export function LanguageSwitcher({
             else setLanguage("th");
           }}
         />
-        <span>
-          <b>TH</b>
-          <small>ไทย</small>
-        </span>
+        <span>ไทย</span>
       </label>
       <label
         className={
@@ -1111,10 +1110,7 @@ export function LanguageSwitcher({
             else setLanguage("en");
           }}
         />
-        <span>
-          <b>EN</b>
-          <small>English</small>
-        </span>
+        <span>English</span>
       </label>
     </div>
   );

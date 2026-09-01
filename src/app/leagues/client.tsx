@@ -615,11 +615,6 @@ export function LeagueOverview({
         >
           <div className="league-section-heading">
             <h2 id="private-heading">ลีกส่วนตัว</h2>
-            {overview.isGuest ? (
-              <Link href="/upgrade" className="primary-button">
-                สมัครสมาชิก
-              </Link>
-            ) : null}
             {!overview.isGuest ? (
               <div className="league-heading-actions">
                 <button
@@ -673,7 +668,11 @@ export function LeagueOverview({
               ))}
             </ul>
           ) : (
-            <p className="league-private-empty-copy">ยังไม่มีลีกส่วนตัว</p>
+            <p className="league-private-empty-copy">
+              {overview.isGuest
+                ? "ต้องสมัครสมาชิกเพื่อเข้าร่วมลีกเล่นกับเพื่อน"
+                : "ยังไม่มีลีกส่วนตัว"}
+            </p>
           )}
         </section>
 

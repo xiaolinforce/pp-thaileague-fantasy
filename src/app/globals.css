@@ -2603,7 +2603,7 @@ textarea:focus-visible {
 }
 
 .language-option {
-  min-width: 92px;
+  min-width: 104px;
   min-height: 46px;
   padding: 7px 10px;
   border: 1px solid transparent;
@@ -2611,7 +2611,8 @@ textarea:focus-visible {
   color: #7f8588;
   display: flex;
   align-items: center;
-  gap: 9px;
+  justify-content: center;
+  gap: 7px;
   cursor: pointer;
 }
 
@@ -2633,16 +2634,7 @@ textarea:focus-visible {
 }
 
 .language-option > span {
-  display: flex;
-  flex-direction: column;
-}
-
-.language-option b {
   font-size: 16px;
-}
-
-.language-option small {
-  font-size: 12px;
 }
 
 .language-option.active {
@@ -7685,6 +7677,7 @@ textarea:focus-visible {
 }
 
 .account-task-card {
+  width: min(100%, 760px);
   padding: 26px;
 }
 
@@ -7736,9 +7729,17 @@ textarea:focus-visible {
   background: #f3f1ed;
 }
 
-.account-team-name-field small {
+.product-content .account-team-name-field small {
+  padding-inline: 12px;
   color: var(--muted);
+  font-size: 12px;
   line-height: 1.45;
+}
+
+.account-guest-description {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
 }
 
 .account-field-error {
@@ -8008,32 +8009,6 @@ textarea:focus-visible {
 
 .rules-document {
   padding: 28px;
-}
-
-.rules-source-note {
-  margin-bottom: 10px;
-  padding: 16px;
-  border: 1px solid #cce4da;
-  border-radius: 12px;
-  display: flex;
-  align-items: flex-start;
-  gap: 11px;
-  color: #365b50;
-  background: #edf7f3;
-}
-
-.rules-source-note > svg {
-  margin-top: 2px;
-  flex: 0 0 auto;
-}
-
-.rules-source-note > div {
-  display: grid;
-  gap: 3px;
-}
-
-.rules-source-note span {
-  line-height: 1.55;
 }
 
 .rules-document-section {
