@@ -1,32 +1,25 @@
 "use client";
 
-import { LoaderCircle, Mail, Save, UsersRound } from "lucide-react";
+import { LoaderCircle, Mail, Save, UserPlus, UsersRound } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { updateFantasyTeamNameAction } from "@/app/fantasy-actions";
 import { AppShell } from "@/components/fantasy/app-shell";
-import { useAppIdentity } from "@/components/fantasy/identity";
+import {
+  useAppIdentity,
+  useSetAppIdentity,
+} from "@/components/fantasy/identity";
 import { useLanguage } from "@/components/fantasy/i18n";
 import { toast } from "@/components/ui/sonner";
-
-function initialsFor(value: string | undefined, fallback: string) {
-  const initials = (value ?? "")
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-  return initials || fallback;
-}
+import { normalizeFantasyName, validateFantasyName } from "@/lib/auth/names";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { language, translate } = useLanguage();
   const identity = useAppIdentity();
+  const setIdentity = useSetAppIdentity();
   const [teamName, setTeamName] = useState(identity?.teamName ?? "");
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
@@ -34,7 +27,11 @@ export default function ProfilePage() {
   const formErrorRef = useRef<HTMLParagraphElement>(null);
 
   const teamNameLocked = (identity?.teamNameChangesRemaining ?? 0) <= 0;
-  const hasNameChanges = teamName.trim() !== (identity?.teamName ?? "");
+  const hasNameChanges =
+    normalizeFantasyName(teamName) !== (identity?.teamName ?? "");
+  const canEditTeamName = Boolean(
+    identity && !identity.isGuest && !teamNameLocked,
+  );
 
   useEffect(() => {
     if (!hasNameChanges) return;
@@ -48,6 +45,15 @@ export default function ProfilePage() {
   const save = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!identity || identity.isGuest || !hasNameChanges || saving) return;
+
+    const validation = validateFantasyName(teamName);
+    if (!validation.ok) {
+      const message = translate(validation.message ?? "ชื่อไม่ถูกต้อง");
+      setFormStatus("");
+      setFormError(message);
+      window.requestAnimationFrame(() => formErrorRef.current?.focus());
+      return;
+    }
 
     setSaving(true);
     setFormError("");
@@ -63,6 +69,16 @@ export default function ProfilePage() {
       }
 
       setFormStatus(message);
+      setTeamName(result.teamName);
+      setIdentity((currentIdentity) =>
+        currentIdentity
+          ? {
+              ...currentIdentity,
+              teamName: result.teamName,
+              teamNameChangesRemaining: result.teamNameChangesRemaining,
+            }
+          : currentIdentity,
+      );
       toast.success(message);
       router.refresh();
     } catch {
@@ -82,123 +98,86 @@ export default function ProfilePage() {
     <AppShell>
       <main id="main-content" className="content product-content account-page">
         <header className="account-page-header">
-          <div>
-            <h1>โปรไฟล์ทีม</h1>
-            <p>จัดการข้อมูลบัญชีและชื่อทีมแฟนตาซีของคุณ</p>
-          </div>
-          <span className="account-status-pill">
-            {identity?.isGuest ? "บัญชี Guest" : "บัญชีสมาชิก"}
-          </span>
+          <h1>โปรไฟล์</h1>
         </header>
 
-        <form className="product-card profile-editor" onSubmit={save}>
+        <div className="account-card-stack">
           <section
-            className="profile-editor-section"
-            aria-labelledby="account-heading"
+            className="product-card account-task-card"
+            aria-labelledby="email-heading"
           >
             <div className="profile-section-heading">
-              <span
-                className="profile-avatar profile-heading-avatar"
-                aria-hidden="true"
-                data-localize="off"
-              >
-                {initialsFor(identity?.teamName, "G")}
+              <span className="settings-icon orange" aria-hidden="true">
+                <Mail />
               </span>
-              <div>
-                <h2 id="account-heading">ข้อมูลบัญชี</h2>
-                <p>
-                  {identity?.isGuest
-                    ? "Guest ไม่มีอีเมลและใช้ได้บนอุปกรณ์นี้"
-                    : "บัญชีนี้ใช้เก็บทีมและการตั้งค่าข้ามอุปกรณ์"}
-                </p>
-              </div>
+              <h2 id="email-heading">อีเมล</h2>
             </div>
 
-            <div className="profile-fields-grid">
-              <div className="settings-readonly-field">
-                <span>อีเมล</span>
-                <strong>
-                  <Mail aria-hidden="true" />
-                  {identity?.email ?? "Guest ไม่มีอีเมล"}
-                </strong>
-              </div>
+            <div className="account-readonly-value">
+              {identity?.email ? (
+                <span data-localize="off">{identity.email}</span>
+              ) : (
+                <span>Guest ไม่มีอีเมล</span>
+              )}
             </div>
           </section>
 
-          <section
-            className="profile-editor-section"
+          <form
+            className="product-card account-task-card"
             aria-labelledby="team-heading"
+            onSubmit={save}
+            noValidate
           >
             <div className="profile-section-heading">
               <span className="settings-icon orange" aria-hidden="true">
                 <UsersRound />
               </span>
-              <div>
-                <h2 id="team-heading">ข้อมูลทีม</h2>
-                <p>ชื่อทีมที่แสดงในคะแนนและตารางอันดับ</p>
-              </div>
+              <h2 id="team-heading">ชื่อทีม</h2>
             </div>
 
-            <div className="team-identity-row">
-              {identity?.isGuest ? (
-                <div className="team-name-readonly">
-                  <span>ชื่อทีม</span>
-                  <strong data-localize="off">{identity.teamName}</strong>
-                  <p>Guest ใช้ชื่อทีมแบบสุ่มและเปลี่ยนไม่ได้</p>
-                </div>
-              ) : (
-                <label>
-                  <span>ชื่อทีม</span>
-                  <input
-                    name="teamName"
-                    value={teamName}
-                    onChange={(event) => setTeamName(event.target.value)}
-                    disabled={teamNameLocked}
-                    required
-                    minLength={3}
-                    maxLength={30}
-                    autoComplete="off"
-                    spellCheck={false}
-                    aria-describedby="team-name-format team-name-help"
-                  />
-                  <small id="team-name-format">
-                    ใช้ภาษาไทย อังกฤษ ตัวเลข เว้นวรรค และ . _ - ได้ 3–30
-                    ตัวอักษร ชื่อทีมต้องไม่ซ้ำในฤดูกาลเดียวกัน
-                  </small>
-                  <small id="team-name-help">
-                    {teamNameLocked
-                      ? "ใช้สิทธิ์เปลี่ยนชื่อทีมครบแล้วสำหรับฤดูกาลนี้"
-                      : `เปลี่ยนชื่อทีมได้อีก ${identity?.teamNameChangesRemaining ?? 0} ครั้งในฤดูกาลนี้`}
-                  </small>
-                </label>
-              )}
+            <div className="account-team-name-field">
+              <input
+                id="team-name"
+                name="teamName"
+                value={teamName}
+                onChange={(event) => {
+                  setTeamName(event.target.value);
+                  setFormError("");
+                  setFormStatus("");
+                }}
+                readOnly={!canEditTeamName}
+                autoComplete="off"
+                spellCheck={false}
+                aria-labelledby="team-heading"
+                aria-describedby={`team-name-help${formError ? " team-name-error" : ""}`}
+                aria-invalid={Boolean(formError)}
+              />
+              <small id="team-name-help">
+                {language === "th"
+                  ? `เปลี่ยนชื่อทีมได้อีก ${identity?.teamNameChangesRemaining ?? 0} ครั้งในฤดูกาลนี้`
+                  : `${identity?.teamNameChangesRemaining ?? 0} team-name changes remaining this season`}
+              </small>
+              {formError ? (
+                <p
+                  id="team-name-error"
+                  className="account-field-error"
+                  ref={formErrorRef}
+                  role="alert"
+                  tabIndex={-1}
+                >
+                  {formError}
+                </p>
+              ) : null}
             </div>
-          </section>
 
-          {identity?.isGuest ? (
-            <div className="profile-guest-upgrade">
-              <div>
-                <strong>ต้องการเก็บทีมไว้ข้ามอุปกรณ์?</strong>
-                <span>สมัครสมาชิกแล้วใช้ทีม Guest เดิมต่อได้</span>
-              </div>
-              <Link href="/upgrade" className="primary-button">
-                สมัครสมาชิก
-              </Link>
-            </div>
-          ) : (
-            <div className="profile-save-row">
+            <div className="account-card-action-row">
               <div className="profile-form-feedback" aria-live="polite">
-                {formError ? (
-                  <p ref={formErrorRef} role="alert" tabIndex={-1}>
-                    {formError}
-                  </p>
-                ) : null}
                 {!formError && formStatus ? <p>{formStatus}</p> : null}
               </div>
               <button
                 type="submit"
                 className="primary-button"
-                disabled={saving || !hasNameChanges}
+                disabled={saving || !canEditTeamName || !hasNameChanges}
                 aria-busy={saving}
               >
                 {saving ? (
@@ -209,8 +188,27 @@ export default function ProfilePage() {
                 {saving ? "กำลังบันทึก…" : "บันทึกชื่อทีม"}
               </button>
             </div>
-          )}
-        </form>
+          </form>
+
+          {identity?.isGuest ? (
+            <section
+              className="product-card account-task-card"
+              aria-labelledby="guest-heading"
+            >
+              <div className="profile-section-heading">
+                <span className="settings-icon orange" aria-hidden="true">
+                  <UserPlus />
+                </span>
+                <h2 id="guest-heading">บัญชี Guest</h2>
+              </div>
+              <div className="account-card-action-row">
+                <Link href="/upgrade" className="primary-button">
+                  สมัครสมาชิก
+                </Link>
+              </div>
+            </section>
+          ) : null}
+        </div>
       </main>
     </AppShell>
   );

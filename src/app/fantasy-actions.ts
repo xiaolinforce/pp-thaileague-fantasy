@@ -65,6 +65,18 @@ export type FantasyActionResult =
       violations?: string[];
     };
 
+export type FantasyTeamNameActionResult =
+  | {
+      ok: true;
+      message: string;
+      teamName: string;
+      teamNameChangesRemaining: number;
+    }
+  | {
+      ok: false;
+      message: string;
+    };
+
 export type FantasyAutoFillResult =
   | {
       ok: true;
@@ -186,7 +198,7 @@ function isUniqueViolation(error: unknown): boolean {
 
 export async function updateFantasyTeamNameAction(input: {
   teamName: string;
-}): Promise<FantasyActionResult> {
+}): Promise<FantasyTeamNameActionResult> {
   const profile = await requireFantasyProfile();
   if (profile.isAnonymous) {
     return {
@@ -201,7 +213,7 @@ export async function updateFantasyTeamNameAction(input: {
       message: teamName.message ?? "ชื่อไม่ถูกต้อง",
     };
   }
-  let result: FantasyActionResult;
+  let result: FantasyTeamNameActionResult;
   try {
     result = await transactionDb.transaction(async (tx) => {
       const teamRows = await tx
@@ -224,7 +236,15 @@ export async function updateFantasyTeamNameAction(input: {
       }
 
       if (teamName.value === currentTeam.name) {
-        return { ok: true, message: "ไม่มีข้อมูลที่เปลี่ยนแปลง" } as const;
+        return {
+          ok: true,
+          message: "ไม่มีข้อมูลที่เปลี่ยนแปลง",
+          teamName: currentTeam.name,
+          teamNameChangesRemaining: Math.max(
+            0,
+            3 - currentTeam.nameChangesUsed,
+          ),
+        } as const;
       }
       if (currentTeam.nameChangesUsed >= 3) {
         return {
@@ -242,7 +262,15 @@ export async function updateFantasyTeamNameAction(input: {
           updatedAt: now,
         })
         .where(eq(fantasyTeams.id, currentTeam.id));
-      return { ok: true, message: "บันทึกชื่อทีมเรียบร้อยแล้ว" } as const;
+      return {
+        ok: true,
+        message: "บันทึกชื่อทีมเรียบร้อยแล้ว",
+        teamName: teamName.value,
+        teamNameChangesRemaining: Math.max(
+          0,
+          3 - (currentTeam.nameChangesUsed + 1),
+        ),
+      } as const;
     });
   } catch (error) {
     if (isUniqueViolation(error)) {

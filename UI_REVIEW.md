@@ -536,6 +536,43 @@ test:email`, `npm run types`, `npm run lint`, `npm run format:check`, `npm run
 build`, migration on the confirmed Neon development branch, responsive DOM
   and overflow inspection.
 
+### 2026-09-01 — Simplified account surfaces and manager trigger
+
+- **Route and task:** shared shell, `/profile`, `/settings`, `/upgrade`, and
+  `/rules`; simplify account tasks into focused cards, reduce page-header copy,
+  and pair the team name with a person icon in the manager trigger.
+- **Status:** Profile and Settings remain In progress, Rules remains Reviewed,
+  and Upgrade remains Unreviewed pending a rendered Guest/provider pass.
+- **Data/auth state:** the available development session resolved as a member.
+  Client-side invalid-name feedback was exercised without submitting a rename;
+  the language preference was changed for bilingual review and restored to Thai.
+- **Language:** Thai and English rendered on Profile, Settings, the manager
+  drawer, and Rules. Team names and private email values remained outside
+  dictionary replacement.
+- **Viewports/accessibility:** 1440px Desktop, 1279px and 768px Tablet, and
+  360px Mobile; no document-level horizontal overflow. Headings, labelled
+  regions/forms, native language radios, invalid-field association, live
+  feedback, disabled actions, keyboard focus, and the person icon in both the
+  sidebar and drawer were inspected.
+- **Issues fixed:** redundant page descriptions and account badges, nested
+  Profile groupings, pre-submit-only browser validation, stale rename-count
+  context after save, the avatar/manager-label treatment, the Upgrade split
+  hero, and the visible Rules contents label. A legacy compact selector that
+  hid the new person icon in the drawer was found and corrected during the
+  bounded review.
+- **Known exclusions:** the Guest-only Profile upgrade card and Upgrade provider
+  choices could not be rendered because `/upgrade` redirects the available
+  member session to Profile. Successful/duplicate/exhausted rename states were
+  not submitted to avoid consuming or mutating real team-name state. Provider
+  availability and Server Action behavior remain covered by implementation,
+  types, and production build pending natural Guest evidence.
+- **Evidence:** bounded in-app Browser DOM, responsive measurement, interaction,
+  and screenshot inspection; no mock route, fixture override, debug flag, or
+  simulation code was introduced.
+- **Verification:** complete project checks: `npm run test:rules`,
+  `npm run test:email`, `npm run test:auth`, `npm run types`, `npm run lint`,
+  `npm run format:check`, and `npm run build`.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

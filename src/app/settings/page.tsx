@@ -1,6 +1,6 @@
 "use client";
 
-import { Cloud, Languages, LoaderCircle, Smartphone } from "lucide-react";
+import { Languages, LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -58,47 +58,31 @@ export default function SettingsPage() {
     <AppShell>
       <main id="main-content" className="content product-content account-page">
         <header className="account-page-header">
-          <div>
-            <h1>ตั้งค่า</h1>
-            <p>เลือกภาษาที่ใช้แสดงผลให้เหมาะกับการใช้งานของคุณ</p>
-          </div>
+          <h1>ตั้งค่า</h1>
         </header>
 
         <section
-          className="product-card settings-page-card"
+          className="product-card account-task-card"
           aria-labelledby="language-heading"
         >
           <div className="profile-section-heading">
             <span className="settings-icon orange" aria-hidden="true">
               <Languages />
             </span>
-            <div>
-              <h2 id="language-heading">ภาษา</h2>
-              <p>เปลี่ยนภาษาไทยและอังกฤษได้ทันที</p>
-            </div>
+            <h2 id="language-heading">ภาษา</h2>
           </div>
 
           <div className="language-preference-panel">
-            <div className="language-preference-copy">
-              {identity?.isGuest ? (
-                <Smartphone aria-hidden="true" />
-              ) : (
-                <Cloud aria-hidden="true" />
-              )}
-              <div>
-                <strong>ภาษาที่ใช้แสดงผล</strong>
-                <span id="language-persistence-help">
-                  {identity?.isGuest
-                    ? "Guest จะบันทึกการตั้งค่านี้ไว้ในอุปกรณ์เครื่องนี้"
-                    : "สมาชิกจะซิงก์การตั้งค่านี้กับบัญชีและอุปกรณ์อื่น"}
-                </span>
-              </div>
-            </div>
             <LanguageSwitcher
               disabled={saving}
               describedBy="language-persistence-help"
               onValueChange={changeLanguage}
             />
+            <small id="language-persistence-help">
+              {identity?.isGuest
+                ? "Guest จะบันทึกการตั้งค่านี้ไว้ในอุปกรณ์เครื่องนี้"
+                : "สมาชิกจะซิงก์การตั้งค่านี้กับบัญชีและอุปกรณ์อื่น"}
+            </small>
           </div>
 
           <div className="settings-save-status" aria-live="polite">

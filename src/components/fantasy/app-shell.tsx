@@ -114,12 +114,10 @@ const accountNavigation = [
 
 function ManagerMenu({
   identity,
-  initials,
   pathname,
   onNavigate,
 }: {
   identity: AppIdentity;
-  initials: string;
   pathname: string;
   onNavigate?: () => void;
 }) {
@@ -173,11 +171,11 @@ function ManagerMenu({
     <button
       type="button"
       className={`manager-card manager-menu-trigger${accountRouteActive ? " active" : ""}`}
-      aria-label={translate("เปิดเมนูผู้จัดการทีม")}
+      aria-label={translate("เปิดเมนูทีม")}
       aria-expanded={open}
     >
       <span className="manager-avatar" aria-hidden="true">
-        {initials}
+        <UserRound size={20} strokeWidth={1.9} />
       </span>
       <span className="manager-card-copy">
         {identity ? (
@@ -185,13 +183,6 @@ function ManagerMenu({
         ) : (
           <strong>{translate("เริ่มเล่น Fantasy")}</strong>
         )}
-        <small>
-          {identity
-            ? identity.isGuest
-              ? translate("ผู้เล่น Guest")
-              : translate("ผู้จัดการทีม")
-            : translate("ยังไม่มีทีม")}
-        </small>
       </span>
       <ChevronDown
         className={open ? "manager-menu-chevron open" : "manager-menu-chevron"}
@@ -217,7 +208,7 @@ function ManagerMenu({
             : translate("เริ่มจัดทีมไทยลีกของคุณ")}
         </span>
       </div>
-      <nav aria-label={translate("เมนูผู้จัดการทีม")}>
+      <nav aria-label={translate("เมนูบัญชี")}>
         {accountNavigation
           .filter(
             (item) =>
@@ -292,12 +283,10 @@ function ManagerMenu({
 function SidebarContent({
   pathname,
   identity,
-  initials,
   onNavigate,
 }: {
   pathname: string;
   identity: AppIdentity;
-  initials: string;
   onNavigate?: () => void;
 }) {
   const { requestNavigation } = useNavigationBlocker();
@@ -382,7 +371,6 @@ function SidebarContent({
       <div className="sidebar-bottom">
         <ManagerMenu
           identity={identity}
-          initials={initials}
           pathname={pathname}
           onNavigate={onNavigate}
         />
@@ -395,12 +383,6 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const identity = useAppIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
-  const initials = (identity?.teamName ?? "Guest")
-    .split(/\s+/)
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
   return (
     <Localized>
       <div className="app-shell">
@@ -408,11 +390,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           ข้ามไปยังเนื้อหาหลัก
         </a>
         <aside className="sidebar">
-          <SidebarContent
-            pathname={pathname}
-            identity={identity}
-            initials={initials}
-          />
+          <SidebarContent pathname={pathname} identity={identity} />
         </aside>
 
         <div className="main-shell">
@@ -445,7 +423,6 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <SidebarContent
                   pathname={pathname}
                   identity={identity}
-                  initials={initials}
                   onNavigate={() => setMenuOpen(false)}
                 />
               </aside>

@@ -1,6 +1,6 @@
 "use client";
 
-import { BookOpenText, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useMemo } from "react";
 
 import { AppShell } from "@/components/fantasy/app-shell";
@@ -18,25 +18,16 @@ export default function RulesPage() {
     <AppShell>
       <main id="main-content" className="content product-content reading-page">
         <header className="reading-page-header">
-          <span className="reading-page-icon" aria-hidden="true">
-            <BookOpenText />
-          </span>
-          <div>
-            <h1>{language === "th" ? "กติกาเกม" : "Game rules"}</h1>
-            <p>
-              {language === "th"
-                ? "กติกาที่ระบบใช้ตรวจทีม ซื้อขาย และคำนวณคะแนนสำหรับฤดูกาล 2026/27"
-                : "The rules used to validate squads, settle transfers, and calculate points for the 2026/27 season."}
-            </p>
-          </div>
+          <h1>{language === "th" ? "กติกาเกม" : "Game rules"}</h1>
         </header>
 
         <div className="rules-page-layout">
           <nav
             className="product-card rules-toc"
-            aria-label={language === "th" ? "สารบัญกติกา" : "Rules contents"}
+            aria-label={
+              language === "th" ? "ส่วนต่างๆ ของกติกา" : "Rules sections"
+            }
           >
-            <strong>{language === "th" ? "สารบัญ" : "Contents"}</strong>
             <div>
               {sections.map((section) => (
                 <a href={`#${section.id}`} key={section.id}>

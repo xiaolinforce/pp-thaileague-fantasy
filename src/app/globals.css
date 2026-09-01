@@ -424,6 +424,66 @@ textarea:focus-visible {
   font-size: 12px;
   line-height: 1.6;
 }
+
+.upgrade-page {
+  position: relative;
+  min-height: 100svh;
+  padding: 80px 24px;
+  display: grid;
+  place-items: center;
+  background: var(--warm);
+  font-family: var(--font-mitr), "Leelawadee UI", Tahoma, Arial, sans-serif;
+}
+
+.upgrade-back-link {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  min-height: 44px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.upgrade-back-link:hover {
+  color: var(--orange-deep);
+  background: #fff;
+}
+
+.upgrade-back-link svg {
+  width: 19px;
+  height: 19px;
+}
+
+.upgrade-auth-panel {
+  width: min(100%, 460px);
+}
+
+.upgrade-auth-panel .auth-choice-stack {
+  gap: 14px;
+}
+
+.upgrade-auth-panel .auth-button {
+  min-height: 56px;
+}
+
+.upgrade-auth-panel .auth-error {
+  margin-top: 14px;
+}
+
+.upgrade-auth-panel .member-card {
+  padding: 22px;
+}
+
+.upgrade-back-link:focus-visible {
+  outline: 3px solid rgba(245, 102, 23, 0.32);
+  outline-offset: 2px;
+}
+
 @media (width < 80rem) {
   .onboarding-page {
     grid-template-columns: 1fr;
@@ -467,6 +527,19 @@ textarea:focus-visible {
   }
   .member-card {
     padding: 16px;
+  }
+
+  .upgrade-page {
+    padding: 76px 16px 32px;
+  }
+
+  .upgrade-back-link {
+    top: 16px;
+    left: 10px;
+  }
+
+  .upgrade-auth-panel .member-card {
+    padding: 18px 16px;
   }
 }
 
@@ -2307,6 +2380,17 @@ textarea:focus-visible {
 .manager-avatar {
   color: var(--navy);
   background: #eef1f2;
+}
+
+.manager-avatar svg {
+  width: 20px;
+  height: 20px;
+  color: currentColor;
+}
+
+.manager-card-copy strong {
+  font-size: 14px;
+  line-height: 1.35;
 }
 
 .manager-menu-chevron {
@@ -6892,7 +6976,7 @@ textarea:focus-visible {
   .segment-tabs.team-workspace-tabs {
     width: 100%;
     height: 56px;
-    margin-bottom: 8px;
+    margin-bottom: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     padding: 3px;
@@ -6900,6 +6984,14 @@ textarea:focus-visible {
     border-radius: 12px;
     background: #f1efeb;
     box-shadow: inset 0 1px 2px rgba(40, 35, 30, 0.04);
+  }
+
+  .team-workspace-tabs-sticky {
+    position: sticky;
+    top: 66px;
+    z-index: 19;
+    margin-bottom: 8px;
+    background: var(--warm);
   }
 
   .team-workspace-tabs [data-slot="tabs-trigger"] {
@@ -7582,6 +7674,94 @@ textarea:focus-visible {
   font-weight: 600;
 }
 
+.account-card-stack {
+  width: min(100%, 760px);
+  display: grid;
+  gap: 16px;
+}
+
+.account-task-card {
+  padding: 26px;
+}
+
+.account-task-card .profile-section-heading {
+  margin-bottom: 18px;
+  align-items: center;
+}
+
+.account-task-card .profile-section-heading h2 {
+  font-size: 21px;
+}
+
+.account-readonly-value,
+.account-team-name-field input {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--warm);
+}
+
+.account-readonly-value {
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  overflow-wrap: anywhere;
+}
+
+.account-team-name-field {
+  display: grid;
+  gap: 7px;
+}
+
+.account-team-name-field input {
+  padding: 9px 12px;
+  background: #fff;
+  font: inherit;
+}
+
+.account-team-name-field input:focus-visible {
+  border-color: var(--orange);
+  outline: 3px solid rgba(245, 102, 23, 0.18);
+  outline-offset: 1px;
+}
+
+.account-team-name-field input[readonly] {
+  color: #596168;
+  background: #f3f1ed;
+}
+
+.account-team-name-field small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.account-field-error {
+  margin: 2px 0 0;
+  color: #b42318;
+  line-height: 1.5;
+}
+
+.account-card-action-row {
+  min-height: 44px;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 16px;
+}
+
+.account-card-action-row .profile-form-feedback {
+  min-width: 0;
+  flex: 1;
+  color: var(--green-dark);
+}
+
+.account-card-action-row .profile-form-feedback p {
+  margin: 0;
+}
+
 .profile-editor {
   padding: 0;
 }
@@ -7717,14 +7897,13 @@ textarea:focus-visible {
 }
 
 .language-preference-panel {
-  min-height: 92px;
+  min-height: 104px;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 22px;
+  display: grid;
+  align-items: start;
+  gap: 10px;
   background: var(--warm);
 }
 
@@ -7752,8 +7931,12 @@ textarea:focus-visible {
 }
 
 .language-preference-panel .language-switcher {
-  width: auto;
-  flex: 0 0 auto;
+  width: fit-content;
+}
+
+.language-preference-panel > small {
+  color: var(--muted);
+  line-height: 1.5;
 }
 
 .settings-save-status {
@@ -7792,11 +7975,6 @@ textarea:focus-visible {
   position: sticky;
   top: 20px;
   padding: 18px;
-}
-
-.rules-toc > strong {
-  display: block;
-  margin-bottom: 10px;
 }
 
 .rules-toc > div {
@@ -8019,6 +8197,7 @@ textarea:focus-visible {
     height: 44px;
   }
 
+  .account-task-card,
   .profile-editor-section,
   .settings-page-card,
   .help-faq,
@@ -8038,8 +8217,14 @@ textarea:focus-visible {
   }
 
   .profile-guest-upgrade .primary-button,
-  .profile-save-row .primary-button {
+  .profile-save-row .primary-button,
+  .account-card-action-row .primary-button {
     width: 100%;
+  }
+
+  .account-card-action-row {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .language-preference-panel {
@@ -8797,6 +8982,10 @@ body {
 
   .drawer-sidebar .manager-card > span:nth-child(2) {
     display: flex;
+  }
+
+  .drawer-sidebar .manager-avatar {
+    display: grid;
   }
 
   .drawer-sidebar .manager-card {

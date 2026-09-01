@@ -8,6 +8,7 @@ import {
   UserRound,
 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -195,6 +196,211 @@ export default function OnboardingClient({
     setError("");
   };
 
+  const emailAuthForm = (
+    <div className="email-auth-form">
+      <button
+        type="button"
+        className="auth-back-button"
+        onClick={showAuthChoices}
+        disabled={busy}
+      >
+        <ArrowLeft aria-hidden="true" /> ย้อนกลับ
+      </button>
+      <h3>
+        {upgradeMode
+          ? "สมัครสมาชิกด้วย EMAIL"
+          : "เข้าสู่ระบบหรือสมัครด้วย EMAIL"}
+      </h3>
+      <label htmlFor="auth-email">อีเมล</label>
+      <div className="auth-input-wrap">
+        <Mail aria-hidden="true" />
+        <input
+          id="auth-email"
+          name="email"
+          type="email"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          placeholder="you@example.com"
+          autoComplete="email"
+          spellCheck={false}
+          disabled={otpSent || busy}
+        />
+      </div>
+      {otpSent ? (
+        <>
+          <label htmlFor="auth-otp">รหัส OTP 6 หลัก</label>
+          <input
+            id="auth-otp"
+            name="otp"
+            className="otp-input"
+            inputMode="numeric"
+            autoComplete="one-time-code"
+            maxLength={6}
+            value={otp}
+            onChange={(event) => setOtp(event.target.value.replace(/\D/g, ""))}
+            placeholder="000000"
+            spellCheck={false}
+          />
+          <button
+            type="button"
+            className="auth-button primary-auth-button"
+            onClick={verifyOtp}
+            disabled={busy || otp.length !== 6}
+            aria-busy={busyAction === "verify-otp"}
+          >
+            {busyAction === "verify-otp" ? (
+              <>
+                <LoaderCircle className="spin" aria-hidden="true" />
+                กำลังตรวจสอบรหัส…
+              </>
+            ) : (
+              <>
+                ยืนยันและเริ่มเล่น <ArrowRight aria-hidden="true" />
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            className="auth-text-button"
+            onClick={() => {
+              setOtpSent(false);
+              setOtp("");
+              setCaptchaToken("");
+              setCaptchaEpoch((value) => value + 1);
+            }}
+            disabled={busy}
+          >
+            เปลี่ยนอีเมลหรือขอรหัสใหม่
+          </button>
+        </>
+      ) : (
+        <>
+          {turnstileSiteKey && (
+            <Turnstile
+              key={captchaEpoch}
+              siteKey={turnstileSiteKey}
+              onToken={setCaptchaToken}
+            />
+          )}
+          <button
+            type="button"
+            className="auth-button primary-auth-button"
+            onClick={sendOtp}
+            disabled={
+              busy ||
+              !email.includes("@") ||
+              Boolean(turnstileSiteKey && !captchaToken)
+            }
+            aria-busy={busyAction === "send-otp"}
+          >
+            {busyAction === "send-otp" ? (
+              <>
+                <LoaderCircle className="spin" aria-hidden="true" />
+                กำลังส่งรหัส OTP…
+              </>
+            ) : (
+              <>
+                ส่งรหัส OTP ทางอีเมล <ArrowRight aria-hidden="true" />
+              </>
+            )}
+          </button>
+        </>
+      )}
+    </div>
+  );
+
+  if (upgradeMode) {
+    return (
+      <Localized>
+        <main id="main-content" className="upgrade-page">
+          <Link href="/profile" className="upgrade-back-link">
+            <ArrowLeft aria-hidden="true" /> ย้อนกลับ
+          </Link>
+
+          <section
+            className="upgrade-auth-panel"
+            aria-labelledby="upgrade-title"
+          >
+            <h1 id="upgrade-title" className="sr-only">
+              สมัครสมาชิก
+            </h1>
+            {authView === "choices" ? (
+              <div className="auth-choice-stack">
+                <button
+                  type="button"
+                  className="auth-button google-button"
+                  onClick={signInWithGoogle}
+                  disabled={busy || !googleEnabled}
+                  aria-busy={busyAction === "google"}
+                  aria-describedby={
+                    googleEnabled ? undefined : "google-upgrade-unavailable"
+                  }
+                  title={
+                    googleEnabled
+                      ? undefined
+                      : "การสมัครสมาชิกด้วย Google ยังไม่เปิดใช้งาน"
+                  }
+                >
+                  {busyAction === "google" ? (
+                    <LoaderCircle className="spin" aria-hidden="true" />
+                  ) : (
+                    <Image
+                      className="google-sign-in-icon"
+                      src="/google-sign-in-icon.svg"
+                      width={40}
+                      height={40}
+                      alt=""
+                      unoptimized
+                    />
+                  )}
+                  {busyAction === "google"
+                    ? "กำลังเปิด Google…"
+                    : "สมัครสมาชิกด้วย GOOGLE"}
+                </button>
+                {!googleEnabled ? (
+                  <p id="google-upgrade-unavailable" className="sr-only">
+                    การสมัครสมาชิกด้วย Google ยังไม่เปิดใช้งาน
+                  </p>
+                ) : null}
+
+                <button
+                  type="button"
+                  className="auth-button email-choice-button"
+                  onClick={showEmailForm}
+                  disabled={busy || !emailEnabled}
+                  aria-describedby={
+                    emailEnabled ? undefined : "email-upgrade-unavailable"
+                  }
+                  title={
+                    emailEnabled
+                      ? undefined
+                      : "การสมัครสมาชิกด้วยอีเมลยังไม่เปิดใช้งาน"
+                  }
+                >
+                  <Mail aria-hidden="true" />
+                  สมัครสมาชิกด้วย EMAIL
+                </button>
+                {!emailEnabled ? (
+                  <p id="email-upgrade-unavailable" className="sr-only">
+                    การสมัครสมาชิกด้วยอีเมลยังไม่เปิดใช้งาน
+                  </p>
+                ) : null}
+              </div>
+            ) : (
+              <div className="member-card">{emailAuthForm}</div>
+            )}
+
+            {error && (
+              <p className="auth-error" role="alert">
+                {error}
+              </p>
+            )}
+          </section>
+        </main>
+      </Localized>
+    );
+  }
+
   return (
     <Localized>
       <main id="main-content" className="onboarding-page">
@@ -221,31 +427,14 @@ export default function OnboardingClient({
           </button>
 
           <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
-          <h1>
-            {upgradeMode
-              ? "เก็บทีม Guest นี้ไว้กับบัญชีของคุณ"
-              : "จัดทีมไทยลีกของคุณ"}
-          </h1>
-          <p>
-            {upgradeMode
-              ? "เข้าสู่ระบบเพื่อเก็บทีมนี้และเล่นต่อได้ทุกอุปกรณ์"
-              : "เลือกนักเตะ ลุ้นคะแนน และแข่งกับเพื่อนตลอดฤดูกาล"}
-          </p>
+          <h1>จัดทีมไทยลีกของคุณ</h1>
+          <p>เลือกนักเตะ ลุ้นคะแนน และแข่งกับเพื่อนตลอดฤดูกาล</p>
         </section>
 
         <section className="onboarding-panel" aria-labelledby="start-title">
-          {upgradeMode ? (
-            <div className="onboarding-panel-heading">
-              <div>
-                <p>เก็บทีมของคุณ</p>
-                <h2 id="start-title">เข้าสู่ระบบ</h2>
-              </div>
-            </div>
-          ) : (
-            <h2 id="start-title" className="sr-only">
-              เลือกวิธีเริ่มเล่น
-            </h2>
-          )}
+          <h2 id="start-title" className="sr-only">
+            เลือกวิธีเริ่มเล่น
+          </h2>
 
           <div
             className={
@@ -256,24 +445,22 @@ export default function OnboardingClient({
           >
             {authView === "choices" ? (
               <div className="auth-choice-stack">
-                {!upgradeMode && (
-                  <button
-                    type="button"
-                    className="auth-button guest-button"
-                    onClick={playAsGuest}
-                    disabled={busy}
-                    aria-busy={busyAction === "guest"}
-                  >
-                    {busyAction === "guest" ? (
-                      <LoaderCircle className="spin" aria-hidden="true" />
-                    ) : (
-                      <UserRound aria-hidden="true" />
-                    )}
-                    {busyAction === "guest"
-                      ? "กำลังเริ่มโหมด Guest…"
-                      : "ทดลองเล่นแบบไม่สมัครสมาชิก"}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  className="auth-button guest-button"
+                  onClick={playAsGuest}
+                  disabled={busy}
+                  aria-busy={busyAction === "guest"}
+                >
+                  {busyAction === "guest" ? (
+                    <LoaderCircle className="spin" aria-hidden="true" />
+                  ) : (
+                    <UserRound aria-hidden="true" />
+                  )}
+                  {busyAction === "guest"
+                    ? "กำลังเริ่มโหมด Guest…"
+                    : "ทดลองเล่นแบบไม่สมัครสมาชิก"}
+                </button>
 
                 {googleEnabled && (
                   <button
@@ -321,114 +508,7 @@ export default function OnboardingClient({
                 )}
               </div>
             ) : (
-              <div className="email-auth-form">
-                <button
-                  type="button"
-                  className="auth-back-button"
-                  onClick={showAuthChoices}
-                  disabled={busy}
-                >
-                  <ArrowLeft aria-hidden="true" /> ย้อนกลับ
-                </button>
-                <h3>เข้าสู่ระบบหรือสมัครด้วย EMAIL</h3>
-                <label htmlFor="auth-email">อีเมล</label>
-                <div className="auth-input-wrap">
-                  <Mail aria-hidden="true" />
-                  <input
-                    id="auth-email"
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={(event) => setEmail(event.target.value)}
-                    placeholder="you@example.com"
-                    autoComplete="email"
-                    spellCheck={false}
-                    disabled={otpSent || busy}
-                  />
-                </div>
-                {otpSent ? (
-                  <>
-                    <label htmlFor="auth-otp">รหัส OTP 6 หลัก</label>
-                    <input
-                      id="auth-otp"
-                      name="otp"
-                      className="otp-input"
-                      inputMode="numeric"
-                      autoComplete="one-time-code"
-                      maxLength={6}
-                      value={otp}
-                      onChange={(event) =>
-                        setOtp(event.target.value.replace(/\D/g, ""))
-                      }
-                      placeholder="000000"
-                      spellCheck={false}
-                    />
-                    <button
-                      type="button"
-                      className="auth-button primary-auth-button"
-                      onClick={verifyOtp}
-                      disabled={busy || otp.length !== 6}
-                      aria-busy={busyAction === "verify-otp"}
-                    >
-                      {busyAction === "verify-otp" ? (
-                        <>
-                          <LoaderCircle className="spin" aria-hidden="true" />
-                          กำลังตรวจสอบรหัส…
-                        </>
-                      ) : (
-                        <>
-                          ยืนยันและเริ่มเล่น <ArrowRight aria-hidden="true" />
-                        </>
-                      )}
-                    </button>
-                    <button
-                      type="button"
-                      className="auth-text-button"
-                      onClick={() => {
-                        setOtpSent(false);
-                        setOtp("");
-                        setCaptchaToken("");
-                        setCaptchaEpoch((value) => value + 1);
-                      }}
-                      disabled={busy}
-                    >
-                      เปลี่ยนอีเมลหรือขอรหัสใหม่
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    {turnstileSiteKey && (
-                      <Turnstile
-                        key={captchaEpoch}
-                        siteKey={turnstileSiteKey}
-                        onToken={setCaptchaToken}
-                      />
-                    )}
-                    <button
-                      type="button"
-                      className="auth-button primary-auth-button"
-                      onClick={sendOtp}
-                      disabled={
-                        busy ||
-                        !email.includes("@") ||
-                        Boolean(turnstileSiteKey && !captchaToken)
-                      }
-                      aria-busy={busyAction === "send-otp"}
-                    >
-                      {busyAction === "send-otp" ? (
-                        <>
-                          <LoaderCircle className="spin" aria-hidden="true" />
-                          กำลังส่งรหัส OTP…
-                        </>
-                      ) : (
-                        <>
-                          ส่งรหัส OTP ทางอีเมล <ArrowRight aria-hidden="true" />
-                        </>
-                      )}
-                    </button>
-                  </>
-                )}
-              </div>
+              emailAuthForm
             )}
           </div>
 
