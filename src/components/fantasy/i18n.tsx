@@ -21,7 +21,6 @@ const translations: Record<string, string> = {
   ซื้อขาย: "Transfers",
   คะแนน: "Points",
   ลีก: "Leagues",
-  โปรแกรมและสถิติ: "Fixtures & Stats",
   โปรแกรม: "Fixtures",
   โปรไฟล์และกติกา: "Profile & Rules",
   โปรไฟล์: "Profile",

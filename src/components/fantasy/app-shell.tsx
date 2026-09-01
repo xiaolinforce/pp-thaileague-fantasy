@@ -48,7 +48,7 @@ const navigation = [
   { label: "คะแนน", shortLabel: "คะแนน", href: "/points", icon: ListChecks },
   { label: "ลีก", shortLabel: "ลีก", href: "/leagues", icon: Trophy },
   {
-    label: "โปรแกรมและสถิติ",
+    label: "โปรแกรม",
     shortLabel: "โปรแกรม",
     href: "/fixtures",
     icon: CalendarDays,

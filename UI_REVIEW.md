@@ -31,7 +31,7 @@ when new behavior invalidates prior coverage.
 | `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                                                             |
 | `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                                       |
 | `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                                            |
-| `/fixtures`      | Data browser          | In progress | Local Gameweek browsing and URL-backed stat/filter states implemented; populated-season evidence remains pending upstream data.                                       |
+| `/fixtures`      | Data browser          | In progress | Focused Gameweek browsing implemented; empty, bilingual, and responsive states remain the next review focus.                                                          |
 | `/leagues`       | Ranking/community     | In progress | Persisted Overall waiting/Top 100 states and responsive language modes reviewed; populated Top 100 and authenticated Private operations still need rendered evidence. |
 | `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                 |
 | `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                            |
@@ -323,6 +323,33 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
   branch, `npm run db:verify:fantasy`, Thai/English DOM snapshots, responsive
   overflow measurements, and the complete project checks listed in the final
   implementation handoff.
+
+### 2026-09-01 — Fixtures-only data browser
+
+- **Route and task:** `/fixtures`; remove the player-statistics workspace and
+  make fixtures the route's only task, with the shared navigation label reduced
+  to Fixtures/โปรแกรม.
+- **Status:** In progress → In progress.
+- **Data/auth/Gameweek state:** real Guest session and imported development
+  fixtures; Gameweek 2 rendered eight fixtures with no simulated state.
+- **Language:** Thai and English after changing and restoring the persisted
+  Guest preference.
+- **Viewports:** default Desktop and 360px Mobile rendered without
+  document-level horizontal overflow.
+- **Keyboard/accessibility:** the semantic page heading, shared Gameweek
+  selector, named navigation links, fixture articles, and club-colour labels
+  remain present; the removed tab interface leaves no unreachable controls.
+- **Issues fixed:** the Stats route-within-a-route, player filters, rankings,
+  source panels, and Stats unlock state were removed. `/fixtures` now sends only
+  fixture, matchweek, and current-Gameweek fields into its Client Component.
+  Desktop sidebar and compact drawer both use the single Fixtures/โปรแกรม label.
+- **Known exclusions:** the existing no-fixture empty state was not manufactured
+  for evidence; it remains implemented for naturally empty Gameweeks.
+- **Evidence:** bounded in-app Browser inspection against the real development
+  database; DOM checks found no Stats text or tab roles, both inspected widths
+  matched their document widths, and the console reported no warnings or errors.
+- **Verification:** `npm run test:rules`, `npm run test:email`, `npm run types`,
+  `npm run lint`, `npm run format:check`, and `npm run build`.
 
 ### 2026-09-01 — Fixtures current-Gameweek browsing
 

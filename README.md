@@ -44,7 +44,7 @@ production-readiness work.
 | `/points`        | Gameweek score and category breakdown.                             |
 | `/leagues`       | Overall standings plus Private League creation and joining.        |
 | `/leagues/[id]`  | Member-only standings and owner/member League controls.            |
-| `/fixtures`      | Competition fixtures and supporting statistics.                    |
+| `/fixtures`      | Competition fixtures grouped by Gameweek.                          |
 | `/profile`       | Account details, the public team name, or Guest upgrade.           |
 | `/settings`      | Interface language preference for the current identity/device.     |
 | `/rules`         | Public rules generated from the executable Fantasy configuration.  |
