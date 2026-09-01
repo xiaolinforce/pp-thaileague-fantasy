@@ -142,12 +142,6 @@ export function PointsPlayerToken({
         </div>
 
         <div className="points-player-breakdown">
-          <div>
-            <span>
-              {language === "th" ? "นาทีที่ลงสนาม" : "Minutes played"}
-            </span>
-            <strong>{result?.minutes ?? 0}</strong>
-          </div>
           {detailRows.map(([key, value]) => (
             <div key={key}>
               <span>{getBreakdownLabel(key, language)}</span>

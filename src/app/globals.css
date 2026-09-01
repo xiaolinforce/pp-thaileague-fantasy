@@ -4931,8 +4931,7 @@ textarea:focus-visible {
 
 .points-player-breakdown > div {
   min-width: 0;
-  min-height: 62px;
-  padding: 10px 12px;
+  padding: 4px 12px;
   border: 1px solid var(--line);
   border-radius: 11px;
   background: #faf9f7;
@@ -4945,13 +4944,13 @@ textarea:focus-visible {
 .points-player-breakdown span {
   min-width: 0;
   color: var(--muted);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.35;
 }
 
 .points-player-breakdown strong {
   color: var(--ink);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 900;
   font-variant-numeric: tabular-nums;
   text-align: right;
