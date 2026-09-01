@@ -145,7 +145,12 @@ npm run db:scenario -- league-populated
 
 Gameweek scenarios rebuild deterministic fixtures, selections, revisions,
 player match points, team scores, and Overall standings for exactly 200 active
-teams. They also clear Private Leagues so each lifecycle baseline is repeatable.
+teams. Eight distinct valid squad templates provide varied player ownership
+without regenerating 200 squads on every switch. A live scenario scores only
+players from the one fixture already in progress and verifies that the target
+Gameweek contains both zero-point and positive provisional team totals. Final
+scenarios score every completed fixture. Gameweek scenarios also clear Private
+Leagues so each lifecycle baseline is repeatable.
 `league-empty` and `league-populated` are fast overlays: they preserve the
 current Gameweek/scoring state and only replace Private League data. Apply the
 desired Gameweek scenario first, then a League overlay when testing a combined
