@@ -92,6 +92,9 @@ the imported database during normal runtime.
   before production.
 - Import competition data before seeding the dependent Fantasy records.
 - Inspect the configured database with `npm run db:studio`.
+- Use the guarded `npm run db:scenario -- <name>` runner on a disposable Neon
+  branch for fast, repeatable Gameweek and Private League UI states; see the
+  [Development guide](DEVELOPMENT.md#fantasy-qa-scenarios).
 
 The Fantasy seed is idempotent for the configured season. It creates or updates
 Gameweeks, player classifications, safe fallback tier metadata, and the single

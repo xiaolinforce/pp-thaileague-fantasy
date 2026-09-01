@@ -21,17 +21,19 @@ Copy-Item .env.example .env.local
 
 Set the pooled Neon connection string for the intended development branch:
 
-| Variable                                                   | Purpose                                                                                     |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                             | Server runtime, Drizzle Kit, migration, seed, and verification connection.                  |
-| `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                    | Better Auth origin and signing/encryption secret.                                           |
-| `AUTH_EMAIL_HASH_SECRET`                                   | Separate salt for privacy-safe recipient hashes in delivery logs.                           |
-| `AUTH_EMAIL_ENABLED`, `AUTH_GOOGLE_ENABLED`                | Opt each sign-in method into the current environment.                                       |
-| `AUTH_PRODUCTION_READY`                                    | Additional production-only gate; keep false until domain/legal/provider review is complete. |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                 | Google OAuth web application credentials.                                                   |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`   | Required pair for every Email OTP request.                                                  |
-| `AUTH_EMAIL_PROVIDERS`, `EMAIL_FROM`, provider keys/limits | Resend → Mailjet delivery routing and quota headroom.                                       |
-| `NEXT_PUBLIC_SITE_URL`                                     | Optional public metadata base URL; local fallback is `http://localhost:3006`.               |
+| Variable                                                        | Purpose                                                                                     |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`                                                  | Server runtime, Drizzle Kit, migration, seed, and verification connection.                  |
+| `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                         | Better Auth origin and signing/encryption secret.                                           |
+| `AUTH_EMAIL_HASH_SECRET`                                        | Separate salt for privacy-safe recipient hashes in delivery logs.                           |
+| `AUTH_EMAIL_ENABLED`, `AUTH_GOOGLE_ENABLED`                     | Opt each sign-in method into the current environment.                                       |
+| `AUTH_PRODUCTION_READY`                                         | Additional production-only gate; keep false until domain/legal/provider review is complete. |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                      | Google OAuth web application credentials.                                                   |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`        | Required pair for every Email OTP request.                                                  |
+| `AUTH_EMAIL_PROVIDERS`, `EMAIL_FROM`, provider keys/limits      | Resend → Mailjet delivery routing and quota headroom.                                       |
+| `NEXT_PUBLIC_SITE_URL`                                          | Optional public metadata base URL; local fallback is `http://localhost:3006`.               |
+| `FANTASY_SCENARIO_BRANCH_ID`                                    | Exact disposable Neon branch ID required by the destructive QA scenario runner.             |
+| `FANTASY_SCENARIO_SEASON_SLUG`, `FANTASY_SCENARIO_PRIMARY_TEAM` | Optional scenario target overrides when more than one season or tester team exists.         |
 
 Never commit a real connection string, auth secret, OAuth credential, email API
 key, or Turnstile secret. The Turnstile site key is intentionally public; do
@@ -84,6 +86,7 @@ Open `http://localhost:3006`.
 | `npm run db:seed:fantasy`                 | Refresh Fantasy configuration, player tiers, and Overall membership.  |
 | `npm run db:rank:players`                 | Preview or explicitly publish a versioned player ranking.             |
 | `npm run db:rank:leagues`                 | Backfill the latest persisted Overall standings after scoring exists. |
+| `npm run db:scenario -- <name>`           | Apply one fast, guarded Fantasy QA database scenario.                 |
 | `npm run db:seed:club-colors`             | Reapply the curated club visual identity registry.                    |
 | `npm run db:normalize:clubs`              | Apply explicit club display-name normalization.                       |
 | `npm run db:normalize:club-short-names`   | Apply curated Thai/English club short names.                          |
@@ -116,6 +119,44 @@ experimentation environment.
 The project currently uses one `DATABASE_URL` for runtime and migrations.
 Environment isolation therefore depends on selecting the correct Neon branch.
 Confirm the target before any migration, import, normalization, or seed command.
+
+### Fantasy QA scenarios
+
+Use a disposable Neon branch for lifecycle and League UI testing. Set
+`DATABASE_URL` to that branch and set `FANTASY_SCENARIO_BRANCH_ID` to its exact
+Neon branch ID. The runner refuses a missing or mismatched branch ID and refuses
+`NODE_ENV=production`. Every write is applied in one transaction and ends with
+compact postcondition checks; a failure rolls the whole scenario back.
+
+List the available scenarios or apply one directly:
+
+```bash
+npm run db:scenario -- --list
+npm run db:scenario -- gw1-before
+npm run db:scenario -- gw1-live
+npm run db:scenario -- gw1-final
+npm run db:scenario -- gw2-live
+npm run db:scenario -- gw2-final
+npm run db:scenario -- gw30-live
+npm run db:scenario -- gw30-final
+npm run db:scenario -- league-empty
+npm run db:scenario -- league-populated
+```
+
+Gameweek scenarios rebuild deterministic fixtures, selections, revisions,
+player match points, team scores, and Overall standings for exactly 200 active
+teams. They also clear Private Leagues so each lifecycle baseline is repeatable.
+`league-empty` and `league-populated` are fast overlays: they preserve the
+current Gameweek/scoring state and only replace Private League data. Apply the
+desired Gameweek scenario first, then a League overlay when testing a combined
+state. The signed-in tester's most recently active team is selected by default;
+use `--primary-team=<team name>` when an explicit team is needed.
+
+The scenario runner is intentionally destructive inside the selected Fantasy
+season on its disposable branch. Do not point it at the shared development or
+production branch. Use `npm run db:verify:fantasy` only when full invariant
+verification is useful; routine scenario switching already performs the narrow
+checks needed for fast UI iteration.
 
 ### Ranking workflow
 
