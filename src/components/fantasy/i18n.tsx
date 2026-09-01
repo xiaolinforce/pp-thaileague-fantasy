@@ -315,6 +315,10 @@ const translations: Record<string, string> = {
   เปลี่ยนฟรีคงเหลือ: "Free transfers remaining",
   เปลี่ยนเกิน: "Transfers over limit",
   "-{points} คะแนน": "-{points} points",
+  "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)":
+    "You can make at most {count} transfers beyond the free allowance (-{points} points)",
+  "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด 3 คน (-12 คะแนน)":
+    "You can make at most 3 transfers beyond the free allowance (-12 points)",
   "Gameweek 1 เปลี่ยนได้ไม่จำกัด": "Unlimited transfers in Gameweek 1",
   "Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้":
     "Wildcard active · no deduction; free transfers are preserved",

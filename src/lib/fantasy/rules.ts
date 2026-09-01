@@ -40,6 +40,7 @@ export type FantasyRules = {
   weeklyFreeTransfers: number;
   maximumFreeTransfers: number;
   transferPointCost: number;
+  maximumChargeableTransfers: number;
   chipUsesPerSeason: number;
   wildcardStartGameweek: number;
 };
@@ -58,6 +59,7 @@ export type RuleViolationCode =
   | "bench_order"
   | "captain"
   | "vice_captain"
+  | "transfer_limit"
   | "chip_already_active"
   | "chip_unavailable"
   | "chip_limit";
@@ -93,6 +95,7 @@ export const THAI_LEAGUE_FANTASY_RULES: FantasyRules = {
   weeklyFreeTransfers: 2,
   maximumFreeTransfers: 4,
   transferPointCost: 4,
+  maximumChargeableTransfers: 3,
   chipUsesPerSeason: 2,
   wildcardStartGameweek: 2,
 };
@@ -386,6 +389,98 @@ export function getNetTransfers(
   };
 }
 
+export function getCountedTransfers(
+  previousSquadIds: string[],
+  nextSquadIds: string[],
+  rules: Pick<FantasyRules, "squadSize"> = THAI_LEAGUE_FANTASY_RULES,
+) {
+  if (previousSquadIds.length !== rules.squadSize) return 0;
+  return getNetTransfers(previousSquadIds, nextSquadIds).count;
+}
+
+export function getTransferUsage({
+  freeTransfersBefore,
+  transferCount,
+  wildcard,
+  openingGameweek = false,
+  rules = THAI_LEAGUE_FANTASY_RULES,
+}: {
+  freeTransfersBefore: number;
+  transferCount: number;
+  wildcard: boolean;
+  openingGameweek?: boolean;
+  rules?: FantasyRules;
+}) {
+  const safeFreeTransfers = Math.max(
+    0,
+    Math.min(rules.maximumFreeTransfers, freeTransfersBefore),
+  );
+  const safeTransferCount = Math.max(0, transferCount);
+  const hasUnlimitedTransfers = wildcard || openingGameweek;
+  const chargeableTransfers = hasUnlimitedTransfers
+    ? 0
+    : Math.max(0, safeTransferCount - safeFreeTransfers);
+
+  return {
+    chargeableTransfers,
+    freeTransfersRemaining: wildcard
+      ? safeFreeTransfers
+      : Math.max(0, safeFreeTransfers - safeTransferCount),
+    hasUnlimitedTransfers,
+    maximumTransferPoints:
+      rules.maximumChargeableTransfers * rules.transferPointCost,
+    transferPoints: chargeableTransfers * rules.transferPointCost,
+    exceedsChargeableTransferLimit:
+      chargeableTransfers > rules.maximumChargeableTransfers,
+  };
+}
+
+export function validateTransferLimit({
+  freeTransfersBefore,
+  transferCount,
+  wildcard,
+  openingGameweek = false,
+  rules = THAI_LEAGUE_FANTASY_RULES,
+}: {
+  freeTransfersBefore: number;
+  transferCount: number;
+  wildcard: boolean;
+  openingGameweek?: boolean;
+  rules?: FantasyRules;
+}): RuleViolation[] {
+  const usage = getTransferUsage({
+    freeTransfersBefore,
+    transferCount,
+    wildcard,
+    openingGameweek,
+    rules,
+  });
+  if (!usage.exceedsChargeableTransferLimit) return [];
+
+  return [
+    {
+      code: "transfer_limit",
+      message:
+        "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)",
+      details: {
+        limit: rules.maximumChargeableTransfers,
+        maximumTransferPoints: usage.maximumTransferPoints,
+        chargeableTransfers: usage.chargeableTransfers,
+        transferPoints: usage.transferPoints,
+      },
+    },
+  ];
+}
+
+export function formatTransferLimitViolation(violation: RuleViolation): string {
+  return violation.message
+    .replace("{count}", String(violation.details?.limit ?? ""))
+    .replace(
+      "{points}",
+      String(violation.details?.maximumTransferPoints ?? ""),
+    );
+}
+
 export function settleTransfers({
   freeTransfersBefore,
   transferCount,
@@ -397,23 +492,18 @@ export function settleTransfers({
   wildcard: boolean;
   rules?: FantasyRules;
 }) {
-  const safeFreeTransfers = Math.max(
-    0,
-    Math.min(rules.maximumFreeTransfers, freeTransfersBefore),
-  );
-  const safeTransferCount = Math.max(0, transferCount);
-  const chargeableTransfers = wildcard
-    ? 0
-    : Math.max(0, safeTransferCount - safeFreeTransfers);
-  const remainingFreeTransfers = wildcard
-    ? safeFreeTransfers
-    : Math.max(0, safeFreeTransfers - safeTransferCount);
+  const usage = getTransferUsage({
+    freeTransfersBefore,
+    transferCount,
+    wildcard,
+    rules,
+  });
 
   return {
-    transferPoints: chargeableTransfers * rules.transferPointCost,
+    transferPoints: usage.transferPoints,
     freeTransfersAfter: Math.min(
       rules.maximumFreeTransfers,
-      remainingFreeTransfers + rules.weeklyFreeTransfers,
+      usage.freeTransfersRemaining + rules.weeklyFreeTransfers,
     ),
   };
 }

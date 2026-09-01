@@ -50,6 +50,8 @@ export function buildFantasyRuleSections(
         points: [
           `Receive ${rules.weeklyFreeTransfers} free transfers after each deadline and bank up to ${rules.maximumFreeTransfers}.`,
           `Each net transfer beyond the free allowance costs ${rules.transferPointCost} points.`,
+          `You may confirm at most ${rules.maximumChargeableTransfers} chargeable transfers in one Gameweek, for a maximum deduction of ${rules.maximumChargeableTransfers * rules.transferPointCost} points.`,
+          "A team's first complete saved squad is free, even if earlier Gameweeks carried an incomplete draft.",
           "The deadline is 90 minutes before the first kickoff. Confirmed pre-deadline changes can be reversed until then.",
           "Wildcard transfers are free and preserve the free-transfer balance held before settlement.",
         ],
@@ -122,6 +124,8 @@ export function buildFantasyRuleSections(
       points: [
         `ได้รับ Free Transfer เพิ่ม ${rules.weeklyFreeTransfers} ครั้งหลังแต่ละ Deadline และสะสมได้สูงสุด ${rules.maximumFreeTransfers} ครั้ง`,
         `Transfer สุทธิที่เกินโควต้าฟรีหัก ${rules.transferPointCost} คะแนนต่อครั้ง`,
+        `ยืนยัน Transfer ที่เกินโควต้าฟรีได้สูงสุด ${rules.maximumChargeableTransfers} คนต่อ Gameweek หรือหักคะแนนได้สูงสุด ${rules.maximumChargeableTransfers * rules.transferPointCost} คะแนน`,
+        "การบันทึกทีมครบครั้งแรกไม่คิดเป็น Transfer แม้ Gameweek ก่อนหน้าจะมี Draft ที่ยังไม่ครบ",
         "Deadline ปิดก่อนคู่แรก 90 นาที และยกเลิกการเปลี่ยนแปลงที่ยืนยันแล้วได้จนถึงเวลานั้น",
         "Wildcard ทำให้ Transfer ไม่มีค่าใช้จ่ายและคง Free Transfer ที่มีอยู่ก่อนสรุปรายการ",
       ],

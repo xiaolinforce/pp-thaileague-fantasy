@@ -24,12 +24,14 @@ import {
   playerRegistrations,
 } from "@/db/schema";
 import {
-  getNetTransfers,
+  formatTransferLimitViolation,
+  getCountedTransfers,
   isBeforeDeadline,
   settleTransfers,
   THAI_LEAGUE_FANTASY_RULES,
   validateChipUse,
   validateLineup,
+  validateTransferLimit,
   type CaptainRole,
   type FantasyChip,
   type FantasyPosition,
@@ -421,17 +423,44 @@ export async function saveFantasySelectionAction(
           eq(fantasyTeamSelectionPlayers.selectionId, previousSelection.id),
         )
     : [];
-  const transferCount = previousSelection
-    ? getNetTransfers(
-        previousMembers.map((member) => member.fantasyPlayerId),
-        uniqueIds,
-      ).count
-    : 0;
+  let transferBaselineIds = previousMembers.map(
+    (member) => member.fantasyPlayerId,
+  );
+  if (transferBaselineIds.length !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
+    const openingRevisionRows = await db
+      .select({ squad: fantasyTransferRevisions.squad })
+      .from(fantasyTransferRevisions)
+      .where(eq(fantasyTransferRevisions.selectionId, selection.id))
+      .orderBy(asc(fantasyTransferRevisions.revision))
+      .limit(1);
+    const openingSquad = openingRevisionRows[0]?.squad;
+    transferBaselineIds = Array.isArray(openingSquad)
+      ? openingSquad.filter(
+          (fantasyPlayerId): fantasyPlayerId is string =>
+            typeof fantasyPlayerId === "string",
+        )
+      : [];
+  }
+  const transferCount = getCountedTransfers(transferBaselineIds, uniqueIds);
   const settlement = settleTransfers({
     freeTransfersBefore: team.freeTransfers,
     transferCount,
     wildcard: input.activeChip === "wildcard",
   });
+  const transferViolations = validateTransferLimit({
+    freeTransfersBefore: team.freeTransfers,
+    transferCount,
+    wildcard: input.activeChip === "wildcard",
+    openingGameweek: gameweek.number === 1,
+  });
+  if (transferViolations.length > 0) {
+    const messages = transferViolations.map(formatTransferLimitViolation);
+    return {
+      ok: false,
+      message: messages[0],
+      violations: messages,
+    };
+  }
 
   if (input.activeChip) {
     const previousUses = (
@@ -975,6 +1004,17 @@ export async function lockFantasyGameweekAction(formData: FormData) {
         transferCount: selection.netTransferCount,
         wildcard: activeChip === "wildcard",
       });
+      const transferViolations = validateTransferLimit({
+        freeTransfersBefore: selection.freeTransfersBefore,
+        transferCount: selection.netTransferCount,
+        wildcard: activeChip === "wildcard",
+        openingGameweek: gameweek.number === 1,
+      });
+      if (transferViolations.length > 0) {
+        throw new Error(
+          `Fantasy team ${team.id} exceeds the chargeable transfer limit.`,
+        );
+      }
       await tx
         .update(fantasyTeamSelections)
         .set({

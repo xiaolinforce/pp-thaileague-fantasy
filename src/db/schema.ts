@@ -714,6 +714,9 @@ export const fantasySeasons = pgTable(
       .default(4)
       .notNull(),
     transferPointCost: smallint("transfer_point_cost").default(4).notNull(),
+    maximumChargeableTransfers: smallint("maximum_chargeable_transfers")
+      .default(3)
+      .notNull(),
     deadlineOffsetMinutes: smallint("deadline_offset_minutes")
       .default(90)
       .notNull(),
@@ -732,7 +735,7 @@ export const fantasySeasons = pgTable(
     ),
     check(
       "fantasy_seasons_transfer_cost_check",
-      sql`${table.transferPointCost} >= 0 and ${table.deadlineOffsetMinutes} >= 0 and ${table.chipUsesPerSeason} > 0`,
+      sql`${table.transferPointCost} >= 0 and ${table.maximumChargeableTransfers} >= 0 and ${table.deadlineOffsetMinutes} >= 0 and ${table.chipUsesPerSeason} > 0`,
     ),
   ],
 );

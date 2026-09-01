@@ -1,0 +1,3 @@
+ALTER TABLE "fantasy_seasons" DROP CONSTRAINT "fantasy_seasons_transfer_cost_check";--> statement-breakpoint
+ALTER TABLE "fantasy_seasons" ADD COLUMN "maximum_chargeable_transfers" smallint DEFAULT 3 NOT NULL;--> statement-breakpoint
+ALTER TABLE "fantasy_seasons" ADD CONSTRAINT "fantasy_seasons_transfer_cost_check" CHECK ("fantasy_seasons"."transfer_point_cost" >= 0 and "fantasy_seasons"."maximum_chargeable_transfers" >= 0 and "fantasy_seasons"."deadline_offset_minutes" >= 0 and "fantasy_seasons"."chip_uses_per_season" > 0);

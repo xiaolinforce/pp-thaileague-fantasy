@@ -99,6 +99,13 @@
       "when": 1788200735178,
       "tag": "0013_illegal_thaddeus_ross",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1788274235303,
+      "tag": "0014_curved_absorbing_man",
+      "breakpoints": true
     }
   ]
 }

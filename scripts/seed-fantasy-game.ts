@@ -73,6 +73,7 @@ async function seedFantasyGame() {
         weeklyFreeTransfers: 2,
         maximumFreeTransfers: 4,
         transferPointCost: 4,
+        maximumChargeableTransfers: 3,
         deadlineOffsetMinutes: 90,
         chipUsesPerSeason: 2,
         updatedAt: new Date(),

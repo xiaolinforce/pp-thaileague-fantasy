@@ -54,8 +54,8 @@ import {
 } from "@/lib/fantasy/team-draft";
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import {
-  getNetTransfers,
-  THAI_LEAGUE_FANTASY_RULES,
+  getCountedTransfers,
+  getTransferUsage,
   type FantasyChip,
   type FantasyPosition,
 } from "@/lib/fantasy/rules";
@@ -150,21 +150,20 @@ export default function TransfersClient({
   const currentSquadIds = members.flatMap((member) =>
     member.fantasyPlayerId ? [member.fantasyPlayerId] : [],
   );
-  const netTransferCount = getNetTransfers(
+  const netTransferCount = getCountedTransfers(
     fantasy.selection.baselineSquadIds,
     currentSquadIds,
-  ).count;
+  );
   const hasUnlimitedOpeningTransfers = fantasy.gameweek.number === 1;
   const hasActiveWildcard = activeChip === "wildcard";
-  const hasUnlimitedTransfers =
-    hasUnlimitedOpeningTransfers || hasActiveWildcard;
-  const freeTransfersRemaining = hasActiveWildcard
-    ? fantasy.team.freeTransfers
-    : Math.max(0, fantasy.team.freeTransfers - netTransferCount);
-  const transferPoints = hasUnlimitedTransfers
-    ? 0
-    : Math.max(0, netTransferCount - fantasy.team.freeTransfers) *
-      THAI_LEAGUE_FANTASY_RULES.transferPointCost;
+  const transferUsage = getTransferUsage({
+    freeTransfersBefore: fantasy.team.freeTransfers,
+    transferCount: netTransferCount,
+    wildcard: hasActiveWildcard,
+    openingGameweek: hasUnlimitedOpeningTransfers,
+  });
+  const { freeTransfersRemaining, hasUnlimitedTransfers, transferPoints } =
+    transferUsage;
   const isOverFreeTransferLimit = transferPoints > 0;
   const unlimitedTransfersLabel = hasActiveWildcard
     ? translate("Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้")

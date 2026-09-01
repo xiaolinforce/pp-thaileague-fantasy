@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  getCountedTransfers,
   getDeadline,
   getNetTransfers,
+  getTransferUsage,
   getValidLineupSwapTargetIds,
   settleTransfers,
   swapLineupAssignments,
@@ -11,6 +13,7 @@ import {
   validateLineup,
   validateLineupAssignment,
   validateSquad,
+  validateTransferLimit,
   type LineupPlayer,
   type SquadPlayer,
 } from "./rules.ts";
@@ -230,6 +233,87 @@ test("keeps captaincy with each player when both players are starters", () => {
 test("counts transfers by the net squad difference", () => {
   const diff = getNetTransfers(["a", "b", "c"], ["a", "b", "d"]);
   assert.deepEqual(diff, { outgoing: ["c"], incoming: ["d"], count: 1 });
+});
+
+test("does not count the first completed squad as transfers", () => {
+  assert.equal(
+    getCountedTransfers(
+      [],
+      Array.from({ length: 15 }, (_, i) => `p${i}`),
+    ),
+    0,
+  );
+  assert.equal(
+    getCountedTransfers(
+      Array.from({ length: 15 }, (_, i) => `p${i}`),
+      Array.from({ length: 15 }, (_, i) =>
+        i === 14 ? "replacement" : `p${i}`,
+      ),
+    ),
+    1,
+  );
+});
+
+test("allows up to three chargeable transfers and rejects the fourth", () => {
+  assert.deepEqual(
+    validateTransferLimit({
+      freeTransfersBefore: 2,
+      transferCount: 5,
+      wildcard: false,
+    }),
+    [],
+  );
+  assert.deepEqual(
+    getTransferUsage({
+      freeTransfersBefore: 2,
+      transferCount: 6,
+      wildcard: false,
+    }),
+    {
+      chargeableTransfers: 4,
+      freeTransfersRemaining: 0,
+      hasUnlimitedTransfers: false,
+      maximumTransferPoints: 12,
+      transferPoints: 16,
+      exceedsChargeableTransferLimit: true,
+    },
+  );
+  assert.deepEqual(
+    validateTransferLimit({
+      freeTransfersBefore: 2,
+      transferCount: 6,
+      wildcard: false,
+    }),
+    [
+      {
+        code: "transfer_limit",
+        message:
+          "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)",
+        details: {
+          limit: 3,
+          maximumTransferPoints: 12,
+          chargeableTransfers: 4,
+          transferPoints: 16,
+        },
+      },
+    ],
+  );
+});
+
+test("opening Gameweek and wildcard transfers bypass the paid-transfer cap", () => {
+  for (const exception of [
+    { wildcard: false, openingGameweek: true },
+    { wildcard: true, openingGameweek: false },
+  ]) {
+    assert.deepEqual(
+      validateTransferLimit({
+        freeTransfersBefore: 0,
+        transferCount: 15,
+        ...exception,
+      }),
+      [],
+    );
+  }
 });
 
 test("adds two free transfers and caps the balance at four", () => {
@@ -503,4 +587,5 @@ test("an unsaved empty selection scores zero when the Gameweek locks", () => {
 test("default rules remain the agreed 15-player configuration", () => {
   assert.equal(THAI_LEAGUE_FANTASY_RULES.squadSize, 15);
   assert.equal(THAI_LEAGUE_FANTASY_RULES.maximumFreeTransfers, 4);
+  assert.equal(THAI_LEAGUE_FANTASY_RULES.maximumChargeableTransfers, 3);
 });

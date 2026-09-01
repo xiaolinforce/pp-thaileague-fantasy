@@ -4,6 +4,24 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-01 — Chargeable transfers are capped at three per Gameweek
+
+**Decision:** Allow at most three net transfers beyond the available free
+balance in one Gameweek, for a maximum 12-point deduction. Keep an over-limit
+draft editable and show its actual hypothetical deduction, but disable saving
+and show the standard squad-validation alert. Gameweek 1, Wildcard transfers,
+and a team's first complete saved squad are exempt.
+
+**Context:** Unlimited paid transfers could create unexpectedly large negative
+scores. The product owner chose a hard confirmation boundary while preserving
+the ability to explore and undo local squad changes.
+
+**Consequences:** Client validation provides immediate feedback, while the
+Server Action reloads trusted team and transfer state and rejects attempts over
+the cap before writing a selection or revision. Gameweek locking repeats the
+invariant defensively. The season stores the maximum chargeable-transfer count
+as configuration, and public Thai/English rules describe the same boundary.
+
 ## 2026-09-01 — Overall ranks are persisted with Gameweek scoring
 
 **Decision:** Persist one current standing row per ranked team and League,

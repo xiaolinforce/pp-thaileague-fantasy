@@ -55,8 +55,10 @@ import {
   suggestFantasyAutoFillAction,
 } from "@/app/fantasy-actions";
 import {
+  getCountedTransfers,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
+  validateTransferLimit,
   type FantasyChip,
   type FantasyPosition,
   type LineupPlayer,
@@ -366,6 +368,14 @@ function formatClientViolation(
         level: violation.details?.level,
         count: violation.details?.limit,
       });
+    case "transfer_limit":
+      return format(
+        "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)",
+        {
+          count: violation.details?.limit,
+          points: violation.details?.maximumTransferPoints,
+        },
+      );
     default:
       return translate(violation.message);
   }
@@ -784,6 +794,34 @@ export default function TeamClient({
     [members],
   );
   const hasVacancies = completeSelectionMembers === null;
+  const transferCount = useMemo(
+    () =>
+      getCountedTransfers(
+        fantasy.selection.baselineSquadIds,
+        members.flatMap((member) =>
+          member.fantasyPlayerId ? [member.fantasyPlayerId] : [],
+        ),
+      ),
+    [fantasy.selection.baselineSquadIds, members],
+  );
+  const transferLimitViolations = useMemo(
+    () =>
+      hasVacancies
+        ? []
+        : validateTransferLimit({
+            freeTransfersBefore: fantasy.team.freeTransfers,
+            transferCount,
+            wildcard: activeChip === "wildcard",
+            openingGameweek: fantasy.gameweek.number === 1,
+          }),
+    [
+      activeChip,
+      fantasy.gameweek.number,
+      fantasy.team.freeTransfers,
+      hasVacancies,
+      transferCount,
+    ],
+  );
   const lineupValidationViolations = useMemo(() => {
     const violations = validateLineup(lineupAssignments);
     return hasVacancies
@@ -801,17 +839,24 @@ export default function TeamClient({
   const clientValidationMessages = useMemo(() => {
     return [
       ...new Set(
-        lineupValidationViolations.flatMap((violation) => {
-          const message = formatClientViolation(
-            violation,
-            translate,
-            clubNameById,
-          );
-          return message ? [message] : [];
-        }),
+        [...lineupValidationViolations, ...transferLimitViolations].flatMap(
+          (violation) => {
+            const message = formatClientViolation(
+              violation,
+              translate,
+              clubNameById,
+            );
+            return message ? [message] : [];
+          },
+        ),
       ),
     ];
-  }, [clubNameById, lineupValidationViolations, translate]);
+  }, [
+    clubNameById,
+    lineupValidationViolations,
+    transferLimitViolations,
+    translate,
+  ]);
   const captaincyValidationMessages = useMemo(
     () =>
       lineupValidationViolations

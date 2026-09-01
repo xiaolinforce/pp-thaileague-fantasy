@@ -113,7 +113,8 @@ the normal save action remains the only confirmation boundary.
 2. The action resolves the account-owned team from the session; admin actions
    additionally reload and require the `admin` role.
 3. The server reloads current database snapshots and validates deadlines,
-   squad composition, lineup, chips, and transfer settlement.
+   squad composition, lineup, chips, transfer settlement, and the per-Gameweek
+   cap of three chargeable transfers before any selection write.
 4. Drizzle writes selections, revisions, League memberships, stats,
    classifications, or Gameweek state. League and administrative operations
    append application-level audit rows.

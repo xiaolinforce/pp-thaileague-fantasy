@@ -173,10 +173,17 @@ Gameweek.
 
 - Each deadline adds two free transfers, capped at four.
 - Net transfers compare player IDs in the previous and next squads.
+- A team's first complete saved squad is free, including when an incomplete
+  draft was carried forward from an earlier Gameweek.
 - Transfers beyond the available free balance cost four points each.
+- A manager may confirm at most three chargeable transfers in one Gameweek,
+  limiting the transfer deduction to 12 points. A draft may temporarily exceed
+  that amount, but it cannot be saved until it returns within the limit.
 - Pre-deadline revisions can be confirmed or cancelled.
 - Wildcard makes that Gameweek's transfers free and preserves the accumulated
   free-transfer balance before adding the normal weekly allowance.
+- Gameweek 1 and Wildcard transfers are exempt from the chargeable-transfer
+  limit.
 - League tie-breaking counts locked net transfers, excluding Wildcard weeks.
 
 ## Chips

@@ -103,6 +103,8 @@ a state is not implemented rather than inventing it.
 ### Team
 
 - untouched empty draft, partial local draft, and valid saved squad;
+- chargeable-transfer boundary at -12 points and blocked-save warning beyond
+  the limit while the local draft remains editable;
 - live free-transfer balance, transfer deduction, opening unlimited transfers,
   and an active Wildcard that preserves the banked balance;
 - editable and deadline-passed/read-only Gameweek;
@@ -196,6 +198,40 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-01 — Chargeable-transfer confirmation cap
+
+- **Route and task:** `/team`; cap a manager at three transfers beyond the free
+  allowance, while preserving an editable over-limit draft and its actual
+  hypothetical deduction.
+- **Status:** remains Reference.
+- **Data/auth/Gameweek state:** real Guest session with a valid saved Gameweek
+  2 squad and four free transfers. Eight valid local replacements progressed
+  through 4, 3, 2, 1, and 0 free transfers, then -4, -8, -12, and -16 points.
+  At -12 the warning was absent and Save Team remained enabled. At -16 the
+  standard squad-validation alert appeared and Save Team was disabled. Enabling
+  Wildcard removed the warning, showed the unlimited state, and re-enabled Save
+  Team. No selection was saved.
+- **Language:** the boundary, badge, warning, and disabled control were rendered
+  in Thai and English. The Guest display preference was restored to Thai after
+  review.
+- **Viewports/accessibility:** default 1280px Desktop and 360px Mobile. The
+  warning remained a visible `role="alert"`, the disabled Save Team state was
+  exposed semantically, and the Mobile document measured 352px wide within a
+  360px viewport without horizontal overflow. The red -16 badge retained
+  11px, weight 400 text, so the deduction is not bold.
+- **Issues fixed:** client and server now share the same transfer baseline and
+  paid-transfer calculation. The first complete saved squad establishes the
+  baseline for later revisions, while direct Server Action and Gameweek-lock
+  paths enforce the cap independently of client state.
+- **Known exclusions:** the real session was Gameweek 2 with an existing complete
+  baseline. Gameweek 1 and first-complete-squad exemptions are covered by pure
+  rules tests rather than manufactured live data.
+- **Evidence:** bounded in-app Browser DOM and screenshot inspection against the
+  real Guest session; all over-limit changes remained local and no selection
+  write, mock, fixture override, or debug path was used.
+- **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
+  `npm run format:check`, and `npm run build`.
+
 ### 2026-09-01 — Live transfer preview
 
 - **Route and task:** `/team`; make the Player Market's free-transfer figure
@@ -217,10 +253,9 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 - **Issues fixed:** the label now means the actual remaining free transfers,
   counts net differences from the Gameweek baseline across saved revisions,
   and states the prospective deduction before confirmation.
-- **Known exclusions:** a live deduction over the four-transfer allowance and
-  the Gameweek 1 opening state were not manufactured in the real session; the
-  existing rules tests cover the allowance cap, overage deduction, and opening
-  Gameweek behavior.
+- **Known exclusions:** the Gameweek 1 opening state was not manufactured in the
+  real session; rules tests cover the opening Gameweek behavior. The later
+  chargeable-transfer-cap review above supplies rendered overage evidence.
 - **Evidence:** bounded in-app Browser DOM and screenshot inspection; no mock,
   fixture override, debug path, or database write was introduced.
 - **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,

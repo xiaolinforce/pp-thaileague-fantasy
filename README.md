@@ -17,7 +17,8 @@ Classic league standings.
   account and stored on the current device for Guests.
 - Fifteen-player squads, valid FPL-style formations, tier and Thai-player
   limits, automatic substitutions, captain/vice-captain, Triple Captain, Bench
-  Boost, Wildcard, free transfers, and transfer-point deductions.
+  Boost, Wildcard, free transfers, and transfer-point deductions capped at 12
+  points per Gameweek.
 - Ranking-weighted squad auto-fill that completes vacant slots, targets the
   full tier allocation, and keeps the result editable until the manager saves.
 - Real Overall and invite-only Private Classic leagues with owner controls,
