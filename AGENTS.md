@@ -57,6 +57,16 @@ that own the affected concern:
 - Never commit credentials, `.env.local`, database exports, or unreviewed
   third-party source payloads.
 
+## Git commits
+
+- Follow the repository's Conventional Commit format:
+  `type(scope): concise imperative summary`.
+- Use a scope when the change belongs to a clear product area, such as
+  `points`, `team`, `fixtures`, `fantasy`, or `account`.
+- Choose the type from the change's intent (`feat`, `fix`, `docs`, `refactor`,
+  `test`, or `chore`) and inspect recent commit history when the fit is unclear.
+- Do not use generic commit subjects such as `Update`, `Polish`, or `Adjust`.
+
 ## Verification
 
 Run the narrowest relevant checks first, then the appropriate project checks:
