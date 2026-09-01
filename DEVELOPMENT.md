@@ -142,6 +142,7 @@ npm run db:scenario -- gw30-final
 npm run db:scenario -- league-empty
 npm run db:scenario -- league-populated
 npm run db:scenario -- --advance
+npm run db:scenario -- --refresh --primary-team=<team-name> --primary-chip=triple_captain
 ```
 
 Gameweek scenarios rebuild deterministic fixtures, selections, revisions,
@@ -188,6 +189,14 @@ ambiguous. If that team joined after earlier Gameweeks, progression records an
 empty locked selection and zero points for those missing weeks instead of
 backdating its current squad. Like named Gameweek presets, progression clears
 Private Leagues; apply the desired League overlay afterward when needed.
+
+`--refresh` regenerates fixtures, player points, team scores, and standings for
+the current lifecycle state without moving its Gameweek forward. It uses the
+same primary-team preservation rules as `--advance`. For chip-specific QA,
+`--primary-chip=triple_captain|bench_boost|wildcard|none` overrides the primary
+team's target-Gameweek chip and updates its latest transfer revision. A Triple
+Captain refresh prefers a live fixture involving the saved captain so the
+multiplier is observable in the resulting score.
 
 The scenario runner is intentionally destructive inside the selected Fantasy
 season on its disposable branch. Do not point it at the shared development or

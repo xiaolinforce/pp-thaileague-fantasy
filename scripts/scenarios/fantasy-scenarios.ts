@@ -179,6 +179,8 @@ type CliOptions = {
   seasonSlug: string | null;
   primaryTeamName: string | null;
   advance: boolean;
+  refresh: boolean;
+  primaryChip: FantasyChip | null | undefined;
   list: boolean;
 };
 
@@ -189,9 +191,20 @@ function parseArgs(args: string[]): CliOptions {
       ?.slice(name.length + 1) ?? null;
   const scenarioArgument = args.find((argument) => !argument.startsWith("--"));
   const scenario = scenarioArgument as ScenarioName | undefined;
+  const primaryChipArgument = option("--primary-chip");
   if (scenario && !(scenario in SCENARIOS)) {
     throw new Error(
       `Unknown scenario "${scenario}". Run with --list to see valid names.`,
+    );
+  }
+  if (
+    primaryChipArgument !== null &&
+    !["none", "triple_captain", "bench_boost", "wildcard"].includes(
+      primaryChipArgument,
+    )
+  ) {
+    throw new Error(
+      `Unknown primary chip "${primaryChipArgument}". Use none, triple_captain, bench_boost, or wildcard.`,
     );
   }
   return {
@@ -205,6 +218,13 @@ function parseArgs(args: string[]): CliOptions {
       process.env.FANTASY_SCENARIO_PRIMARY_TEAM ??
       null,
     advance: args.includes("--advance"),
+    refresh: args.includes("--refresh"),
+    primaryChip:
+      primaryChipArgument === null
+        ? undefined
+        : primaryChipArgument === "none"
+          ? null
+          : (primaryChipArgument as FantasyChip),
     list: args.includes("--list"),
   };
 }
@@ -216,6 +236,9 @@ function listScenarios() {
   }
   console.log(
     "\nUse --advance without a scenario name to preserve the primary team and move to the next lifecycle state.",
+  );
+  console.log(
+    "Use --refresh to preserve the primary team and regenerate the current lifecycle state.",
   );
 }
 
@@ -326,6 +349,53 @@ async function inferAdvanceDefinition(
         ? `Preserve the current GW${current.number} draft and move past its deadline`
         : `Preserve GW${current.number} and finalize its score`,
   };
+}
+
+async function inferRefreshDefinition(
+  tx: ScenarioTransaction,
+  seasonId: string,
+): Promise<GameweekScenario> {
+  const result = await tx.execute<{
+    number: number;
+    status: "open" | "provisional" | "final";
+  }>(sql`
+    select number, status
+    from fantasy_gameweeks
+    where fantasy_season_id = ${seasonId}::uuid
+      and status in ('open', 'provisional', 'final')
+    order by case when status = 'provisional' then 0
+                  when status = 'final' then 1
+                  else 2 end,
+             number desc
+  `);
+  const provisional = result.rows.find((row) => row.status === "provisional");
+  if (provisional) {
+    return {
+      kind: "gameweek",
+      targetGameweek: provisional.number,
+      phase: "live",
+      description: `Regenerate the current live GW${provisional.number} state`,
+    };
+  }
+  const latestFinal = result.rows.find((row) => row.status === "final");
+  if (latestFinal) {
+    return {
+      kind: "gameweek",
+      targetGameweek: latestFinal.number,
+      phase: "final",
+      description: `Regenerate the current final GW${latestFinal.number} state`,
+    };
+  }
+  const open = result.rows.find((row) => row.status === "open");
+  if (open?.number === 1) {
+    return {
+      kind: "gameweek",
+      targetGameweek: 1,
+      phase: "before",
+      description: "Regenerate the current pre-GW1 state",
+    };
+  }
+  throw new Error("Cannot refresh: the current Gameweek lifecycle is unknown.");
 }
 
 async function capturePrimaryProgression(
@@ -1020,8 +1090,14 @@ function chooseLiveFixtureId(
   fixtures: FixtureRow[],
   targetGameweek: number,
   squads: SquadMember[][],
+  preferPrimaryCaptain: boolean,
 ) {
   const primaryClubIds = new Set(squads[0].map((member) => member.clubId));
+  const primaryCaptainClubIds = new Set(
+    squads[0]
+      .filter((member) => member.captainRole === "captain")
+      .map((member) => member.clubId),
+  );
   const candidates = fixtures
     .filter((fixture) => fixture.matchweek === targetGameweek)
     .map((fixture) => {
@@ -1044,6 +1120,10 @@ function chooseLiveFixtureId(
         fixture,
         ownedBy,
         startedBy,
+        primaryCaptainPlays:
+          preferPrimaryCaptain &&
+          (primaryCaptainClubIds.has(fixture.home_club_id) ||
+            primaryCaptainClubIds.has(fixture.away_club_id)),
         primaryOwns:
           squads[0].some(
             (member) =>
@@ -1058,6 +1138,7 @@ function chooseLiveFixtureId(
     })
     .sort(
       (left, right) =>
+        Number(right.primaryCaptainPlays) - Number(left.primaryCaptainPlays) ||
         Number(right.scoreableMixedOwnership) -
           Number(left.scoreableMixedOwnership) ||
         Number(right.primaryOwns) - Number(left.primaryOwns) ||
@@ -1077,26 +1158,28 @@ async function applyGameweekScenario(
   definition: GameweekScenario,
   requestedPrimaryTeam: TeamRow | null,
   scenarioName: string,
-  advance: boolean,
+  mode: "reset" | "advance" | "refresh",
+  primaryChipOverride: FantasyChip | null | undefined,
 ) {
+  const preservePrimary = mode !== "reset";
   const templates = await loadSquadTemplates(
     tx,
     season,
     requestedPrimaryTeam?.id ?? null,
   );
   const squads = templates.squads;
-  if (advance && !requestedPrimaryTeam) {
+  if (preservePrimary && !requestedPrimaryTeam) {
     throw new Error(
-      "Cannot advance: a signed-in primary tester team was not found.",
+      "Cannot preserve progression: a signed-in primary tester team was not found.",
     );
   }
   const preservedSelections =
-    advance && requestedPrimaryTeam
+    preservePrimary && requestedPrimaryTeam
       ? await capturePrimaryProgression(tx, season.id, requestedPrimaryTeam.id)
       : [];
-  if (advance && preservedSelections.length === 0) {
+  if (preservePrimary && preservedSelections.length === 0) {
     throw new Error(
-      "Cannot advance: the primary tester team has no Gameweek selection to preserve.",
+      "Cannot preserve progression: the primary tester team has no Gameweek selection.",
     );
   }
 
@@ -1178,16 +1261,19 @@ async function applyGameweekScenario(
     number,
     PreservedSelection & { status: "draft" | "locked" }
   >();
-  if (advance) {
+  if (preservePrimary) {
     let latest: PreservedSelection | null = null;
     for (let gameweek = 1; gameweek <= plan.selectionThrough; gameweek += 1) {
       const exact = preservedByGameweek.get(gameweek) ?? null;
       if (exact) latest = exact;
       const status = gameweek <= plan.scoredThrough ? "locked" : "draft";
-      const activeChip =
-        gameweek < 2 && latest?.activeChip === "wildcard"
-          ? null
+      const requestedChip =
+        gameweek === definition.targetGameweek &&
+        primaryChipOverride !== undefined
+          ? primaryChipOverride
           : (exact?.activeChip ?? null);
+      const activeChip =
+        gameweek < 2 && requestedChip === "wildcard" ? null : requestedChip;
       const freeTransfersBefore =
         exact?.freeTransfersBefore ??
         latest?.freeTransfersAfter ??
@@ -1199,8 +1285,26 @@ async function applyGameweekScenario(
         wildcard: activeChip === "wildcard",
       });
       const carried = !exact;
+      const revisions = carried
+        ? []
+        : exact.revisions.map((revision) => ({ ...revision }));
+      if (
+        gameweek === definition.targetGameweek &&
+        primaryChipOverride !== undefined &&
+        revisions.length > 0
+      ) {
+        const latestRevision = revisions[revisions.length - 1];
+        revisions[revisions.length - 1] = {
+          ...latestRevision,
+          activeChip,
+          transferPoints:
+            status === "locked"
+              ? settlement.transferPoints
+              : latestRevision.transferPoints,
+        };
+      }
       const state: PreservedSelection & { status: "draft" | "locked" } = {
-        id: exact?.id ?? uuidFor(`advance:${primaryTeam.id}:${gameweek}`),
+        id: exact?.id ?? uuidFor(`${mode}:${primaryTeam.id}:${gameweek}`),
         gameweek,
         status,
         activeChip,
@@ -1223,7 +1327,7 @@ async function applyGameweekScenario(
         createdAt: exact?.createdAt ?? new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         members: (latest?.members ?? []).map((member) => ({ ...member })),
-        revisions: carried ? [] : exact.revisions,
+        revisions,
       };
       primaryAdvanceStates.set(gameweek, state);
       latest = state;
@@ -1247,6 +1351,7 @@ async function applyGameweekScenario(
           fixturesResult.rows,
           definition.targetGameweek,
           squads,
+          primaryChipOverride === "triple_captain",
         )
       : null;
   const fixturePlan = fixtureStates(
@@ -1302,7 +1407,7 @@ async function applyGameweekScenario(
         updated_at = now()
     where fantasy_season_id = ${season.id}::uuid
   `);
-  if (advance) {
+  if (preservePrimary) {
     const selectionPayload = [...primaryAdvanceStates.values()].map(
       (selection) => ({
         gameweek: selection.gameweek,
@@ -1387,7 +1492,7 @@ async function applyGameweekScenario(
       on member.team_id::uuid = selection.fantasy_team_id
     where gw.fantasy_season_id = ${season.id}::uuid
   `);
-  if (advance) {
+  if (preservePrimary) {
     await tx.execute(sql`
       delete from fantasy_team_selection_players member
       using fantasy_team_selections selection, fantasy_gameweeks gw
@@ -1470,7 +1575,7 @@ async function applyGameweekScenario(
       on revision.team_id::uuid = selection.fantasy_team_id
     where gw.fantasy_season_id = ${season.id}::uuid
   `);
-  if (advance) {
+  if (preservePrimary) {
     await tx.execute(sql`
       delete from fantasy_transfer_revisions revision
       using fantasy_team_selections selection, fantasy_gameweeks gw
@@ -1493,9 +1598,9 @@ async function applyGameweekScenario(
                       (member) => member.fantasyPlayerId,
                     ),
                     lineup: { members: selection.members },
-                    activeChip: null,
+                    activeChip: selection.activeChip,
                     netTransferCount: 0,
-                    transferPoints: 0,
+                    transferPoints: selection.transferPoints,
                     createdAt: selection.createdAt,
                     updatedAt: selection.updatedAt,
                   },
@@ -1546,6 +1651,15 @@ async function applyGameweekScenario(
   const statRows: Array<Record<string, unknown>> = [];
   const pointRows: Array<Record<string, unknown>> = [];
   const teamScoreRows: Array<Record<string, unknown>> = [];
+  let primaryTargetScore: {
+    gameweek: number;
+    activeChip: FantasyChip | null;
+    totalPoints: number;
+    captainBonus: number;
+    captainPlayerId: string | null;
+    captainName: string | null;
+    captainBasePoints: number;
+  } | null = null;
   const primaryScoringStates = new Map<number, SelectionScenarioState>(
     [...primaryAdvanceStates].map(([gameweek, selection]) => [
       gameweek,
@@ -1741,7 +1855,7 @@ async function applyGameweekScenario(
     }
     for (const { team, squad } of teamSquads) {
       const scoringState =
-        advance && team.id === primaryTeam.id
+        preservePrimary && team.id === primaryTeam.id
           ? primaryScoringStates.get(gameweek)
           : { squad, activeChip: null, transferPoints: 0 };
       if (!scoringState) {
@@ -1771,7 +1885,41 @@ async function applyGameweekScenario(
         total_points: score.totalPoints,
         auto_substitutions: score.autoSubstitutions,
       });
+      if (
+        preservePrimary &&
+        team.id === primaryTeam.id &&
+        gameweek === definition.targetGameweek
+      ) {
+        const captain = scoringState.squad.find(
+          (member) => member.captainRole === "captain",
+        );
+        const captainResult = captain
+          ? results.find(
+              (result) => result.playerId === captain.fantasyPlayerId,
+            )
+          : null;
+        primaryTargetScore = {
+          gameweek,
+          activeChip: scoringState.activeChip,
+          totalPoints: score.totalPoints,
+          captainBonus: score.captainBonus,
+          captainPlayerId: captain?.fantasyPlayerId ?? null,
+          captainName: null,
+          captainBasePoints: captainResult?.points ?? 0,
+        };
+      }
     }
+  }
+  if (primaryTargetScore?.captainPlayerId) {
+    const captainResult = await tx.execute<{ name: string }>(sql`
+      select coalesce(player.short_name_th, player.short_name_en,
+                      player.full_name_th, player.full_name_en) as name
+      from fantasy_players fantasy_player
+      join players player on player.id = fantasy_player.player_id
+      where fantasy_player.id = ${primaryTargetScore.captainPlayerId}::uuid
+      limit 1
+    `);
+    primaryTargetScore.captainName = captainResult.rows[0]?.name ?? null;
   }
   if (statRows.length > 0) {
     await tx.execute(sql`
@@ -1870,9 +2018,9 @@ async function applyGameweekScenario(
     participants: participants.teams.length,
     scoredThrough: plan.scoredThrough,
     squadTemplates: squads.length,
-    mode: advance ? "advance" : "reset",
+    mode,
   });
-  const preservedPrimaryGameweeks = advance
+  const preservedPrimaryGameweeks = preservePrimary
     ? await verifyPrimaryProgression(
         tx,
         season.id,
@@ -1880,7 +2028,7 @@ async function applyGameweekScenario(
         primaryAdvanceStates,
       )
     : 0;
-  const expectedSelectionPlayers = advance
+  const expectedSelectionPlayers = preservePrimary
     ? (PARTICIPANT_COUNT - 1) * plan.selectionThrough * 15 +
       [...primaryAdvanceStates.values()].reduce(
         (count, selection) => count + selection.members.length,
@@ -1894,7 +2042,8 @@ async function applyGameweekScenario(
     plan.selectionThrough,
     plan.scoredThrough,
     expectedSelectionPlayers,
-    advance ? primaryTeam.id : null,
+    preservePrimary ? primaryTeam.id : null,
+    primaryChipOverride !== "triple_captain",
   );
   return {
     ...verified,
@@ -1905,8 +2054,9 @@ async function applyGameweekScenario(
         : "existing selections + published ranking",
     squadTemplates: squads.length,
     liveFixtureId: fixturePlan.liveFixtureId,
-    mode: advance ? "advance" : "reset",
+    mode,
     preservedPrimaryGameweeks,
+    primaryTargetScore,
   };
 }
 
@@ -2180,6 +2330,7 @@ async function verifyGameweekScenario(
   scoredThrough: number,
   expectedSelectionPlayers: number,
   transferExceptionTeamId: string | null,
+  requireZeroLiveScore: boolean,
 ) {
   const base = await verifyBaseCounts(tx, seasonId);
   const result = await tx.execute<{
@@ -2388,7 +2539,9 @@ async function verifyGameweekScenario(
     counts.invalid_score_status !== 0 ||
     counts.invalid_gameweek_summary !== 0 ||
     counts.impossible_player_totals !== 0 ||
-    (definition.phase === "live" && counts.target_zero_scores === 0) ||
+    (definition.phase === "live" &&
+      requireZeroLiveScore &&
+      counts.target_zero_scores === 0) ||
     (definition.phase === "live" && counts.target_positive_scores === 0) ||
     (scoredThrough > 0 && counts.target_distinct_scores < 2)
   ) {
@@ -2498,14 +2651,25 @@ export async function runFantasyScenarioCli(args: string[]) {
     listScenarios();
     return;
   }
-  if (options.advance && options.scenario) {
+  const workflowCount =
+    Number(Boolean(options.scenario)) +
+    Number(options.advance) +
+    Number(options.refresh);
+  if (workflowCount > 1) {
     throw new Error(
-      "Use either --advance or a named reset scenario, not both.",
+      "Use exactly one of --advance, --refresh, or a named reset scenario.",
     );
   }
-  if (!options.scenario && !options.advance) {
+  if (workflowCount === 0) {
     listScenarios();
-    throw new Error("Choose a scenario name or use --advance.");
+    throw new Error("Choose a scenario name, --advance, or --refresh.");
+  }
+  if (
+    options.primaryChip !== undefined &&
+    !options.advance &&
+    !options.refresh
+  ) {
+    throw new Error("--primary-chip requires --advance or --refresh.");
   }
   const branchId = await assertBranch(options.branchId);
   const startedAt = Date.now();
@@ -2518,10 +2682,17 @@ export async function runFantasyScenarioCli(args: string[]) {
     );
     const definition = options.advance
       ? await inferAdvanceDefinition(tx, season.id)
-      : SCENARIOS[options.scenario!];
+      : options.refresh
+        ? await inferRefreshDefinition(tx, season.id)
+        : SCENARIOS[options.scenario!];
+    const mode = options.advance
+      ? "advance"
+      : options.refresh
+        ? "refresh"
+        : "reset";
     const scenarioName =
-      options.advance && definition.kind === "gameweek"
-        ? `advance-gw${definition.targetGameweek}-${definition.phase}`
+      mode !== "reset" && definition.kind === "gameweek"
+        ? `${mode}-gw${definition.targetGameweek}-${definition.phase}`
         : options.scenario!;
     const summary =
       definition.kind === "gameweek"
@@ -2531,7 +2702,8 @@ export async function runFantasyScenarioCli(args: string[]) {
             definition,
             primaryTeam,
             scenarioName,
-            options.advance,
+            mode,
+            options.primaryChip,
           )
         : await applyLeagueScenario(
             tx,
