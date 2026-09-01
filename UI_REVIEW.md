@@ -199,6 +199,34 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-02 — Compact Team workspace scroll restoration
+
+- **Route and task:** `/team`; preserve a manager's separate document scroll
+  positions while switching between Squad and Player Market on Mobile and
+  Tablet.
+- **Status:** remains Reference.
+- **Data/auth/Gameweek state:** real signed-in Gameweek 3 squad. Both workspace
+  views were switched and scrolled locally; no squad, transfer, chip, account,
+  or database state was saved.
+- **Language:** Thai source labels were rendered. No user-facing copy or
+  localization behavior changed.
+- **Viewports/accessibility:** exercised at 360px and 768px with the visible tab
+  controls. Pointer activation restored two distinct saved positions exactly
+  in each viewport. At 1280px the tabs remain hidden, the two-column workspace
+  remains intact, and the document has no horizontal overflow.
+- **Issues fixed:** each compact workspace now records its latest window scroll
+  position and restores it after the selected workspace has laid out. Compact
+  workspace scroll anchoring is disabled so browser anchoring cannot offset the
+  requested restoration when the two views have different heights.
+- **Known exclusions:** positions live only for the mounted `/team` page and
+  intentionally reset after navigation or reload. English was not toggled on
+  the signed-in account because the change introduces no copy.
+- **Evidence:** bounded in-app Browser interaction and DOM measurements against
+  the real local `/team` route; no fixture override, simulation path, or
+  database write was introduced.
+- **Verification:** `npm run test:rules`, `npm run test:email`, `npm run types`,
+  `npm run lint`, `npm run format:check`, and `npm run build`.
+
 ### 2026-09-01 — Sticky compact Team workspace tabs
 
 - **Route and task:** `/team`; keep the Squad and Player Market workspace

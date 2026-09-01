@@ -15,7 +15,14 @@ import {
   WandSparkles,
   Zap,
 } from "lucide-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
@@ -112,6 +119,8 @@ function getShortPositionLabel(position: CompetitionPosition) {
 }
 
 type PlayerSwapState = "source" | "available" | "unavailable";
+
+type TeamWorkspaceView = "squad" | "market";
 
 type GameweekDetailsProps = {
   deadlineAt: string;
@@ -637,10 +646,61 @@ export default function TeamClient({
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
-  const [workspaceView, setWorkspaceView] = useState<"squad" | "market">(
-    "squad",
-  );
+  const [workspaceView, setWorkspaceView] =
+    useState<TeamWorkspaceView>("squad");
+  const workspaceViewRef = useRef<TeamWorkspaceView>("squad");
+  const workspaceScrollPositions = useRef<
+    Partial<Record<TeamWorkspaceView, number>>
+  >({});
+  const pendingWorkspaceScroll = useRef<number | null>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    const rememberWorkspaceScroll = () => {
+      workspaceScrollPositions.current[workspaceViewRef.current] =
+        window.scrollY;
+    };
+
+    rememberWorkspaceScroll();
+    window.addEventListener("scroll", rememberWorkspaceScroll, {
+      passive: true,
+    });
+
+    return () => window.removeEventListener("scroll", rememberWorkspaceScroll);
+  }, []);
+
+  useLayoutEffect(() => {
+    const scrollTop = pendingWorkspaceScroll.current;
+
+    if (scrollTop === null) {
+      return;
+    }
+
+    const restoreFrame = window.requestAnimationFrame(() => {
+      window.scrollTo(0, scrollTop);
+      pendingWorkspaceScroll.current = null;
+    });
+
+    return () => window.cancelAnimationFrame(restoreFrame);
+  }, [workspaceView]);
+
+  const changeWorkspaceView = (nextView: TeamWorkspaceView) => {
+    const currentView = workspaceViewRef.current;
+
+    if (nextView === currentView) {
+      return;
+    }
+
+    const currentScrollTop =
+      workspaceScrollPositions.current[currentView] ?? window.scrollY;
+
+    workspaceScrollPositions.current[currentView] = currentScrollTop;
+    pendingWorkspaceScroll.current =
+      workspaceScrollPositions.current[nextView] ?? currentScrollTop;
+    workspaceViewRef.current = nextView;
+    setWorkspaceView(nextView);
+  };
+
   const replaceDraftMembers = (nextMembers: DraftLineupMember[]) => {
     setMembers(nextMembers);
     setRemovedPlayersBySlot((current) =>
@@ -1215,9 +1275,11 @@ export default function TeamClient({
         <Tabs
           className="team-workspace-tabs-sticky"
           value={workspaceView}
-          onValueChange={(value) =>
-            setWorkspaceView(value as "squad" | "market")
-          }
+          onValueChange={(value) => {
+            if (value === "squad" || value === "market") {
+              changeWorkspaceView(value);
+            }
+          }}
         >
           <TabsList
             className="segment-tabs team-workspace-tabs"

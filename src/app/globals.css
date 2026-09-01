@@ -6973,6 +6973,10 @@ textarea:focus-visible {
     grid-template-columns: 1fr;
   }
 
+  .unified-team-workspace {
+    overflow-anchor: none;
+  }
+
   .segment-tabs.team-workspace-tabs {
     width: 100%;
     height: 56px;
