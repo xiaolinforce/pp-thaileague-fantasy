@@ -95,6 +95,9 @@ the imported database during normal runtime.
 - Use the guarded `npm run db:scenario -- <name>` runner on a disposable Neon
   branch for fast, repeatable Gameweek and Private League UI states; see the
   [Development guide](DEVELOPMENT.md#fantasy-qa-scenarios).
+- Use `npm run db:scenario -- --advance` to lock and score the primary tester's
+  saved team, preserve its transfer history, and carry it into the next
+  Gameweek draft without replacing it with a preset squad.
 
 The Fantasy seed is idempotent for the configured season. It creates or updates
 Gameweeks, player classifications, safe fallback tier metadata, and the single

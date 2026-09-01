@@ -141,6 +141,7 @@ npm run db:scenario -- gw30-live
 npm run db:scenario -- gw30-final
 npm run db:scenario -- league-empty
 npm run db:scenario -- league-populated
+npm run db:scenario -- --advance
 ```
 
 Gameweek scenarios rebuild deterministic fixtures, selections, revisions,
@@ -164,6 +165,27 @@ use `--primary-team=<team name>` when an explicit signed-in team is needed.
 The populated League state gives that tester four memberships (two owned and
 two joined), uses member identities for every owner, and preserves realistic
 creation and join order.
+
+Named Gameweek scenarios are reset presets: they rebuild every team's Fantasy
+history for a repeatable baseline. `--advance` is the progression mode. It
+infers the next lifecycle transition from the database, prioritizing a
+provisional Gameweek before the already-open successor:
+
+```text
+open GW N -> provisional GW N + open GW N+1 -> final GW N
+```
+
+Progression preserves the primary tester's saved selection for every existing
+Gameweek, including lineup, bench order, captaincy, chip, transfer settlement,
+and transfer revisions. Passing the deadline locks the current saved draft;
+the resulting squad is carried into a new draft for the following Gameweek.
+Scores are regenerated from the preserved locked selection, while the other
+199 teams continue to use deterministic QA squads. Only changes already saved
+through the Team screen are in PostgreSQL and can be preserved; an unsaved
+browser draft is intentionally invisible to the runner. Use
+`--primary-team=<team name>` when automatic signed-in-team detection could be
+ambiguous. Like named Gameweek presets, progression clears Private Leagues;
+apply the desired League overlay afterward when needed.
 
 The scenario runner is intentionally destructive inside the selected Fantasy
 season on its disposable branch. Do not point it at the shared development or

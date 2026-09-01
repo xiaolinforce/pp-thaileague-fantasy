@@ -17,7 +17,11 @@ import {
   createEmptySquadDraft,
   getCompleteSelectionMembers,
 } from "../../src/lib/fantasy/team-draft.ts";
-import type { FantasyPosition } from "../../src/lib/fantasy/rules.ts";
+import {
+  settleTransfers,
+  type FantasyChip,
+  type FantasyPosition,
+} from "../../src/lib/fantasy/rules.ts";
 
 const PARTICIPANT_COUNT = 200;
 const SQUAD_TEMPLATE_COUNT = 8;
@@ -137,12 +141,44 @@ type FixtureState = FixtureRow & {
   homeScore: number | null;
   awayScore: number | null;
 };
+type PreservedSelection = {
+  id: string;
+  gameweek: number;
+  activeChip: FantasyChip | null;
+  freeTransfersBefore: number;
+  freeTransfersAfter: number | null;
+  netTransferCount: number;
+  transferPoints: number;
+  confirmedAt: string | null;
+  lockedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  members: SquadMember[];
+  revisions: PreservedRevision[];
+};
+type PreservedRevision = {
+  revision: number;
+  status: "confirmed" | "cancelled";
+  squad: string[];
+  lineup: Record<string, unknown>;
+  activeChip: FantasyChip | null;
+  netTransferCount: number;
+  transferPoints: number;
+  createdAt: string;
+  updatedAt: string;
+};
+type SelectionScenarioState = {
+  squad: SquadMember[];
+  activeChip: FantasyChip | null;
+  transferPoints: number;
+};
 
 type CliOptions = {
   scenario: ScenarioName | null;
   branchId: string | null;
   seasonSlug: string | null;
   primaryTeamName: string | null;
+  advance: boolean;
   list: boolean;
 };
 
@@ -168,6 +204,7 @@ function parseArgs(args: string[]): CliOptions {
       option("--primary-team") ??
       process.env.FANTASY_SCENARIO_PRIMARY_TEAM ??
       null,
+    advance: args.includes("--advance"),
     list: args.includes("--list"),
   };
 }
@@ -177,6 +214,9 @@ function listScenarios() {
   for (const [name, definition] of Object.entries(SCENARIOS)) {
     console.log(`  ${name.padEnd(18)} ${definition.description}`);
   }
+  console.log(
+    "\nUse --advance without a scenario name to preserve the primary team and move to the next lifecycle state.",
+  );
 }
 
 function uuidFor(value: string) {
@@ -254,6 +294,240 @@ async function findPrimaryTeam(
     limit 1
   `);
   return result.rows[0] ?? null;
+}
+
+async function inferAdvanceDefinition(
+  tx: ScenarioTransaction,
+  seasonId: string,
+): Promise<GameweekScenario> {
+  const result = await tx.execute<{
+    number: number;
+    status: "open" | "provisional";
+  }>(sql`
+    select number, status
+    from fantasy_gameweeks
+    where fantasy_season_id = ${seasonId}::uuid
+      and status in ('open', 'provisional')
+    order by case when status = 'provisional' then 0 else 1 end, number
+  `);
+  const current = result.rows[0];
+  if (!current) {
+    throw new Error(
+      "Cannot advance: the season has no open or provisional Gameweek.",
+    );
+  }
+  const phase = current.status === "provisional" ? "final" : "live";
+  return {
+    kind: "gameweek",
+    targetGameweek: current.number,
+    phase,
+    description:
+      phase === "live"
+        ? `Preserve the current GW${current.number} draft and move past its deadline`
+        : `Preserve GW${current.number} and finalize its score`,
+  };
+}
+
+async function capturePrimaryProgression(
+  tx: ScenarioTransaction,
+  seasonId: string,
+  teamId: string,
+) {
+  const selectionResult = await tx.execute<{
+    id: string;
+    gameweek: number;
+    active_chip: FantasyChip | null;
+    free_transfers_before: number;
+    free_transfers_after: number | null;
+    net_transfer_count: number;
+    transfer_points: number;
+    confirmed_at: string | null;
+    locked_at: string | null;
+    created_at: string;
+    updated_at: string;
+  }>(sql`
+    select selection.id,
+           gw.number as gameweek,
+           selection.active_chip,
+           selection.free_transfers_before,
+           selection.free_transfers_after,
+           selection.net_transfer_count,
+           selection.transfer_points,
+           selection.confirmed_at::text,
+           selection.locked_at::text,
+           selection.created_at::text,
+           selection.updated_at::text
+    from fantasy_team_selections selection
+    join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+    where selection.fantasy_team_id = ${teamId}::uuid
+      and gw.fantasy_season_id = ${seasonId}::uuid
+    order by gw.number
+  `);
+  const memberResult = await tx.execute<{
+    gameweek: number;
+    fantasy_player_id: string;
+    club_id_snapshot: string;
+    position_snapshot: FantasyPosition;
+    tier_snapshot: number;
+    is_thai_snapshot: boolean;
+    lineup_role: "starter" | "bench";
+    bench_order: number | null;
+    captain_role: "none" | "captain" | "vice_captain";
+  }>(sql`
+    select gw.number as gameweek,
+           member.fantasy_player_id,
+           member.club_id_snapshot,
+           member.position_snapshot,
+           member.tier_snapshot,
+           member.is_thai_snapshot,
+           member.lineup_role,
+           member.bench_order,
+           member.captain_role
+    from fantasy_team_selection_players member
+    join fantasy_team_selections selection on selection.id = member.selection_id
+    join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+    where selection.fantasy_team_id = ${teamId}::uuid
+      and gw.fantasy_season_id = ${seasonId}::uuid
+    order by gw.number,
+             case when member.lineup_role = 'starter' then 0 else 1 end,
+             member.bench_order nulls first,
+             member.id
+  `);
+  const revisionResult = await tx.execute<{
+    gameweek: number;
+    revision: number;
+    status: "confirmed" | "cancelled";
+    squad: string[];
+    lineup: Record<string, unknown>;
+    active_chip: FantasyChip | null;
+    net_transfer_count: number;
+    transfer_points: number;
+    created_at: string;
+    updated_at: string;
+  }>(sql`
+    select gw.number as gameweek,
+           revision.revision,
+           revision.status,
+           revision.squad,
+           revision.lineup,
+           revision.active_chip,
+           revision.net_transfer_count,
+           revision.transfer_points,
+           revision.created_at::text,
+           revision.updated_at::text
+    from fantasy_transfer_revisions revision
+    join fantasy_team_selections selection on selection.id = revision.selection_id
+    join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+    where selection.fantasy_team_id = ${teamId}::uuid
+      and gw.fantasy_season_id = ${seasonId}::uuid
+    order by gw.number, revision.revision
+  `);
+  const membersByGameweek = new Map<number, SquadMember[]>();
+  for (const row of memberResult.rows) {
+    const members = membersByGameweek.get(row.gameweek) ?? [];
+    members.push({
+      fantasyPlayerId: row.fantasy_player_id,
+      clubId: row.club_id_snapshot,
+      position: row.position_snapshot,
+      tier: row.tier_snapshot,
+      isThai: row.is_thai_snapshot,
+      lineupRole: row.lineup_role,
+      benchOrder: row.bench_order,
+      captainRole: row.captain_role,
+    });
+    membersByGameweek.set(row.gameweek, members);
+  }
+  const revisionsByGameweek = new Map<number, PreservedRevision[]>();
+  for (const row of revisionResult.rows) {
+    const revisions = revisionsByGameweek.get(row.gameweek) ?? [];
+    revisions.push({
+      revision: row.revision,
+      status: row.status,
+      squad: row.squad,
+      lineup: row.lineup,
+      activeChip: row.active_chip,
+      netTransferCount: row.net_transfer_count,
+      transferPoints: row.transfer_points,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    });
+    revisionsByGameweek.set(row.gameweek, revisions);
+  }
+  return selectionResult.rows.map<PreservedSelection>((row) => ({
+    id: row.id,
+    gameweek: row.gameweek,
+    activeChip: row.active_chip,
+    freeTransfersBefore: row.free_transfers_before,
+    freeTransfersAfter: row.free_transfers_after,
+    netTransferCount: row.net_transfer_count,
+    transferPoints: row.transfer_points,
+    confirmedAt: row.confirmed_at,
+    lockedAt: row.locked_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+    members: membersByGameweek.get(row.gameweek) ?? [],
+    revisions: revisionsByGameweek.get(row.gameweek) ?? [],
+  }));
+}
+
+function normalizedSquad(squad: SquadMember[]) {
+  return [...squad]
+    .sort((left, right) =>
+      left.fantasyPlayerId.localeCompare(right.fantasyPlayerId),
+    )
+    .map((member) => ({
+      fantasyPlayerId: member.fantasyPlayerId,
+      clubId: member.clubId,
+      position: member.position,
+      tier: member.tier,
+      isThai: member.isThai,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder,
+      captainRole: member.captainRole,
+    }));
+}
+
+async function verifyPrimaryProgression(
+  tx: ScenarioTransaction,
+  seasonId: string,
+  teamId: string,
+  expected: Map<number, PreservedSelection & { status: "draft" | "locked" }>,
+) {
+  const actual = await capturePrimaryProgression(tx, seasonId, teamId);
+  if (actual.length !== expected.size) {
+    throw new Error(
+      `Advance verification failed: expected ${expected.size} primary selections, found ${actual.length}.`,
+    );
+  }
+  for (const selection of actual) {
+    const expectedSelection = expected.get(selection.gameweek);
+    if (!expectedSelection) {
+      throw new Error(
+        `Advance verification failed: unexpected primary GW${selection.gameweek} selection.`,
+      );
+    }
+    const expectedRevisionCount =
+      expectedSelection.revisions.length > 0
+        ? expectedSelection.revisions.length
+        : expectedSelection.members.length > 0
+          ? 1
+          : 0;
+    if (
+      selection.activeChip !== expectedSelection.activeChip ||
+      selection.freeTransfersBefore !== expectedSelection.freeTransfersBefore ||
+      selection.freeTransfersAfter !== expectedSelection.freeTransfersAfter ||
+      selection.netTransferCount !== expectedSelection.netTransferCount ||
+      selection.transferPoints !== expectedSelection.transferPoints ||
+      selection.revisions.length !== expectedRevisionCount ||
+      JSON.stringify(normalizedSquad(selection.members)) !==
+        JSON.stringify(normalizedSquad(expectedSelection.members))
+    ) {
+      throw new Error(
+        `Advance verification failed for primary GW${selection.gameweek}.`,
+      );
+    }
+  }
+  return actual.length;
 }
 
 function squadSignature(squad: SquadMember[]) {
@@ -802,7 +1076,8 @@ async function applyGameweekScenario(
   season: SeasonRow,
   definition: GameweekScenario,
   requestedPrimaryTeam: TeamRow | null,
-  scenarioName: GameweekScenarioName,
+  scenarioName: string,
+  advance: boolean,
 ) {
   const templates = await loadSquadTemplates(
     tx,
@@ -810,6 +1085,20 @@ async function applyGameweekScenario(
     requestedPrimaryTeam?.id ?? null,
   );
   const squads = templates.squads;
+  if (advance && !requestedPrimaryTeam) {
+    throw new Error(
+      "Cannot advance: a signed-in primary tester team was not found.",
+    );
+  }
+  const preservedSelections =
+    advance && requestedPrimaryTeam
+      ? await capturePrimaryProgression(tx, season.id, requestedPrimaryTeam.id)
+      : [];
+  if (advance && preservedSelections.length === 0) {
+    throw new Error(
+      "Cannot advance: the primary tester team has no Gameweek selection to preserve.",
+    );
+  }
 
   await clearPrivateLeagues(tx, season.id);
   await tx.execute(sql`
@@ -882,6 +1171,70 @@ async function applyGameweekScenario(
       new Date(gameweek.deadline_at),
     ]),
   );
+  const preservedByGameweek = new Map(
+    preservedSelections.map((selection) => [selection.gameweek, selection]),
+  );
+  const primaryAdvanceStates = new Map<
+    number,
+    PreservedSelection & { status: "draft" | "locked" }
+  >();
+  if (advance) {
+    let latest: PreservedSelection | null = null;
+    for (let gameweek = 1; gameweek <= plan.selectionThrough; gameweek += 1) {
+      const exact = preservedByGameweek.get(gameweek) ?? null;
+      if (exact) latest = exact;
+      if (!latest) {
+        throw new Error(
+          `Cannot advance: the primary tester team has no selection to carry into GW${gameweek}.`,
+        );
+      }
+      const status = gameweek <= plan.scoredThrough ? "locked" : "draft";
+      const activeChip =
+        gameweek < 2 && latest.activeChip === "wildcard"
+          ? null
+          : (exact?.activeChip ?? null);
+      const settlement = settleTransfers({
+        freeTransfersBefore:
+          exact?.freeTransfersBefore ??
+          latest.freeTransfersAfter ??
+          latest.freeTransfersBefore,
+        transferCount: exact?.netTransferCount ?? 0,
+        wildcard: activeChip === "wildcard",
+      });
+      const carried = !exact;
+      const state: PreservedSelection & { status: "draft" | "locked" } = {
+        id: exact?.id ?? uuidFor(`advance:${primaryTeam.id}:${gameweek}`),
+        gameweek,
+        status,
+        activeChip,
+        freeTransfersBefore:
+          exact?.freeTransfersBefore ??
+          latest.freeTransfersAfter ??
+          latest.freeTransfersBefore,
+        freeTransfersAfter:
+          status === "locked"
+            ? settlement.freeTransfersAfter
+            : (exact?.freeTransfersAfter ?? null),
+        netTransferCount: exact?.netTransferCount ?? 0,
+        transferPoints:
+          status === "locked"
+            ? settlement.transferPoints
+            : (exact?.transferPoints ?? 0),
+        confirmedAt: carried ? null : exact.confirmedAt,
+        lockedAt:
+          status === "locked"
+            ? (exact?.lockedAt ??
+              deadlineByGameweek.get(gameweek)!.toISOString())
+            : null,
+        createdAt: exact?.createdAt ?? new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        members: latest.members.map((member) => ({ ...member })),
+        revisions: carried ? [] : exact.revisions,
+      };
+      primaryAdvanceStates.set(gameweek, state);
+      latest = state;
+    }
+  }
   const fixturesResult = await tx.execute<FixtureRow>(sql`
     select f.id,
            f.matchweek,
@@ -955,6 +1308,56 @@ async function applyGameweekScenario(
         updated_at = now()
     where fantasy_season_id = ${season.id}::uuid
   `);
+  if (advance) {
+    const selectionPayload = [...primaryAdvanceStates.values()].map(
+      (selection) => ({
+        gameweek: selection.gameweek,
+        status: selection.status,
+        active_chip: selection.activeChip,
+        free_transfers_before: selection.freeTransfersBefore,
+        free_transfers_after: selection.freeTransfersAfter,
+        net_transfer_count: selection.netTransferCount,
+        transfer_points: selection.transferPoints,
+        confirmed_at: selection.confirmedAt,
+        locked_at: selection.lockedAt,
+        created_at: selection.createdAt,
+        updated_at: selection.updatedAt,
+      }),
+    );
+    await tx.execute(sql`
+      update fantasy_team_selections selection
+      set status = x.status::fantasy_selection_status,
+          active_chip = x.active_chip::fantasy_chip,
+          free_transfers_before = x.free_transfers_before,
+          free_transfers_after = x.free_transfers_after,
+          net_transfer_count = x.net_transfer_count,
+          transfer_points = x.transfer_points,
+          confirmed_at = x.confirmed_at::timestamptz,
+          locked_at = x.locked_at::timestamptz,
+          created_at = x.created_at::timestamptz,
+          updated_at = x.updated_at::timestamptz
+      from fantasy_gameweeks gw,
+           jsonb_to_recordset(${JSON.stringify(selectionPayload)}::jsonb)
+             as x(gameweek int, status text, active_chip text,
+                  free_transfers_before int, free_transfers_after int,
+                  net_transfer_count int, transfer_points int,
+                  confirmed_at text, locked_at text, created_at text, updated_at text)
+      where selection.fantasy_team_id = ${primaryTeam.id}::uuid
+        and selection.fantasy_gameweek_id = gw.id
+        and gw.fantasy_season_id = ${season.id}::uuid
+        and gw.number = x.gameweek
+    `);
+    const latestState = primaryAdvanceStates.get(plan.selectionThrough)!;
+    const primaryFreeTransfers =
+      latestState.status === "draft"
+        ? latestState.freeTransfersBefore
+        : (latestState.freeTransfersAfter ?? latestState.freeTransfersBefore);
+    await tx.execute(sql`
+      update fantasy_teams
+      set free_transfers = ${primaryFreeTransfers}, updated_at = now()
+      where id = ${primaryTeam.id}::uuid
+    `);
+  }
 
   const teamSquadPayload = teamSquads.flatMap(({ team, squad }) =>
     squad.map((member) => ({
@@ -990,6 +1393,55 @@ async function applyGameweekScenario(
       on member.team_id::uuid = selection.fantasy_team_id
     where gw.fantasy_season_id = ${season.id}::uuid
   `);
+  if (advance) {
+    await tx.execute(sql`
+      delete from fantasy_team_selection_players member
+      using fantasy_team_selections selection, fantasy_gameweeks gw
+      where member.selection_id = selection.id
+        and selection.fantasy_gameweek_id = gw.id
+        and selection.fantasy_team_id = ${primaryTeam.id}::uuid
+        and gw.fantasy_season_id = ${season.id}::uuid
+    `);
+    const primaryMemberPayload = [...primaryAdvanceStates.values()].flatMap(
+      (selection) =>
+        selection.members.map((member) => ({
+          gameweek: selection.gameweek,
+          fantasy_player_id: member.fantasyPlayerId,
+          club_id: member.clubId,
+          position: member.position,
+          tier: member.tier,
+          is_thai: member.isThai,
+          lineup_role: member.lineupRole,
+          bench_order: member.benchOrder,
+          captain_role: member.captainRole,
+        })),
+    );
+    if (primaryMemberPayload.length > 0) {
+      await tx.execute(sql`
+        insert into fantasy_team_selection_players
+          (selection_id, fantasy_player_id, club_id_snapshot, position_snapshot,
+           tier_snapshot, is_thai_snapshot, lineup_role, bench_order, captain_role)
+        select selection.id,
+               member.fantasy_player_id::uuid,
+               member.club_id::uuid,
+               member.position::player_position,
+               member.tier,
+               member.is_thai,
+               member.lineup_role::fantasy_lineup_role,
+               member.bench_order,
+               member.captain_role::fantasy_captain_role
+        from fantasy_team_selections selection
+        join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+        join jsonb_to_recordset(${JSON.stringify(primaryMemberPayload)}::jsonb)
+          as member(gameweek int, fantasy_player_id text, club_id text, position text,
+                    tier int, is_thai boolean, lineup_role text, bench_order int,
+                    captain_role text)
+          on member.gameweek = gw.number
+        where selection.fantasy_team_id = ${primaryTeam.id}::uuid
+          and gw.fantasy_season_id = ${season.id}::uuid
+      `);
+    }
+  }
   const revisionPayload = teamSquads.map(({ team, squad }) => {
     const members = squad.map((member) => ({
       fantasy_player_id: member.fantasyPlayerId,
@@ -1024,13 +1476,100 @@ async function applyGameweekScenario(
       on revision.team_id::uuid = selection.fantasy_team_id
     where gw.fantasy_season_id = ${season.id}::uuid
   `);
+  if (advance) {
+    await tx.execute(sql`
+      delete from fantasy_transfer_revisions revision
+      using fantasy_team_selections selection, fantasy_gameweeks gw
+      where revision.selection_id = selection.id
+        and selection.fantasy_gameweek_id = gw.id
+        and selection.fantasy_team_id = ${primaryTeam.id}::uuid
+        and gw.fantasy_season_id = ${season.id}::uuid
+    `);
+    const primaryRevisionPayload = [...primaryAdvanceStates.values()].flatMap(
+      (selection) => {
+        const revisions =
+          selection.revisions.length > 0
+            ? selection.revisions
+            : selection.members.length > 0
+              ? [
+                  {
+                    revision: 1,
+                    status: "confirmed" as const,
+                    squad: selection.members.map(
+                      (member) => member.fantasyPlayerId,
+                    ),
+                    lineup: { members: selection.members },
+                    activeChip: null,
+                    netTransferCount: 0,
+                    transferPoints: 0,
+                    createdAt: selection.createdAt,
+                    updatedAt: selection.updatedAt,
+                  },
+                ]
+              : [];
+        return revisions.map((revision) => ({
+          gameweek: selection.gameweek,
+          revision: revision.revision,
+          status: revision.status,
+          squad: revision.squad,
+          lineup: revision.lineup,
+          active_chip: revision.activeChip,
+          net_transfer_count: revision.netTransferCount,
+          transfer_points: revision.transferPoints,
+          created_at: revision.createdAt,
+          updated_at: revision.updatedAt,
+        }));
+      },
+    );
+    if (primaryRevisionPayload.length > 0) {
+      await tx.execute(sql`
+        insert into fantasy_transfer_revisions
+          (selection_id, revision, status, squad, lineup, active_chip,
+           net_transfer_count, transfer_points, created_at, updated_at)
+        select selection.id,
+               revision.revision,
+               revision.status::fantasy_revision_status,
+               revision.squad,
+               revision.lineup,
+               revision.active_chip::fantasy_chip,
+               revision.net_transfer_count,
+               revision.transfer_points,
+               revision.created_at::timestamptz,
+               revision.updated_at::timestamptz
+        from fantasy_team_selections selection
+        join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+        join jsonb_to_recordset(${JSON.stringify(primaryRevisionPayload)}::jsonb)
+          as revision(gameweek int, revision int, status text, squad jsonb,
+                      lineup jsonb, active_chip text, net_transfer_count int,
+                      transfer_points int, created_at text, updated_at text)
+          on revision.gameweek = gw.number
+        where selection.fantasy_team_id = ${primaryTeam.id}::uuid
+          and gw.fantasy_season_id = ${season.id}::uuid
+      `);
+    }
+  }
 
   const statRows: Array<Record<string, unknown>> = [];
   const pointRows: Array<Record<string, unknown>> = [];
   const teamScoreRows: Array<Record<string, unknown>> = [];
+  const primaryScoringStates = new Map<number, SelectionScenarioState>(
+    [...primaryAdvanceStates].map(([gameweek, selection]) => [
+      gameweek,
+      {
+        squad: selection.members,
+        activeChip: selection.activeChip,
+        transferPoints: selection.transferPoints,
+      },
+    ]),
+  );
   const playerUniverse = [
     ...new Map(
-      squads.flat().map((member) => [member.fantasyPlayerId, member]),
+      [
+        ...squads.flat(),
+        ...[...primaryAdvanceStates.values()].flatMap(
+          (selection) => selection.members,
+        ),
+      ].map((member) => [member.fantasyPlayerId, member]),
     ).values(),
   ].sort((left, right) =>
     left.fantasyPlayerId.localeCompare(right.fantasyPlayerId),
@@ -1207,8 +1746,17 @@ async function applyGameweekScenario(
       }
     }
     for (const { team, squad } of teamSquads) {
+      const scoringState =
+        advance && team.id === primaryTeam.id
+          ? primaryScoringStates.get(gameweek)
+          : { squad, activeChip: null, transferPoints: 0 };
+      if (!scoringState) {
+        throw new Error(
+          `Cannot score GW${gameweek}: the primary tester selection is missing.`,
+        );
+      }
       const score = resolveTeamScore({
-        selection: squad.map((member) => ({
+        selection: scoringState.squad.map((member) => ({
           playerId: member.fantasyPlayerId,
           position: member.position,
           lineupRole: member.lineupRole,
@@ -1216,8 +1764,8 @@ async function applyGameweekScenario(
           captainRole: member.captainRole,
         })),
         playerResults: results,
-        activeChip: null,
-        transferPoints: 0,
+        activeChip: scoringState.activeChip,
+        transferPoints: scoringState.transferPoints,
       });
       teamScoreRows.push({
         team_id: team.id,
@@ -1225,6 +1773,7 @@ async function applyGameweekScenario(
         lineup_points: score.lineupPoints,
         bench_points: score.benchPoints,
         captain_bonus: score.captainBonus,
+        transfer_points: score.transferPoints,
         total_points: score.totalPoints,
         auto_substitutions: score.autoSubstitutions,
       });
@@ -1281,7 +1830,7 @@ async function applyGameweekScenario(
              team_score.lineup_points,
              team_score.bench_points,
              team_score.captain_bonus,
-             0,
+             team_score.transfer_points,
              team_score.total_points,
              team_score.auto_substitutions,
              now()
@@ -1290,7 +1839,8 @@ async function applyGameweekScenario(
       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
       join jsonb_to_recordset(${JSON.stringify(teamScoreRows)}::jsonb)
         as team_score(team_id text, gameweek int, lineup_points int, bench_points int,
-                      captain_bonus int, total_points int, auto_substitutions jsonb)
+                      captain_bonus int, transfer_points int, total_points int,
+                      auto_substitutions jsonb)
         on team_score.gameweek = gw.number
        and team_score.team_id::uuid = team.id
       where gw.fantasy_season_id = ${season.id}::uuid
@@ -1321,13 +1871,31 @@ async function applyGameweekScenario(
     participants: participants.teams.length,
     scoredThrough: plan.scoredThrough,
     squadTemplates: squads.length,
+    mode: advance ? "advance" : "reset",
   });
+  const preservedPrimaryGameweeks = advance
+    ? await verifyPrimaryProgression(
+        tx,
+        season.id,
+        primaryTeam.id,
+        primaryAdvanceStates,
+      )
+    : 0;
+  const expectedSelectionPlayers = advance
+    ? (PARTICIPANT_COUNT - 1) * plan.selectionThrough * 15 +
+      [...primaryAdvanceStates.values()].reduce(
+        (count, selection) => count + selection.members.length,
+        0,
+      )
+    : PARTICIPANT_COUNT * plan.selectionThrough * 15;
   const verified = await verifyGameweekScenario(
     tx,
     season.id,
     definition,
     plan.selectionThrough,
     plan.scoredThrough,
+    expectedSelectionPlayers,
+    advance ? primaryTeam.id : null,
   );
   return {
     ...verified,
@@ -1338,6 +1906,8 @@ async function applyGameweekScenario(
         : "existing selections + published ranking",
     squadTemplates: squads.length,
     liveFixtureId: fixturePlan.liveFixtureId,
+    mode: advance ? "advance" : "reset",
+    preservedPrimaryGameweeks,
   };
 }
 
@@ -1560,7 +2130,7 @@ async function applyLeagueScenario(
 async function insertScenarioAudit(
   tx: ScenarioTransaction,
   seasonId: string,
-  scenarioName: ScenarioName,
+  scenarioName: string,
   after: Record<string, unknown>,
 ) {
   await tx.execute(sql`
@@ -1609,6 +2179,8 @@ async function verifyGameweekScenario(
   definition: GameweekScenario,
   selectionThrough: number,
   scoredThrough: number,
+  expectedSelectionPlayers: number,
+  transferExceptionTeamId: string | null,
 ) {
   const base = await verifyBaseCounts(tx, seasonId);
   const result = await tx.execute<{
@@ -1728,12 +2300,16 @@ async function verifyGameweekScenario(
        from fantasy_team_selections selection
        join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
        where gw.fantasy_season_id = ${seasonId}::uuid
+         and (${transferExceptionTeamId}::uuid is null
+           or selection.fantasy_team_id <> ${transferExceptionTeamId}::uuid)
          and (selection.free_transfers_before <> case when gw.number = 1 then 2 else 4 end
            or (selection.status = 'locked' and selection.free_transfers_after <> 4)
            or (selection.status = 'draft' and selection.free_transfers_after is not null))) as invalid_transfer_balance,
       (select count(*)::int
        from fantasy_teams team
        where team.fantasy_season_id = ${seasonId}::uuid
+         and (${transferExceptionTeamId}::uuid is null
+           or team.id <> ${transferExceptionTeamId}::uuid)
          and team.free_transfers <> case when ${scoredThrough} > 0 then 4 else 2 end) as invalid_team_transfer_balance,
       (select count(*)::int
        from fantasy_team_gameweek_scores score
@@ -1795,7 +2371,7 @@ async function verifyGameweekScenario(
     counts.provisional_gameweeks !== expectedProvisional ||
     counts.final_gameweeks !== expectedFinal ||
     counts.selections !== expectedSelections ||
-    counts.selection_players !== expectedSelections * 15 ||
+    counts.selection_players !== expectedSelectionPlayers ||
     counts.scores !== expectedScores ||
     counts.standings !== expectedStandings ||
     counts.live_fixtures !== expectedLive ||
@@ -1918,11 +2494,15 @@ export async function runFantasyScenarioCli(args: string[]) {
     listScenarios();
     return;
   }
-  if (!options.scenario) {
-    listScenarios();
-    throw new Error("Choose a scenario name.");
+  if (options.advance && options.scenario) {
+    throw new Error(
+      "Use either --advance or a named reset scenario, not both.",
+    );
   }
-  const definition = SCENARIOS[options.scenario];
+  if (!options.scenario && !options.advance) {
+    listScenarios();
+    throw new Error("Choose a scenario name or use --advance.");
+  }
   const branchId = await assertBranch(options.branchId);
   const startedAt = Date.now();
   const result = await transactionDb.transaction(async (tx) => {
@@ -1932,6 +2512,13 @@ export async function runFantasyScenarioCli(args: string[]) {
       season.id,
       options.primaryTeamName,
     );
+    const definition = options.advance
+      ? await inferAdvanceDefinition(tx, season.id)
+      : SCENARIOS[options.scenario!];
+    const scenarioName =
+      options.advance && definition.kind === "gameweek"
+        ? `advance-gw${definition.targetGameweek}-${definition.phase}`
+        : options.scenario!;
     const summary =
       definition.kind === "gameweek"
         ? await applyGameweekScenario(
@@ -1939,25 +2526,27 @@ export async function runFantasyScenarioCli(args: string[]) {
             season,
             definition,
             primaryTeam,
-            options.scenario as GameweekScenarioName,
+            scenarioName,
+            options.advance,
           )
         : await applyLeagueScenario(
             tx,
             season,
             definition,
             primaryTeam,
-            options.scenario as LeagueScenarioName,
+            scenarioName as LeagueScenarioName,
           );
-    return { seasonSlug: season.slug, ...summary };
+    return { scenarioName, seasonSlug: season.slug, ...summary };
   });
+  const { scenarioName, ...summary } = result;
   console.log(
     JSON.stringify(
       {
         ok: true,
-        scenario: options.scenario,
+        scenario: scenarioName,
         branchId,
         durationMs: Date.now() - startedAt,
-        ...result,
+        ...summary,
       },
       null,
       2,
