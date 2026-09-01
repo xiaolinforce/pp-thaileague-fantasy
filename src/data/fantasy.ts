@@ -55,6 +55,7 @@ export type FantasyState = {
     id: string;
     status: "draft" | "locked";
     activeChip: FantasyChip | null;
+    baselineSquadIds: string[];
     hasPendingChanges: boolean;
     netTransferCount: number;
     transferPoints: number;
@@ -81,6 +82,12 @@ export async function getFantasyState(): Promise<FantasyState> {
     .where(eq(fantasyTransferRevisions.selectionId, selection.id))
     .orderBy(asc(fantasyTransferRevisions.revision));
   const baselineRevision = revisions[0]?.revision ?? 0;
+  const baselineSquadIds = Array.isArray(revisions[0]?.squad)
+    ? revisions[0].squad.filter(
+        (fantasyPlayerId): fantasyPlayerId is string =>
+          typeof fantasyPlayerId === "string",
+      )
+    : members.map((member) => member.fantasyPlayerId);
   const hasPendingChanges = revisions.some(
     (revision) =>
       revision.revision > baselineRevision && revision.status === "confirmed",
@@ -127,6 +134,7 @@ export async function getFantasyState(): Promise<FantasyState> {
       id: selection.id,
       status: selection.status,
       activeChip: selection.activeChip,
+      baselineSquadIds,
       hasPendingChanges,
       netTransferCount: selection.netTransferCount,
       transferPoints: selection.transferPoints,
@@ -338,6 +346,7 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       id: selected.selection.id,
       status: selected.selection.status,
       activeChip: selected.selection.activeChip,
+      baselineSquadIds: members.map((member) => member.fantasyPlayerId),
       hasPendingChanges: false,
       netTransferCount: selected.selection.netTransferCount,
       transferPoints: selected.selection.transferPoints,

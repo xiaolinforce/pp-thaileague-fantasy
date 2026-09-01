@@ -312,6 +312,12 @@ const translations: Record<string, string> = {
   ฟรี: "Free",
   เปลี่ยนตัวอิสระ: "Wildcard",
   เปลี่ยนฟรีได้อีก: "Free transfers",
+  เปลี่ยนฟรีคงเหลือ: "Free transfers remaining",
+  เปลี่ยนเกิน: "Transfers over limit",
+  "-{points} คะแนน": "-{points} points",
+  "Gameweek 1 เปลี่ยนได้ไม่จำกัด": "Unlimited transfers in Gameweek 1",
+  "Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้":
+    "Wildcard active · no deduction; free transfers are preserved",
   "ระดับ 1": "Tier 1",
   "ระดับ 1–2": "Tiers 1–2",
   "ระดับ 1–3": "Tiers 1–3",

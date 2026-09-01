@@ -53,7 +53,12 @@ import {
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
-import type { FantasyPosition } from "@/lib/fantasy/rules";
+import {
+  getNetTransfers,
+  THAI_LEAGUE_FANTASY_RULES,
+  type FantasyChip,
+  type FantasyPosition,
+} from "@/lib/fantasy/rules";
 
 const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
   goalkeeper: "GK",
@@ -71,6 +76,7 @@ const fantasyPositions: Record<CompetitionPosition, FantasyPosition> = {
 export default function TransfersClient({
   data,
   fantasy,
+  activeChip,
   isEditable,
   members,
   onMembersChange,
@@ -80,6 +86,7 @@ export default function TransfersClient({
 }: {
   data: CompetitionDataset;
   fantasy: FantasyState;
+  activeChip: FantasyChip | null;
   isEditable: boolean;
   members: DraftLineupMember[];
   onMembersChange: (members: DraftLineupMember[]) => void;
@@ -140,6 +147,28 @@ export default function TransfersClient({
       ),
     [members],
   );
+  const currentSquadIds = members.flatMap((member) =>
+    member.fantasyPlayerId ? [member.fantasyPlayerId] : [],
+  );
+  const netTransferCount = getNetTransfers(
+    fantasy.selection.baselineSquadIds,
+    currentSquadIds,
+  ).count;
+  const hasUnlimitedOpeningTransfers = fantasy.gameweek.number === 1;
+  const hasActiveWildcard = activeChip === "wildcard";
+  const hasUnlimitedTransfers =
+    hasUnlimitedOpeningTransfers || hasActiveWildcard;
+  const freeTransfersRemaining = hasActiveWildcard
+    ? fantasy.team.freeTransfers
+    : Math.max(0, fantasy.team.freeTransfers - netTransferCount);
+  const transferPoints = hasUnlimitedTransfers
+    ? 0
+    : Math.max(0, netTransferCount - fantasy.team.freeTransfers) *
+      THAI_LEAGUE_FANTASY_RULES.transferPointCost;
+  const isOverFreeTransferLimit = transferPoints > 0;
+  const unlimitedTransfersLabel = hasActiveWildcard
+    ? translate("Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้")
+    : translate("Gameweek 1 เปลี่ยนได้ไม่จำกัด");
   const vacancies = members.filter(
     (member) =>
       member.fantasyPlayerId === null && member.vacancyPosition !== null,
@@ -195,10 +224,6 @@ export default function TransfersClient({
     .replace("{level1}", String(levelOne))
     .replace("{level2}", String(levelTwo))
     .replace("{level3}", String(levelThree));
-  const hasUnlimitedOpeningTransfers = fantasy.gameweek.number === 1;
-  const unlimitedTransfersLabel =
-    language === "th" ? "เปลี่ยนนักเตะได้ไม่จำกัด" : "Unlimited transfers";
-
   function choosePlayer(player: CompetitionPlayerView) {
     if (isAutoFilling) return;
     if (!isEditable) {
@@ -228,25 +253,34 @@ export default function TransfersClient({
         </div>
         <div className="compact-transfer-stats">
           <div>
-            <span>เปลี่ยนฟรีได้อีก</span>
+            <span>
+              {isOverFreeTransferLimit
+                ? translate("เปลี่ยนเกิน")
+                : translate("เปลี่ยนฟรีคงเหลือ")}
+            </span>
             <strong
               className={
-                hasUnlimitedOpeningTransfers
+                hasUnlimitedTransfers
                   ? "compact-transfer-unlimited"
-                  : undefined
+                  : isOverFreeTransferLimit
+                    ? "compact-transfer-overage"
+                    : undefined
               }
               aria-label={
-                hasUnlimitedOpeningTransfers
-                  ? unlimitedTransfersLabel
-                  : undefined
+                hasUnlimitedTransfers ? unlimitedTransfersLabel : undefined
               }
               title={
-                hasUnlimitedOpeningTransfers
-                  ? unlimitedTransfersLabel
-                  : undefined
+                hasUnlimitedTransfers ? unlimitedTransfersLabel : undefined
               }
             >
-              {hasUnlimitedOpeningTransfers ? "∞" : fantasy.team.freeTransfers}
+              {hasUnlimitedTransfers
+                ? "∞"
+                : isOverFreeTransferLimit
+                  ? translate("-{points} คะแนน").replace(
+                      "{points}",
+                      String(transferPoints),
+                    )
+                  : freeTransfersRemaining}
             </strong>
           </div>
           <div>

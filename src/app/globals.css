@@ -24,7 +24,7 @@
   --color-muted-foreground: var(--muted);
   --color-accent: var(--orange-soft);
   --color-accent-foreground: var(--orange-deep);
-  --color-destructive: #c9362b;
+  --color-destructive: var(--red);
   --color-border: var(--line);
   --color-input: var(--line);
   --color-ring: var(--orange);
@@ -40,6 +40,7 @@
   --blue-soft: #e9f1fc;
   --purple: #7751af;
   --purple-soft: #f0eaf9;
+  --red: #c9362b;
   --ink: #182026;
   --muted: #687078;
   --line: #e7e4df;
@@ -2969,6 +2970,20 @@ textarea:focus-visible {
 .compact-transfer-stats strong.compact-transfer-unlimited {
   font-size: 20px;
   line-height: 1;
+}
+
+.compact-transfer-stats strong.compact-transfer-overage {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  margin-top: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--red);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.2;
 }
 
 .compact-market-toolbar {

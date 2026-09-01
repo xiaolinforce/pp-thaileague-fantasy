@@ -103,6 +103,8 @@ a state is not implemented rather than inventing it.
 ### Team
 
 - untouched empty draft, partial local draft, and valid saved squad;
+- live free-transfer balance, transfer deduction, opening unlimited transfers,
+  and an active Wildcard that preserves the banked balance;
 - editable and deadline-passed/read-only Gameweek;
 - no change, unsaved change, invalid squad, pending save, success, and failure;
 - auto-fill available, pending, complete, unavailable, and failed;
@@ -193,6 +195,36 @@ Verification commands:
 Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
+
+### 2026-09-01 — Live transfer preview
+
+- **Route and task:** `/team`; make the Player Market's free-transfer figure
+  reflect the current net squad change before a manager saves.
+- **Status:** remains Reference.
+- **Data/auth/Gameweek state:** real Guest session with a valid saved Gameweek
+  2 squad and four available transfers. Removing one goalkeeper in the local
+  draft immediately changed the displayed balance from 4 to 3 and showed one
+  net transfer with no deduction. Selecting Wildcard locally showed unlimited
+  transfers and its written preservation/deduction explanation. No selection
+  was saved or otherwise mutated during review.
+- **Language:** Thai source copy was rendered. The matching English dictionary
+  entries cover the remaining balance, opening unlimited state, Wildcard, and
+  deduction preview; the Guest display preference was restored to Thai after
+  the bounded settings check.
+- **Viewports/accessibility:** default Desktop and 360px Mobile market views;
+  the Mobile document width and scroll width both measured 345px. The preview
+  is a written `status` update, so its meaning does not depend on color.
+- **Issues fixed:** the label now means the actual remaining free transfers,
+  counts net differences from the Gameweek baseline across saved revisions,
+  and states the prospective deduction before confirmation.
+- **Known exclusions:** a live deduction over the four-transfer allowance and
+  the Gameweek 1 opening state were not manufactured in the real session; the
+  existing rules tests cover the allowance cap, overage deduction, and opening
+  Gameweek behavior.
+- **Evidence:** bounded in-app Browser DOM and screenshot inspection; no mock,
+  fixture override, debug path, or database write was introduced.
+- **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`,
+  `npm run format:check`, and `npm run build`.
 
 ### 2026-09-01 — Persisted Overall Top 100
 

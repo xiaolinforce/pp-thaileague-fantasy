@@ -1315,6 +1315,7 @@ export default function TeamClient({
           <TransfersClient
             data={data}
             fantasy={fantasy}
+            activeChip={activeChip}
             isEditable={isEditable}
             members={members}
             onMembersChange={setMembers}
