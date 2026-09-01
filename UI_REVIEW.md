@@ -110,7 +110,8 @@ a state is not implemented rather than inventing it.
 - editable and deadline-passed/read-only Gameweek;
 - no change, unsaved change, invalid squad, pending save, success, and failure;
 - auto-fill available, pending, complete, unavailable, and failed;
-- swap source, valid target, invalid target, player removal, and vacancy;
+- swap source, valid target, invalid target, player removal, per-vacancy Undo,
+  replacement-cleared Undo, and vacancy;
 - captain, vice-captain, bench order, chip selection, Gameweek 1 Wildcard lock;
 - market empty results, owned player, reselectable removed player, and tier
   over-limit explanation; and
@@ -197,6 +198,36 @@ Verification commands:
 Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
+
+### 2026-09-01 — Per-vacancy player-removal Undo
+
+- **Route and task:** `/team`; let a manager reverse an accidental player
+  removal from an individual vacant squad slot.
+- **Status:** remains Reference.
+- **Data/auth/Gameweek state:** real Guest session with an editable, saved
+  Gameweek 2 squad. Removal was exercised from the pitch, Player Market, and
+  player-detail dialog. Two simultaneous vacancies retained independent Undo
+  actions. Undo restored an immediately removed captain, followed a vacancy
+  moved from the starting lineup to the bench, and disappeared when the
+  vacancy was filled by a replacement. No selection was saved.
+- **Language:** Thai and English accessible names and tooltips were rendered.
+  The Guest display preference was restored to Thai after review.
+- **Viewports/accessibility:** default 1280px Desktop and 360px Mobile. The
+  icon-only Undo control has a player-specific accessible name and sits to the
+  right of Swap on the same horizontal line. On Mobile the action bounds shared
+  the same top coordinate, and the 352px document fit within the 360px viewport
+  without horizontal overflow.
+- **Issues fixed:** removal history is local and keyed by vacancy. It survives
+  lineup swaps, preserves later lineup and captaincy edits, restores captain or
+  vice-captain only when the role remains free, and is pruned when a replacement
+  fills the vacancy or the removed player returns elsewhere.
+- **Known exclusions:** deadline-passed/read-only rendering was not manufactured
+  in the real session; the existing disabled-action contract applies to Undo.
+  Restoration and pruning edge cases are covered by pure draft tests.
+- **Evidence:** bounded in-app Browser DOM inspection against the real Guest
+  session; no mock, fixture override, debug path, or database write was used.
+- **Verification:** `npm run test:rules`, `npm run test:email`, `npm run types`,
+  `npm run lint`, `npm run format:check`, and `npm run build`.
 
 ### 2026-09-01 — Chargeable-transfer confirmation cap
 

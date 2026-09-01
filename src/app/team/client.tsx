@@ -10,6 +10,7 @@ import {
   Shirt,
   TriangleAlert,
   Trash2,
+  Undo2,
   UserRound,
   WandSparkles,
   Zap,
@@ -69,9 +70,12 @@ import {
   createEmptySquadDraft,
   getCompleteSelectionMembers,
   getValidDraftSwapTargetSlotIds,
+  pruneRemovedDraftPlayers,
   removePlayerFromDraft,
+  restoreRemovedPlayerToDraft,
   swapDraftLineupMembers,
   type DraftLineupMember,
+  type RemovedDraftPlayersBySlot,
 } from "@/lib/fantasy/team-draft";
 import TransfersClient from "@/app/team/transfers-client";
 
@@ -502,6 +506,8 @@ function VacantSquadSlot({
   swapDisabled,
   swapState,
   captain,
+  undoPlayerName,
+  onUndo,
 }: {
   position: CompetitionPosition;
   onSelect: () => void;
@@ -511,6 +517,8 @@ function VacantSquadSlot({
   swapDisabled: boolean;
   swapState?: PlayerSwapState;
   captain?: "C" | "V";
+  undoPlayerName?: string;
+  onUndo?: () => void;
 }) {
   const { language } = useLanguage();
   const isSource = swapState === "source";
@@ -574,6 +582,22 @@ function VacantSquadSlot({
           <ArrowLeftRight size={13} aria-hidden="true" />
         </button>
       )}
+      {!hideAction && undoPlayerName && onUndo && (
+        <button
+          type="button"
+          className="squad-token-action squad-undo-action"
+          onClick={onUndo}
+          disabled={actionsDisabled}
+          aria-label={
+            language === "th"
+              ? `เลิกทำการลบ ${undoPlayerName}`
+              : `Undo removing ${undoPlayerName}`
+          }
+          title={language === "th" ? "เลิกทำ" : "Undo"}
+        >
+          <Undo2 size={13} aria-hidden="true" />
+        </button>
+      )}
     </div>
   );
 }
@@ -607,6 +631,8 @@ export default function TeamClient({
           captainRole: member.captainRole,
         })),
   );
+  const [removedPlayersBySlot, setRemovedPlayersBySlot] =
+    useState<RemovedDraftPlayersBySlot>({});
   const [isPending, startTransition] = useTransition();
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -615,6 +641,12 @@ export default function TeamClient({
     "squad",
   );
   const router = useRouter();
+  const replaceDraftMembers = (nextMembers: DraftLineupMember[]) => {
+    setMembers(nextMembers);
+    setRemovedPlayersBySlot((current) =>
+      pruneRemovedDraftPlayers(current, nextMembers),
+    );
+  };
   const playersByFantasyId = useMemo(
     () =>
       new Map(
@@ -940,6 +972,7 @@ export default function TeamClient({
           activeChip,
         });
         if (result.ok) {
+          setRemovedPlayersBySlot({});
           toast.success(translate(result.message));
           router.refresh();
         } else {
@@ -969,7 +1002,7 @@ export default function TeamClient({
           });
           return;
         }
-        setMembers(result.members);
+        replaceDraftMembers(result.members);
         setSwapFrom(null);
         setSelected(null);
         toast.success(translate("เติมนักเตะอัตโนมัติแล้ว"), {
@@ -1049,15 +1082,55 @@ export default function TeamClient({
       (item) => item.fantasyPlayerId === player.fantasyPlayerId,
     );
     if (!member) return;
-    setMembers((current) =>
-      removePlayerFromDraft(
-        current,
-        player.fantasyPlayerId!,
-        fantasyPositions[player.position],
-      ),
+    const nextMembers = removePlayerFromDraft(
+      members,
+      player.fantasyPlayerId,
+      fantasyPositions[player.position],
     );
+    setMembers(nextMembers);
+    setRemovedPlayersBySlot((current) => ({
+      ...pruneRemovedDraftPlayers(current, nextMembers),
+      [member.slotId]: {
+        fantasyPlayerId: player.fantasyPlayerId!,
+        captainRole: member.captainRole,
+      },
+    }));
     setSwapFrom(null);
     setSelected(null);
+  };
+
+  const undoPlayerRemoval = (slotId: string) => {
+    if (interactionsDisabled) return;
+    const removedPlayer = removedPlayersBySlot[slotId];
+    if (!removedPlayer) return;
+    const restoredMembers = restoreRemovedPlayerToDraft(
+      members,
+      slotId,
+      removedPlayer,
+    );
+    if (!restoredMembers) {
+      setRemovedPlayersBySlot((current) => {
+        const remaining = { ...current };
+        delete remaining[slotId];
+        return remaining;
+      });
+      return;
+    }
+    setMembers(restoredMembers);
+    setRemovedPlayersBySlot((current) => {
+      const remaining = { ...current };
+      delete remaining[slotId];
+      return pruneRemovedDraftPlayers(remaining, restoredMembers);
+    });
+    setSwapFrom(null);
+    setSelected(null);
+  };
+
+  const getUndoPlayerName = (slotId: string) => {
+    const removedPlayer = removedPlayersBySlot[slotId];
+    if (!removedPlayer) return undefined;
+    const player = playersByFantasyId.get(removedPlayer.fantasyPlayerId);
+    return player ? localize(player.name, language) : undefined;
   };
 
   const selectPlayer = (player: CompetitionPlayerView) => {
@@ -1304,6 +1377,10 @@ export default function TeamClient({
                                   ? "V"
                                   : undefined
                             }
+                            undoPlayerName={getUndoPlayerName(
+                              slot.member.slotId,
+                            )}
+                            onUndo={() => undoPlayerRemoval(slot.member.slotId)}
                           />
                         ),
                       )}
@@ -1349,6 +1426,8 @@ export default function TeamClient({
                               ? "V"
                               : undefined
                         }
+                        undoPlayerName={getUndoPlayerName(slot.member.slotId)}
+                        onUndo={() => undoPlayerRemoval(slot.member.slotId)}
                       />
                     )}
                   </div>
@@ -1363,7 +1442,7 @@ export default function TeamClient({
             activeChip={activeChip}
             isEditable={isEditable}
             members={members}
-            onMembersChange={setMembers}
+            onMembersChange={replaceDraftMembers}
             onPlayerSelect={setSelected}
             onPlayerRemove={removePlayer}
             isAutoFilling={isAutoFilling}

@@ -3702,6 +3702,10 @@ textarea:focus-visible {
   color: #b42318;
 }
 
+.squad-undo-action {
+  right: calc(50% - 34px);
+}
+
 .squad-remove-action:hover:not(:disabled) {
   color: #912018;
   border-color: #e39c95;
@@ -7265,7 +7269,8 @@ textarea:focus-visible {
     font-size: 9px;
   }
 
-  .squad-remove-action {
+  .squad-remove-action,
+  .squad-undo-action {
     right: calc(50% - 32px);
   }
 
@@ -8671,6 +8676,10 @@ body {
   .squad-captain-role,
   .vacant-squad-token-shell .squad-swap-action {
     left: calc(50% - 24px);
+  }
+
+  .vacant-squad-token-shell .squad-undo-action {
+    right: calc(50% - 24px);
   }
 
   .squad-captain-role {

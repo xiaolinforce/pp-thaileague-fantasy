@@ -9,7 +9,9 @@ import {
   fillFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
   getValidDraftSwapTargetSlotIds,
+  pruneRemovedDraftPlayers,
   removePlayerFromDraft,
+  restoreRemovedPlayerToDraft,
   swapDraftLineupMembers,
   type DraftLineupMember,
 } from "./team-draft.ts";
@@ -80,6 +82,93 @@ test("removing a player preserves the lineup slot as a position-locked vacancy",
   });
   assert.deepEqual(next[1], members[1]);
   assert.equal(getCompleteSelectionMembers(next), null);
+});
+
+test("undoing a removal restores the player and an available captain role", () => {
+  const vacancy = removePlayerFromDraft(members, "gk-1", "goalkeeper");
+  const restored = restoreRemovedPlayerToDraft(vacancy, "starter-gk", {
+    fantasyPlayerId: "gk-1",
+    captainRole: "captain",
+  });
+
+  assert.deepEqual(restored, members);
+});
+
+test("undo preserves later lineup changes and does not reclaim an occupied captain role", () => {
+  const vacancy = removePlayerFromDraft(members, "gk-1", "goalkeeper").map(
+    (member) =>
+      member.slotId === "starter-gk"
+        ? {
+            ...member,
+            lineupRole: "bench" as const,
+            benchOrder: 0,
+          }
+        : {
+            ...member,
+            lineupRole: "starter" as const,
+            benchOrder: null,
+            captainRole: "captain" as const,
+          },
+  );
+  const restored = restoreRemovedPlayerToDraft(vacancy, "starter-gk", {
+    fantasyPlayerId: "gk-1",
+    captainRole: "captain",
+  });
+
+  assert.deepEqual(restored?.[0], {
+    slotId: "starter-gk",
+    fantasyPlayerId: "gk-1",
+    vacancyPosition: null,
+    lineupRole: "bench",
+    benchOrder: 0,
+    captainRole: "none",
+  });
+  assert.equal(restored?.[1].captainRole, "captain");
+});
+
+test("undo rejects an occupied slot or a player already restored elsewhere", () => {
+  assert.equal(
+    restoreRemovedPlayerToDraft(members, "starter-gk", {
+      fantasyPlayerId: "gk-3",
+      captainRole: "none",
+    }),
+    null,
+  );
+  const vacancyWithDuplicate = removePlayerFromDraft(
+    members,
+    "gk-1",
+    "goalkeeper",
+  ).map((member) =>
+    member.slotId === "bench-gk"
+      ? { ...member, fantasyPlayerId: "gk-1" }
+      : member,
+  );
+  assert.equal(
+    restoreRemovedPlayerToDraft(vacancyWithDuplicate, "starter-gk", {
+      fantasyPlayerId: "gk-1",
+      captainRole: "captain",
+    }),
+    null,
+  );
+});
+
+test("prunes undo history after a slot is filled or its player returns elsewhere", () => {
+  const removedPlayers = {
+    "starter-gk": { fantasyPlayerId: "gk-1", captainRole: "captain" as const },
+    "bench-gk": { fantasyPlayerId: "gk-3", captainRole: "none" as const },
+  };
+  const draft = removePlayerFromDraft(members, "gk-1", "goalkeeper");
+
+  assert.deepEqual(pruneRemovedDraftPlayers(removedPlayers, draft), {
+    "starter-gk": removedPlayers["starter-gk"],
+  });
+  assert.deepEqual(
+    pruneRemovedDraftPlayers(
+      removedPlayers,
+      fillDraftVacancy(draft, "starter-gk", "gk-3"),
+    ),
+    {},
+  );
 });
 
 test("filling a vacancy restores a complete server-safe selection", () => {

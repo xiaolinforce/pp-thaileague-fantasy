@@ -21,6 +21,13 @@ export type CompleteSelectionMember = Omit<
   fantasyPlayerId: string;
 };
 
+export type RemovedDraftPlayer = {
+  fantasyPlayerId: string;
+  captainRole: CaptainRole;
+};
+
+export type RemovedDraftPlayersBySlot = Record<string, RemovedDraftPlayer>;
+
 const starterShape: Array<[FantasyPosition, number]> = [
   ["goalkeeper", 1],
   ["defender", 4],
@@ -71,6 +78,64 @@ export function removePlayerFromDraft(
           captainRole: "none" as const,
         }
       : member,
+  );
+}
+
+export function restoreRemovedPlayerToDraft(
+  members: DraftLineupMember[],
+  slotId: string,
+  removedPlayer: RemovedDraftPlayer,
+) {
+  const vacancy = members.find((member) => member.slotId === slotId);
+  if (
+    !vacancy ||
+    vacancy.fantasyPlayerId !== null ||
+    members.some(
+      (member) => member.fantasyPlayerId === removedPlayer.fantasyPlayerId,
+    )
+  ) {
+    return null;
+  }
+
+  const canRestoreCaptainRole =
+    vacancy.captainRole === "none" &&
+    removedPlayer.captainRole !== "none" &&
+    vacancy.lineupRole === "starter" &&
+    !members.some((member) => member.captainRole === removedPlayer.captainRole);
+
+  return members.map((member) =>
+    member.slotId === slotId
+      ? {
+          ...member,
+          fantasyPlayerId: removedPlayer.fantasyPlayerId,
+          vacancyPosition: null,
+          captainRole: canRestoreCaptainRole
+            ? removedPlayer.captainRole
+            : member.captainRole,
+        }
+      : member,
+  );
+}
+
+export function pruneRemovedDraftPlayers(
+  removedPlayersBySlot: RemovedDraftPlayersBySlot,
+  members: DraftLineupMember[],
+) {
+  const ownedPlayerIds = new Set(
+    members.flatMap((member) =>
+      member.fantasyPlayerId ? [member.fantasyPlayerId] : [],
+    ),
+  );
+  const membersBySlotId = new Map(
+    members.map((member) => [member.slotId, member]),
+  );
+
+  return Object.fromEntries(
+    Object.entries(removedPlayersBySlot).filter(
+      ([slotId, removedPlayer]) =>
+        membersBySlotId.get(slotId)?.fantasyPlayerId === null &&
+        !ownedPlayerIds.has(removedPlayer.fantasyPlayerId),
+    ),
   );
 }
 

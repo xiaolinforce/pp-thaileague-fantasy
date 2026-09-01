@@ -114,6 +114,11 @@ proven behaviors unless a deliberate product decision replaces them:
 - Keep selected players visible in the market, identify them as owned, and
   expose removal rather than another transfer-in action.
 - A compatible market player fills the first matching vacancy directly.
+- Removing a player creates a local Undo action for that vacancy beside Swap.
+  Multiple vacancies keep independent Undo histories. Filling a vacancy clears
+  its Undo; swapping the vacancy first keeps the history with that vacancy, and
+  Undo restores the player into its current lineup assignment. Captain or
+  vice-captain status is reclaimed only when that role is still unassigned.
 - Swap and remove are compact repeated actions with accessible names. Vacancy,
   player, source, valid target, invalid target, captaincy, tier, and bench state
   remain distinguishable without relying only on color.
