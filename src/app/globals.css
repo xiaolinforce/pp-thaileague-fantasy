@@ -8006,6 +8006,10 @@ textarea:focus-visible {
   scroll-margin-top: 20px;
 }
 
+.rules-document-section:first-child {
+  padding-top: 0;
+}
+
 .rules-document-section + .rules-document-section {
   border-top: 1px solid var(--line);
 }

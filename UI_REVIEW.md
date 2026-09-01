@@ -633,6 +633,17 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   `npm run test:email`, `npm run test:auth`, `npm run types`, `npm run lint`,
   `npm run format:check`, and `npm run build`.
 
+### 2026-09-02 — Rules reading-density refinement
+
+- **Route and task:** `/rules`; remove the doubled top spacing before the first
+  Rules section while preserving the card's reading inset and every subsequent
+  section rhythm.
+- **Evidence:** in-app Browser computed-style inspection at 1440px and 360px.
+  The first heading now starts 28px from the card edge on Desktop and 20px on
+  Mobile, with no document-level horizontal overflow.
+- **Verification:** layout detector returned no findings; formatting, lint,
+  types, and production build checks follow this refinement.
+
 ### 2026-09-02 — Account copy and Guest league refinement
 
 - **Route and task:** `/profile`, `/settings`, `/leagues`, and `/rules`; make
