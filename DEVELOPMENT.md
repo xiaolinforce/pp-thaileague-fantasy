@@ -146,16 +146,24 @@ npm run db:scenario -- league-populated
 Gameweek scenarios rebuild deterministic fixtures, selections, revisions,
 player match points, team scores, and Overall standings for exactly 200 active
 teams. Eight distinct valid squad templates provide varied player ownership
-without regenerating 200 squads on every switch. A live scenario scores only
-players from the one fixture already in progress and verifies that the target
-Gameweek contains both zero-point and positive provisional team totals. Final
-scenarios score every completed fixture. Gameweek scenarios also clear Private
-Leagues so each lifecycle baseline is repeatable.
+without regenerating 200 squads on every switch; deterministic lineup and
+captain variations keep teams using the same template from producing identical
+results. Fixture kickoff times, deadlines, statuses, scorelines, player minutes,
+goals, assists, cards, saves, team totals, summaries, and persisted Overall
+ranking are kept mutually consistent. A live scenario scores only players from
+the one fixture already in progress and verifies that the target Gameweek
+contains both zero-point and positive provisional team totals. Final scenarios
+score every completed fixture, and locked selections carry the implemented
+free-transfer balance into the open successor. Gameweek scenarios also clear
+Private Leagues so each lifecycle baseline is repeatable.
 `league-empty` and `league-populated` are fast overlays: they preserve the
 current Gameweek/scoring state and only replace Private League data. Apply the
 desired Gameweek scenario first, then a League overlay when testing a combined
 state. The signed-in tester's most recently active team is selected by default;
-use `--primary-team=<team name>` when an explicit team is needed.
+use `--primary-team=<team name>` when an explicit signed-in team is needed.
+The populated League state gives that tester four memberships (two owned and
+two joined), uses member identities for every owner, and preserves realistic
+creation and join order.
 
 The scenario runner is intentionally destructive inside the selected Fantasy
 season on its disposable branch. Do not point it at the shared development or

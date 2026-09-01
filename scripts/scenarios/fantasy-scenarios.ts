@@ -12,6 +12,7 @@ import {
   resolveTeamScore,
   type GameweekPlayerResult,
 } from "../../src/lib/fantasy/scoring.ts";
+import { refreshOverallLeagueStandings as refreshPersistedOverallStandings } from "../../src/lib/fantasy/league-standings-service.ts";
 import {
   createEmptySquadDraft,
   getCompleteSelectionMembers,
@@ -262,6 +263,44 @@ function squadSignature(squad: SquadMember[]) {
     .join(":");
 }
 
+function personalizeSquad(squad: SquadMember[], teamIndex: number) {
+  if (teamIndex === 0) return squad.map((member) => ({ ...member }));
+  const personalized: SquadMember[] = squad.map((member) => ({
+    ...member,
+    captainRole: "none",
+  }));
+  const bench = personalized
+    .filter((member) => member.lineupRole === "bench")
+    .sort((left, right) => (left.benchOrder ?? 99) - (right.benchOrder ?? 99));
+  const incoming = bench[teamIndex % bench.length];
+  const matchingStarters = personalized.filter(
+    (member) =>
+      member.lineupRole === "starter" && member.position === incoming.position,
+  );
+  const outgoing = matchingStarters[teamIndex % matchingStarters.length];
+  const outgoingBenchOrder = incoming.benchOrder;
+  incoming.lineupRole = "starter";
+  incoming.benchOrder = null;
+  outgoing.lineupRole = "bench";
+  outgoing.benchOrder = outgoingBenchOrder;
+
+  const starters = personalized.filter(
+    (member) => member.lineupRole === "starter",
+  );
+  const captainIndex = teamIndex % starters.length;
+  const viceCaptainIndex =
+    (captainIndex + 1 + (teamIndex % 5)) % starters.length;
+  starters[captainIndex].captainRole = "captain";
+  starters[viceCaptainIndex].captainRole = "vice_captain";
+  return personalized;
+}
+
+function rotateValues<T>(values: T[], offset: number) {
+  if (values.length === 0) return values;
+  const normalized = ((offset % values.length) + values.length) % values.length;
+  return [...values.slice(normalized), ...values.slice(0, normalized)];
+}
+
 async function captureCompleteSquads(
   tx: ScenarioTransaction,
   seasonId: string,
@@ -478,14 +517,17 @@ async function ensureParticipants(
 ) {
   await tx.execute(sql`
     delete from fantasy_managers
-    where auth_user_id is null
-      and status = 'abandoned'
+    where (auth_user_id is null or auth_user_id like 'qa-scenario-owner-%')
       and id in (
         select manager_id
         from fantasy_teams
         where fantasy_season_id = ${seasonId}::uuid
           and name ~ ${QA_TEAM_NAME_PATTERN}
       )
+  `);
+  await tx.execute(sql`
+    delete from auth_users
+    where id like 'qa-scenario-owner-%'
   `);
 
   const realTeamsResult = await tx.execute<TeamRow>(sql`
@@ -660,9 +702,6 @@ function fixtureStates(
       rows.findIndex((row) => row.id === preferredLiveFixtureId),
     );
     for (const [index, fixture] of rows.entries()) {
-      const kickoffAt = new Date(
-        deadlines.get(gameweek)!.getTime() + (90 + index * 180) * 60 * 1_000,
-      );
       const isPastFinal =
         gameweek < definition.targetGameweek ||
         (gameweek === definition.targetGameweek &&
@@ -671,9 +710,25 @@ function fixtureStates(
         definition.phase === "live" &&
         gameweek === definition.targetGameweek &&
         index === liveIndex;
-      const homeScore = isPastFinal || isLive ? (gameweek + index) % 4 : null;
-      const awayScore =
-        isPastFinal || isLive ? (gameweek * 2 + index + 1) % 3 : null;
+      const futureFixtureIndex = index < liveIndex ? index : index - 1;
+      const kickoffOffsetMinutes = isLive
+        ? 90
+        : definition.phase === "live" && gameweek === definition.targetGameweek
+          ? 270 + futureFixtureIndex * 180
+          : 90 + index * 180;
+      const kickoffAt = new Date(
+        deadlines.get(gameweek)!.getTime() + kickoffOffsetMinutes * 60 * 1_000,
+      );
+      const homeScore = isPastFinal
+        ? (gameweek + index) % 4
+        : isLive
+          ? (gameweek + index) % 2
+          : null;
+      const awayScore = isPastFinal
+        ? (gameweek * 2 + index + 1) % 3
+        : isLive
+          ? (gameweek + index + 1) % 2
+          : null;
       if (isLive) liveFixtureId = fixture.id;
       states.push({
         ...fixture,
@@ -782,7 +837,7 @@ async function applyGameweekScenario(
     throw new Error("No Fantasy team is available for the scenario.");
   const teamSquads = participants.teams.map((team, index) => ({
     team,
-    squad: squads[index % squads.length],
+    squad: personalizeSquad(squads[index % squads.length], index),
   }));
 
   const now = new Date();
@@ -882,17 +937,23 @@ async function applyGameweekScenario(
            gw.id,
            case when gw.number <= ${plan.scoredThrough} then 'locked'::fantasy_selection_status
                 else 'draft'::fantasy_selection_status end,
-           2,
-           case when gw.number <= ${plan.scoredThrough} then 2 else null end,
+           case when gw.number = 1 then 2 else 4 end,
+           case when gw.number <= ${plan.scoredThrough} then 4 else null end,
            0,
            0,
-           now(),
+           least(now(), gw.deadline_at - interval '2 days'),
            case when gw.number <= ${plan.scoredThrough} then gw.deadline_at else null end
     from fantasy_teams team
     cross join fantasy_gameweeks gw
     where team.fantasy_season_id = ${season.id}::uuid
       and gw.fantasy_season_id = ${season.id}::uuid
       and gw.number <= ${plan.selectionThrough}
+  `);
+  await tx.execute(sql`
+    update fantasy_teams
+    set free_transfers = case when ${plan.scoredThrough} > 0 then 4 else 2 end,
+        updated_at = now()
+    where fantasy_season_id = ${season.id}::uuid
   `);
 
   const teamSquadPayload = teamSquads.flatMap(({ team, squad }) =>
@@ -964,17 +1025,6 @@ async function applyGameweekScenario(
     where gw.fantasy_season_id = ${season.id}::uuid
   `);
 
-  const fixtureByGameweekAndClub = new Map<string, FixtureState>();
-  for (const fixture of fixturePlan.states) {
-    fixtureByGameweekAndClub.set(
-      `${fixture.matchweek}:${fixture.home_club_id}`,
-      fixture,
-    );
-    fixtureByGameweekAndClub.set(
-      `${fixture.matchweek}:${fixture.away_club_id}`,
-      fixture,
-    );
-  }
   const statRows: Array<Record<string, unknown>> = [];
   const pointRows: Array<Record<string, unknown>> = [];
   const teamScoreRows: Array<Record<string, unknown>> = [];
@@ -985,61 +1035,176 @@ async function applyGameweekScenario(
   ].sort((left, right) =>
     left.fantasyPlayerId.localeCompare(right.fantasyPlayerId),
   );
+  const playersByClub = new Map<string, SquadMember[]>();
+  for (const player of playerUniverse) {
+    const clubPlayers = playersByClub.get(player.clubId) ?? [];
+    clubPlayers.push(player);
+    playersByClub.set(player.clubId, clubPlayers);
+  }
+  const fixturesByGameweek = new Map<number, FixtureState[]>();
+  for (const fixture of fixturePlan.states) {
+    const gameweekFixtures = fixturesByGameweek.get(fixture.matchweek) ?? [];
+    gameweekFixtures.push(fixture);
+    fixturesByGameweek.set(fixture.matchweek, gameweekFixtures);
+  }
   for (let gameweek = 1; gameweek <= plan.scoredThrough; gameweek += 1) {
     const results: GameweekPlayerResult[] = [];
-    for (const [index, member] of playerUniverse.entries()) {
-      const fixture = fixtureByGameweekAndClub.get(
-        `${gameweek}:${member.clubId}`,
-      );
-      if (!fixture || fixture.status === "scheduled") continue;
-      const isHome = fixture.home_club_id === member.clubId;
-      const goalsConceded = isHome
-        ? (fixture.awayScore ?? 0)
-        : (fixture.homeScore ?? 0);
-      const stats = {
-        minutes: fixture.status === "live" ? 30 : 90,
-        goals: (gameweek + index) % 13 === 0 ? 1 : 0,
-        sourceAssists: (gameweek * 2 + index) % 11 === 0 ? 1 : 0,
-        fantasyAssists: null,
-        goalsConcededWhilePlaying: goalsConceded,
-        saves:
-          member.position === "goalkeeper" ? 3 + ((gameweek + index) % 4) : 0,
-        penaltySaves: 0,
-        penaltyMisses: 0,
-        yellowCards: (gameweek + index) % 17 === 0 ? 1 : 0,
-        redCards: 0,
-        ownGoals: 0,
-      };
-      const points = calculatePlayerPoints(member.position, stats);
-      const statsId = uuidFor(`stats:${gameweek}:${member.fantasyPlayerId}`);
-      statRows.push({
-        id: statsId,
-        fixture_id: fixture.id,
-        fantasy_player_id: member.fantasyPlayerId,
-        status: fixture.status === "finished" ? "reviewed" : "imported",
-        minutes: stats.minutes,
-        goals: stats.goals,
-        source_assists: stats.sourceAssists,
-        fantasy_assists: stats.fantasyAssists,
-        goals_conceded: stats.goalsConcededWhilePlaying,
-        saves: stats.saves,
-        penalty_saves: stats.penaltySaves,
-        penalty_misses: stats.penaltyMisses,
-        yellow_cards: stats.yellowCards,
-        red_cards: stats.redCards,
-        own_goals: stats.ownGoals,
-        payload: { scenario: scenarioName, deterministic: true },
-      });
-      pointRows.push({
-        stats_id: statsId,
-        breakdown: points.breakdown,
-        total_points: points.total,
-      });
-      results.push({
-        playerId: member.fantasyPlayerId,
-        minutes: stats.minutes,
-        points: points.total,
-      });
+    const activeFixtures = (fixturesByGameweek.get(gameweek) ?? []).filter(
+      (fixture) => fixture.status !== "scheduled",
+    );
+    for (const fixture of activeFixtures) {
+      const sides = [
+        {
+          clubId: fixture.home_club_id,
+          goalsFor: fixture.homeScore ?? 0,
+          goalsAgainst: fixture.awayScore ?? 0,
+        },
+        {
+          clubId: fixture.away_club_id,
+          goalsFor: fixture.awayScore ?? 0,
+          goalsAgainst: fixture.homeScore ?? 0,
+        },
+      ];
+      for (const [sideIndex, side] of sides.entries()) {
+        const clubPlayers = playersByClub.get(side.clubId) ?? [];
+        const goalkeepers = rotateValues(
+          clubPlayers
+            .filter((player) => player.position === "goalkeeper")
+            .sort((left, right) =>
+              left.fantasyPlayerId.localeCompare(right.fantasyPlayerId),
+            ),
+          gameweek + sideIndex,
+        );
+        const outfield = rotateValues(
+          clubPlayers
+            .filter((player) => player.position !== "goalkeeper")
+            .sort((left, right) =>
+              left.fantasyPlayerId.localeCompare(right.fantasyPlayerId),
+            ),
+          gameweek * 3 + sideIndex + (fixture.match_number ?? 0),
+        );
+        const starters = [
+          ...goalkeepers.slice(0, 1),
+          ...outfield.slice(0, goalkeepers.length > 0 ? 10 : 11),
+        ];
+        const starterIds = new Set(
+          starters.map((player) => player.fantasyPlayerId),
+        );
+        const substitutes = [...outfield, ...goalkeepers]
+          .filter((player) => !starterIds.has(player.fantasyPlayerId))
+          .slice(0, fixture.status === "finished" ? 5 : 0);
+        const participants = [...starters, ...substitutes];
+        if (participants.length === 0) continue;
+
+        const scorerPool = [
+          ...participants.filter((player) => player.position === "forward"),
+          ...participants.filter((player) => player.position === "midfielder"),
+          ...participants.filter((player) => player.position === "defender"),
+          ...participants.filter((player) => player.position === "goalkeeper"),
+        ];
+        const goalsByPlayer = new Map<string, number>();
+        const assistsByPlayer = new Map<string, number>();
+        const scorers: SquadMember[] = [];
+        for (let goalIndex = 0; goalIndex < side.goalsFor; goalIndex += 1) {
+          const scorer =
+            scorerPool[(goalIndex + gameweek + sideIndex) % scorerPool.length];
+          scorers.push(scorer);
+          goalsByPlayer.set(
+            scorer.fantasyPlayerId,
+            (goalsByPlayer.get(scorer.fantasyPlayerId) ?? 0) + 1,
+          );
+        }
+        for (const [goalIndex, scorer] of scorers.entries()) {
+          if ((goalIndex + gameweek + sideIndex) % 4 === 0) continue;
+          const assister = scorerPool.find(
+            (candidate, candidateIndex) =>
+              candidate.fantasyPlayerId !== scorer.fantasyPlayerId &&
+              candidateIndex >= goalIndex % Math.max(1, scorerPool.length - 1),
+          );
+          if (!assister) continue;
+          assistsByPlayer.set(
+            assister.fantasyPlayerId,
+            (assistsByPlayer.get(assister.fantasyPlayerId) ?? 0) + 1,
+          );
+        }
+
+        for (const [participantIndex, member] of participants.entries()) {
+          const isStarter = participantIndex < starters.length;
+          const minutes =
+            fixture.status === "live"
+              ? 30
+              : isStarter
+                ? 90
+                : 20 + ((gameweek + participantIndex * 7) % 26);
+          const stats = {
+            minutes,
+            goals: goalsByPlayer.get(member.fantasyPlayerId) ?? 0,
+            sourceAssists: assistsByPlayer.get(member.fantasyPlayerId) ?? 0,
+            fantasyAssists: null,
+            goalsConcededWhilePlaying: isStarter
+              ? side.goalsAgainst
+              : Math.min(
+                  side.goalsAgainst,
+                  (gameweek + participantIndex) % (side.goalsAgainst + 1),
+                ),
+            saves:
+              member.position === "goalkeeper"
+                ? 2 + ((gameweek + sideIndex + (fixture.match_number ?? 0)) % 6)
+                : 0,
+            penaltySaves: 0,
+            penaltyMisses: 0,
+            yellowCards:
+              participantIndex ===
+              (gameweek + sideIndex + (fixture.match_number ?? 0)) %
+                participants.length
+                ? 1
+                : 0,
+            redCards:
+              (gameweek + sideIndex + (fixture.match_number ?? 0)) % 23 === 0 &&
+              participantIndex === participants.length - 1
+                ? 1
+                : 0,
+            ownGoals: 0,
+          };
+          const points = calculatePlayerPoints(member.position, stats);
+          const statsId = uuidFor(
+            `stats:${gameweek}:${member.fantasyPlayerId}`,
+          );
+          statRows.push({
+            id: statsId,
+            fixture_id: fixture.id,
+            fantasy_player_id: member.fantasyPlayerId,
+            status: fixture.status === "finished" ? "reviewed" : "imported",
+            minutes: stats.minutes,
+            goals: stats.goals,
+            source_assists: stats.sourceAssists,
+            fantasy_assists: stats.fantasyAssists,
+            goals_conceded: stats.goalsConcededWhilePlaying,
+            saves: stats.saves,
+            penalty_saves: stats.penaltySaves,
+            penalty_misses: stats.penaltyMisses,
+            yellow_cards: stats.yellowCards,
+            red_cards: stats.redCards,
+            own_goals: stats.ownGoals,
+            payload: {
+              scenario: scenarioName,
+              deterministic: true,
+              fixtureStatus: fixture.status,
+              clubId: side.clubId,
+            },
+          });
+          pointRows.push({
+            stats_id: statsId,
+            breakdown: points.breakdown,
+            total_points: points.total,
+          });
+          results.push({
+            playerId: member.fantasyPlayerId,
+            minutes: stats.minutes,
+            points: points.total,
+          });
+        }
+      }
     }
     for (const { team, squad } of teamSquads) {
       const score = resolveTeamScore({
@@ -1147,7 +1312,7 @@ async function applyGameweekScenario(
       where gw.id = summary.fantasy_gameweek_id
         and gw.fantasy_season_id = ${season.id}::uuid
     `);
-    await refreshOverallStandings(tx, season.id, participants.overallLeagueId);
+    await refreshOverallStandings(tx, season.id);
   }
 
   await insertScenarioAudit(tx, season.id, scenarioName, {
@@ -1179,63 +1344,26 @@ async function applyGameweekScenario(
 async function refreshOverallStandings(
   tx: ScenarioTransaction,
   seasonId: string,
-  overallLeagueId: string,
 ) {
-  await tx.execute(sql`
-    delete from fantasy_league_standings
-    where fantasy_league_id = ${overallLeagueId}::uuid
-  `);
-  await tx.execute(sql`
-    with latest as (
-      select id, score_complete
-      from fantasy_gameweeks
-      where fantasy_season_id = ${seasonId}::uuid
-        and status in ('provisional', 'final')
-      order by number desc
-      limit 1
-    ), totals as (
-      select team.id as team_id,
-             coalesce(sum(score.total_points), 0)::int as total_points,
-             coalesce(sum(case when selection.fantasy_gameweek_id = latest.id
-                               then score.total_points else 0 end), 0)::int as gameweek_points,
-             coalesce(sum(case when selection.status = 'locked'
-                               then selection.net_transfer_count else 0 end), 0)::int as transfer_count,
-             latest.id as gameweek_id,
-             latest.score_complete
-      from latest
-      cross join fantasy_teams team
-      left join fantasy_team_selections selection on selection.fantasy_team_id = team.id
-      left join fantasy_team_gameweek_scores score on score.selection_id = selection.id
-      where team.fantasy_season_id = ${seasonId}::uuid
-      group by team.id, latest.id, latest.score_complete
-    ), ranked as (
-      select totals.*,
-             row_number() over (
-               order by total_points desc, gameweek_points desc, transfer_count asc, team_id
-             )::int as rank
-      from totals
-    )
-    insert into fantasy_league_standings
-      (fantasy_league_id, fantasy_team_id, through_gameweek_id, status, rank,
-       gameweek_points, total_points, transfer_count, computed_at)
-    select ${overallLeagueId}::uuid,
-           team_id,
-           gameweek_id,
-           case when score_complete then 'final'::fantasy_score_status
-                else 'provisional'::fantasy_score_status end,
-           rank,
-           gameweek_points,
-           total_points,
-           transfer_count,
-           now()
-    from ranked
-  `);
+  await refreshPersistedOverallStandings(seasonId, tx);
 }
 
 async function promotePrimaryToMember(
   tx: ScenarioTransaction,
   primaryTeam: TeamRow,
 ) {
+  const identityResult = await tx.execute<{ auth_user_id: string }>(sql`
+    select manager.auth_user_id
+    from fantasy_managers manager
+    join auth_users user_row on user_row.id = manager.auth_user_id
+    where manager.id = ${primaryTeam.manager_id}::uuid
+    limit 1
+  `);
+  if (!identityResult.rows[0]) {
+    throw new Error(
+      "A signed-in tester team is required for Private League scenarios.",
+    );
+  }
   await tx.execute(sql`
     update fantasy_managers manager
     set status = 'member', updated_at = now()
@@ -1248,6 +1376,41 @@ async function promotePrimaryToMember(
     where manager.id = ${primaryTeam.manager_id}::uuid
       and user_row.id = manager.auth_user_id
   `);
+}
+
+async function provisionQaLeagueOwners(
+  tx: ScenarioTransaction,
+  ownerTeams: TeamRow[],
+) {
+  const owners = ownerTeams.map((team, index) => ({
+    team_id: team.id,
+    manager_id: team.manager_id,
+    user_id: `qa-scenario-owner-${index + 1}`,
+    name: `QA League Owner ${index + 1}`,
+    email: `qa-league-owner-${index + 1}@example.invalid`,
+  }));
+  await tx.execute(sql`
+    insert into auth_users
+      (id, name, email, email_verified, is_anonymous, role)
+    select owner.user_id,
+           owner.name,
+           owner.email,
+           true,
+           false,
+           'member'
+    from jsonb_to_recordset(${JSON.stringify(owners)}::jsonb)
+      as owner(user_id text, name text, email text)
+  `);
+  await tx.execute(sql`
+    update fantasy_managers manager
+    set auth_user_id = owner.user_id,
+        status = 'member',
+        updated_at = now()
+    from jsonb_to_recordset(${JSON.stringify(owners)}::jsonb)
+      as owner(manager_id text, user_id text)
+    where manager.id = owner.manager_id::uuid
+  `);
+  return owners;
 }
 
 async function applyLeagueScenario(
@@ -1270,6 +1433,11 @@ async function applyLeagueScenario(
 
   let privateMemberships = 0;
   if (definition.populated) {
+    await provisionQaLeagueOwners(tx, [
+      participants.teams[1],
+      participants.teams[2],
+    ]);
+    const scenarioNow = new Date();
     const leagueDefinitions = [
       {
         key: "friends",
@@ -1277,6 +1445,7 @@ async function applyLeagueScenario(
         invite: "QAFR2345",
         ownerIndex: 0,
         members: 16,
+        ageDays: 21,
       },
       {
         key: "work",
@@ -1284,6 +1453,7 @@ async function applyLeagueScenario(
         invite: "QAWK6789",
         ownerIndex: 0,
         members: 42,
+        ageDays: 14,
       },
       {
         key: "thai",
@@ -1291,6 +1461,7 @@ async function applyLeagueScenario(
         invite: "QATH2345",
         ownerIndex: 1,
         members: 100,
+        ageDays: 10,
       },
       {
         key: "club",
@@ -1298,6 +1469,7 @@ async function applyLeagueScenario(
         invite: "QAFC6789",
         ownerIndex: 2,
         members: 8,
+        ageDays: 5,
       },
     ];
     const leagueRows = leagueDefinitions.map((league) => ({
@@ -1305,36 +1477,46 @@ async function applyLeagueScenario(
       name: league.name,
       invite_code: league.invite,
       owner_team_id: participants.teams[league.ownerIndex].id,
+      created_at: new Date(
+        scenarioNow.getTime() - league.ageDays * DAY_MS,
+      ).toISOString(),
     }));
     await tx.execute(sql`
       insert into fantasy_leagues
-        (id, fantasy_season_id, name, type, owner_team_id, invite_code)
+        (id, fantasy_season_id, name, type, owner_team_id, invite_code,
+         created_at, updated_at)
       select x.id::uuid,
              ${season.id}::uuid,
              x.name,
              'private',
              x.owner_team_id::uuid,
-             x.invite_code
+             x.invite_code,
+             x.created_at::timestamptz,
+             x.created_at::timestamptz
       from jsonb_to_recordset(${JSON.stringify(leagueRows)}::jsonb)
-        as x(id text, name text, invite_code text, owner_team_id text)
+        as x(id text, name text, invite_code text, owner_team_id text, created_at text)
     `);
     const membershipRows = leagueDefinitions.flatMap((league, leagueIndex) => {
       const owner = participants.teams[league.ownerIndex];
-      const chosen = [primaryTeam, owner, ...participants.teams].filter(
+      const chosen = [owner, primaryTeam, ...participants.teams].filter(
         (team, index, rows) =>
           rows.findIndex((candidate) => candidate.id === team.id) === index,
       );
-      return chosen.slice(0, league.members).map((team) => ({
+      const leagueCreatedAt = new Date(leagueRows[leagueIndex].created_at);
+      return chosen.slice(0, league.members).map((team, memberIndex) => ({
         league_id: leagueRows[leagueIndex].id,
         team_id: team.id,
+        joined_at: new Date(
+          leagueCreatedAt.getTime() + memberIndex * 30 * 60 * 1_000,
+        ).toISOString(),
       }));
     });
     privateMemberships = membershipRows.length;
     await tx.execute(sql`
       insert into fantasy_league_members (fantasy_league_id, fantasy_team_id, joined_at)
-      select x.league_id::uuid, x.team_id::uuid, now()
+      select x.league_id::uuid, x.team_id::uuid, x.joined_at::timestamptz
       from jsonb_to_recordset(${JSON.stringify(membershipRows)}::jsonb)
-        as x(league_id text, team_id text)
+        as x(league_id text, team_id text, joined_at text)
     `);
     await tx.execute(sql`
       insert into fantasy_league_audit_log
@@ -1342,10 +1524,21 @@ async function applyLeagueScenario(
       select ${season.id}::uuid,
              x.id::uuid,
              x.owner_team_id::uuid,
-             'create_league',
-             jsonb_build_object('scenario', ${scenarioName}::text)
+             'create_private_league',
+             jsonb_build_object('scenario', ${scenarioName}::text, 'name', x.name)
       from jsonb_to_recordset(${JSON.stringify(leagueRows)}::jsonb)
-        as x(id text, owner_team_id text)
+        as x(id text, owner_team_id text, name text)
+    `);
+    await tx.execute(sql`
+      insert into fantasy_league_audit_log
+        (fantasy_season_id, fantasy_league_id, actor_team_id, action, details)
+      select ${season.id}::uuid,
+             x.id::uuid,
+             ${primaryTeam.id}::uuid,
+             'join_private_league',
+             jsonb_build_object('scenario', ${scenarioName}::text)
+      from jsonb_to_recordset(${JSON.stringify(leagueRows.slice(2))}::jsonb)
+        as x(id text)
     `);
   }
   await insertScenarioAudit(tx, season.id, scenarioName, {
@@ -1358,6 +1551,8 @@ async function applyLeagueScenario(
     season.id,
     definition.populated ? 4 : 0,
     privateMemberships,
+    primaryTeam.id,
+    definition.populated ? 2 : 0,
   );
   return { ...verified, primaryTeamName: primaryTeam.name };
 }
@@ -1427,6 +1622,18 @@ async function verifyGameweekScenario(
     live_fixtures: number;
     target_zero_scores: number;
     target_positive_scores: number;
+    target_distinct_scores: number;
+    target_average_points: number;
+    target_highest_points: number;
+    invalid_fixture_timing: number;
+    invalid_fixture_scores: number;
+    deadline_mismatches: number;
+    invalid_selection_lifecycle: number;
+    invalid_transfer_balance: number;
+    invalid_team_transfer_balance: number;
+    invalid_score_status: number;
+    invalid_gameweek_summary: number;
+    impossible_player_totals: number;
   }>(sql`
     select
       (select count(*)::int from fantasy_gameweeks
@@ -1471,7 +1678,106 @@ async function verifyGameweekScenario(
        join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
        where gw.fantasy_season_id = ${seasonId}::uuid
          and gw.number = ${definition.targetGameweek}
-         and score.total_points > 0) as target_positive_scores
+         and score.total_points > 0) as target_positive_scores,
+      (select count(distinct score.total_points)::int
+       from fantasy_team_gameweek_scores score
+       join fantasy_team_selections selection on selection.id = score.selection_id
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid
+         and gw.number = ${definition.targetGameweek}) as target_distinct_scores,
+      (select average_points from fantasy_gameweeks
+       where fantasy_season_id = ${seasonId}::uuid
+         and number = ${definition.targetGameweek}) as target_average_points,
+      (select highest_points from fantasy_gameweeks
+       where fantasy_season_id = ${seasonId}::uuid
+         and number = ${definition.targetGameweek}) as target_highest_points,
+      (select count(*)::int from fixtures
+       where competition_season_id = (
+         select competition_season_id from fantasy_seasons where id = ${seasonId}::uuid
+       ) and (
+         (status = 'live' and (kickoff_at > now() or kickoff_at < now() - interval '3 hours'))
+         or (status = 'finished' and kickoff_at >= now())
+         or (status in ('scheduled', 'time_tbc') and kickoff_at <= now())
+       )) as invalid_fixture_timing,
+      (select count(*)::int from fixtures
+       where competition_season_id = (
+         select competition_season_id from fantasy_seasons where id = ${seasonId}::uuid
+       ) and (
+         (status in ('live', 'finished') and (home_score is null or away_score is null))
+         or (status in ('scheduled', 'time_tbc') and (home_score is not null or away_score is not null))
+       )) as invalid_fixture_scores,
+      (select count(*)::int
+       from fantasy_gameweeks gw
+       where gw.fantasy_season_id = ${seasonId}::uuid
+         and abs(extract(epoch from (
+           gw.deadline_at - (
+             select min(fixture.kickoff_at) - interval '90 minutes'
+             from fixtures fixture
+             where fixture.competition_season_id = (
+               select competition_season_id from fantasy_seasons where id = ${seasonId}::uuid
+             ) and fixture.matchweek = gw.number
+           )
+         ))) > 1) as deadline_mismatches,
+      (select count(*)::int
+       from fantasy_team_selections selection
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid
+         and ((gw.status in ('provisional', 'final') and selection.status <> 'locked')
+           or (gw.status = 'open' and selection.status <> 'draft'))) as invalid_selection_lifecycle,
+      (select count(*)::int
+       from fantasy_team_selections selection
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid
+         and (selection.free_transfers_before <> case when gw.number = 1 then 2 else 4 end
+           or (selection.status = 'locked' and selection.free_transfers_after <> 4)
+           or (selection.status = 'draft' and selection.free_transfers_after is not null))) as invalid_transfer_balance,
+      (select count(*)::int
+       from fantasy_teams team
+       where team.fantasy_season_id = ${seasonId}::uuid
+         and team.free_transfers <> case when ${scoredThrough} > 0 then 4 else 2 end) as invalid_team_transfer_balance,
+      (select count(*)::int
+       from fantasy_team_gameweek_scores score
+       join fantasy_team_selections selection on selection.id = score.selection_id
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid
+         and score.status <> case when gw.score_complete
+           then 'final'::fantasy_score_status else 'provisional'::fantasy_score_status end) as invalid_score_status,
+      (select count(*)::int
+       from fantasy_gameweeks gw
+       join lateral (
+         select round(avg(score.total_points))::int as average_points,
+                max(score.total_points)::int as highest_points
+         from fantasy_team_gameweek_scores score
+         join fantasy_team_selections selection on selection.id = score.selection_id
+         where selection.fantasy_gameweek_id = gw.id
+       ) summary on true
+       where gw.fantasy_season_id = ${seasonId}::uuid
+         and gw.status in ('provisional', 'final')
+         and (gw.average_points <> summary.average_points
+           or gw.highest_points <> summary.highest_points)) as invalid_gameweek_summary,
+      (select count(*)::int
+       from (
+         select stats.fixture_id,
+                stats.source_payload ->> 'clubId' as club_id,
+                sum(stats.goals)::int as goals,
+                sum(stats.source_assists)::int as assists,
+                case
+                  when stats.source_payload ->> 'clubId' = home.club_id::text then fixture.home_score
+                  when stats.source_payload ->> 'clubId' = away.club_id::text then fixture.away_score
+                  else null
+                end as fixture_goals
+         from fantasy_player_match_stats stats
+         join fixtures fixture on fixture.id = stats.fixture_id
+         join competition_entries home on home.id = fixture.home_entry_id
+         join competition_entries away on away.id = fixture.away_entry_id
+         where fixture.competition_season_id = (
+           select competition_season_id from fantasy_seasons where id = ${seasonId}::uuid
+         ) and stats.source_name = 'qa-scenario'
+         group by stats.fixture_id, stats.source_payload ->> 'clubId',
+                  home.club_id, away.club_id, fixture.home_score, fixture.away_score
+       ) generated
+       where generated.goals > generated.fixture_goals
+          or generated.assists > generated.goals) as impossible_player_totals
   `);
   const counts = result.rows[0];
   const expectedOpen = definition.targetGameweek < 30 ? 1 : 0;
@@ -1493,8 +1799,18 @@ async function verifyGameweekScenario(
     counts.scores !== expectedScores ||
     counts.standings !== expectedStandings ||
     counts.live_fixtures !== expectedLive ||
+    counts.invalid_fixture_timing !== 0 ||
+    counts.invalid_fixture_scores !== 0 ||
+    counts.deadline_mismatches !== 0 ||
+    counts.invalid_selection_lifecycle !== 0 ||
+    counts.invalid_transfer_balance !== 0 ||
+    counts.invalid_team_transfer_balance !== 0 ||
+    counts.invalid_score_status !== 0 ||
+    counts.invalid_gameweek_summary !== 0 ||
+    counts.impossible_player_totals !== 0 ||
     (definition.phase === "live" && counts.target_zero_scores === 0) ||
-    (definition.phase === "live" && counts.target_positive_scores === 0)
+    (definition.phase === "live" && counts.target_positive_scores === 0) ||
+    (scoredThrough > 0 && counts.target_distinct_scores < 2)
   ) {
     throw new Error(
       `Scenario postcondition failed: ${JSON.stringify(counts)}.`,
@@ -1508,11 +1824,17 @@ async function verifyLeagueScenario(
   seasonId: string,
   expectedPrivateLeagues: number,
   expectedPrivateMemberships: number,
+  primaryTeamId: string,
+  expectedPrimaryOwned: number,
 ) {
   const base = await verifyBaseCounts(tx, seasonId);
   const result = await tx.execute<{
     private_leagues: number;
     private_memberships: number;
+    primary_memberships: number;
+    primary_owned: number;
+    invalid_owners: number;
+    owner_membership_missing: number;
   }>(sql`
     select
       (select count(*)::int from fantasy_leagues
@@ -1521,12 +1843,44 @@ async function verifyLeagueScenario(
        from fantasy_league_members member
        join fantasy_leagues league on league.id = member.fantasy_league_id
        where league.fantasy_season_id = ${seasonId}::uuid
-         and league.type = 'private') as private_memberships
+         and league.type = 'private') as private_memberships,
+      (select count(*)::int
+       from fantasy_league_members member
+       join fantasy_leagues league on league.id = member.fantasy_league_id
+       where league.fantasy_season_id = ${seasonId}::uuid
+         and league.type = 'private'
+         and member.fantasy_team_id = ${primaryTeamId}::uuid) as primary_memberships,
+      (select count(*)::int from fantasy_leagues
+       where fantasy_season_id = ${seasonId}::uuid
+         and type = 'private'
+         and owner_team_id = ${primaryTeamId}::uuid) as primary_owned,
+      (select count(*)::int
+       from fantasy_leagues league
+       join fantasy_teams team on team.id = league.owner_team_id
+       join fantasy_managers manager on manager.id = team.manager_id
+       left join auth_users user_row on user_row.id = manager.auth_user_id
+       where league.fantasy_season_id = ${seasonId}::uuid
+         and league.type = 'private'
+         and (manager.status <> 'member' or manager.auth_user_id is null
+              or user_row.id is null or user_row.is_anonymous is distinct from false)) as invalid_owners,
+      (select count(*)::int
+       from fantasy_leagues league
+       where league.fantasy_season_id = ${seasonId}::uuid
+         and league.type = 'private'
+         and not exists (
+           select 1 from fantasy_league_members member
+           where member.fantasy_league_id = league.id
+             and member.fantasy_team_id = league.owner_team_id
+         )) as owner_membership_missing
   `);
   const counts = result.rows[0];
   if (
     counts.private_leagues !== expectedPrivateLeagues ||
-    counts.private_memberships !== expectedPrivateMemberships
+    counts.private_memberships !== expectedPrivateMemberships ||
+    counts.primary_memberships !== expectedPrivateLeagues ||
+    counts.primary_owned !== expectedPrimaryOwned ||
+    counts.invalid_owners !== 0 ||
+    counts.owner_membership_missing !== 0
   ) {
     throw new Error(
       `League scenario postcondition failed: ${JSON.stringify(counts)}.`,
