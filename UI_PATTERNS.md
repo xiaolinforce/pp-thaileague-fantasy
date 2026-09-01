@@ -156,7 +156,7 @@ proven behaviors unless a deliberate product decision replaces them:
 - Show the counted lineup after automatic substitutions on a read-only pitch.
   Keep the bench visually connected and distinguish counted from uncounted
   players without color alone.
-- Display an active chip once as a prominent written callout above the pitch.
+- Display an active chip once as a prominent, centered icon-and-name callout above the pitch.
 - Show the captain's displayed contribution with the applied ×2 or ×3
   multiplier; do not add a duplicate page-level calculation.
 - Open the player's positive and negative category breakdown in the shared

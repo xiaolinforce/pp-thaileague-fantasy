@@ -153,12 +153,11 @@ export default async function PointsPage({
             {activeChipLabel ? (
               <div className="points-chip-banner">
                 <span className="points-chip-banner__icon" aria-hidden="true">
-                  <Zap size={20} fill="currentColor" />
+                  <Zap size={16} fill="currentColor" />
                 </span>
-                <span className="points-chip-banner__copy">
-                  <small>Chip ที่ใช้ใน Gameweek นี้</small>
-                  <strong>{activeChipLabel}</strong>
-                </span>
+                <strong className="points-chip-banner__label">
+                  {activeChipLabel}
+                </strong>
               </div>
             ) : null}
             <div
