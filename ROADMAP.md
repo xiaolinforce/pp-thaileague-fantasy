@@ -17,11 +17,11 @@
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,
   stat overrides, transfer revisions, and application-level admin audit entries.
 - Versioned preseason player ranking with contiguous overall/position ranks,
-  source confidence, review CSV, and deterministic 5%/15%/20%/remaining tiers.
+  source confidence, reviewed tier edits, and preserved publication history.
 - Persisted latest Overall ranks with a Top 100 read model, plus invite-only
   Private Classic standings with transactional owner/member limits, owner
   controls, and audit history.
-- Idempotent competition and Fantasy seed workflows with database verification.
+- Verified database-backed competition and Fantasy data with source provenance.
 
 ## Production readiness blockers
 
@@ -34,12 +34,12 @@ Fantasy service:
 2. Add account recovery/support procedures, auth/email observability, provider
    quota alerts, abuse review, and periodic cleanup of expired auth artifacts.
 3. Review the admin role assignment process and audit retention policy.
-4. Define a controlled import schedule, upstream failure behavior, source terms,
-   rate limits, freshness reporting, and operational ownership.
+4. Define a controlled data-maintenance schedule, upstream failure behavior,
+   source terms, rate limits, freshness reporting, and operational ownership.
 5. Add database backup/recovery, migration promotion, rollback, monitoring,
    alerting, and incident procedures.
-6. Expand automated coverage to Server Actions, database invariants, import
-   adapters, ranking, and end-to-end critical paths.
+6. Expand automated coverage to Server Actions, database invariants,
+   source-data maintenance, and end-to-end critical paths.
 7. Decide the production localization and SEO model instead of relying on
    recursive client-side text replacement.
 8. Review privacy, terms of play, competition/player data usage, club identity,

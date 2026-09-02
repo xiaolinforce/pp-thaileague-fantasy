@@ -18,7 +18,7 @@ that own the affected concern:
 2. `PRODUCT.md` for users, purpose, positioning, constraints, principles, and brand commitments.
 3. `ARCHITECTURE.md` for runtime boundaries, data/write flow, and persistence.
 4. `DOMAIN.md` for the implemented Fantasy rules and Gameweek lifecycle.
-5. `DATA_SOURCES.md` for provenance, source identifiers, imports, and seed order.
+5. `DATA_SOURCES.md` for provenance, source identifiers, and database maintenance.
 6. `DESIGN.md` for product-wide UI, localization, responsive, and accessibility rules.
 7. `UI_PATTERNS.md` for reusable compositions and the Team/Points reference contracts.
 8. `UI_REVIEW.md` for route maturity, reachable-state coverage, evidence, and audit priority.
@@ -32,8 +32,8 @@ that own the affected concern:
   the shared Drizzle client from `src/db/index.ts`.
 - Treat `src/db/schema.ts` as the schema source of truth. Generate and review a
   new forward migration; never rewrite migration history that may be applied.
-- Confirm the target Neon branch before migrations, imports, normalization, or
-  seeds. Import competition data before seeding dependent Fantasy data.
+- Confirm the target Neon branch before migrations or direct data maintenance.
+  Keep task-scoped data tools and source payloads out of the repository.
 - Keep deterministic rules and scoring in `src/lib/fantasy`. Update
   `DOMAIN.md`, profile rule copy, and relevant tests when behavior changes.
 - Validate mutations against fresh database state. Do not trust client-supplied
@@ -91,7 +91,7 @@ npm run format:check
 npm run build
 ```
 
-For import or seed changes, also run the relevant database verification against
-the intended development branch. Update the owning context document in the same
+For database data changes, also run the relevant verification against the
+intended development branch. Update the owning context document in the same
 change whenever scope, architecture, rules, sources, design, UI patterns or
 review evidence, workflow, roadmap, or a durable decision changes.

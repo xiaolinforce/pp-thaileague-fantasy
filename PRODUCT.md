@@ -56,7 +56,7 @@ PP Thai League Fantasy เป็นผลิตภัณฑ์อิสระ �
 
 ## Evidence on Hand
 
-- ข้อมูลการแข่งขัน Thai League 1 และ provenance ของแหล่งข้อมูลถูกบันทึกใน `DATA_SOURCES.md` และ persisted ผ่าน import/seed workflow
+- ข้อมูลการแข่งขัน Thai League 1 และ provenance ของแหล่งข้อมูลถูกบันทึกใน `DATA_SOURCES.md` และ persisted ในฐานข้อมูลที่ผ่านการตรวจสอบ
 - กฎ Fantasy ที่ใช้งานจริงถูกบันทึกใน `DOMAIN.md` และมี executable source of truth ภายใต้ `src/lib/fantasy`
 - เส้นทางหลักตั้งแต่ onboarding, team management, points, leagues, fixtures, profile, settings, public rules/help จนถึง internal administration มี implementation ใน `src/app`
 - มี automated tests สำหรับกฎ Fantasy, scoring behavior และ email provider routing

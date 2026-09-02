@@ -309,6 +309,10 @@ require an audit reason rather than silent mutation of history.
 
 ## 2026-08-17 — External football data is imported before runtime
 
+**Operational workflow superseded on 2026-09-02:** Runtime remains
+database-only, but reusable import implementations are no longer retained in
+the repository. Source-data maintenance now uses reviewed task-scoped tools.
+
 **Decision:** Fetch Thai League and Transfermarkt data through explicit scripts,
 normalize and validate it, and persist it in PostgreSQL. Runtime pages read the
 database and do not call those sources directly.
@@ -440,8 +444,46 @@ static UI dataset.
 
 **Consequences:** Schema changes require reviewed forward migrations. Database
 access stays server-only. The selected Neon branch determines the environment,
-so migrations and seeds require an explicit target check. The old static
-`src/lib/fantasy-data.ts` file is not a runtime source of truth.
+so migrations and direct data maintenance require an explicit target check. The
+old static `src/lib/fantasy-data.ts` file is not a runtime source of truth.
+
+## 2026-09-02 — The official Thai League roster owns current eligibility
+
+**Decision:** Use tournament `224` from the Thai League official API as the
+authority for active 2026/27 player registrations. Use Transfermarkt only to
+enrich a reviewed same-club identity with market value, profile facts, and
+partial prior-season match performance. Retain unmatched source players as
+inactive historical identities rather than adding them to the Fantasy pool.
+
+**Context:** Public squad aggregators can lag registrations and use different
+transliterations. The official site now exposes the complete current-season
+roster, while current market value and prior foreign-league match facts remain
+useful for ranking newcomers.
+
+**Consequences:** Current eligibility is auditable from official row/person
+IDs. Cross-source matches use stable-ID exceptions and conservative name
+matching within the same club. Ranking records distinguish estimated official
+aggregates from partial match-level calculations, record unavailable scoring
+components, and keep nationality out of the quality score.
+
+## 2026-09-02 — Source-data maintenance implementations are task-scoped
+
+**Decision:** Keep competition and Fantasy source data in PostgreSQL without
+retaining reusable import, normalization, seed, or preseason-ranking scripts in
+the repository. Build narrowly scoped temporary maintenance tools when a data
+change is requested, verify the target Neon branch and postconditions, then
+delete the tool and generated artifacts.
+
+**Context:** The current season data has already been reviewed and persisted.
+Keeping one-off pipelines and exports in Git creates noise and risks rerunning a
+stale workflow against the wrong environment. The product owner prefers to
+request each future data change explicitly.
+
+**Consequences:** The repository cannot populate a blank database or promote
+source data to production automatically. Each future update must reconstruct
+only the required operation from current database state and cited sources,
+preserve stable IDs, history, and audit context, apply to development unless
+production is explicitly authorized, and remove temporary files afterward.
 
 ## 2026-08-31 — Classic leagues contain only real provisioned teams
 
@@ -456,8 +498,8 @@ populated but could not support trustworthy membership or management. Guests
 still need a useful zero-friction competition while private groups require a
 stable authenticated owner and privacy boundary.
 
-**Consequences:** Fantasy seeds never create manager/team/score/Private League
-records. Private mutations reauthorize the current member, lock fresh database
+**Consequences:** Season data maintenance never creates manager/team/score or
+Private League records. Private mutations reauthorize the current member, lock fresh database
 rows, validate limits transactionally, and append an audit row. Invite input is
 case-insensitive but stored/displayed uppercase from an alphabet that excludes
 `I`, `L`, `O`, `0`, and `1`. League detail is available only to members, and

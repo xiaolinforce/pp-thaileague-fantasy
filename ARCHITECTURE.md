@@ -8,10 +8,10 @@ state, focused Client Components own interactive team-management screens, and
 Server Actions validate authenticated player and administrative changes.
 
 ```text
-Thai League API + Transfermarkt + curated club identities
+Thai League + reviewed external sources
                          |
                          v
-                 import and seed scripts
+           task-scoped data maintenance
                          |
                          v
                     Neon Postgres
@@ -40,25 +40,23 @@ create synthetic manager identities.
 
 ## Main boundaries
 
-| Area                     | Location                             | Responsibility                                                                                      |
-| ------------------------ | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Routes and screens       | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                    |
-| Fantasy UI               | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components.    |
-| UI primitives            | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                     |
-| Read models              | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                                  |
-| Game rules               | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                             |
-| Squad auto-fill          | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                    |
-| Player ranking           | `src/lib/fantasy/ranking.ts`         | Pure preseason projection, deterministic ordering, confidence, and tier-boundary derivation.        |
-| Authentication           | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                      |
-| Account provisioning     | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.         |
-| League operations        | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.      |
-| Transactional email      | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                      |
-| Scoring                  | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                      |
-| Score persistence        | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                               |
-| Persistence              | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                           |
-| Migrations               | `drizzle`                            | Generated, ordered SQL migrations and Drizzle snapshots.                                            |
-| Imports and operations   | `scripts`                            | Competition import, fantasy seed, player ranking, normalization, club identities, and verification. |
-| External-source adapters | `scripts/sources`                    | Thai League API, Transfermarkt, and curated normalization/visual identity records.                  |
+| Area                 | Location                             | Responsibility                                                                                   |
+| -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Routes and screens   | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                 |
+| Fantasy UI           | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components. |
+| UI primitives        | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                  |
+| Read models          | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                               |
+| Game rules           | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
+| Squad auto-fill      | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                 |
+| Authentication       | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
+| Account provisioning | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
+| League operations    | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
+| Transactional email  | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
+| Scoring              | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
+| Score persistence    | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
+| Persistence          | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
+| Migrations           | `drizzle`                            | Generated, ordered SQL migrations and Drizzle snapshots.                                         |
+| Database operations  | `scripts`                            | Read-only verification, guarded QA scenarios, transaction checks, and standings maintenance.     |
 
 Runtime routes read from `src/data` and PostgreSQL. The legacy static Fantasy
 dataset has been removed and must not be reintroduced as a runtime fallback.
@@ -99,8 +97,12 @@ querying.
 4. The page renders directly or passes serializable data to a focused Client
    Component.
 
-External services are not called during normal page rendering. They are read
-by explicit import scripts and persisted before the application serves them.
+External services are not called during normal page rendering. Competition and
+Fantasy source data is maintained directly in PostgreSQL through reviewed,
+task-scoped operations against a confirmed Neon branch. Those temporary tools,
+source payloads, and database exports are not retained in the repository. The
+current player pool is authoritative from the Thai League tournament roster;
+other public sources are enrichment only.
 
 The Team client may request an auto-fill suggestion through a read-only Server
 Action. The action authenticates the current manager, reloads the published

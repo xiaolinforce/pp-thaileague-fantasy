@@ -67,7 +67,7 @@ changes do not rewrite history.
 ## Thai classification
 
 The competition import retains source nationality text, while the Fantasy
-player stores an explicit `isThai` decision and its source. The initial seed
+player stores an explicit `isThai` decision and its source. Season setup
 recognizes nationality text containing Thai, Thailand, or ไทย. An administrator
 may correct the current result with a reason; existing selections retain their
 earlier Thai-status snapshot.

@@ -2,14 +2,20 @@
 
 ## Policy
 
-Competition data is imported explicitly and persisted in PostgreSQL. Runtime
-pages never depend on live availability of an external football service.
-Every imported entity retains a source name, external identifier, and source
-URL where the schema supports them.
+Competition and Fantasy source data is persisted in PostgreSQL before runtime.
+Pages never depend on live availability of an external football service. Every
+stored entity retains a source name, stable external identifier, and source URL
+where the schema supports them.
 
-Do not silently combine or infer source facts in UI code. Normalize them in the
-source adapter or seed script, preserve provenance, and verify the resulting
-database before building Fantasy state on top of it.
+The repository intentionally does not retain data-import, normalization, seed,
+or preseason-ranking scripts. Data changes are performed through reviewed,
+task-scoped operations against an explicitly confirmed Neon branch. Temporary
+tools, source payloads, CSV files, spreadsheets, screenshots, and database
+exports must not be committed.
+
+Do not silently combine or infer source facts in UI code. Resolve them during
+the maintenance task, preserve provenance and audit context in PostgreSQL, and
+run the relevant database verification before handoff.
 
 ## Current season identifiers
 
@@ -21,222 +27,87 @@ database before building Fantasy state on top of it.
 | Thai League season ID     | `33`                    |
 | Fantasy season slug       | `thai-league-1-2026-27` |
 
-These identifiers currently live in `scripts/sources/thai-league-2026-27.ts`,
-the competition seed, and the Fantasy seed/action context. Changing a season
-requires a deliberate update across the source registry and Fantasy setup; do
-not reuse the identifiers for another season.
+These stable identifiers are persisted in the competition and Fantasy tables.
+Changing a season requires a deliberate database maintenance task; do not reuse
+the identifiers for another season.
 
-## Source inventory
+## Source authority
 
-| Source                               | Used for                                                                                            | Adapter or registry                                   |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| Thai League official API             | Season, tournament, clubs, venues, fixtures, kickoff, status, scores, penalties, and attendance.    | `scripts/sources/thai-league-2026-27.ts`              |
-| Thai League 2025/26 API              | Prior-season TL1 (`207`) and TL2 (`208`) player aggregates and club context for preseason ranking.  | `scripts/sources/thai-league-2025-26-player-stats.ts` |
-| Transfermarkt public squad pages     | Players, positions, shirt numbers, nationality text, active registration, and current market value. | `scripts/sources/thai-league-2026-27.ts`              |
-| Transfermarkt public player profiles | Thai full and short names for the roster records classified as Thai.                                | `scripts/normalize-player-short-names.ts`             |
-| Player Thai-name exception registry  | Reviewed Thai full names for Thai-classified profiles that do not publish a Thai-script home name.  | `scripts/sources/player-thai-name-overrides.ts`       |
-| Curated kit/club research URLs       | Four-color club visual identity palettes and explanatory notes.                                     | `scripts/sources/club-visual-identities.ts`           |
-| Explicit club-name overrides         | Normal English display casing for selected all-cap source names.                                    | `scripts/sources/club-name-normalization.ts`          |
-| Explicit club short-name overrides   | Curated Thai and English compact club labels for product UI.                                        | `scripts/sources/club-short-name-overrides.ts`        |
-| Fantasy administrator                | Reviewed match-stat corrections, Fantasy assists, Thai status, and effective tier changes.          | `/admin/fantasy` and `src/app/fantasy-actions.ts`     |
+| Source                               | Authority or use                                                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| Thai League official API and website | Competition, season, clubs, current player eligibility, registration, position, nationality, and fixtures. |
+| Thai League 2025/26 data             | Prior-season Thai League player performance used in preseason evaluation.                                  |
+| Transfermarkt public data            | Identity enrichment, profile facts, market value, and partial prior-season facts for newcomers.            |
+| Reviewed player spreadsheet          | Human-reviewed bilingual names, short names, Thai/foreign grouping, position, club, and tier corrections.  |
+| Fantasy administrator                | Match-stat corrections, Fantasy assists, Thai status, and effective tier changes after setup.              |
 
-Club visual palettes are presentation metadata, not official crests or a claim
-of trademark ownership. Retain the cited source URL and note when changing a
-palette.
+The Thai League tournament roster owns current eligibility. Transfermarkt and
+other public aggregators are enrichment only and must not activate a player who
+is absent from the official roster. Cross-source identity matching must use
+stable identifiers and same-club evidence; display names alone are insufficient.
 
-## Import flow
+Nationality determines the implemented Thai-player eligibility decision. It is
+not a quality proxy in player ranking. Individual performance, expected
+minutes, market evidence, position, and club context take precedence.
 
-```text
-Thai League API ---------------------+
-                                      |
-Transfermarkt squad pages ------------+--> seed-competition-data.ts
-                                      |             |
-Curated name and color registries ----+             v
-                                                competition tables
-                                                     |
-Transfermarkt player profiles ----------------> normalize-player-short-names.ts
-                                                     |
-                                                     v
-                                           seed-fantasy-game.ts
-                                                     |
-                                                     v
-                                                fantasy tables
-```
+## Current development snapshot
 
-Run the workflow in this order:
+As of 2026-09-02, the Neon `development` branch contains:
 
-```bash
-npm run db:migrate
-npm run db:seed:competition
-npm run db:normalize:player-short-names -- --apply
-npm run db:verify:competition
-npm run db:seed:fantasy
-npm run db:rank:players -- --publish
-npm run db:verify:fantasy
-```
+- 16 current clubs and 240 fixtures across 30 Gameweeks;
+- 462 official active player registrations;
+- 550 player master records, including inactive historical identities;
+- published ranking version `preseason-2026-27-v5-manual-tiers` for Gameweek 1;
+- 462 ranked players distributed as L1=20, L2=84, L3=159, and L4=199; and
+- no locked selections or player scores for the opening Gameweek at the time of
+  publication.
 
-The Fantasy seed depends on the imported competition season, entries, player
-registrations, and fixtures. It must not be run first. A fresh seed assigns a
-safe Level 4 fallback; the reviewed ranking publication then derives the
-effective 5%/15%/20%/remainder level distribution.
+Published ranking runs are immutable. A correction creates a new version,
+supersedes the previous published version, updates the effective tier rows,
+refreshes only current draft snapshots when safe, and records an administrative
+audit entry. Historical locked selections and effective tier history must not
+be rewritten.
 
-## Competition normalization
+## Maintenance workflow
 
-The source adapter fetches the target season/tournament, all fixture pages, and
-the configured Transfermarkt squad page for each tournament team. It validates
-the combined source data before the seed writes it.
+Use this sequence for a roster, fixture, player-stat, classification, or ranking
+change:
 
-The seed then:
+1. Confirm that `DATABASE_URL` points to the intended Neon branch and read
+   `current_setting('neon.branch_id', true)` before any write.
+2. Inspect fresh database state and resolve every target by stable ID.
+3. Fetch or inspect only the sources needed for the requested change.
+4. Preview and validate the complete change set without writing.
+5. Apply the update in one transaction when supported, preserving history and
+   audit context.
+6. Run `npm run db:verify:competition` and/or
+   `npm run db:verify:fantasy` as appropriate.
+7. Remove the temporary tool and all generated artifacts after verification.
 
-- upserts the competition, season, competition season, clubs, entries, venues,
-  players, registrations, fixtures, and visual identities by stable source IDs;
-- normalizes empty or `TBC` values into nullable database fields;
-- combines source date/time into a timestamp only when a usable time exists;
-- maps official match status and cancellation flags to the shared fixture enum;
-- stores scores only for finished fixtures;
-- marks previous Transfermarkt registrations inactive before upserting the
-  currently observed active squad; and
-- applies explicit English club-name casing instead of generic title casing.
-
-`npm run db:normalize:player-short-names` is preview-only unless `--apply` is
-passed. It reads each existing Transfermarkt player-profile URL for the
-`Name in home country` value, then stores the full Thai name and its first token
-as the Thai short name only for records currently classified as Thai in
-`fantasy_players`. If that public profile does not publish Thai script, the
-command may use a reviewed stable-Transfermarkt-ID exception from
-`scripts/sources/player-thai-name-overrides.ts`. The command aborts before
-writing if any such player has neither a valid source value nor an exception.
-English short names use the first token of `full_name_en` for players classified
-as Thai, and the final non-suffix token for other players. Players not
-classified as Thai deliberately retain null Thai full and short names.
-
-Player identity is currently derived from Transfermarkt external IDs. Do not
-fall back to display-name matching for updates because names are not stable
-identifiers.
-
-## Fantasy derivation
-
-The Fantasy seed is idempotent for the configured season. It derives Gameweeks
-from the first stored kickoff in each imported matchweek, sets the deadline 90
-minutes earlier, creates tier definitions and effective player tiers, ensures
-the single Overall Classic league, and backfills every real season team into
-Overall. It does not create managers, teams, selections, scores, or Private
-Leagues. Those records originate only from authenticated/Guest provisioning and
-player actions.
-
-Fixtures without an official kickoff remain `time_tbc` with a null timestamp.
-The application does not synthesize kickoff dates or times. Re-running the
-competition import replaces stored fixture facts with the latest official API
-values, including returning an unconfirmed kickoff to TBC when appropriate.
-
-## Current-season player statistics
-
-`npm run db:import:player-stats` reads the current tournament's public Thai
-League aggregate-player endpoint and is preview-only by default. It matches a
-player only by a unique normalized English name within the same official club.
-Reviewed exceptions belong in
-`scripts/sources/current-player-stat-overrides.ts`, keyed by stable Thai League
-person ID and stable Transfermarkt player ID. The importer refuses to write if
-any identity is unmatched or ambiguous and requires both `--apply` and the
-exact Neon `--branch-id`.
-
-Stored rows preserve the official source row and person identifiers, source
-URL, complete payload, match method, import time, and non-negative aggregate
-facts. Multiple official rows for the same player, such as after a transfer,
-are combined only in the read model. The UI shows a truthful current-season
-empty state while the upstream endpoint contains no rows; it does not fall back
-to prior-season or projected values.
-
-Fantasy points remain a separate derived dataset. Per-match inputs entered by
-an authorized administrator store their reference/reason and audit context,
-and the scoring engine recalculates points. Form is the mean Fantasy points
-from the player's club's last five finished fixtures; a fixture in which the
-player did not appear contributes zero.
-
-The seed recognizes a Thai nationality from normalized source text as an
-initial value only. Reviewed Thai-status and tier corrections belong in the
-Fantasy classification records and admin audit log; they must not be written
-back into the external competition source.
-
-## Preseason player ranking
-
-`npm run db:rank:players` is preview-only. It fetches official 2025/26 TL1 and
-TL2 aggregate rows plus current Transfermarkt squad values, matches prior rows
-to the current imported player pool, calculates a deterministic projection, and
-prints the top ranks and tier/position distribution. Use `--output=path.csv` to
-retain the review report.
-
-The prior-season aggregates provide minutes, appearances, starts, goals,
-assists, clean sheets, goals conceded, penalties, cards, and own goals. The
-projection applies current Fantasy scoring where the facts support it. The
-official aggregate does not supply goalkeeper saves or every player visible in
-other leaderboards, so those components are not invented. Unmatched players use
-market value, position priors, and conservative expected minutes with low
-confidence.
-
-Automatic matching accepts unique normalized names and conservative unambiguous
-fuzzy matches. Reviewed exceptions belong in
-`scripts/sources/fantasy-ranking-overrides.ts`, keyed by stable Transfermarkt
-player ID. Each published run stores source facts, match method and score,
-confidence, model components, projection, overall/position rank, and tier.
-
-Publishing requires an explicit version and confirmed development database:
-
-```bash
-npm run db:rank:players -- --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20 --output=ranking.csv
-npm run db:rank:players -- --publish --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20
-```
-
-Publication refuses a passed deadline, locked selection, score, duplicate
-published version, or draft squad that would become invalid. Tier upserts,
-current draft snapshots, ranking status, and audit entry are committed in one
-database batch. Earlier effective tiers and historical selection snapshots are
-preserved.
-
-Do not document a fixed Gameweek count unless the imported fixture schedule is
-itself fixed. The current competition verification expects 240 fixtures across
-30 matchweeks, eight fixtures per matchweek, and 30 appearances per club.
-
-## Club visual identity updates
-
-`npm run db:seed:club-colors` reapplies the curated registry without reimporting
-all competition data. Each registry entry must have:
-
-- the normalized English club name used by the competition entry;
-- exactly four valid colors in display order;
-- a public research URL; and
-- a concise note explaining the interpretation.
-
-If an upstream English club name changes, update or run
-`npm run db:normalize:clubs` deliberately and verify that the visual identity
-still joins the intended club.
+Production is a separate environment. A development data change does not
+authorize or imply the same production write.
 
 ## Verification contract
 
-`npm run db:verify:competition` currently asserts:
+`npm run db:verify:competition` asserts the current competition shape, active
+registration uniqueness and provenance, fixture completeness, and club
+coverage. `npm run db:verify:fantasy` verifies season/Gameweek continuity,
+published ranking completeness, exact tier totals, effective tier consistency,
+selection snapshots, and League integrity.
 
-- one competition season, 16 clubs and entries, 16 visual identities, 15
-  venues, and 240 fixtures;
-- at least 200 active unique players and no empty club squad;
-- eight fixtures in every matchweek; and
-- 30 fixtures for every club.
-
-`npm run db:verify:fantasy` reports row counts and verifies every published
-ranking has complete contiguous ranks, exact configured tier totals, and tier
-rows consistent with its effective Gameweek. It also requires contiguous
-Gameweeks 1-30, at most one open Gameweek per Fantasy season, and an open
-Gameweek while planned weeks remain. Keep pure rule and ranking invariants
-covered by `npm run test:rules`.
+`npm run db:verify:player-stats` remains read-only and checks persisted official
+current-season aggregate rows. The application-level rule tests cover squad,
+lineup, transfer, chip, scoring, substitution, and auto-fill behavior.
 
 ## Adding a season
 
-1. Add a season-specific source registry or generalize the existing adapter
-   without overwriting the prior season configuration.
-2. Record official tournament/season IDs and squad source mappings.
-3. Confirm the source schema, status mapping, timezone, matchweek numbering,
-   club names, and stable player identifiers.
-4. Import into a development database and review every upsert target.
-5. Update verification expectations for the competition format.
-6. Create the attached Fantasy season, tier definitions, and initial Gameweeks.
-7. Verify representative squads, deadlines, fixtures, and historical source
-   provenance before production migration.
+1. Confirm the new official competition, tournament, season, club, and fixture
+   identifiers.
+2. Design a task-scoped import with stable-ID matching, provenance, preview,
+   transaction boundaries, and rollback behavior.
+3. Apply schema migrations separately from source-data writes.
+4. Populate and verify the development branch before any production decision.
+5. Review representative rosters, deadlines, fixtures, rankings, and historical
+   snapshots.
+6. Delete the temporary import implementation and generated artifacts after
+   the verified data is persisted.

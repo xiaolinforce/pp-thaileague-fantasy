@@ -3,8 +3,7 @@
 ## Requirements
 
 - Node.js 24.18.1 and npm 12.0.2, pinned through Volta in `package.json`.
-- A PostgreSQL-compatible Neon database branch.
-- Network access when importing Thai League and Transfermarkt source data.
+- A populated PostgreSQL-compatible Neon database branch.
 
 This project uses Next.js 16.3.1. Before changing framework code, read the
 relevant bundled guide under `node_modules/next/dist/docs/`; APIs and conventions
@@ -23,7 +22,7 @@ Set the pooled Neon connection string for the intended development branch:
 
 | Variable                                                        | Purpose                                                                                     |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `DATABASE_URL`                                                  | Server runtime, Drizzle Kit, migration, seed, and verification connection.                  |
+| `DATABASE_URL`                                                  | Server runtime, Drizzle Kit, migration, maintenance, and verification connection.           |
 | `BETTER_AUTH_URL`, `BETTER_AUTH_SECRET`                         | Better Auth origin and signing/encryption secret.                                           |
 | `AUTH_EMAIL_HASH_SECRET`                                        | Separate salt for privacy-safe recipient hashes in delivery logs.                           |
 | `AUTH_EMAIL_ENABLED`, `AUTH_GOOGLE_ENABLED`                     | Opt each sign-in method into the current environment.                                       |
@@ -48,16 +47,12 @@ provider and a permitted sender. For public production, use a verified sending
 domain, configure the Google callback at `/api/auth/callback/google`, publish
 reviewed privacy/terms pages, and only then set `AUTH_PRODUCTION_READY=true`.
 
-Prepare and start a fresh development database:
+Connect to and verify the populated development database:
 
 ```bash
 npm run db:check
 npm run db:migrate
-npm run db:seed:competition
-npm run db:normalize:player-short-names -- --apply
 npm run db:verify:competition
-npm run db:seed:fantasy
-npm run db:rank:players -- --publish
 npm run db:verify:fantasy
 npm run dev
 ```
@@ -66,36 +61,28 @@ Open `http://localhost:3006`.
 
 ## Commands
 
-| Command                                   | Purpose                                                               |
-| ----------------------------------------- | --------------------------------------------------------------------- |
-| `npm run dev`                             | Start the development server on port 3006.                            |
-| `npm run build`                           | Create a production Next.js build.                                    |
-| `npm run start`                           | Serve an existing production build.                                   |
-| `npm run lint`                            | Run ESLint.                                                           |
-| `npm run types`                           | Run TypeScript without emitting files.                                |
-| `npm run test:email`                      | Run transactional email routing and fallback tests.                   |
-| `npm run test:auth`                       | Run authentication preference parsing tests.                          |
-| `npm run test:rules`                      | Run squad, transfer, deadline, scoring, and substitution tests.       |
-| `npm run format:check`                    | Check repository formatting with Prettier.                            |
-| `npm run format`                          | Rewrite formatting across the repository; use intentionally.          |
-| `npm run db:check`                        | Verify that the configured database can be reached.                   |
-| `npm run db:generate`                     | Generate a new Drizzle migration from schema changes.                 |
-| `npm run db:migrate`                      | Apply committed Drizzle migrations.                                   |
-| `npm run db:studio`                       | Open Drizzle Studio for the configured database.                      |
-| `npm run db:seed:competition`             | Fetch, normalize, and upsert competition data.                        |
-| `npm run db:seed:fantasy`                 | Refresh Fantasy configuration, player tiers, and Overall membership.  |
-| `npm run db:rank:players`                 | Preview or explicitly publish a versioned player ranking.             |
-| `npm run db:rank:leagues`                 | Backfill the latest persisted Overall standings after scoring exists. |
-| `npm run db:scenario -- <name>`           | Apply one fast, guarded Fantasy QA database scenario.                 |
-| `npm run db:seed:club-colors`             | Reapply the curated club visual identity registry.                    |
-| `npm run db:normalize:clubs`              | Apply explicit club display-name normalization.                       |
-| `npm run db:normalize:club-short-names`   | Apply curated Thai/English club short names.                          |
-| `npm run db:normalize:player-short-names` | Preview or apply sourced Thai and derived English player short names. |
-| `npm run db:verify:competition`           | Assert expected source/import structure.                              |
-| `npm run db:verify:fantasy`               | Verify Fantasy, ranking, Gameweek, and League invariants.             |
-| `npm run db:import:player-stats`          | Preview official current-season stats; apply with exact branch id.    |
-| `npm run db:verify:player-stats`          | Verify stored official current-season player-stat rows.               |
-| `npm run db:verify:transaction`           | Prove rollback on the exact development branch.                       |
+| Command                          | Purpose                                                               |
+| -------------------------------- | --------------------------------------------------------------------- |
+| `npm run dev`                    | Start the development server on port 3006.                            |
+| `npm run build`                  | Create a production Next.js build.                                    |
+| `npm run start`                  | Serve an existing production build.                                   |
+| `npm run lint`                   | Run ESLint.                                                           |
+| `npm run types`                  | Run TypeScript without emitting files.                                |
+| `npm run test:email`             | Run transactional email routing and fallback tests.                   |
+| `npm run test:auth`              | Run authentication preference parsing tests.                          |
+| `npm run test:rules`             | Run squad, transfer, deadline, scoring, and substitution tests.       |
+| `npm run format:check`           | Check repository formatting with Prettier.                            |
+| `npm run format`                 | Rewrite formatting across the repository; use intentionally.          |
+| `npm run db:check`               | Verify that the configured database can be reached.                   |
+| `npm run db:generate`            | Generate a new Drizzle migration from schema changes.                 |
+| `npm run db:migrate`             | Apply committed Drizzle migrations.                                   |
+| `npm run db:studio`              | Open Drizzle Studio for the configured database.                      |
+| `npm run db:rank:leagues`        | Backfill the latest persisted Overall standings after scoring exists. |
+| `npm run db:scenario -- <name>`  | Apply one fast, guarded Fantasy QA database scenario.                 |
+| `npm run db:verify:competition`  | Assert expected source/import structure.                              |
+| `npm run db:verify:fantasy`      | Verify Fantasy, ranking, Gameweek, and League invariants.             |
+| `npm run db:verify:player-stats` | Verify stored official current-season player-stat rows.               |
+| `npm run db:verify:transaction`  | Prove rollback on the exact development branch.                       |
 
 Database commands use a small Windows Node user-info compatibility shim. Keep
 the wrapper in package scripts unless the underlying Windows issue is confirmed
@@ -108,17 +95,33 @@ resolved for the pinned toolchain.
 3. Review the generated SQL and snapshot under `drizzle`.
 4. Apply the migration to the Neon development branch with
    `npm run db:migrate`.
-5. Run the relevant seed only when the schema or source data requires it.
-6. Run both structural verification and the affected application checks.
-7. Test development before applying the same committed migration to production.
+5. Run both structural verification and the affected application checks.
+6. Test development before applying the same committed migration to production.
 
 Do not edit or replace a migration that may already have been applied. Create a
-new migration for follow-up changes. Do not use production as a seed or schema
+new migration for follow-up changes. Do not use production as a schema or data
 experimentation environment.
 
 The project currently uses one `DATABASE_URL` for runtime and migrations.
 Environment isolation therefore depends on selecting the correct Neon branch.
-Confirm the target before any migration, import, normalization, or seed command.
+Confirm the target before any migration or direct data-maintenance operation.
+
+### Source-data maintenance
+
+Competition rosters, fixtures, player facts, classifications, and ranking
+versions are database-managed records. The repository does not contain scripts
+that rebuild or overwrite this source data. For a requested change:
+
+1. confirm the exact Neon branch ID and inspect fresh state;
+2. create a narrowly scoped temporary operation with stable-ID targeting,
+   preview output, transaction safety, and audit context;
+3. apply it to development only unless production is explicitly requested;
+4. run the relevant read-only database verification; and
+5. remove the temporary tool and generated artifacts after success.
+
+Never commit source payloads, spreadsheets, CSV exports, screenshots, database
+exports, or task-local maintenance scripts. See `DATA_SOURCES.md` for the
+current source authority and persisted snapshot.
 
 ### Fantasy QA scenarios
 
@@ -208,25 +211,6 @@ production branch. Use `npm run db:verify:fantasy` only when full invariant
 verification is useful; routine scenario switching already performs the narrow
 checks needed for fast UI iteration.
 
-### Ranking workflow
-
-Run the ranking command without `--publish` first and retain a CSV for review.
-The default version targets the 2026/27 preseason and Gameweek 1. It derives
-Level 1 from the top `5%`, Level 2 from the next `15%`, Level 3 from the next
-`20%`, and Level 4 from the remainder of the active ranked pool. Cumulative
-boundaries are rounded to keep ranks contiguous. When changing any assumption,
-pass all values explicitly and use a new version:
-
-```bash
-npm run db:rank:players -- --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20 --output=ranking-v2.csv
-npm run db:rank:players -- --publish --version=preseason-2026-27-v2 --effective-gameweek=1 --l1-percent=5 --l2-percent=15 --l3-percent=20
-npm run db:verify:fantasy
-```
-
-Confirm the Neon branch before both commands because preview reads current
-players and publication writes ranking runs, rankings, effective tiers, draft
-snapshots, and an audit row. Published versions are not rebuilt in place.
-
 ### League standings workflow
 
 Gameweek lock, finalization, and later score corrections rebuild current
@@ -247,7 +231,7 @@ rank, not only the Top 100 returned by the dialog.
 - Validate Server Actions against current database state and preserve selection
   snapshots, revisions, and audit context.
 - Add or update tests whenever squad, lineup, transfer, chip, deadline, points,
-  substitution, or ranking behavior changes.
+  substitution, or auto-fill behavior changes.
 - Keep user-facing Thai and English behavior aligned. The current translation
   system uses Thai source copy and a client-side dictionary; update both in the
   same change.

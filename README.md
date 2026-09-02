@@ -2,9 +2,9 @@
 
 PP Thai League Fantasy is a Thai-first, responsive Thai League 1 Fantasy
 Football prototype built with Next.js 16, Drizzle ORM, and Neon Postgres. It
-imports competition data, provisions an empty opening draft for each account, applies the agreed
-Fantasy rules, calculates provisional/final Gameweek scores, and presents
-Classic league standings.
+reads reviewed competition data from PostgreSQL, provisions an empty opening
+draft for each account, applies the agreed Fantasy rules, calculates
+provisional/final Gameweek scores, and presents Classic league standings.
 
 ## Current scope
 
@@ -28,8 +28,8 @@ Classic league standings.
   Thai Fantasy-specific 10 points for a goalkeeper goal.
 - Read-only access to the final team, points, fixtures, and standings after the
   last Gameweek closes.
-- Competition import from the Thai League official API and public Transfermarkt
-  squad pages, persisted before runtime.
+- Reviewed competition and player data persisted in Neon before runtime, with
+  the official Thai League roster owning current eligibility.
 
 Authentication and server-side admin roles are implemented, but production
 providers remain gated until a verified domain, reviewed privacy/terms pages,
@@ -63,26 +63,21 @@ npm install
 Copy-Item .env.example .env.local
 ```
 
-Add the pooled connection string for the Neon `development` branch and prepare
-the database:
+Add the pooled connection string for the populated Neon `development` branch,
+apply any schema migrations, verify its data, and start the application:
 
 ```bash
 npm run db:check
 npm run db:migrate
-npm run db:seed:competition
-npm run db:normalize:player-short-names -- --apply
 npm run db:verify:competition
-npm run db:seed:fantasy
-npm run db:rank:players -- --publish
-npm run db:seed:fantasy
-npm run db:rank:leagues
 npm run db:verify:fantasy
 npm run dev
 ```
 
 Open [http://localhost:3006](http://localhost:3006). `.env.local` is excluded
-from Git. The competition import requires network access; the application reads
-the imported database during normal runtime.
+from Git. A schema-only database is intentionally not populated by repository
+scripts; competition or Fantasy data changes use a reviewed task-scoped
+operation against the intended Neon branch.
 
 ## Database workflow
 
@@ -93,7 +88,6 @@ the imported database during normal runtime.
 - Generate and review migrations with `npm run db:generate`.
 - Apply committed migrations with `npm run db:migrate`, testing development
   before production.
-- Import competition data before seeding the dependent Fantasy records.
 - Inspect the configured database with `npm run db:studio`.
 - Use the guarded `npm run db:scenario -- <name>` runner on a disposable Neon
   branch for fast, repeatable Gameweek and Private League UI states; see the
@@ -102,17 +96,12 @@ the imported database during normal runtime.
   saved team, preserve its transfer history, and carry it into the next
   Gameweek draft without replacing it with a preset squad.
 
-The Fantasy seed is idempotent for the configured season. It creates or updates
-Gameweeks, player classifications, safe fallback tier metadata, and the single
-Overall Classic league. It never creates managers, teams, squads, scores, or
-Private Leagues. Every real Guest or member team is enrolled in Overall during
-provisioning, and rerunning the seed backfills any missing Overall membership.
-The ranking command publishes a versioned 1-to-all player order and derives
-four levels from the active ranked pool: Level 1 is 5%, Level 2 is the next
-15%, Level 3 is the next 20%, and Level 4 is the remaining 60%. A
-real account or Guest receives an empty opening draft and chooses all 15 players
-before the first save. Standings therefore contain only real account-owned or
-historically preserved Guest teams.
+Competition rosters, classifications, effective tiers, ranking versions, and
+season setup are maintained in the database with source provenance and audit
+context. Repository scripts do not rebuild or overwrite that source data. A
+real account or Guest receives an empty opening draft and chooses all 15
+players before the first save. Standings therefore contain only real
+account-owned or historically preserved Guest teams.
 The League ranking command backfills current Overall standings only after a
 provisional or final Gameweek exists; normal scoring recalculation keeps those
 latest rows current afterward. Runtime Overall reads fetch the current team's
