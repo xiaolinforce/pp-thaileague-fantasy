@@ -69,7 +69,19 @@ that own the affected concern:
 
 ## Verification
 
-Run the narrowest relevant checks first, then the appropriate project checks:
+Use verification proportional to the size, risk, and duration of the change.
+For a small, localized edit, do not routinely run type checks, lint, broad error
+checks, builds, or real-browser verification. Inspect the affected code and run
+only a narrowly targeted check when it is quick and directly relevant.
+
+Run the appropriate project checks for material or higher-risk work, including
+multi-file or cross-cutting changes, new features, changes to routes, data flow,
+database/schema, Fantasy rules, dependencies, or work that took substantial
+time. Use real-browser verification only for such work when it is relevant to
+the user-facing result, or when the user explicitly requests it.
+
+For material work, run the narrowest relevant checks first, then the appropriate
+project checks:
 
 ```bash
 npm run test:rules
