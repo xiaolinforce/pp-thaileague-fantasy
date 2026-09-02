@@ -31,10 +31,11 @@ provisional/final Gameweek scores, and presents Classic league standings.
 - Reviewed competition and player data persisted in Neon before runtime, with
   the official Thai League roster owning current eligibility.
 
-Authentication and server-side admin roles are implemented, but production
-providers remain gated until a verified domain, reviewed privacy/terms pages,
-and provider credentials are ready. See [Roadmap](ROADMAP.md) for the remaining
-production-readiness work.
+Authentication and server-side admin roles are implemented. The verified
+Production domain now has Google and Email OTP enabled with public privacy and
+terms pages. See [Production operations](PRODUCTION.md) and
+[Roadmap](ROADMAP.md) for the remaining controls required before public entries
+open.
 
 ## Routes
 
@@ -148,6 +149,7 @@ npm run build
 - [UI review status](UI_REVIEW.md) — route maturity, state inventory, evidence, and audit backlog.
 - [Development guide](DEVELOPMENT.md) — setup, commands, database workflow, and checks.
 - [Roadmap](ROADMAP.md) — current prototype, production blockers, next steps, and exclusions.
+- [Production operations](PRODUCTION.md) — releases, recovery, retention, monitoring, and incidents.
 - [Decision log](DECISIONS.md) — durable choices and their consequences.
 - [Agent instructions](AGENTS.md) — non-negotiable contribution rules for coding agents.
 

@@ -52,6 +52,7 @@ create synthetic manager identities.
 | Account provisioning | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
 | League operations    | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
 | Transactional email  | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
+| Auth maintenance     | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
 | Scoring              | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
 | Score persistence    | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
 | Persistence          | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |

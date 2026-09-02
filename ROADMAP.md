@@ -28,16 +28,18 @@
 These are required before the prototype can safely become a public, writable
 Fantasy service:
 
-1. Verify a production domain and sending domain; publish reviewed privacy and
-   terms pages; complete Google OAuth verification; then approve
+1. Completed 2026-09-03: verified the Production and sending domains, published
+   privacy/terms pages, configured Google OAuth, and approved
    `AUTH_PRODUCTION_READY`.
-2. Add account recovery/support procedures, auth/email observability, provider
-   quota alerts, abuse review, and periodic cleanup of expired auth artifacts.
+2. Account recovery/support, abuse response, retention, and daily expired-auth
+   cleanup are documented and implemented. Provider quota alerts and broader
+   auth/email observability still need an external notification destination.
 3. Review the admin role assignment process and audit retention policy.
-4. Define a controlled data-maintenance schedule, upstream failure behavior,
-   source terms, rate limits, freshness reporting, and operational ownership.
-5. Add database backup/recovery, migration promotion, rollback, monitoring,
-   alerting, and incident procedures.
+4. The maintenance schedule, upstream failure behavior, and current operational
+   owner are documented. Source terms review, automated freshness reporting,
+   and external alerting remain.
+5. Backup/recovery, migration promotion, rollback, monitoring, and incident
+   procedures are documented. A recovery drill and external alerts remain.
 6. Expand automated coverage to Server Actions, database invariants,
    source-data maintenance, and end-to-end critical paths.
 7. Decide the production localization and SEO model instead of relying on
