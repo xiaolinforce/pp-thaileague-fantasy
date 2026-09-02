@@ -126,6 +126,7 @@ type GameweekDetailsProps = {
   deadlineAt: string;
   gameweekNumber: number;
   isEditable: boolean;
+  seasonFinished: boolean;
   language: Language;
   translate: (text: string) => string;
   remainingDays: number;
@@ -139,6 +140,7 @@ function GameweekDetails({
   deadlineAt,
   gameweekNumber,
   isEditable,
+  seasonFinished,
   language,
   translate,
   remainingDays,
@@ -226,7 +228,9 @@ function GameweekDetails({
           </>
         ) : (
           <strong className="deadline-closed">
-            {translate("ปิดรับการจัดทีมแล้ว")}
+            {translate(
+              seasonFinished ? "ฤดูกาลสิ้นสุดแล้ว" : "ปิดรับการจัดทีมแล้ว",
+            )}
           </strong>
         )}
       </div>
@@ -1238,6 +1242,7 @@ export default function TeamClient({
               deadlineAt={fantasy.gameweek.deadlineAt}
               gameweekNumber={fantasy.gameweek.number}
               isEditable={isEditable}
+              seasonFinished={fantasy.seasonFinished}
               language={language}
               translate={translate}
               remainingDays={remainingDays}
@@ -1252,6 +1257,15 @@ export default function TeamClient({
                 <span className="compact-gameweek__title">
                   <span>GAMEWEEK</span>
                   <strong>{fantasy.gameweek.number}</strong>
+                  {!isEditable ? (
+                    <small>
+                      {translate(
+                        fantasy.seasonFinished
+                          ? "ฤดูกาลสิ้นสุดแล้ว"
+                          : "ปิดรับการจัดทีมแล้ว",
+                      )}
+                    </small>
+                  ) : null}
                 </span>
               </AccordionTrigger>
               <AccordionContent className="compact-gameweek__content">
@@ -1259,6 +1273,7 @@ export default function TeamClient({
                   deadlineAt={fantasy.gameweek.deadlineAt}
                   gameweekNumber={fantasy.gameweek.number}
                   isEditable={isEditable}
+                  seasonFinished={fantasy.seasonFinished}
                   language={language}
                   translate={translate}
                   remainingDays={remainingDays}
@@ -1518,7 +1533,10 @@ export default function TeamClient({
         onOpenChange={(open) => !open && setSelected(null)}
       >
         {selected && (
-          <DialogContent className="product-dialog accessible-player-modal">
+          <DialogContent
+            className="product-dialog accessible-player-modal"
+            closeLabel={translate("ปิด")}
+          >
             <div className="modal-player-top">
               <PlayerKit
                 color={selected.color}

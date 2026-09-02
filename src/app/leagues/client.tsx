@@ -144,7 +144,10 @@ function CreateLeagueDialog({
   return (
     <Localized>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="product-dialog league-dialog">
+        <DialogContent
+          className="product-dialog league-dialog"
+          closeLabel={translate("ปิด")}
+        >
           <form onSubmit={submit}>
             <DialogHeader>
               <DialogTitle>สร้างลีกส่วนตัว</DialogTitle>
@@ -267,7 +270,10 @@ function JoinLeagueDialog({
           }
         }}
       >
-        <DialogContent className="product-dialog league-dialog">
+        <DialogContent
+          className="product-dialog league-dialog"
+          closeLabel={translate("ปิด")}
+        >
           <form onSubmit={inspect}>
             <DialogHeader>
               <DialogTitle>เข้าร่วมลีกส่วนตัว</DialogTitle>
@@ -398,7 +404,10 @@ function LeagueStandingsDialog({
   return (
     <Localized>
       <Dialog open={Boolean(leagueId)} onOpenChange={onOpenChange}>
-        <DialogContent className="product-dialog league-standings-dialog">
+        <DialogContent
+          className="product-dialog league-standings-dialog"
+          closeLabel={translate("ปิด")}
+        >
           <DialogHeader>
             <DialogTitle>
               {isOverallHint ? (

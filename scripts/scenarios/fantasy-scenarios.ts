@@ -854,6 +854,141 @@ async function clearPrivateLeagues(tx: ScenarioTransaction, seasonId: string) {
   `);
 }
 
+type LeagueOverlaySnapshot = {
+  managers: number;
+  teams: number;
+  selections: number;
+  selection_players: number;
+  transfer_revisions: number;
+  scores: number;
+  score_points: number;
+  overall_members: number;
+  overall_standings: number;
+  overall_points: number;
+  gameweeks_checksum: string;
+};
+
+async function captureLeagueOverlaySnapshot(
+  tx: ScenarioTransaction,
+  seasonId: string,
+) {
+  const result = await tx.execute<LeagueOverlaySnapshot>(sql`
+    select
+      (select count(*)::int
+       from fantasy_managers manager
+       where exists (
+         select 1 from fantasy_teams team
+         where team.manager_id = manager.id
+           and team.fantasy_season_id = ${seasonId}::uuid
+       )) as managers,
+      (select count(*)::int from fantasy_teams
+       where fantasy_season_id = ${seasonId}::uuid) as teams,
+      (select count(*)::int
+       from fantasy_team_selections selection
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid) as selections,
+      (select count(*)::int
+       from fantasy_team_selection_players member
+       join fantasy_team_selections selection on selection.id = member.selection_id
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid) as selection_players,
+      (select count(*)::int
+       from fantasy_transfer_revisions revision
+       join fantasy_team_selections selection on selection.id = revision.selection_id
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid) as transfer_revisions,
+      (select count(*)::int
+       from fantasy_team_gameweek_scores score
+       join fantasy_team_selections selection on selection.id = score.selection_id
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid) as scores,
+      (select coalesce(sum(score.total_points), 0)::int
+       from fantasy_team_gameweek_scores score
+       join fantasy_team_selections selection on selection.id = score.selection_id
+       join fantasy_gameweeks gw on gw.id = selection.fantasy_gameweek_id
+       where gw.fantasy_season_id = ${seasonId}::uuid) as score_points,
+      (select count(*)::int
+       from fantasy_league_members member
+       join fantasy_leagues league on league.id = member.fantasy_league_id
+       where league.fantasy_season_id = ${seasonId}::uuid
+         and league.type = 'overall') as overall_members,
+      (select count(*)::int
+       from fantasy_league_standings standing
+       join fantasy_leagues league on league.id = standing.fantasy_league_id
+       where league.fantasy_season_id = ${seasonId}::uuid
+         and league.type = 'overall') as overall_standings,
+      (select coalesce(sum(standing.total_points), 0)::int
+       from fantasy_league_standings standing
+       join fantasy_leagues league on league.id = standing.fantasy_league_id
+       where league.fantasy_season_id = ${seasonId}::uuid
+         and league.type = 'overall') as overall_points,
+      (select md5(coalesce(string_agg(
+         concat_ws(':', gw.number, gw.status, gw.score_complete,
+           gw.average_points, gw.highest_points),
+         '|' order by gw.number
+       ), ''))
+       from fantasy_gameweeks gw
+       where gw.fantasy_season_id = ${seasonId}::uuid) as gameweeks_checksum
+  `);
+  const snapshot = result.rows[0];
+  if (!snapshot) throw new Error("Could not capture League overlay state.");
+  return snapshot;
+}
+
+async function loadLeagueParticipants(
+  tx: ScenarioTransaction,
+  seasonId: string,
+  primaryTeam: TeamRow | null,
+) {
+  if (!primaryTeam) {
+    throw new Error(
+      "A signed-in tester team is required for Private League scenarios.",
+    );
+  }
+  const allTeamsResult = await tx.execute<TeamRow>(sql`
+    select id, manager_id, name
+    from fantasy_teams
+    where fantasy_season_id = ${seasonId}::uuid
+    order by created_at, id
+  `);
+  if (allTeamsResult.rows.length !== PARTICIPANT_COUNT) {
+    throw new Error(
+      `League overlays require ${PARTICIPANT_COUNT} existing teams; apply a Gameweek scenario first. Found ${allTeamsResult.rows.length}.`,
+    );
+  }
+  if (!allTeamsResult.rows.some((team) => team.id === primaryTeam.id)) {
+    throw new Error("The signed-in tester team is not part of this season.");
+  }
+  const ownerCandidateResult = await tx.execute<TeamRow>(sql`
+    select team.id, team.manager_id, team.name
+    from fantasy_teams team
+    join fantasy_managers manager on manager.id = team.manager_id
+    where team.fantasy_season_id = ${seasonId}::uuid
+      and team.id <> ${primaryTeam.id}::uuid
+      and (manager.auth_user_id is null
+        or manager.auth_user_id like 'qa-scenario-owner-%')
+    order by team.created_at, team.id
+    limit 2
+  `);
+  if (ownerCandidateResult.rows.length < 2) {
+    throw new Error(
+      "League overlays require two unowned QA teams for Private League owners.",
+    );
+  }
+  const preferredIds = new Set([
+    primaryTeam.id,
+    ...ownerCandidateResult.rows.map((team) => team.id),
+  ]);
+  return {
+    primaryTeam,
+    teams: [
+      primaryTeam,
+      ...ownerCandidateResult.rows,
+      ...allTeamsResult.rows.filter((team) => !preferredIds.has(team.id)),
+    ],
+  };
+}
+
 async function ensureParticipants(
   tx: ScenarioTransaction,
   seasonId: string,
@@ -2109,6 +2244,16 @@ async function provisionQaLeagueOwners(
     email: `qa-league-owner-${index + 1}@example.invalid`,
   }));
   await tx.execute(sql`
+    update fantasy_managers manager
+    set auth_user_id = null,
+        status = 'abandoned',
+        updated_at = now()
+    from jsonb_to_recordset(${JSON.stringify(owners)}::jsonb)
+      as owner(manager_id text, user_id text)
+    where manager.auth_user_id = owner.user_id
+      and manager.id <> owner.manager_id::uuid
+  `);
+  await tx.execute(sql`
     insert into auth_users
       (id, name, email, email_verified, is_anonymous, role)
     select owner.user_id,
@@ -2119,6 +2264,13 @@ async function provisionQaLeagueOwners(
            'member'
     from jsonb_to_recordset(${JSON.stringify(owners)}::jsonb)
       as owner(user_id text, name text, email text)
+    on conflict (id) do update
+    set name = excluded.name,
+        email = excluded.email,
+        email_verified = excluded.email_verified,
+        is_anonymous = excluded.is_anonymous,
+        role = excluded.role,
+        updated_at = now()
   `);
   await tx.execute(sql`
     update fantasy_managers manager
@@ -2139,8 +2291,9 @@ async function applyLeagueScenario(
   requestedPrimaryTeam: TeamRow | null,
   scenarioName: LeagueScenarioName,
 ) {
+  const preservedState = await captureLeagueOverlaySnapshot(tx, season.id);
   await clearPrivateLeagues(tx, season.id);
-  const participants = await ensureParticipants(
+  const participants = await loadLeagueParticipants(
     tx,
     season.id,
     requestedPrimaryTeam,
@@ -2273,6 +2426,12 @@ async function applyLeagueScenario(
     primaryTeam.id,
     definition.populated ? 2 : 0,
   );
+  const currentState = await captureLeagueOverlaySnapshot(tx, season.id);
+  if (JSON.stringify(currentState) !== JSON.stringify(preservedState)) {
+    throw new Error(
+      `League overlay changed protected Gameweek/scoring state: before=${JSON.stringify(preservedState)}, after=${JSON.stringify(currentState)}.`,
+    );
+  }
   return { ...verified, primaryTeamName: primaryTeam.name };
 }
 

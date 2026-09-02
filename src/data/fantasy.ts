@@ -39,6 +39,7 @@ export type FantasySquadMember = {
 
 export type FantasyState = {
   seasonId: string;
+  seasonFinished: boolean;
   team: {
     id: string;
     name: string;
@@ -52,7 +53,7 @@ export type FantasyState = {
     scoreComplete: boolean;
   };
   selection: {
-    id: string;
+    id: string | null;
     status: "draft" | "locked";
     activeChip: FantasyChip | null;
     baselineSquadIds: string[];
@@ -72,15 +73,19 @@ export async function getFantasyState(): Promise<FantasyState> {
   const selection = profile.selection;
   const current = { team: profile.team };
 
-  const members = await db
-    .select()
-    .from(fantasyTeamSelectionPlayers)
-    .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
-  const revisions = await db
-    .select()
-    .from(fantasyTransferRevisions)
-    .where(eq(fantasyTransferRevisions.selectionId, selection.id))
-    .orderBy(asc(fantasyTransferRevisions.revision));
+  const [members, revisions] = selection
+    ? await Promise.all([
+        db
+          .select()
+          .from(fantasyTeamSelectionPlayers)
+          .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id)),
+        db
+          .select()
+          .from(fantasyTransferRevisions)
+          .where(eq(fantasyTransferRevisions.selectionId, selection.id))
+          .orderBy(asc(fantasyTransferRevisions.revision)),
+      ])
+    : [[], []];
   const baselineRevision = revisions[0]?.revision ?? 0;
   const baselineSquadIds = Array.isArray(revisions[0]?.squad)
     ? revisions[0].squad.filter(
@@ -118,6 +123,7 @@ export async function getFantasyState(): Promise<FantasyState> {
 
   return {
     seasonId: fantasySeason.id,
+    seasonFinished: profile.seasonFinished,
     team: {
       id: current.team.id,
       name: current.team.name,
@@ -131,13 +137,13 @@ export async function getFantasyState(): Promise<FantasyState> {
       scoreComplete: gameweek.scoreComplete,
     },
     selection: {
-      id: selection.id,
-      status: selection.status,
-      activeChip: selection.activeChip,
+      id: selection?.id ?? null,
+      status: selection?.status ?? "locked",
+      activeChip: selection?.activeChip ?? null,
       baselineSquadIds,
       hasPendingChanges,
-      netTransferCount: selection.netTransferCount,
-      transferPoints: selection.transferPoints,
+      netTransferCount: selection?.netTransferCount ?? 0,
+      transferPoints: selection?.transferPoints ?? 0,
       members: members.map((member) => ({
         fantasyPlayerId: member.fantasyPlayerId,
         clubId: member.clubIdSnapshot,
@@ -179,10 +185,15 @@ export type FantasyPointsSquadMember = FantasySquadMember & {
 
 export async function getFantasyPointsState(requestedGameweek?: number) {
   const activeFantasy = await getFantasyState();
-  const [season, selectionRows] = await Promise.all([
+  const [season, gameweekRows, selectionRows] = await Promise.all([
     db.query.fantasySeasons.findFirst({
       where: eq(fantasySeasons.id, activeFantasy.seasonId),
     }),
+    db
+      .select()
+      .from(fantasyGameweeks)
+      .where(eq(fantasyGameweeks.fantasySeasonId, activeFantasy.seasonId))
+      .orderBy(asc(fantasyGameweeks.number)),
     db
       .select({
         selection: fantasyTeamSelections,
@@ -204,18 +215,21 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
   if (!season) throw new Error("Fantasy season was not found.");
 
   const now = new Date();
-  const deadlinePassedSelections = selectionRows.filter((row) =>
-    hasGameweekDeadlinePassed(row.gameweek.deadlineAt, now),
+  const deadlinePassedGameweeks = gameweekRows.filter((gameweek) =>
+    hasGameweekDeadlinePassed(gameweek.deadlineAt, now),
   );
-  const defaultSelection = deadlinePassedSelections.at(-1);
-  const selected =
+  const defaultGameweek = deadlinePassedGameweeks.at(-1);
+  const selectedGameweek =
     (Number.isInteger(requestedGameweek) && requestedGameweek! > 0
-      ? deadlinePassedSelections.find(
-          (row) => row.gameweek.number === requestedGameweek,
+      ? deadlinePassedGameweeks.find(
+          (gameweek) => gameweek.number === requestedGameweek,
         )
-      : undefined) ?? defaultSelection;
-  if (!selected)
-    throw new Error("No deadline-passed Fantasy selection was found.");
+      : undefined) ?? defaultGameweek;
+  if (!selectedGameweek)
+    throw new Error("No deadline-passed Fantasy Gameweek was found.");
+  const selectedSelection = selectionRows.find(
+    (row) => row.gameweek.id === selectedGameweek.id,
+  )?.selection;
 
   const [fixtureRows, squadRows, teamScore] = await Promise.all([
     db
@@ -224,47 +238,54 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       .where(
         and(
           eq(fixtures.competitionSeasonId, season.competitionSeasonId),
-          eq(fixtures.matchweek, selected.gameweek.number),
+          eq(fixtures.matchweek, selectedGameweek.number),
         ),
       ),
-    db
-      .select({
-        member: fantasyTeamSelectionPlayers,
-        fullNameTh: players.fullNameTh,
-        fullNameEn: players.fullNameEn,
-        shortNameTh: players.shortNameTh,
-        shortNameEn: players.shortNameEn,
-        clubNameTh: clubs.nameTh,
-        clubNameEn: clubs.nameEn,
-        clubShortNameTh: clubs.shortNameTh,
-        clubShortNameEn: clubs.shortNameEn,
-        clubAbbreviation: clubs.abbreviation,
-        color: clubVisualIdentities.topLeftColor,
-        accent: clubVisualIdentities.topRightColor,
-      })
-      .from(fantasyTeamSelectionPlayers)
-      .innerJoin(
-        fantasyPlayers,
-        eq(fantasyTeamSelectionPlayers.fantasyPlayerId, fantasyPlayers.id),
-      )
-      .innerJoin(players, eq(fantasyPlayers.playerId, players.id))
-      .innerJoin(
-        clubs,
-        eq(fantasyTeamSelectionPlayers.clubIdSnapshot, clubs.id),
-      )
-      .leftJoin(
-        clubVisualIdentities,
-        eq(
-          fantasyTeamSelectionPlayers.clubIdSnapshot,
-          clubVisualIdentities.clubId,
-        ),
-      )
-      .where(
-        eq(fantasyTeamSelectionPlayers.selectionId, selected.selection.id),
-      ),
-    db.query.fantasyTeamGameweekScores.findFirst({
-      where: eq(fantasyTeamGameweekScores.selectionId, selected.selection.id),
-    }),
+    selectedSelection
+      ? db
+          .select({
+            member: fantasyTeamSelectionPlayers,
+            fullNameTh: players.fullNameTh,
+            fullNameEn: players.fullNameEn,
+            shortNameTh: players.shortNameTh,
+            shortNameEn: players.shortNameEn,
+            clubNameTh: clubs.nameTh,
+            clubNameEn: clubs.nameEn,
+            clubShortNameTh: clubs.shortNameTh,
+            clubShortNameEn: clubs.shortNameEn,
+            clubAbbreviation: clubs.abbreviation,
+            color: clubVisualIdentities.topLeftColor,
+            accent: clubVisualIdentities.topRightColor,
+          })
+          .from(fantasyTeamSelectionPlayers)
+          .innerJoin(
+            fantasyPlayers,
+            eq(fantasyTeamSelectionPlayers.fantasyPlayerId, fantasyPlayers.id),
+          )
+          .innerJoin(players, eq(fantasyPlayers.playerId, players.id))
+          .innerJoin(
+            clubs,
+            eq(fantasyTeamSelectionPlayers.clubIdSnapshot, clubs.id),
+          )
+          .leftJoin(
+            clubVisualIdentities,
+            eq(
+              fantasyTeamSelectionPlayers.clubIdSnapshot,
+              clubVisualIdentities.clubId,
+            ),
+          )
+          .where(
+            eq(fantasyTeamSelectionPlayers.selectionId, selectedSelection.id),
+          )
+      : Promise.resolve([]),
+    selectedSelection
+      ? db.query.fantasyTeamGameweekScores.findFirst({
+          where: eq(
+            fantasyTeamGameweekScores.selectionId,
+            selectedSelection.id,
+          ),
+        })
+      : Promise.resolve(undefined),
   ]);
   const fixtureIds = fixtureRows.map((fixture) => fixture.id);
   const pointRows = fixtureIds.length
@@ -336,33 +357,33 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
   const fantasy: FantasyState = {
     ...activeFantasy,
     gameweek: {
-      id: selected.gameweek.id,
-      number: selected.gameweek.number,
-      deadlineAt: selected.gameweek.deadlineAt.toISOString(),
-      status: selected.gameweek.status,
-      scoreComplete: selected.gameweek.scoreComplete,
+      id: selectedGameweek.id,
+      number: selectedGameweek.number,
+      deadlineAt: selectedGameweek.deadlineAt.toISOString(),
+      status: selectedGameweek.status,
+      scoreComplete: selectedGameweek.scoreComplete,
     },
     selection: {
-      id: selected.selection.id,
-      status: selected.selection.status,
-      activeChip: selected.selection.activeChip,
+      id: selectedSelection?.id ?? null,
+      status: selectedSelection?.status ?? "locked",
+      activeChip: selectedSelection?.activeChip ?? null,
       baselineSquadIds: members.map((member) => member.fantasyPlayerId),
       hasPendingChanges: false,
-      netTransferCount: selected.selection.netTransferCount,
-      transferPoints: selected.selection.transferPoints,
+      netTransferCount: selectedSelection?.netTransferCount ?? 0,
+      transferPoints: selectedSelection?.transferPoints ?? 0,
       members,
     },
   };
   return {
     fantasy,
-    gameweeks: deadlinePassedSelections.map(({ gameweek }) => ({
+    gameweeks: deadlinePassedGameweeks.map((gameweek) => ({
       number: gameweek.number,
     })) satisfies FantasyPointsGameweek[],
     squad: members,
     players: [...byPlayer.values()],
     gameweekSummary: {
-      averagePoints: selected.gameweek.averagePoints,
-      highestPoints: selected.gameweek.highestPoints,
+      averagePoints: selectedGameweek.averagePoints,
+      highestPoints: selectedGameweek.highestPoints,
     },
     teamScore: teamScore
       ? {

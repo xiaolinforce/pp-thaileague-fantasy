@@ -170,8 +170,16 @@ export default async function PointsPage({
               </div>
               {points.squad.length === 0 ? (
                 <div className="points-empty-squad" role="status">
-                  <strong>ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้</strong>
-                  <span>เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน</span>
+                  <strong>
+                    {points.fantasy.seasonFinished
+                      ? "ไม่มีทีมที่บันทึกไว้สำหรับ Gameweek นี้"
+                      : "ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้"}
+                  </strong>
+                  <span>
+                    {points.fantasy.seasonFinished
+                      ? "ฤดูกาลนี้สิ้นสุดแล้ว จึงไม่สามารถจัดทีมย้อนหลังได้"
+                      : "เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน"}
+                  </span>
                 </div>
               ) : (
                 <div className="points-pitch-rows">

@@ -76,7 +76,7 @@ export function NavigationBlockerProvider({
         open={pendingHref !== null}
         onOpenChange={(open) => !open && setPendingHref(null)}
       >
-        <DialogContent className="product-dialog">
+        <DialogContent className="product-dialog" closeLabel={translate("ปิด")}>
           <DialogHeader>
             <DialogTitle>
               {translate("ยังไม่ได้บันทึกการเปลี่ยนแปลง")}

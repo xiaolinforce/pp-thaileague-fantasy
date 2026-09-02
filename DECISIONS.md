@@ -4,6 +4,24 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-02 — A completed season remains available read-only
+
+**Decision:** When no `open` or `planned` Gameweek remains, use the latest
+Gameweek as the display context without provisioning a new selection. Existing
+teams retain read-only access to Team, Points, Fixtures, and Leagues. A new
+identity may receive a season team and Overall membership after completion, but
+it cannot create a retroactive squad.
+
+**Context:** The implemented GW30 lifecycle deliberately has no successor, but
+account provisioning treated the absence of an editable Gameweek as an
+exception and caused every authenticated core route to enter its error
+boundary.
+
+**Consequences:** Read models distinguish a provisioning Gameweek from a
+display Gameweek, team actions require an actually open Gameweek and an existing
+selection, and the UI communicates completion as a normal read-only state.
+Supporting multiple historical seasons remains separate future work.
+
 ## 2026-09-01 — Chargeable transfers are capped at three per Gameweek
 
 **Decision:** Allow at most three net transfers beyond the available free

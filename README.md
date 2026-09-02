@@ -26,6 +26,8 @@ Classic league standings.
   seeded competitors.
 - FPL-inspired scoring without bonus/BPS or Defensive Contributions, with a
   Thai Fantasy-specific 10 points for a goalkeeper goal.
+- Read-only access to the final team, points, fixtures, and standings after the
+  last Gameweek closes.
 - Competition import from the Thai League official API and public Transfermarkt
   squad pages, persisted before runtime.
 

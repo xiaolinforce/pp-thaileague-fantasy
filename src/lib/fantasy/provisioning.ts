@@ -15,6 +15,7 @@ import {
   fantasyTransferRevisions,
 } from "@/db/schema";
 import { createGuestTeamName } from "@/lib/auth/names";
+import { resolveFantasyGameweekContext } from "@/lib/fantasy/gameweek-context";
 import { THAI_LEAGUE_FANTASY_RULES } from "@/lib/fantasy/rules";
 
 export const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
@@ -75,11 +76,21 @@ async function getActiveSeasonAndGameweek() {
     .from(fantasyGameweeks)
     .where(eq(fantasyGameweeks.fantasySeasonId, season.id))
     .orderBy(asc(fantasyGameweeks.number));
-  const gameweek =
-    gameweeks.find((item) => item.status === "open") ??
-    gameweeks.find((item) => item.status === "planned");
-  if (!gameweek) throw new Error("No open Gameweek was found.");
-  return { season, gameweek, gameweeks };
+  const context = resolveFantasyGameweekContext(gameweeks);
+  if (!context) throw new Error("Fantasy Gameweeks were not found.");
+  return { season, gameweeks, ...context };
+}
+
+async function getExistingSelection(
+  team: typeof fantasyTeams.$inferSelect,
+  gameweek: typeof fantasyGameweeks.$inferSelect,
+) {
+  return db.query.fantasyTeamSelections.findFirst({
+    where: and(
+      eq(fantasyTeamSelections.fantasyTeamId, team.id),
+      eq(fantasyTeamSelections.fantasyGameweekId, gameweek.id),
+    ),
+  });
 }
 
 async function ensureInitialSelection(
@@ -162,7 +173,8 @@ export async function ensureFantasyProfile(input: {
   const existingManager = await db.query.fantasyManagers.findFirst({
     where: eq(fantasyManagers.authUserId, input.authUserId),
   });
-  const { season, gameweek, gameweeks } = await getActiveSeasonAndGameweek();
+  const { season, gameweek, gameweeks, canProvisionSelection, seasonFinished } =
+    await getActiveSeasonAndGameweek();
   let manager = existingManager;
   let created = false;
   if (!manager) {
@@ -211,8 +223,19 @@ export async function ensureFantasyProfile(input: {
       )
       .onConflictDoNothing();
   }
-  const selection = await ensureInitialSelection(team, gameweek);
-  return { manager, team, season, gameweek, gameweeks, selection, created };
+  const selection = canProvisionSelection
+    ? await ensureInitialSelection(team, gameweek)
+    : await getExistingSelection(team, gameweek);
+  return {
+    manager,
+    team,
+    season,
+    gameweek,
+    gameweeks,
+    selection: selection ?? null,
+    seasonFinished,
+    created,
+  };
 }
 
 export async function linkAnonymousFantasyProfile(input: {

@@ -168,6 +168,11 @@ const translations: Record<string, string> = {
   บันทึกทีม: "Save Team",
   เดดไลน์จัดทีม: "Team Deadline",
   ปิดรับการจัดทีมแล้ว: "Team selection is closed",
+  ฤดูกาลสิ้นสุดแล้ว: "Season complete",
+  "ไม่มีทีมที่บันทึกไว้สำหรับ Gameweek นี้":
+    "No team was saved for this Gameweek",
+  "ฤดูกาลนี้สิ้นสุดแล้ว จึงไม่สามารถจัดทีมย้อนหลังได้":
+    "This season is complete, so a team cannot be created retroactively",
   "ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว":
     "Team selection for this Gameweek is closed",
   "ศุกร์ 21 ส.ค. · 18:00 น.": "Friday 21 Aug · 6:00 PM",

@@ -94,7 +94,8 @@ querying.
    `src/db/index.ts`.
 3. Competition records are normalized into UI-facing club, player, fixture,
    and table shapes. Fantasy records are assembled around the current season,
-   open/planned Gameweek, and the current account's manager/team selection.
+   its open/planned Gameweek or latest read-only Gameweek after season end, and
+   the current account's manager/team selection when one exists.
 4. The page renders directly or passes serializable data to a focused Client
    Component.
 
@@ -151,9 +152,11 @@ moves the manager ownership to the new auth user. Signing into an existing
 account keeps that account's team and marks the Guest manager `abandoned`,
 preserving both histories without merging selections. Initial account
 provisioning is idempotent: concurrent auth completion requests converge on one
-manager, team, and empty opening selection. Selection-player snapshots and the
-opening transfer revision are created together only after the manager first
-saves a valid 15-player squad.
+manager and team, plus an empty selection while a Gameweek can still be
+provisioned. After the last Gameweek closes, a new identity joins the season and
+Overall without receiving a retroactive selection. Selection-player snapshots
+and the opening transfer revision are created together only after the manager
+first saves a valid 15-player squad.
 
 Email OTP values are hashed in the verification table, expire after five
 minutes, allow three attempts, and rotate on resend. Turnstile protects every

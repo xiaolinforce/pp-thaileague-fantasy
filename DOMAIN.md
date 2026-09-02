@@ -169,6 +169,13 @@ Finalization requires `provisional`; score recalculation and the final status
 commit together so a failed calculation cannot leave a partially transitioned
 Gameweek.
 
+When the last Gameweek has no `open` or `planned` successor, authenticated
+routes use the latest Gameweek as a read-only display context. Existing teams
+retain access to their final squad, points, fixtures, and standings. A manager
+who first arrives after the season closes may receive a season team and Overall
+membership, but the system does not create a selection retroactively and every
+team mutation remains closed.
+
 ## Transfers
 
 - Each deadline adds two free transfers, capped at four.

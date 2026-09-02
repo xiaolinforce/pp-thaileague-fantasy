@@ -199,6 +199,53 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-02 — Completed-season resilience and shared UI hardening
+
+- **Route and task:** `/team`, `/points`, `/fixtures`, and `/leagues`; keep the
+  Fantasy product readable when no Gameweek remains open or planned, preserve
+  production-like data while switching League QA overlays, remove compact Team
+  overflow, and localize the shared dialog close control.
+- **Status:** Team and Points remain Reference; Fixtures and Leagues remain In
+  progress.
+- **Data/auth/Gameweek state:** real signed-in QA team on the confirmed
+  development Neon branch. Gameweek 30 was rendered once as provisional and
+  once as final, with no open or planned Gameweek. League populated and empty
+  overlays were applied transactionally and the original Gameweek 2 final
+  baseline was restored. Verification retained 200 managers, 200 teams, 600
+  selections, 9,000 selection players, 400 team scores, and 200 Overall
+  standings.
+- **Language:** Thai completed-season and deadline-passed states were rendered.
+  The generated close control in an Overall dialog exposed `ปิด` in Thai and
+  `Close` in English; the Guest display preference was restored to Thai.
+- **Viewports/accessibility:** Team was measured at 360px, 767px, 768px,
+  1279px, and 1280px with no document-level horizontal overflow. The compact
+  Gameweek trigger exposes the written completed or closed state without
+  requiring expansion. Every Team mutation control was disabled in the final
+  Gameweek, and the shared icon-only dialog close control retained a localized
+  accessible name.
+- **Issues fixed:** a missing open/planned Gameweek no longer sends Team,
+  Points, Fixtures, or Leagues to the error boundary; the latest provisional or
+  final Gameweek is available read-only. New post-season identities do not
+  receive retroactive selections. League QA overlays no longer delete managers
+  or cascade through historical teams, selections, scores, or Overall
+  standings. The compact Team card no longer uses viewport-width geometry that
+  exceeded its document, and generated dialog close labels are supplied by the
+  active language.
+- **Known exclusions:** a brand-new post-season account with no historical
+  selection was not created in the browser because that would require mutating
+  authentication data; nullable-selection reads and lifecycle selection are
+  covered by types and pure resolver tests. Accessibility evidence used the
+  browser accessibility tree and DOM state rather than a separate screen
+  reader session.
+- **Evidence:** bounded in-app Browser inspection against the real local routes
+  and development database. QA lifecycle and League overlays were removed by
+  restoring `gw2-final`; no production debug or simulation route was added.
+- **Verification:** Fantasy rules, Email, Auth, TypeScript, ESLint, production
+  build, Fantasy database invariants, targeted Prettier checks for every changed
+  file, and responsive Browser DOM measurements passed. The repo-wide Prettier
+  check still reports the pre-existing `rules/page.tsx` and `rule-content.ts`
+  formatting debt outside this change.
+
 ### 2026-09-02 — Compact Team workspace scroll restoration
 
 - **Route and task:** `/team`; preserve a manager's separate document scroll

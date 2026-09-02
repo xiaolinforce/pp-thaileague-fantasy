@@ -106,6 +106,9 @@ proven behaviors unless a deliberate product decision replaces them:
 
 - Represent the one Gameweek currently open for squad changes. Show its number,
   live deadline, and editability without historical previous/next controls.
+- After the final Gameweek closes, keep the latest squad available read-only,
+  replace the countdown with an explicit completed-season label, and keep
+  transfers, chips, swaps, removals, auto-fill, and saving unavailable.
 - Keep lineup management and player discovery in one workspace. Desktop shows
   pitch and market side by side; Tablet and Mobile use state-preserving tabs
   that remain available below the compact Top bar after the manager scrolls

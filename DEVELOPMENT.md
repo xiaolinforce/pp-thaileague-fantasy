@@ -166,6 +166,10 @@ use `--primary-team=<team name>` when an explicit signed-in team is needed.
 The populated League state gives that tester four memberships (two owned and
 two joined), uses member identities for every owner, and preserves realistic
 creation and join order.
+Before committing, each League overlay compares protected row counts, score
+totals, Overall membership/standings, and a Gameweek summary checksum inside
+the same transaction. Any unexpected lifecycle or scoring change rolls the
+entire overlay back.
 
 Named Gameweek scenarios are reset presets: they rebuild every team's Fantasy
 history for a repeatable baseline. `--advance` is the progression mode. It

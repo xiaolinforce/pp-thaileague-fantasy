@@ -153,7 +153,7 @@ export async function suggestFantasyAutoFillAction(input: {
   members: DraftLineupMember[];
 }): Promise<FantasyAutoFillResult> {
   const { season, gameweek } = await requireFantasyProfile();
-  if (!isBeforeDeadline(gameweek.deadlineAt)) {
+  if (gameweek.status !== "open" || !isBeforeDeadline(gameweek.deadlineAt)) {
     return {
       ok: false,
       message: "ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว",
@@ -386,7 +386,11 @@ export async function saveFantasySelectionAction(
   input: FantasySelectionInput,
 ): Promise<FantasyActionResult> {
   const { season, gameweek, team, selection } = await requireFantasyProfile();
-  if (!isBeforeDeadline(gameweek.deadlineAt)) {
+  if (
+    gameweek.status !== "open" ||
+    !selection ||
+    !isBeforeDeadline(gameweek.deadlineAt)
+  ) {
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
   const uniqueIds = [
@@ -581,7 +585,11 @@ export async function saveFantasySelectionAction(
 
 export async function cancelFantasyChangesAction(): Promise<FantasyActionResult> {
   const { season, gameweek, selection } = await requireFantasyProfile();
-  if (!isBeforeDeadline(gameweek.deadlineAt)) {
+  if (
+    gameweek.status !== "open" ||
+    !selection ||
+    !isBeforeDeadline(gameweek.deadlineAt)
+  ) {
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
   const baselineRows = await db
