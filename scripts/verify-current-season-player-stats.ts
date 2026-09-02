@@ -17,7 +17,7 @@ async function run() {
     select
       count(*)::int as rows,
       count(distinct player_id)::int as players,
-      count(*) filter (where match_method not in ('exact_name', 'manual'))::int as unmatched,
+      count(*) filter (where match_method not in ('official_registration', 'exact_name', 'manual'))::int as unmatched,
       max(imported_at)::text as last_imported_at
     from competition_player_season_stats
   `);

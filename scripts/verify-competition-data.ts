@@ -55,7 +55,7 @@ async function verifyCompetitionData() {
     competition_entries: 16,
     fixtures: 240,
     seasons: 1,
-    venues: 15,
+    venues: 17,
   };
 
   for (const [tableName, expected] of Object.entries(expectedCounts)) {
@@ -68,9 +68,30 @@ async function verifyCompetitionData() {
   }
 
   const activePlayers = countByTable.get("player_registrations") ?? 0;
-  if (activePlayers < 200 || countByTable.get("players") !== activePlayers) {
+  const totalPlayers = countByTable.get("players") ?? 0;
+  if (activePlayers < 300 || totalPlayers < activePlayers) {
     throw new Error(
-      `Expected at least 200 active unique players, received ${activePlayers}.`,
+      `Expected at least 300 active registrations backed by player records, received ${activePlayers} active and ${totalPlayers} total players.`,
+    );
+  }
+
+  const registrationErrors = await db.execute<{
+    distinct_players: number;
+    official_registrations: number;
+  }>(sql`
+    select
+      count(distinct player_id)::int as distinct_players,
+      count(*) filter (where source_name = 'Thai League official API')::int as official_registrations
+    from player_registrations
+    where status = 'active'
+  `);
+  const registrationSummary = registrationErrors.rows[0];
+  if (
+    Number(registrationSummary?.distinct_players ?? 0) !== activePlayers ||
+    Number(registrationSummary?.official_registrations ?? 0) !== activePlayers
+  ) {
+    throw new Error(
+      "Active player registrations must be unique and sourced from the official Thai League roster.",
     );
   }
 
