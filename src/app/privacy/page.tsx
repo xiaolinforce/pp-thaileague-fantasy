@@ -95,8 +95,8 @@ const sections: LegalSection[] = [
     title: { th: "ผู้ให้บริการภายนอก", en: "Service providers" },
     paragraphs: [
       {
-        th: "เราใช้ผู้ให้บริการที่จำเป็นต่อการทำงานของระบบ ได้แก่ Vercel สำหรับโฮสติ้ง, Neon สำหรับฐานข้อมูล, Google สำหรับ OAuth, Cloudflare Turnstile สำหรับป้องกันบอต และ Resend สำหรับอีเมล ผู้ให้บริการเหล่านี้อาจประมวลผลข้อมูลในต่างประเทศภายใต้มาตรการของตน",
-        en: "We use service providers necessary to operate the product: Vercel for hosting, Neon for the database, Google for OAuth, Cloudflare Turnstile for bot protection, and Resend for email. These providers may process data outside Thailand under their own safeguards.",
+        th: "เราใช้ผู้ให้บริการที่จำเป็นต่อการทำงานของระบบ ได้แก่ Vercel สำหรับโฮสติ้ง, Neon สำหรับฐานข้อมูล, Google สำหรับ OAuth และรับอีเมลช่วยเหลือ, Cloudflare Turnstile สำหรับป้องกันบอต, Resend สำหรับส่งอีเมล และ ImprovMX สำหรับส่งต่ออีเมลช่วยเหลือ ผู้ให้บริการเหล่านี้อาจประมวลผลข้อมูลในต่างประเทศภายใต้มาตรการของตน",
+        en: "We use service providers necessary to operate the product: Vercel for hosting, Neon for the database, Google for OAuth and support-email delivery, Cloudflare Turnstile for bot protection, Resend for sending email, and ImprovMX for forwarding support email. These providers may process data outside Thailand under their own safeguards.",
       },
       {
         th: "เราไม่ขายข้อมูลส่วนบุคคล และจะเปิดเผยข้อมูลเมื่อจำเป็นต่อการให้บริการ ป้องกันความเสียหาย ปฏิบัติตามกฎหมาย หรือเมื่อคุณอนุญาตเท่านั้น",
