@@ -4,6 +4,7 @@ import {
   ArrowUpRight,
   CircleHelp,
   LifeBuoy,
+  Mail,
   MessageCircle,
 } from "lucide-react";
 import Link from "next/link";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/accordion";
 
 const facebookUrl = "https://www.facebook.com/ppfo0tball";
+const supportEmail = "support@ppfootball.net";
 
 export default function HelpPage() {
   const identity = useAppIdentity();
@@ -188,6 +190,40 @@ export default function HelpPage() {
                 {language === "th" ? "เปิดเพจ PP Football" : "Open PP Football"}
                 <ArrowUpRight size={17} aria-hidden="true" />
               </a>
+            </section>
+
+            <section className="product-card help-support-card">
+              <Mail aria-hidden="true" />
+              <h2>
+                {language === "th" ? "ติดต่อทางอีเมล" : "Contact us by email"}
+              </h2>
+              <p>
+                {language === "th"
+                  ? "ส่งคำถามเกี่ยวกับบัญชี ข้อมูลส่วนบุคคล หรือปัญหาการใช้งาน พร้อมรายละเอียดที่ช่วยให้ตรวจสอบได้"
+                  : "Send questions about your account, personal data, or a product issue with enough detail for us to investigate."}
+              </p>
+              <a href={`mailto:${supportEmail}`} className="secondary-button">
+                {supportEmail}
+              </a>
+            </section>
+
+            <section className="product-card help-support-card">
+              <h2>
+                {language === "th" ? "นโยบายและข้อกำหนด" : "Policies and terms"}
+              </h2>
+              <p>
+                {language === "th"
+                  ? "อ่านวิธีที่เราใช้ข้อมูลและเงื่อนไขสำหรับการเล่น PP Thai League Fantasy"
+                  : "Read how we use data and the conditions for playing PP Thai League Fantasy."}
+              </p>
+              <div className="help-legal-links">
+                <Link href="/privacy" className="secondary-button">
+                  {language === "th" ? "ความเป็นส่วนตัว" : "Privacy"}
+                </Link>
+                <Link href="/terms" className="secondary-button">
+                  {language === "th" ? "ข้อกำหนด" : "Terms"}
+                </Link>
+              </div>
             </section>
 
             {!identity ? (

@@ -309,6 +309,21 @@ export default function OnboardingClient({
     </div>
   );
 
+  const legalNotice = (
+    <p className="auth-legal-notice">
+      {language === "th"
+        ? "เมื่อดำเนินการต่อ คุณยอมรับ"
+        : "By continuing, you agree to the"}{" "}
+      <Link href="/terms">
+        {language === "th" ? "ข้อกำหนดการใช้งาน" : "Terms of Service"}
+      </Link>{" "}
+      {language === "th" ? "และรับทราบ" : "and acknowledge the"}{" "}
+      <Link href="/privacy">
+        {language === "th" ? "นโยบายความเป็นส่วนตัว" : "Privacy Policy"}
+      </Link>
+    </p>
+  );
+
   if (upgradeMode) {
     return (
       <Localized>
@@ -389,6 +404,8 @@ export default function OnboardingClient({
             ) : (
               <div className="member-card">{emailAuthForm}</div>
             )}
+
+            {legalNotice}
 
             {error && (
               <p className="auth-error" role="alert">
@@ -511,6 +528,8 @@ export default function OnboardingClient({
               emailAuthForm
             )}
           </div>
+
+          {legalNotice}
 
           {error && (
             <p className="auth-error" role="alert">

@@ -425,6 +425,26 @@ textarea:focus-visible {
   line-height: 1.6;
 }
 
+.auth-legal-notice {
+  margin: 16px 8px 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.auth-legal-notice a {
+  color: var(--orange-deep);
+  font-weight: 600;
+  text-underline-offset: 3px;
+}
+
+.auth-legal-notice a:focus-visible {
+  border-radius: 3px;
+  outline: 3px solid rgba(245, 102, 23, 0.28);
+  outline-offset: 2px;
+}
+
 .upgrade-page {
   position: relative;
   min-height: 100svh;
@@ -473,6 +493,10 @@ textarea:focus-visible {
 
 .upgrade-auth-panel .auth-error {
   margin-top: 14px;
+}
+
+.upgrade-auth-panel .auth-legal-notice {
+  margin-inline: 18px;
 }
 
 .upgrade-auth-panel .member-card {
@@ -7959,25 +7983,29 @@ textarea:focus-visible {
   background: var(--orange-soft);
 }
 
-.rules-page-layout {
+.rules-page-layout,
+.legal-page-layout {
   display: grid;
   grid-template-columns: 230px minmax(0, 1fr);
   align-items: start;
   gap: 18px;
 }
 
-.rules-toc {
+.rules-toc,
+.legal-toc {
   position: sticky;
   top: 20px;
   padding: 18px;
 }
 
-.rules-toc > div {
+.rules-toc > div,
+.legal-toc > div {
   display: grid;
   gap: 3px;
 }
 
-.rules-toc a {
+.rules-toc a,
+.legal-toc a {
   min-height: 42px;
   padding: 9px 10px;
   border-radius: 9px;
@@ -7988,45 +8016,55 @@ textarea:focus-visible {
 }
 
 .rules-toc a:hover,
-.rules-toc a:focus-visible {
+.rules-toc a:focus-visible,
+.legal-toc a:hover,
+.legal-toc a:focus-visible {
   color: var(--ink);
   background: var(--warm);
 }
 
-.rules-toc a:focus-visible {
+.rules-toc a:focus-visible,
+.legal-toc a:focus-visible {
   outline: 3px solid rgba(245, 102, 23, 0.28);
 }
 
-.rules-document {
+.rules-document,
+.legal-document {
   padding: 28px;
 }
 
-.rules-document-section {
+.rules-document-section,
+.legal-document-section {
   padding: 28px 0;
   scroll-margin-top: 20px;
 }
 
-.rules-document-section:first-child {
+.rules-document-section:first-child,
+.legal-document-section:first-of-type {
   padding-top: 0;
 }
 
-.rules-document-section + .rules-document-section {
+.rules-document-section + .rules-document-section,
+.legal-document-section + .legal-document-section {
   border-top: 1px solid var(--line);
 }
 
-.rules-document-section h2 {
+.rules-document-section h2,
+.legal-document-section h2 {
   margin: 0;
   font-size: 22px;
 }
 
-.rules-document-section > p {
+.rules-document-section > p,
+.legal-document-section > p {
   max-width: 70ch;
   margin: 6px 0 16px;
   color: var(--muted);
   line-height: 1.6;
 }
 
-.rules-document-section ul {
+.rules-document-section ul,
+.legal-document-section ul {
   max-width: 74ch;
   margin: 0;
   padding: 0;
@@ -8035,14 +8073,16 @@ textarea:focus-visible {
   list-style: none;
 }
 
-.rules-document-section li {
+.rules-document-section li,
+.legal-document-section li {
   position: relative;
   padding-inline-start: 20px;
   color: #4f5960;
   line-height: 1.7;
 }
 
-.rules-document-section li::before {
+.rules-document-section li::before,
+.legal-document-section li::before {
   content: "";
   position: absolute;
   top: 0.72em;
@@ -8051,6 +8091,34 @@ textarea:focus-visible {
   height: 7px;
   border-radius: 50%;
   background: var(--orange-deep);
+}
+
+.legal-effective-date {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.legal-document-footer {
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+}
+
+.legal-document-footer p {
+  margin: 0 0 13px;
+}
+
+.legal-document-footer div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px 18px;
+}
+
+.legal-document-footer a {
+  color: var(--orange-deep);
+  font-weight: 600;
+  text-underline-offset: 3px;
 }
 
 .help-page-layout {
@@ -8108,6 +8176,12 @@ textarea:focus-visible {
   min-height: 44px;
 }
 
+.help-legal-links {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
 .help-support-card--facebook {
   border-color: #cfd8ec;
   background: #f7f9fd;
@@ -8126,21 +8200,25 @@ textarea:focus-visible {
 
 @media (width < 80rem) {
   .rules-page-layout,
+  .legal-page-layout,
   .help-page-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .rules-toc {
+  .rules-toc,
+  .legal-toc {
     position: static;
   }
 
-  .rules-toc > div {
+  .rules-toc > div,
+  .legal-toc > div {
     display: flex;
     flex-wrap: wrap;
     gap: 5px;
   }
 
-  .rules-toc a {
+  .rules-toc a,
+  .legal-toc a {
     min-height: 40px;
   }
 
@@ -8174,7 +8252,8 @@ textarea:focus-visible {
   .profile-editor-section,
   .settings-page-card,
   .help-faq,
-  .rules-document {
+  .rules-document,
+  .legal-document {
     padding: 19px 16px;
   }
 
@@ -8213,21 +8292,25 @@ textarea:focus-visible {
     flex: 1;
   }
 
-  .rules-toc {
+  .rules-toc,
+  .legal-toc {
     padding: 14px;
   }
 
-  .rules-toc > div {
+  .rules-toc > div,
+  .legal-toc > div {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .rules-toc a {
+  .rules-toc a,
+  .legal-toc a {
     justify-content: center;
     text-align: center;
   }
 
-  .rules-document-section {
+  .rules-document-section,
+  .legal-document-section {
     padding: 23px 0;
   }
 

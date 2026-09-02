@@ -51,6 +51,8 @@ production-readiness work.
 | `/settings`      | Interface language preference for the current identity/device.     |
 | `/rules`         | Public rules generated from the executable Fantasy configuration.  |
 | `/help`          | Public FAQ, rules recovery path, and official Facebook contact.    |
+| `/privacy`       | Public bilingual privacy policy and data-rights contact.           |
+| `/terms`         | Public bilingual service and fair-play terms.                      |
 | `/admin/fantasy` | Internal match stats, classification, locking, and finalization.   |
 
 ## Getting started
