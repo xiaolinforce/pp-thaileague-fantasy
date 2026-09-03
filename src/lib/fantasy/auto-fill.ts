@@ -1,7 +1,6 @@
 import type { DraftLineupMember } from "./team-draft.ts";
 import {
   getCumulativeTierLimits,
-  isValidStartingFormation,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
   type FantasyPosition,
@@ -73,9 +72,6 @@ const captaincyPositionPriority: Record<FantasyPosition, number> = {
   defender: 2,
   goalkeeper: 3,
 };
-const orderedTierLevels = [...THAI_LEAGUE_FANTASY_RULES.tierSlots]
-  .sort((left, right) => left.level - right.level)
-  .map((slot) => slot.level);
 
 function incrementCount<T>(counts: Map<T, number>, key: T) {
   const next = new Map(counts);
@@ -233,120 +229,6 @@ function getPreservedCaptaincyIds(members: DraftLineupMember[]) {
   };
 }
 
-type LineupOption = {
-  starterIds: Set<string>;
-  tierCounts: Map<number, number>;
-  hasLikelyStartingGoalkeeper: boolean;
-  randomScore: number;
-  deterministicKey: string;
-};
-
-function compareLineupOptions(left: LineupOption, right: LineupOption) {
-  const likelyGoalkeeperDifference =
-    Number(right.hasLikelyStartingGoalkeeper) -
-    Number(left.hasLikelyStartingGoalkeeper);
-  if (likelyGoalkeeperDifference !== 0) return likelyGoalkeeperDifference;
-
-  for (const tier of orderedTierLevels) {
-    const tierDifference =
-      (right.tierCounts.get(tier) ?? 0) - (left.tierCounts.get(tier) ?? 0);
-    if (tierDifference !== 0) return tierDifference;
-  }
-
-  return (
-    right.randomScore - left.randomScore ||
-    left.deterministicKey.localeCompare(right.deterministicKey)
-  );
-}
-
-function optimizeStartingLineup(
-  members: DraftLineupMember[],
-  candidatesById: Map<string, AutoFillCandidate>,
-  randomPriorityByCandidate: Map<string, number>,
-) {
-  const memberCandidates: AutoFillCandidate[] = [];
-  for (const member of members) {
-    if (!member.fantasyPlayerId) return null;
-    const candidate = candidatesById.get(member.fantasyPlayerId);
-    if (!candidate) return null;
-    memberCandidates.push(candidate);
-  }
-
-  const { captainId, viceCaptainId } = getPreservedCaptaincyIds(members);
-  const protectedStarterIds = new Set(
-    [captainId, viceCaptainId].filter((id): id is string => Boolean(id)),
-  );
-  let bestOption: LineupOption | null = null;
-  const combinationLimit = 1 << memberCandidates.length;
-
-  for (let mask = 0; mask < combinationLimit; mask += 1) {
-    const starters: AutoFillCandidate[] = [];
-    for (let index = 0; index < memberCandidates.length; index += 1) {
-      if ((mask & (1 << index)) !== 0) starters.push(memberCandidates[index]);
-    }
-    if (starters.length !== 11) continue;
-
-    const starterIds = new Set(starters.map((candidate) => candidate.id));
-    if ([...protectedStarterIds].some((id) => !starterIds.has(id))) continue;
-    if (!isValidStartingFormation(starters)) continue;
-
-    const option: LineupOption = {
-      starterIds,
-      tierCounts: countBy(starters.map((candidate) => candidate.tier)),
-      hasLikelyStartingGoalkeeper: starters.some(
-        (candidate) =>
-          candidate.position === "goalkeeper" &&
-          candidate.isLikelyClubStartingGoalkeeper,
-      ),
-      randomScore: starters.reduce(
-        (sum, candidate) =>
-          sum + (randomPriorityByCandidate.get(candidate.id) ?? 0),
-        0,
-      ),
-      deterministicKey: [...starterIds].sort().join("\u0000"),
-    };
-    if (!bestOption || compareLineupOptions(option, bestOption) < 0) {
-      bestOption = option;
-    }
-  }
-
-  if (!bestOption) return null;
-  const benchCandidates = memberCandidates.filter(
-    (candidate) => !bestOption.starterIds.has(candidate.id),
-  );
-  const benchGoalkeeper = benchCandidates.find(
-    (candidate) => candidate.position === "goalkeeper",
-  );
-  const benchOutfield = benchCandidates
-    .filter((candidate) => candidate.position !== "goalkeeper")
-    .sort(
-      (left, right) =>
-        left.tier - right.tier ||
-        (randomPriorityByCandidate.get(right.id) ?? 0) -
-          (randomPriorityByCandidate.get(left.id) ?? 0) ||
-        left.id.localeCompare(right.id),
-    );
-  if (!benchGoalkeeper || benchOutfield.length !== 3) return null;
-  const benchOrderById = new Map<string, number>([
-    [benchGoalkeeper.id, 0],
-    ...benchOutfield.map(
-      (candidate, index) => [candidate.id, index + 1] as const,
-    ),
-  ]);
-
-  return members.map((member) => {
-    const isStarter = bestOption.starterIds.has(member.fantasyPlayerId!);
-    return {
-      ...member,
-      lineupRole: isStarter ? ("starter" as const) : ("bench" as const),
-      benchOrder: isStarter
-        ? null
-        : (benchOrderById.get(member.fantasyPlayerId!) ?? null),
-      captainRole: isStarter ? member.captainRole : ("none" as const),
-    };
-  });
-}
-
 function assignCaptaincy(
   members: DraftLineupMember[],
   candidatesById: Map<string, AutoFillCandidate>,
@@ -431,14 +313,8 @@ export function autoFillSquadDraft({
       member.fantasyPlayerId === null && member.vacancyPosition !== null,
   );
   if (vacancies.length === 0) {
-    const optimizedMembers = optimizeStartingLineup(
-      members,
-      candidatesById,
-      randomPriorityByCandidate,
-    );
-    if (!optimizedMembers) return null;
     const withCaptaincy = assignCaptaincy(
-      optimizedMembers,
+      members,
       candidatesById,
       randomPriorityByCandidate,
     );
@@ -636,14 +512,8 @@ export function autoFillSquadDraft({
       captainRole: "none" as const,
     };
   });
-  const optimizedMembers = optimizeStartingLineup(
-    filledMembers,
-    candidatesById,
-    randomPriorityByCandidate,
-  );
-  if (!optimizedMembers) return null;
   const withCaptaincy = assignCaptaincy(
-    optimizedMembers,
+    filledMembers,
     candidatesById,
     randomPriorityByCandidate,
   );

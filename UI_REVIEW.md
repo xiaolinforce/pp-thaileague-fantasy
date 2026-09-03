@@ -789,6 +789,28 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   files changed for this task pass targeted Prettier checks; repository-wide
   formatting still reports the existing 168-file baseline drift.
 
+### 2026-09-03 — Auto-fill vacancy-only explanation
+
+- **Route and task:** `/rules`; replace the superseded strongest-lineup copy
+  with the rule that Auto-fill preserves the current formation, starter and
+  substitute roles, and bench order while filling only vacant slots.
+- **Language and responsive evidence:** Thai and English rendered in the in-app
+  Browser at the normal Desktop viewport and 360px Mobile. Both versions remain
+  contained in the Squad selection card; Mobile document and client widths
+  both measured 345px. The Guest preference and viewport were restored to Thai
+  and Desktop after review.
+- **Accessibility:** the formation guarantee is a separate semantic list item,
+  with no new control, focus target, or color-dependent meaning.
+- **Known exclusions:** the Auto-fill action was not submitted in the browser
+  because that would modify the current unsaved draft. Deterministic Fantasy
+  tests verify that every slot retains its lineup role and bench order.
+- **Verification:** responsive Thai/English rendered inspection, all Fantasy,
+  auth, and email tests, types, and production build passed. Targeted Prettier
+  checks pass for every changed file. Repository-wide lint is blocked by the
+  pre-existing `react-hooks/set-state-in-effect` error in
+  `src/app/team/transfers-client.tsx`; repository-wide formatting reports the
+  existing baseline drift outside this change.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

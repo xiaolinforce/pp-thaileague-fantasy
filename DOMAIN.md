@@ -140,17 +140,17 @@ remain hard limits.
 
 For goalkeeper inference, a lower tier number is better; goalkeepers tied for
 their club's best tier are treated equally because the current data does not
-store an explicit depth chart. After completing the squad, auto-fill compares
-every valid starting eleven from all 15 selected players. Existing valid
-captain and vice-captain assignments remain starters. It then prefers a likely
-club starting goalkeeper and maximizes Level 1 starters, followed by Levels 2,
-3, and 4 in order; randomness breaks an otherwise exact tie. The remaining
-outfield substitutes are ordered by the same tier-first rule. Any missing
-captain or vice-captain is assigned independently from the best remaining tier,
-favoring forwards, then midfielders, defenders, and goalkeepers. Randomness
-breaks ties within the same tier and position. The suggestion changes only the
-client draft and has no transfer or persistence effect until the manager saves
-through the normal validation path.
+store an explicit depth chart. Auto-fill treats the manager's current formation
+and lineup assignment as fixed: it fills each vacant slot without changing any
+existing starter, substitute, or bench order. When starter and substitute slots
+for the same position are both vacant, the better-tier newly selected player
+fills the starter slot first; a likely club starting goalkeeper takes priority
+for a vacant starting-goalkeeper slot. Existing valid captain and vice-captain
+assignments remain unchanged. Any missing captain or vice-captain is assigned
+independently from the best remaining tier, favoring forwards, then midfielders,
+defenders, and goalkeepers. Randomness breaks ties within the same tier and
+position. The suggestion changes only the client draft and has no transfer or
+persistence effect until the manager saves through the normal validation path.
 
 ## Deadlines and Gameweeks
 

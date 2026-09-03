@@ -24,7 +24,32 @@ in Vercel, Preview and Production use separate environment tags, and quota or
 traffic growth must trigger a sampling and plan review before enabling broader
 logging.
 
+## 2026-09-03 — Auto-fill preserves formation and fills vacancies only
+
+**Decision:** Treat every draft slot's starter or substitute role and bench
+order as manager-owned. Auto-fill may select a player only for a vacant slot;
+it must not move an existing player, rebuild the starting eleven, change the
+formation, or reorder the bench. When starter and substitute vacancies share a
+position, assign the better-tier newly selected player to the starter vacancy
+first, with the likely first-choice goalkeeper preference applied before tier
+for goalkeeper vacancies.
+
+**Context:** The manager wants Auto-fill to complete unfinished work without
+overriding lineup choices already made. The existing draft slots already encode
+a valid formation, so preserving them makes the action predictable while still
+allowing the selection search to pursue tier, goalkeeper, and foreign-player
+goals.
+
+**Consequences:** A stronger player already on the bench is not promoted, and a
+weaker existing starter is not demoted. Existing captaincy remains preserved and
+missing roles are still assigned by tier and position priority. Projected points
+and overall rank remain excluded. The previous strongest-lineup decision below
+is superseded.
+
 ## 2026-09-03 — Auto-fill rebuilds the strongest valid starting eleven
+
+**Superseded:** Auto-fill now preserves formation and fills vacancies only, as
+defined by the decision above.
 
 **Decision:** After completing the 15-player squad, compare every valid
 11-player lineup. Preserve valid existing captain and vice-captain assignments
