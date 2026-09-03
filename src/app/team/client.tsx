@@ -661,7 +661,27 @@ export default function TeamClient({
     if (nextView === workspaceView) {
       return;
     }
+
+    const tabs = document.querySelector<HTMLElement>(
+      ".team-workspace-tabs-sticky",
+    );
+    const topbar = document.querySelector<HTMLElement>(".compact-topbar");
+    const tabsArePinned =
+      tabs &&
+      topbar &&
+      Math.abs(
+        tabs.getBoundingClientRect().top -
+          topbar.getBoundingClientRect().bottom,
+      ) <= 1;
+
     setWorkspaceView(nextView);
+    if (window.matchMedia("(width < 48rem)").matches && tabsArePinned) {
+      window.requestAnimationFrame(() => {
+        document
+          .querySelector(".unified-team-workspace")
+          ?.scrollIntoView({ block: "start" });
+      });
+    }
   };
 
   const replaceDraftMembers = (nextMembers: DraftLineupMember[]) => {

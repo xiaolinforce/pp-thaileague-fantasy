@@ -7054,6 +7054,7 @@ button.vacant-squad-slot {
 
   .unified-team-workspace {
     overflow-anchor: none;
+    scroll-margin-top: calc(var(--compact-topbar-height) + 64px);
   }
 
   .segment-tabs.team-workspace-tabs {
