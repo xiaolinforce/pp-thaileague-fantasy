@@ -24,6 +24,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/sonner";
 import { Input } from "@/components/ui/input";
 import {
@@ -262,6 +272,164 @@ export default function TransfersClient({
     onMembersChange(nextMembers);
   }
 
+  const renderMarketFilters = () => (
+    <div className="compact-market-toolbar">
+      <div className="compact-market-primary-filters">
+        <label className="search-field compact-market-search">
+          <Search size={17} aria-hidden="true" />
+          <Input
+            className="market-search-input"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="ค้นหาชื่อนักเตะ"
+            aria-label="ค้นหาชื่อนักเตะ"
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={() => setQuery("")}
+              aria-label="ล้างคำค้น"
+            >
+              <X size={15} aria-hidden="true" />
+            </button>
+          )}
+        </label>
+        <Select
+          value={clubId}
+          onValueChange={(value) => value && setClubId(String(value))}
+        >
+          <SelectTrigger aria-label="กรองสโมสร">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <span className="market-select-item">
+                <span className="market-select-dot market-select-dot--all" />
+                ทุกสโมสร
+              </span>
+            </SelectItem>
+            {clubs.map((club) => (
+              <SelectItem value={club.id} key={club.id}>
+                <span className="market-select-item">
+                  <ClubColor
+                    color={club.colors[0]}
+                    secondaryColor={club.colors[1]}
+                    label={localize(club.shortName, language)}
+                    size="medium"
+                  />
+                  {localize(club.shortName, language)}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="compact-position-nationality-filters">
+        <Select
+          value={position}
+          onValueChange={(value) => value && setPosition(String(value))}
+        >
+          <SelectTrigger aria-label="กรองตำแหน่งผู้เล่น">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">
+              <span className="market-select-item">
+                <span className="market-select-dot market-select-dot--all" />
+                ทุกตำแหน่ง
+              </span>
+            </SelectItem>
+            {(["GK", "DEF", "MID", "FWD"] as const).map((filterPosition) => (
+              <SelectItem value={filterPosition} key={filterPosition}>
+                <span className="market-select-item">
+                  <PositionBadge
+                    position={filterPosition}
+                    className="market-select-position-badge"
+                  />
+                  {getLocalizedPositionLabel(filterPosition, language)}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={nationality}
+          onValueChange={(value) => value && setNationality(String(value))}
+        >
+          <SelectTrigger aria-label="กรองสัญชาติ">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <span className="market-select-item">
+                <span className="market-select-dot market-select-dot--all" />
+                ทุกสัญชาติ
+              </span>
+            </SelectItem>
+            <SelectItem value="thai">
+              <span className="market-select-item">
+                <span className="market-select-nationality-badge market-select-nationality-badge--thai" />
+                นักเตะไทย
+              </span>
+            </SelectItem>
+            <SelectItem value="foreign">
+              <span className="market-select-item">
+                <span className="market-select-nationality-badge market-select-nationality-badge--foreign">
+                  F
+                </span>
+                นักเตะต่างชาติ
+              </span>
+            </SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="compact-market-selects">
+        <Select
+          value={tier}
+          onValueChange={(value) => value && setTier(String(value))}
+        >
+          <SelectTrigger aria-label="กรองระดับ">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">
+              <span className="market-select-item">
+                <span className="market-select-dot market-select-dot--all" />
+                ทุกระดับ
+              </span>
+            </SelectItem>
+            {[1, 2, 3, 4].map((filterTier) => (
+              <SelectItem value={String(filterTier)} key={filterTier}>
+                <span className="market-select-item">
+                  <span
+                    className={`market-select-tier-badge market-select-tier-badge--${filterTier}`}
+                  >
+                    {filterTier}
+                  </span>
+                  ระดับ {filterTier}
+                </span>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select
+          value={sort}
+          onValueChange={(value) => value && setSort(String(value))}
+        >
+          <SelectTrigger aria-label="เรียงลำดับ">
+            <ArrowDownUp size={15} />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="points">คะแนนสูงสุด</SelectItem>
+            <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
+            <SelectItem value="tier">ระดับสูงสุด</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+    </div>
+  );
+
   return (
     <Localized>
       <aside
@@ -381,6 +549,25 @@ export default function TransfersClient({
           </div>
         </div>
 
+        <Dialog>
+          <DialogTrigger className="compact-market-filter-dialog-trigger">
+            {translate("กรองนักเตะ")}
+          </DialogTrigger>
+          <DialogContent
+            className="compact-market-filter-dialog"
+            closeLabel={translate("ปิดตัวกรอง")}
+          >
+            <DialogHeader>
+              <DialogTitle>Filter</DialogTitle>
+            </DialogHeader>
+            {renderMarketFilters()}
+            <DialogFooter className="compact-market-filter-dialog-footer">
+              <DialogClose render={<Button />}>
+                {translate("เสร็จสิ้น")}
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
         <Accordion
           className="compact-market-filter-accordion"
           value={filterAccordionValue}
@@ -391,210 +578,7 @@ export default function TransfersClient({
               Filter
             </AccordionTrigger>
             <AccordionContent className="compact-market-filter-content">
-              <div className="compact-market-toolbar">
-                <div className="compact-market-primary-filters">
-                  <label className="search-field compact-market-search">
-                    <Search size={17} aria-hidden="true" />
-                    <Input
-                      className="market-search-input"
-                      value={query}
-                      onChange={(event) => setQuery(event.target.value)}
-                      placeholder="ค้นหาชื่อนักเตะ"
-                      aria-label="ค้นหาชื่อนักเตะ"
-                    />
-                    {query && (
-                      <button
-                        type="button"
-                        onClick={() => setQuery("")}
-                        aria-label="ล้างคำค้น"
-                      >
-                        <X size={15} aria-hidden="true" />
-                      </button>
-                    )}
-                  </label>
-                  <Select
-                    value={clubId}
-                    onValueChange={(value) => value && setClubId(String(value))}
-                  >
-                    <SelectTrigger aria-label="กรองสโมสร">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <span className="market-select-item">
-                          <span className="market-select-dot market-select-dot--all" />
-                          ทุกสโมสร
-                        </span>
-                      </SelectItem>
-                      {clubs.map((club) => (
-                        <SelectItem value={club.id} key={club.id}>
-                          <span className="market-select-item">
-                            <ClubColor
-                              color={club.colors[0]}
-                              secondaryColor={club.colors[1]}
-                              label={localize(club.shortName, language)}
-                              size="medium"
-                            />
-                            {localize(club.shortName, language)}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="compact-position-nationality-filters">
-                  <Select
-                    value={position}
-                    onValueChange={(value) =>
-                      value && setPosition(String(value))
-                    }
-                  >
-                    <SelectTrigger aria-label="กรองตำแหน่งผู้เล่น">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ALL">
-                        <span className="market-select-item">
-                          <span className="market-select-dot market-select-dot--all" />
-                          ทุกตำแหน่ง
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="GK">
-                        <span className="market-select-item">
-                          <PositionBadge
-                            position="GK"
-                            className="market-select-position-badge"
-                          />
-                          {getLocalizedPositionLabel("GK", language)}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="DEF">
-                        <span className="market-select-item">
-                          <PositionBadge
-                            position="DEF"
-                            className="market-select-position-badge"
-                          />
-                          {getLocalizedPositionLabel("DEF", language)}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="MID">
-                        <span className="market-select-item">
-                          <PositionBadge
-                            position="MID"
-                            className="market-select-position-badge"
-                          />
-                          {getLocalizedPositionLabel("MID", language)}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="FWD">
-                        <span className="market-select-item">
-                          <PositionBadge
-                            position="FWD"
-                            className="market-select-position-badge"
-                          />
-                          {getLocalizedPositionLabel("FWD", language)}
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={nationality}
-                    onValueChange={(value) =>
-                      value && setNationality(String(value))
-                    }
-                  >
-                    <SelectTrigger aria-label="กรองสัญชาติ">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <span className="market-select-item">
-                          <span className="market-select-dot market-select-dot--all" />
-                          ทุกสัญชาติ
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="thai">
-                        <span className="market-select-item">
-                          <span className="market-select-nationality-badge market-select-nationality-badge--thai" />
-                          นักเตะไทย
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="foreign">
-                        <span className="market-select-item">
-                          <span className="market-select-nationality-badge market-select-nationality-badge--foreign">
-                            F
-                          </span>
-                          นักเตะต่างชาติ
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="compact-market-selects">
-                  <Select
-                    value={tier}
-                    onValueChange={(value) => value && setTier(String(value))}
-                  >
-                    <SelectTrigger aria-label="กรองระดับ">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">
-                        <span className="market-select-item">
-                          <span className="market-select-dot market-select-dot--all" />
-                          ทุกระดับ
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="1">
-                        <span className="market-select-item">
-                          <span className="market-select-tier-badge market-select-tier-badge--1">
-                            1
-                          </span>
-                          ระดับ 1
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="2">
-                        <span className="market-select-item">
-                          <span className="market-select-tier-badge market-select-tier-badge--2">
-                            2
-                          </span>
-                          ระดับ 2
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="3">
-                        <span className="market-select-item">
-                          <span className="market-select-tier-badge market-select-tier-badge--3">
-                            3
-                          </span>
-                          ระดับ 3
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="4">
-                        <span className="market-select-item">
-                          <span className="market-select-tier-badge market-select-tier-badge--4">
-                            4
-                          </span>
-                          ระดับ 4
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={sort}
-                    onValueChange={(value) => value && setSort(String(value))}
-                  >
-                    <SelectTrigger aria-label="เรียงลำดับ">
-                      <ArrowDownUp size={15} />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="points">คะแนนสูงสุด</SelectItem>
-                      <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
-                      <SelectItem value="tier">ระดับสูงสุด</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              {renderMarketFilters()}
             </AccordionContent>
           </AccordionItem>
         </Accordion>

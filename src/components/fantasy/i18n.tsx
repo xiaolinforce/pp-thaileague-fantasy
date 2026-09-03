@@ -393,6 +393,9 @@ const translations: Record<string, string> = {
   ราคาสูงสุด: "Highest Price",
   ตัวกรอง: "Filters",
   ตัวกรองเพิ่มเติม: "More Filters",
+  กรองนักเตะ: "Filter players",
+  ปิดตัวกรอง: "Close filters",
+  เสร็จสิ้น: "Done",
   จำกัดผลลัพธ์ตามรายการที่สนใจและงบประมาณ:
     "Narrow results by watchlist and budget",
   เฉพาะรายการที่สนใจ: "Watchlist only",
