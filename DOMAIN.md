@@ -144,9 +144,11 @@ store an explicit depth chart. A likely club starter occupies a vacant Fantasy
 starting-goalkeeper slot before a fallback, and otherwise newly selected
 players with better tiers occupy vacant starting slots before bench slots of
 the same position. Existing valid captaincy is preserved; any missing captain
-or vice-captain is assigned from the best-tier starters, with randomness used
-for ties. The suggestion changes only the client draft and has no transfer or
-persistence effect until the manager saves through the normal validation path.
+or vice-captain is assigned independently from the best remaining tier,
+favoring forwards, then midfielders, defenders, and goalkeepers. Randomness
+breaks ties within the same tier and position. The suggestion changes only the
+client draft and has no transfer or persistence effect until the manager saves
+through the normal validation path.
 
 ## Deadlines and Gameweeks
 

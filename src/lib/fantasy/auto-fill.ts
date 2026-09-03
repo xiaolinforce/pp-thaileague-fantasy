@@ -66,6 +66,12 @@ const positions: FantasyPosition[] = [
   "midfielder",
   "forward",
 ];
+const captaincyPositionPriority: Record<FantasyPosition, number> = {
+  forward: 0,
+  midfielder: 1,
+  defender: 2,
+  goalkeeper: 3,
+};
 
 function incrementCount<T>(counts: Map<T, number>, key: T) {
   const next = new Map(counts);
@@ -222,24 +228,26 @@ function assignCaptaincy(
       member.fantasyPlayerId &&
       starterIds.has(member.fantasyPlayerId),
   )?.fantasyPlayerId;
-  const rankedStarters = starterMembers
+  const preferredStarters = starterMembers
     .map((member) => candidatesById.get(member.fantasyPlayerId!))
     .filter((candidate): candidate is AutoFillCandidate => Boolean(candidate))
     .sort(
       (left, right) =>
         left.tier - right.tier ||
+        captaincyPositionPriority[left.position] -
+          captaincyPositionPriority[right.position] ||
         (randomPriorityByCandidate.get(right.id) ?? 0) -
           (randomPriorityByCandidate.get(left.id) ?? 0) ||
         left.id.localeCompare(right.id),
     );
 
   if (!captainId) {
-    captainId = rankedStarters.find(
+    captainId = preferredStarters.find(
       (candidate) => candidate.id !== viceCaptainId,
     )?.id;
   }
   if (!viceCaptainId) {
-    viceCaptainId = rankedStarters.find(
+    viceCaptainId = preferredStarters.find(
       (candidate) => candidate.id !== captainId,
     )?.id;
   }

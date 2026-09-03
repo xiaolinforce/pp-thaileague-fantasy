@@ -273,6 +273,164 @@ test("preserves selected players and existing captaincy while filling vacancies"
   );
 });
 
+test("assigns missing captaincy by tier before position priority", () => {
+  const candidates = createCandidates();
+  const initial = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates,
+    random: seededRandom(31),
+  });
+  assert.ok(initial);
+
+  const starterIds = new Set(
+    initial.members.flatMap((member) =>
+      member.lineupRole === "starter" && member.fantasyPlayerId
+        ? [member.fantasyPlayerId]
+        : [],
+    ),
+  );
+  const bestDefenderId = candidates.find(
+    (candidate) =>
+      starterIds.has(candidate.id) && candidate.position === "defender",
+  )?.id;
+  const bestGoalkeeperId = candidates.find(
+    (candidate) =>
+      starterIds.has(candidate.id) && candidate.position === "goalkeeper",
+  )?.id;
+  assert.ok(bestDefenderId);
+  assert.ok(bestGoalkeeperId);
+  const priorityCandidates = candidates.map((candidate) => ({
+    ...candidate,
+    tier:
+      candidate.id === bestDefenderId || candidate.id === bestGoalkeeperId
+        ? 1
+        : 2,
+  }));
+  const result = autoFillSquadDraft({
+    members: initial.members.map((member) => ({
+      ...member,
+      captainRole: "none" as const,
+    })),
+    candidates: priorityCandidates,
+    random: seededRandom(37),
+  });
+
+  assert.ok(result);
+  const lineup = toLineup(result.members, priorityCandidates);
+  assert.equal(
+    lineup.find((player) => player.captainRole === "captain")?.position,
+    "defender",
+  );
+  assert.equal(
+    lineup.find((player) => player.captainRole === "vice_captain")?.position,
+    "goalkeeper",
+  );
+});
+
+test("uses forwards then midfielders when the best-tier starters tie", () => {
+  const candidates = createCandidates();
+  const initial = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates,
+    random: seededRandom(41),
+  });
+  assert.ok(initial);
+
+  const byId = new Map(
+    candidates.map((candidate) => [candidate.id, candidate]),
+  );
+  const bestForwardId = initial.members.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      member.fantasyPlayerId &&
+      byId.get(member.fantasyPlayerId)?.position === "forward",
+  )?.fantasyPlayerId;
+  const bestMidfielderId = initial.members.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      member.fantasyPlayerId &&
+      byId.get(member.fantasyPlayerId)?.position === "midfielder",
+  )?.fantasyPlayerId;
+  assert.ok(bestForwardId);
+  assert.ok(bestMidfielderId);
+  const tiedCandidates = candidates.map((candidate) => ({
+    ...candidate,
+    tier:
+      candidate.id === bestForwardId || candidate.id === bestMidfielderId
+        ? 1
+        : 2,
+  }));
+  const result = autoFillSquadDraft({
+    members: initial.members.map((member) => ({
+      ...member,
+      captainRole: "none" as const,
+    })),
+    candidates: tiedCandidates,
+    random: seededRandom(43),
+  });
+
+  assert.ok(result);
+  const lineup = toLineup(result.members, tiedCandidates);
+  assert.equal(
+    lineup.find((player) => player.captainRole === "captain")?.position,
+    "forward",
+  );
+  assert.equal(
+    lineup.find((player) => player.captainRole === "vice_captain")?.position,
+    "midfielder",
+  );
+});
+
+test("preserves an existing captain and fills only the missing vice-captain", () => {
+  const candidates = createCandidates();
+  const initial = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates,
+    random: seededRandom(47),
+  });
+  assert.ok(initial);
+
+  const byId = new Map(
+    candidates.map((candidate) => [candidate.id, candidate]),
+  );
+  const preservedCaptain = initial.members.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      member.fantasyPlayerId &&
+      byId.get(member.fantasyPlayerId)?.position === "defender",
+  );
+  assert.ok(preservedCaptain?.fantasyPlayerId);
+  const priorityCandidates = candidates.map((candidate) => ({
+    ...candidate,
+    tier:
+      candidate.position === "forward" || candidate.position === "midfielder"
+        ? 1
+        : 2,
+  }));
+  const result = autoFillSquadDraft({
+    members: initial.members.map((member) => ({
+      ...member,
+      captainRole:
+        member.fantasyPlayerId === preservedCaptain.fantasyPlayerId
+          ? ("captain" as const)
+          : ("none" as const),
+    })),
+    candidates: priorityCandidates,
+    random: seededRandom(53),
+  });
+
+  assert.ok(result);
+  const lineup = toLineup(result.members, priorityCandidates);
+  assert.equal(
+    lineup.find((player) => player.captainRole === "captain")?.id,
+    preservedCaptain.fantasyPlayerId,
+  );
+  assert.equal(
+    lineup.find((player) => player.captainRole === "vice_captain")?.position,
+    "forward",
+  );
+});
+
 test("the same seed is repeatable while different seeds provide variety", () => {
   const candidates = createCandidates();
   const first = autoFillSquadDraft({

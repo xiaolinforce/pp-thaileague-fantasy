@@ -750,6 +750,25 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   English, followed by Fantasy tests, types, lint, formatting, and production
   build checks.
 
+### 2026-09-03 — Auto-fill captaincy priority explanation
+
+- **Route and task:** `/rules`; document that auto-fill preserves valid
+  captaincy, fills only a missing role, and orders candidates by tier before
+  forward, midfielder, defender, and goalkeeper preference.
+- **Language and responsive evidence:** Thai and English rendered in the in-app
+  Browser at the normal Desktop viewport and 360px Mobile. The additional
+  sentence wraps inside the existing Squad selection card without clipping;
+  Mobile document and client widths both measured 345px. The Guest preference
+  and viewport were restored to Thai and Desktop after review.
+- **Accessibility:** the explanation remains a semantic list item with no new
+  control, focus target, or color-dependent meaning.
+- **Known exclusions:** no authenticated member preference or Fantasy data
+  mutation was required because the rule content is shared and static.
+- **Verification:** targeted Thai/English responsive inspection, Fantasy and
+  auth/email tests, types, lint, and production build passed. Repository-wide
+  formatting remains blocked by pre-existing style drift outside this change;
+  every file changed for this task passes targeted Prettier checks.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

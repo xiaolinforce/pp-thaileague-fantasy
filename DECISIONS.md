@@ -4,6 +4,23 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-03 — Auto-fill captaincy is tier and position ordered
+
+**Decision:** Preserve each valid captain or vice-captain already assigned to a
+starter and fill only a missing role. Choose independently from the best
+remaining tier, then prefer forwards, midfielders, defenders, and goalkeepers
+in that order. Randomize only when tier and position are tied.
+
+**Context:** Captaincy should remain under the manager's control once set. When
+auto-fill must complete it, player tier is the public quality signal and
+position supplies a predictable football-oriented preference without
+reintroducing projected points or overall rank.
+
+**Consequences:** Captain and vice-captain remain distinct. If only one starter
+exists in the best available tier, the other role falls through to the next
+best remaining tier. A role attached to a bench player, vacancy, or missing
+candidate is not preserved because both captaincy roles must belong to starters.
+
 ## 2026-09-03 — Auto-fill uses tier goals instead of projected points
 
 **Decision:** Preserve selected players and compare valid auto-fill suggestions
