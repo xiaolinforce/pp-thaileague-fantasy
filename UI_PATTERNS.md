@@ -139,6 +139,8 @@ proven behaviors unless a deliberate product decision replaces them:
   disclosed in compact modes. Wildcard remains unavailable in Gameweek 1.
 - Order market filters by the user's narrowing task. Keep cumulative tier
   limits visible with a written over-limit state and an accessible explanation.
+- On Mobile, show the current goalkeeper, defender, midfielder, and forward
+  quotas below the free-transfer and foreign-player quota cards.
 - Show unlimited Gameweek 1 transfers with an infinity symbol plus an
   accessible written label.
 - Player detail opens in the shared dialog so selection context is not lost.

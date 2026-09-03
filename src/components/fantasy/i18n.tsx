@@ -273,6 +273,7 @@ const translations: Record<string, string> = {
     "Choose exactly one vice-captain from the starting XI",
   โควต้าระดับ: "Tier Quotas",
   "โควต้านักเตะระดับ 1-3": "Player quota for Tiers 1-3",
+  โควต้าตำแหน่งนักเตะ: "Position quotas",
   ดูวิธีนับโควต้าระดับ: "How tier quotas work",
   โควต้าระดับเป็นแบบสะสม: "Tier quotas are cumulative",
   "นักเตะระดับ 1 มีได้สูงสุด 3 คน": "Tier 1 has a maximum of 3 players",

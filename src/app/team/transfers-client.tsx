@@ -56,6 +56,7 @@ import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import {
   getCountedTransfers,
   getTransferUsage,
+  THAI_LEAGUE_FANTASY_RULES,
   type FantasyChip,
   type FantasyPosition,
 } from "@/lib/fantasy/rules";
@@ -210,6 +211,17 @@ export default function TransfersClient({
     (player) => player.tier <= 3,
   ).length;
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
+  const positionQuotaStats = (
+    Object.keys(competitionPositions) as FantasyPosition[]
+  ).map((fantasyPosition) => {
+    const position = competitionPositions[fantasyPosition];
+    return {
+      position,
+      used: squadPlayers.filter((player) => player.position === position)
+        .length,
+      limit: THAI_LEAGUE_FANTASY_RULES.positionLimits[fantasyPosition],
+    };
+  });
   const tierQuotaDots = buildTierQuotaMeter({
     1: levelOne,
     2: levelTwo,
@@ -286,6 +298,19 @@ export default function TransfersClient({
             <span>ต่างชาติ</span>
             <strong>{foreignPlayers}/7</strong>
           </div>
+        </div>
+        <div
+          className="compact-position-quota-stats"
+          aria-label={translate("โควต้าตำแหน่งนักเตะ")}
+        >
+          {positionQuotaStats.map(({ position, used, limit }) => (
+            <div key={position}>
+              <span>{getLocalizedPositionLabel(position, language)}</span>
+              <strong>
+                {used}/{limit}
+              </strong>
+            </div>
+          ))}
         </div>
         <div
           className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
