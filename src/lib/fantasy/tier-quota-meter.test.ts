@@ -3,44 +3,51 @@ import test from "node:test";
 
 import { buildTierQuotaMeter } from "./tier-quota-meter.ts";
 
-test("starts each player level in its own three-circle group", () => {
+test("shows actual player counts in tier order", () => {
   assert.deepEqual(buildTierQuotaMeter({ 1: 1, 2: 1, 3: 1 }), [
     1,
-    null,
-    null,
     2,
-    null,
-    null,
     3,
+    null,
+    null,
+    null,
+    null,
     null,
     null,
   ]);
 });
 
-test("fills each nominal three-circle group from left to right", () => {
+test("fills all nine circles from left to right", () => {
   assert.deepEqual(
     buildTierQuotaMeter({ 1: 3, 2: 3, 3: 3 }),
     [1, 1, 1, 2, 2, 2, 3, 3, 3],
   );
 });
 
-test("moves extra level 2 players backward through circles 3 to 1", () => {
-  assert.deepEqual(buildTierQuotaMeter({ 1: 1, 2: 5, 3: 0 }), [
+test("shows players beyond an individual tier quota", () => {
+  assert.deepEqual(buildTierQuotaMeter({ 1: 4, 2: 4, 3: 0 }), [
+    1,
+    1,
+    1,
     1,
     2,
     2,
     2,
     2,
-    2,
-    null,
-    null,
     null,
   ]);
 });
 
-test("moves extra level 3 players backward and skips occupied circles", () => {
+test("limits the meter to nine circles and prioritizes higher tiers", () => {
   assert.deepEqual(
-    buildTierQuotaMeter({ 1: 1, 2: 2, 3: 6 }),
-    [1, 3, 3, 2, 2, 3, 3, 3, 3],
+    buildTierQuotaMeter({ 1: 4, 2: 4, 3: 4 }),
+    [1, 1, 1, 1, 2, 2, 2, 2, 3],
+  );
+});
+
+test("uses all nine circles for the highest tier before lower tiers", () => {
+  assert.deepEqual(
+    buildTierQuotaMeter({ 1: 10, 2: 2, 3: 2 }),
+    [1, 1, 1, 1, 1, 1, 1, 1, 1],
   );
 });

@@ -1,33 +1,25 @@
 export type TierQuotaMeterLevel = 1 | 2 | 3;
 
-const tierQuotaPlacements: ReadonlyArray<{
-  level: TierQuotaMeterLevel;
-  indexes: readonly number[];
-}> = [
-  { level: 1, indexes: [0, 1, 2] },
-  { level: 2, indexes: [3, 4, 5, 2, 1, 0] },
-  { level: 3, indexes: [6, 7, 8, 5, 4, 3, 2, 1, 0] },
-];
+const tierQuotaMeterLevels: readonly TierQuotaMeterLevel[] = [1, 2, 3];
+const tierQuotaMeterSize = 9;
 
 export function buildTierQuotaMeter(
   levelCounts: Readonly<Record<TierQuotaMeterLevel, number>>,
 ) {
-  const dots: Array<TierQuotaMeterLevel | null> = Array.from(
-    { length: 9 },
-    () => null,
-  );
+  const dots: Array<TierQuotaMeterLevel | null> = [];
 
-  for (const { level, indexes } of tierQuotaPlacements) {
-    let playersLeft = levelCounts[level];
+  for (const level of tierQuotaMeterLevels) {
+    const availableDots = tierQuotaMeterSize - dots.length;
+    const visiblePlayers = Math.min(levelCounts[level], availableDots);
 
-    for (const index of indexes) {
-      if (playersLeft <= 0) break;
-      if (dots[index] !== null) continue;
-
-      dots[index] = level;
-      playersLeft -= 1;
+    for (let index = 0; index < visiblePlayers; index += 1) {
+      dots.push(level);
     }
+
+    if (dots.length === tierQuotaMeterSize) break;
   }
+
+  while (dots.length < tierQuotaMeterSize) dots.push(null);
 
   return dots;
 }
