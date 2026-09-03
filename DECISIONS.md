@@ -9,8 +9,8 @@ not a changelog or a place for short-lived implementation notes.
 **Decision:** Run Vercel Functions in Singapore (`sin1`) beside the production
 Neon compute. Memoize session and profile readers within each render request,
 use a read-only fast path for already-provisioned accounts, cache the shared
-competition dataset for 60 seconds, and give Fixtures a smaller five-minute
-read model. Disable automatic prefetch for authenticated primary navigation.
+competition dataset and the smaller Fixtures read model for five minutes.
+Disable automatic prefetch for authenticated primary navigation.
 
 **Context:** Production traces showed Functions in Washington, DC making 14–32
 HTTP SQL calls to Neon in Singapore per navigation. Profile provisioning wrote

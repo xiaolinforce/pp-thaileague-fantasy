@@ -70,9 +70,9 @@ for authenticated Server Component routes.
 Runtime data loaders emit JSON `server_timing` log entries for Fantasy profile,
 team state, League overview, fixture, and competition reads. Use Vercel Runtime
 Logs to compare `durationMs` after deployment. Test cold and warm requests
-separately: competition data has a 60-second tagged cache and the fixture-only
-model has a five-minute tagged cache. In-app Fantasy mutations invalidate those
-tags; direct data maintenance may remain visible for at most the cache lifetime.
+separately: competition data and the fixture-only model have five-minute tagged
+caches. In-app Fantasy mutations invalidate those tags; direct data maintenance
+may remain visible for at most the cache lifetime.
 
 ## Commands
 

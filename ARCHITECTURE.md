@@ -94,9 +94,9 @@ querying.
 Authentication and Fantasy profile readers use React request memoization so a
 layout and its page share one session/identity lookup. Existing complete
 profiles take a read-only path; provisioning writes run only when account state
-may need creation or repair. The full competition read model is shared through
-a tagged 60-second server cache, while `/fixtures` uses a smaller fixture-only
-model cached for five minutes. Fantasy mutations invalidate the relevant tags.
+may need creation or repair. The full competition read model and the smaller
+fixture-only model used by `/fixtures` are shared through tagged five-minute
+server caches. Fantasy mutations invalidate the relevant tags.
 Main navigation does not automatically prefetch these authenticated database
 routes, avoiding duplicate hidden-sidebar requests and speculative SQL work.
 

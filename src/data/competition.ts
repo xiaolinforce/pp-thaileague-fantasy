@@ -503,7 +503,7 @@ async function loadCompetitionDataset(): Promise<CompetitionDataset> {
 const getCachedCompetitionDataset = unstable_cache(
   loadCompetitionDataset,
   ["competition-dataset-v1"],
-  { revalidate: 60, tags: ["competition-dataset"] },
+  { revalidate: 300, tags: ["competition-dataset"] },
 );
 
 export async function getCompetitionDataset(): Promise<CompetitionDataset> {
