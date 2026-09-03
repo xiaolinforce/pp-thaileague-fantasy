@@ -15,14 +15,7 @@ import {
   WandSparkles,
   Zap,
 } from "lucide-react";
-import {
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-  useTransition,
-} from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
@@ -662,56 +655,12 @@ export default function TeamClient({
     useState<TeamWorkspaceView>("squad");
   const [marketPositionFilterRequest, setMarketPositionFilterRequest] =
     useState<{ position: CompetitionPosition; requestId: number } | null>(null);
-  const workspaceViewRef = useRef<TeamWorkspaceView>("squad");
-  const workspaceScrollPositions = useRef<
-    Partial<Record<TeamWorkspaceView, number>>
-  >({});
-  const pendingWorkspaceScroll = useRef<number | null>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const rememberWorkspaceScroll = () => {
-      workspaceScrollPositions.current[workspaceViewRef.current] =
-        window.scrollY;
-    };
-
-    rememberWorkspaceScroll();
-    window.addEventListener("scroll", rememberWorkspaceScroll, {
-      passive: true,
-    });
-
-    return () => window.removeEventListener("scroll", rememberWorkspaceScroll);
-  }, []);
-
-  useLayoutEffect(() => {
-    const scrollTop = pendingWorkspaceScroll.current;
-
-    if (scrollTop === null) {
-      return;
-    }
-
-    const restoreFrame = window.requestAnimationFrame(() => {
-      window.scrollTo(0, scrollTop);
-      pendingWorkspaceScroll.current = null;
-    });
-
-    return () => window.cancelAnimationFrame(restoreFrame);
-  }, [workspaceView]);
-
   const changeWorkspaceView = (nextView: TeamWorkspaceView) => {
-    const currentView = workspaceViewRef.current;
-
-    if (nextView === currentView) {
+    if (nextView === workspaceView) {
       return;
     }
-
-    const currentScrollTop =
-      workspaceScrollPositions.current[currentView] ?? window.scrollY;
-
-    workspaceScrollPositions.current[currentView] = currentScrollTop;
-    pendingWorkspaceScroll.current =
-      workspaceScrollPositions.current[nextView] ?? currentScrollTop;
-    workspaceViewRef.current = nextView;
     setWorkspaceView(nextView);
   };
 
