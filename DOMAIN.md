@@ -83,8 +83,8 @@ The current season defines:
 | ----: | ------------: | ----------------------: |
 |     1 |             3 |              Level 1: 3 |
 |     2 |             3 |  Levels 1–2 combined: 6 |
-|     3 |             3 |  Levels 1–3 combined: 9 |
-|     4 |             6 | Levels 1–4 combined: 15 |
+|     3 |             6 | Levels 1–3 combined: 12 |
+|     4 |             3 | Levels 1–4 combined: 15 |
 
 Validation is cumulative. A lower-ranked player may occupy a remaining
 higher-level slot, but a higher-ranked player cannot overflow into any
@@ -129,8 +129,8 @@ Before the deadline, a manager may fill every vacant draft slot automatically.
 The suggestion preserves players already in the draft, ignores market display
 filters, and uses the current published ranking with fresh availability, club,
 position, Thai-status, and effective-tier data. It first minimizes the total
-shortfall from the three nominal slots at each of Levels 1–3 and then minimizes
-the largest shortfall at any one of those levels. Among equally good tier
+shortfall from the nominal 3/3/6 slots at Levels 1–3 and then minimizes the
+largest shortfall at any one of those levels. Among equally good tier
 allocations it prefers goalkeepers whose tier is the best available among the
 goalkeepers at their club, then maximizes foreign-player use up to the hard
 limit. Only after those priorities tie does it prefer the best feasible quality

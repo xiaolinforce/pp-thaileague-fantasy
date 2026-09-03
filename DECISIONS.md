@@ -4,6 +4,25 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-03 — Level 3 receives six nominal squad slots
+
+**Decision:** Apply a 3/3/6/3 nominal slot allocation for Levels 1–4 to the
+2026/27 Fantasy season immediately. Continue cumulative validation so Level 1
+is capped at 3 players, Levels 1–2 at 6, Levels 1–3 at 12, and the complete
+squad at 15. Auto-fill targets the same 3/3/6 allocation across Levels 1–3.
+
+**Context:** Allowing up to twelve players from Levels 1–3 gives managers more
+room to select mid-tier players while preserving the existing caps on Levels 1
+and 1–2 and the fixed fifteen-player squad size.
+
+**Consequences:** Validation, Auto-fill, the Team quota meter, public rule copy,
+season tier definitions, and data verification use 3/3/6/3. Existing squads
+that met the previous nine-player cumulative cap remain valid. Player rankings,
+effective tier assignments, locked selection snapshots, and historical scores
+are not rewritten. This supersedes the slot allocation in the 2026-08-25
+four-tier decision below, while preserving its cumulative-validation model and
+ranking boundaries.
+
 ## 2026-09-03 — Sentry owns privacy-minimized application monitoring
 
 **Decision:** Use Sentry Developer Free for uncaught client, server, and Edge
@@ -356,6 +375,10 @@ verification covers 360px and both sides of 768px and 1280px, in Thai and
 English, with document-level horizontal overflow treated as a defect.
 
 ## 2026-08-25 — Squads use four cumulative tiers
+
+**Partially superseded on 2026-09-03:** The 2026/27 nominal slot allocation is
+now 3/3/6/3 with cumulative limits of 3/6/12/15. The four-tier model,
+cumulative-validation behavior, and player-ranking boundaries remain current.
 
 **Decision:** Define nominal squad slots as 3/3/3/6 for Levels 1–4. Validate
 them cumulatively: Level 1 is capped at 3, Levels 1–2 at 6, Levels 1–3 at 9,

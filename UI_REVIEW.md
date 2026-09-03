@@ -836,6 +836,34 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   in `src/app/team/transfers-client.tsx`; repository-wide formatting reports
   the existing 177-file baseline drift outside this change.
 
+### 2026-09-03 — Twelve-player cumulative tier quota
+
+- **Route and task:** `/team` and `/rules`; change the 2026/27 nominal tier
+  allocation to 3/3/6/3, let Levels 1–3 total twelve players, align Auto-fill,
+  and expand the Team quota meter from nine to twelve dots.
+- **Language and responsive evidence:** Thai and English rule copy rendered
+  with nominal limits 3/3/6/3 and cumulative limits 3/6/12/15. The Team quota
+  meter and popover rendered in both languages at 360px Mobile and 1280px
+  Desktop. DOM measurements at 360, 767/768, and 1279/1280px showed twelve
+  dots with document width equal to client width and no horizontal overflow.
+  The Guest preference and viewport were restored to Thai and the default
+  viewport after review.
+- **Accessibility:** the twelve-dot meter remains decorative behind the
+  existing written live-region summary. The focusable help control retains its
+  accessible name, and the popover states the 3, 6, and 12 cumulative limits
+  without relying on color.
+- **Known exclusions:** Auto-fill and a thirteen-player over-limit draft were
+  not submitted in the browser because either action would modify the current
+  draft. Deterministic Fantasy tests cover the exact 3/3/6/3 Auto-fill result,
+  acceptance at twelve players, and rejection at thirteen.
+- **Verification:** all 94 Fantasy tests, Email tests, types, targeted Prettier,
+  production build, and development Fantasy database verification passed. No
+  browser console error or Next.js error overlay appeared. Repository-wide
+  lint remains blocked by the pre-existing `react-hooks/set-state-in-effect`
+  error in `src/app/team/transfers-client.tsx` outside this task's diff.
+  Repository-wide formatting reports the existing 175-file baseline drift;
+  every file changed for this task passes targeted Prettier checks.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

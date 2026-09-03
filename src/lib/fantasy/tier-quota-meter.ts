@@ -1,7 +1,10 @@
+import { getCumulativeTierLimits } from "./rules.ts";
+
 export type TierQuotaMeterLevel = 1 | 2 | 3;
 
 const tierQuotaMeterLevels: readonly TierQuotaMeterLevel[] = [1, 2, 3];
-const tierQuotaMeterSize = 9;
+const tierQuotaMeterSize =
+  getCumulativeTierLimits().find(({ level }) => level === 3)?.limit ?? 0;
 
 export function buildTierQuotaMeter(
   levelCounts: Readonly<Record<TierQuotaMeterLevel, number>>,

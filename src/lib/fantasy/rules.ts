@@ -89,8 +89,8 @@ export const THAI_LEAGUE_FANTASY_RULES: FantasyRules = {
   tierSlots: [
     { level: 1, slots: 3 },
     { level: 2, slots: 3 },
-    { level: 3, slots: 3 },
-    { level: 4, slots: 6 },
+    { level: 3, slots: 6 },
+    { level: 4, slots: 3 },
   ],
   weeklyFreeTransfers: 2,
   maximumFreeTransfers: 4,

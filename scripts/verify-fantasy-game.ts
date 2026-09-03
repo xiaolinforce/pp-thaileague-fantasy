@@ -280,7 +280,7 @@ async function verifyFantasyGame() {
     .select()
     .from(fantasyTierDefinitions)
     .orderBy(asc(fantasyTierDefinitions.level));
-  const expectedTierSlots = [3, 3, 3, 6];
+  const expectedTierSlots = [3, 3, 6, 3];
   if (
     tierDefinitions.length !== expectedTierSlots.length ||
     tierDefinitions.some(
@@ -290,7 +290,7 @@ async function verifyFantasyGame() {
     )
   ) {
     throw new Error(
-      "Fantasy tier definitions must be Level 1-4 with 3/3/3/6 slots.",
+      "Fantasy tier definitions must be Level 1-4 with 3/3/6/3 slots.",
     );
   }
 

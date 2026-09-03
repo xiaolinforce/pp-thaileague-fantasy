@@ -65,6 +65,7 @@ import {
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import {
   getCountedTransfers,
+  getCumulativeTierLimits,
   getTransferUsage,
   THAI_LEAGUE_FANTASY_RULES,
   type FantasyChip,
@@ -83,6 +84,9 @@ const fantasyPositions: Record<CompetitionPosition, FantasyPosition> = {
   MID: "midfielder",
   FWD: "forward",
 };
+const cumulativeTierLimits = new Map(
+  getCumulativeTierLimits().map(({ level, limit }) => [level, limit]),
+);
 
 export default function TransfersClient({
   data,
@@ -248,7 +252,9 @@ export default function TransfersClient({
     3: levelThree,
   });
   const isTierQuotaOver =
-    levelOne > 3 || topTwoLevels > 6 || topThreeLevels > 9;
+    levelOne > (cumulativeTierLimits.get(1) ?? 0) ||
+    topTwoLevels > (cumulativeTierLimits.get(2) ?? 0) ||
+    topThreeLevels > (cumulativeTierLimits.get(3) ?? 0);
   const tierQuotaSummary = translate(
     "ใช้ระดับ 1 {level1} คน ระดับ 2 {level2} คน และระดับ 3 {level3} คน",
   )
@@ -514,15 +520,21 @@ export default function TransfersClient({
                       {translate("โควต้านักเตะระดับ 1-3")}
                     </PopoverTitle>
                     <PopoverDescription>
-                      <span>{translate("นักเตะระดับ 1 มีได้สูงสุด 3 คน")}</span>
-                      <br />
-                      <span>
-                        {translate("นักเตะระดับ 1-2 มีได้สูงสุด 6 คน")}
-                      </span>
-                      <br />
-                      <span>
-                        {translate("นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน")}
-                      </span>
+                      {[1, 2, 3].map((level) => (
+                        <span key={level}>
+                          {translate(
+                            level === 1
+                              ? "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน"
+                              : "ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน",
+                          )
+                            .replace("{level}", String(level))
+                            .replace(
+                              "{count}",
+                              String(cumulativeTierLimits.get(level) ?? 0),
+                            )}
+                          {level < 3 && <br />}
+                        </span>
+                      ))}
                     </PopoverDescription>
                   </PopoverHeader>
                 </PopoverContent>

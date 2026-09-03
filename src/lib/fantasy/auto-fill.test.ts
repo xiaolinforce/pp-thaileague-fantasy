@@ -182,8 +182,8 @@ test("fills an empty squad with exact tier targets and valid captaincy", () => {
   assert.deepEqual(validateLineup(lineup), []);
   assert.equal(lineup.filter((player) => player.tier === 1).length, 3);
   assert.equal(lineup.filter((player) => player.tier === 2).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 3).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 4).length, 6);
+  assert.equal(lineup.filter((player) => player.tier === 3).length, 6);
+  assert.equal(lineup.filter((player) => player.tier === 4).length, 3);
   assert.equal(
     lineup.filter((player) => player.captainRole === "captain").length,
     1,
@@ -266,7 +266,8 @@ test("prefers a likely club starting goalkeeper before maximizing foreigners", (
   assert.equal(lineup.filter((player) => !player.isThai).length, 7);
   assert.equal(lineup.filter((player) => player.tier === 1).length, 3);
   assert.equal(lineup.filter((player) => player.tier === 2).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 3).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 3).length, 6);
+  assert.equal(lineup.filter((player) => player.tier === 4).length, 3);
 });
 
 test("preserves selected players and existing captaincy while filling vacancies", () => {

@@ -230,8 +230,8 @@ const translations: Record<string, string> = {
     "Select no more than 3 Tier 1 players",
   "ผู้เล่นระดับ 1–2 รวมกันได้ไม่เกิน 6 คน":
     "Select no more than 6 players across Tiers 1–2",
-  "ผู้เล่นระดับ 1–3 รวมกันได้ไม่เกิน 9 คน":
-    "Select no more than 9 players across Tiers 1–3",
+  "ผู้เล่นระดับ 1–3 รวมกันได้ไม่เกิน 12 คน":
+    "Select no more than 12 players across Tiers 1–3",
   ไม่พบระดับ: "Tier",
   ในกติกาฤดูกาลนี้: "is not defined in this season's rules",
   นักเตะไม่เปิดให้เลือกในตลาด: "This player is not available in the market",
@@ -280,10 +280,10 @@ const translations: Record<string, string> = {
   โควต้าระดับเป็นแบบสะสม: "Tier quotas are cumulative",
   "นักเตะระดับ 1 มีได้สูงสุด 3 คน": "Tier 1 has a maximum of 3 players",
   "นักเตะระดับ 1-2 มีได้สูงสุด 6 คน": "Tiers 1-2 have a maximum of 6 players",
-  "นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน":
-    "Tiers 1-3 have a maximum of 9 players in total",
-  "ระดับ 1 เติมวง 1–3 ระดับ 2 เติมวง 4–6 แล้วถอยกลับไปวง 3–1 ส่วนระดับ 3 เติมวง 7–9 แล้วถอยกลับไปวง 6–1 โดยข้ามวงที่ถูกใช้แล้ว ระดับ 4 ไม่ใช้วงกลมชุดนี้":
-    "Tier 1 fills circles 1–3. Tier 2 fills 4–6, then works backward through 3–1. Tier 3 fills 7–9, then works backward through 6–1, skipping occupied circles. Tier 4 does not use these circles.",
+  "นักเตะระดับ 1-3 มีรวมได้สูงสุด 12 คน":
+    "Tiers 1-3 have a maximum of 12 players in total",
+  "ระดับ 1 เติมวง 1–3 ระดับ 2 เติมวง 4–6 แล้วถอยกลับไปวง 3–1 ส่วนระดับ 3 เติมวง 7–12 แล้วถอยกลับไปวง 6–1 โดยข้ามวงที่ถูกใช้แล้ว ระดับ 4 ไม่ใช้วงกลมชุดนี้":
+    "Tier 1 fills circles 1–3. Tier 2 fills 4–6, then works backward through 3–1. Tier 3 fills 7–12, then works backward through 6–1, skipping occupied circles. Tier 4 does not use these circles.",
   "ใช้ระดับ 1 {level1} คน ระดับ 2 {level2} คน และระดับ 3 {level3} คน":
     "Tier 1: {level1} players, Tier 2: {level2} players, and Tier 3: {level3} players",
   "กัปตัน ×3": "Triple Captain",
@@ -803,8 +803,8 @@ const translations: Record<string, string> = {
     "Each Gameweek stores tier, position, and club snapshots to preserve historical results",
   "ทีมมี 15 คน: ผู้รักษาประตู 2 กองหลัง 5 กองกลาง 5 และกองหน้า 3 คน ตัวจริงต้องมี 1 GK, อย่างน้อย 3 DEF, 2 MID และ 1 FWD สโมสรเดียวกันไม่เกิน 3 คนและต่างชาติไม่เกิน 7 คน โดยลูกครึ่งไทยนับเป็นนักเตะไทย":
     "A squad has 15 players: 2 goalkeepers, 5 defenders, 5 midfielders, and 3 forwards. The starting XI needs 1 GK, at least 3 DEF, 2 MID, and 1 FWD. A squad may include at most 3 players from one club and 7 foreign players; dual-national Thai players count as Thai.",
-  "ระดับ 1–3 มีระดับละ 3 ช่อง และระดับ 4 มี 6 ช่อง ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ว่างได้ จึงมีระดับ 1 ได้สูงสุด 3 คน ระดับ 1–2 รวมกันสูงสุด 6 คน และระดับ 1–3 รวมกันสูงสุด 9 คน ระดับมีผลเป็นราย Gameweek":
-    "Tiers 1–3 have 3 slots each, and Tier 4 has 6. Lower-tier players may use an open higher-tier slot, so a squad can have at most 3 Tier 1 players, 6 players from Tiers 1–2 combined, and 9 from Tiers 1–3 combined. Tiers apply per Gameweek.",
+  "ระดับ 1 และ 2 มีระดับละ 3 ช่อง ระดับ 3 มี 6 ช่อง และระดับ 4 มี 3 ช่อง ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ว่างได้ จึงมีระดับ 1 ได้สูงสุด 3 คน ระดับ 1–2 รวมกันสูงสุด 6 คน และระดับ 1–3 รวมกันสูงสุด 12 คน ระดับมีผลเป็นราย Gameweek":
+    "Tiers 1 and 2 have 3 slots each, Tier 3 has 6, and Tier 4 has 3. Lower-tier players may use an open higher-tier slot, so a squad can have at most 3 Tier 1 players, 6 players from Tiers 1–2 combined, and 12 from Tiers 1–3 combined. Tiers apply per Gameweek.",
   "ได้รับ Free Transfer เพิ่ม 2 ครั้งหลังแต่ละ Deadline สะสมได้สูงสุด 4 ครั้ง ส่วนที่เกินหัก 4 คะแนนต่อครั้ง นับจากความแตกต่างสุทธิของทีม และยกเลิกได้จนถึง Deadline 90 นาทีก่อนคู่แรก":
     "You receive 2 free transfers after each deadline and may bank up to 4. Each additional transfer costs 4 points. Transfers use the net squad difference and can be reversed until 90 minutes before the first kickoff.",
   "มี Triple Captain, Bench Boost และ Wildcard อย่างละ 2 ครั้งตลอดฤดูกาล ใช้ได้หนึ่ง Chip ต่อ Gameweek ใช้ชนิดเดิมติดกันได้ และยกเลิกได้ก่อน Deadline โดย Wildcard เก็บ Free Transfer ที่สะสมไว้":
@@ -823,12 +823,12 @@ const translations: Record<string, string> = {
     "Select at most 7 foreign players; players classified as Thai count toward the Thai-player quota",
   "เมื่อสลับกัปตันหรือรองกัปตันกับตัวสำรอง นักเตะที่ขึ้นมาเป็นตัวจริงจะรับบทบาทนั้นแทน ส่วนการสลับผู้เล่นที่เป็นตัวจริงทั้งคู่จะคงบทบาทไว้กับผู้เล่นเดิม":
     "When a captain or vice-captain is swapped with a substitute, the incoming starter inherits that role. Swapping two starters keeps each role with its existing player",
-  "ระดับ 1–3 มีระดับละ 3 ช่อง และระดับ 4 มี 6 ช่อง":
-    "Tiers 1–3 have 3 slots each, and Tier 4 has 6 slots",
+  "ระดับ 1 และ 2 มีระดับละ 3 ช่อง ระดับ 3 มี 6 ช่อง และระดับ 4 มี 3 ช่อง":
+    "Tiers 1 and 2 have 3 slots each, Tier 3 has 6 slots, and Tier 4 has 3 slots",
   ผู้เล่นระดับต่ำกว่าสามารถใช้ช่องระดับสูงกว่าที่ยังว่างได้:
     "A lower-tier player may use an available higher-tier slot",
-  "ระดับ 1 ได้สูงสุด 3 คน ระดับ 1–2 รวมกันสูงสุด 6 คน และระดับ 1–3 รวมกันสูงสุด 9 คน":
-    "A squad may have at most 3 Tier 1 players, 6 players from Tiers 1–2 combined, and 9 from Tiers 1–3 combined",
+  "ระดับ 1 ได้สูงสุด 3 คน ระดับ 1–2 รวมกันสูงสุด 6 คน และระดับ 1–3 รวมกันสูงสุด 12 คน":
+    "A squad may have at most 3 Tier 1 players, 6 players from Tiers 1–2 combined, and 12 from Tiers 1–3 combined",
   "ระดับนักเตะมีผลแยกตาม Gameweek":
     "Player tiers apply separately to each Gameweek",
   "ได้รับ Free Transfer เพิ่ม 2 ครั้งหลังแต่ละ Deadline และสะสมได้สูงสุด 4 ครั้ง":

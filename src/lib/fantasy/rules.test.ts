@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   getCountedTransfers,
+  getCumulativeTierLimits,
   getDeadline,
   getNetTransfers,
   getTransferUsage,
@@ -37,7 +38,7 @@ const positions = [
   "forward",
 ] as const;
 
-function makeSquad(tiers = [1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4, 4]) {
+function makeSquad(tiers = [1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4]) {
   return positions.map<SquadPlayer>((position, index) => ({
     id: `p${index + 1}`,
     clubId: `c${Math.floor(index / 3) + 1}`,
@@ -86,6 +87,15 @@ test("accepts the four-tier nominal allocation", () => {
   assert.deepEqual(validateSquad(makeSquad()), []);
 });
 
+test("derives cumulative tier limits of 3, 6, 12, and 15", () => {
+  assert.deepEqual(getCumulativeTierLimits(), [
+    { level: 1, limit: 3 },
+    { level: 2, limit: 6 },
+    { level: 3, limit: 12 },
+    { level: 4, limit: 15 },
+  ]);
+});
+
 test("reports only the level-one quota when its overflow carries forward", () => {
   const violations = validateSquad(
     makeSquad([1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4]),
@@ -114,9 +124,18 @@ test("allows lower tiers to fill unused higher-tier slots", () => {
   assert.deepEqual(validateSquad(makeSquad(Array(15).fill(4))), []);
 });
 
+test("accepts twelve players across the top three tiers", () => {
+  assert.deepEqual(
+    validateSquad(makeSquad([1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 4, 4, 4])),
+    [],
+  );
+});
+
 test("rejects cumulative tier quota overflow", () => {
   const sevenTopTwo = makeSquad([1, 1, 1, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4]);
-  const tenTopThree = makeSquad([1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4]);
+  const thirteenTopThree = makeSquad([
+    1, 1, 1, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 4, 4,
+  ]);
   assert.ok(
     validateSquad(sevenTopTwo).some(
       (violation) =>
@@ -124,7 +143,7 @@ test("rejects cumulative tier quota overflow", () => {
     ),
   );
   assert.ok(
-    validateSquad(tenTopThree).some(
+    validateSquad(thirteenTopThree).some(
       (violation) =>
         violation.code === "tier_quota" && violation.details?.level === 3,
     ),
