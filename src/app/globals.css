@@ -3190,6 +3190,7 @@ textarea:focus-visible {
 @media (width < 48rem) {
   .compact-tier-quota-strip {
     padding-block: 4px;
+    margin-bottom: 0;
   }
 }
 
@@ -7193,6 +7194,7 @@ button.vacant-squad-slot {
 @media (width < 48rem) {
   .compact-tier-quota-heading {
     gap: 3px;
+    margin-top: 0;
   }
 
   .compact-tier-quota-info {
