@@ -3129,7 +3129,7 @@ textarea:focus-visible {
   padding: 9px 12px;
   border: 0;
   border-radius: 10px;
-  color: #fff;
+  color: var(--orange);
   background: var(--navy);
   font-size: 14px;
   font-weight: 500;
