@@ -3187,6 +3187,12 @@ textarea:focus-visible {
   color: var(--orange-deep);
 }
 
+@media (width < 48rem) {
+  .compact-tier-quota-strip {
+    padding-block: 4px;
+  }
+}
+
 .compact-tier-quota-heading {
   min-width: 0;
   display: flex;
