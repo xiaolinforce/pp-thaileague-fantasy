@@ -440,148 +440,154 @@ export default function TransfersClient({
         <div className="compact-market-head">
           <h2>ตลาดนักเตะ</h2>
         </div>
-        <div className="compact-transfer-stats">
-          <div>
-            <span>
-              {isOverFreeTransferLimit
-                ? translate("เปลี่ยนเกิน")
-                : translate("เปลี่ยนฟรีคงเหลือ")}
-            </span>
-            <strong
-              className={
-                hasUnlimitedTransfers
-                  ? "compact-transfer-unlimited"
+        <div className="compact-market-sticky-controls">
+          <div className="compact-transfer-stats">
+            <div>
+              <span>
+                {isOverFreeTransferLimit
+                  ? translate("เปลี่ยนเกิน")
+                  : translate("เปลี่ยนฟรีคงเหลือ")}
+              </span>
+              <strong
+                className={
+                  hasUnlimitedTransfers
+                    ? "compact-transfer-unlimited"
+                    : isOverFreeTransferLimit
+                      ? "compact-transfer-overage"
+                      : undefined
+                }
+                aria-label={
+                  hasUnlimitedTransfers ? unlimitedTransfersLabel : undefined
+                }
+                title={
+                  hasUnlimitedTransfers ? unlimitedTransfersLabel : undefined
+                }
+              >
+                {hasUnlimitedTransfers
+                  ? "∞"
                   : isOverFreeTransferLimit
-                    ? "compact-transfer-overage"
-                    : undefined
-              }
-              aria-label={
-                hasUnlimitedTransfers ? unlimitedTransfersLabel : undefined
-              }
-              title={
-                hasUnlimitedTransfers ? unlimitedTransfersLabel : undefined
-              }
-            >
-              {hasUnlimitedTransfers
-                ? "∞"
-                : isOverFreeTransferLimit
-                  ? translate("-{points} คะแนน").replace(
-                      "{points}",
-                      String(transferPoints),
-                    )
-                  : freeTransfersRemaining}
-            </strong>
-          </div>
-          <div>
-            <span>ต่างชาติ</span>
-            <strong>{foreignPlayers}/7</strong>
-          </div>
-        </div>
-        <div
-          className="compact-position-quota-stats"
-          aria-label={translate("โควต้าตำแหน่งนักเตะ")}
-        >
-          {positionQuotaStats.map(({ position, used, limit }) => (
-            <div key={position}>
-              <span>{getLocalizedPositionLabel(position, language)}</span>
-              <strong>
-                {used}/{limit}
+                    ? translate("-{points} คะแนน").replace(
+                        "{points}",
+                        String(transferPoints),
+                      )
+                    : freeTransfersRemaining}
               </strong>
             </div>
-          ))}
-        </div>
-        <div
-          className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
-        >
-          <div className="compact-tier-quota-heading">
-            <span>{translate("โควต้านักเตะระดับ 1-3")}</span>
-            <Popover>
-              <PopoverTrigger
-                className="compact-tier-quota-info"
-                aria-label="ดูวิธีนับโควต้าระดับ"
-              >
-                <CircleHelp size={16} aria-hidden="true" />
-              </PopoverTrigger>
-              <PopoverContent
-                className="compact-tier-quota-popover"
-                align="start"
-                side="bottom"
-                sideOffset={7}
-              >
-                <PopoverHeader>
-                  <PopoverTitle>
-                    {translate("โควต้านักเตะระดับ 1-3")}
-                  </PopoverTitle>
-                  <PopoverDescription>
-                    <span>{translate("นักเตะระดับ 1 มีได้สูงสุด 3 คน")}</span>
-                    <br />
-                    <span>{translate("นักเตะระดับ 1-2 มีได้สูงสุด 6 คน")}</span>
-                    <br />
-                    <span>
-                      {translate("นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน")}
-                    </span>
-                  </PopoverDescription>
-                </PopoverHeader>
-              </PopoverContent>
-            </Popover>
-            {isTierQuotaOver && (
-              <strong className="compact-tier-quota-warning">เกินโควต้า</strong>
-            )}
+            <div>
+              <span>ต่างชาติ</span>
+              <strong>{foreignPlayers}/7</strong>
+            </div>
           </div>
           <div
-            className="compact-tier-quota-dots"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
+            className="compact-position-quota-stats"
+            aria-label={translate("โควต้าตำแหน่งนักเตะ")}
           >
-            <span className="sr-only">
-              {tierQuotaSummary}
-              {isTierQuotaOver ? `, ${translate("เกินโควต้า")}` : ""}
-            </span>
-            <span className="compact-tier-quota-dot-track" aria-hidden="true">
-              {tierQuotaDots.map((tierLevel, index) => (
-                <span
-                  className={`compact-tier-quota-dot${tierLevel ? ` compact-tier-quota-dot--${tierLevel}` : ""}`}
-                  key={index}
-                />
-              ))}
-            </span>
+            {positionQuotaStats.map(({ position, used, limit }) => (
+              <div key={position}>
+                <span>{getLocalizedPositionLabel(position, language)}</span>
+                <strong>
+                  {used}/{limit}
+                </strong>
+              </div>
+            ))}
           </div>
-        </div>
-
-        <Dialog>
-          <DialogTrigger className="compact-market-filter-dialog-trigger">
-            {translate("กรองนักเตะ")}
-          </DialogTrigger>
-          <DialogContent
-            className="compact-market-filter-dialog"
-            closeLabel={translate("ปิดตัวกรอง")}
+          <div
+            className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
           >
-            <DialogHeader>
-              <DialogTitle>Filter</DialogTitle>
-            </DialogHeader>
-            {renderMarketFilters()}
-            <DialogFooter className="compact-market-filter-dialog-footer">
-              <DialogClose render={<Button />}>
-                {translate("เสร็จสิ้น")}
-              </DialogClose>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        <Accordion
-          className="compact-market-filter-accordion"
-          value={filterAccordionValue}
-          onValueChange={setFilterAccordionValue}
-        >
-          <AccordionItem value="filters">
-            <AccordionTrigger className="compact-market-filter-trigger">
-              Filter
-            </AccordionTrigger>
-            <AccordionContent className="compact-market-filter-content">
+            <div className="compact-tier-quota-heading">
+              <span>{translate("โควต้านักเตะระดับ 1-3")}</span>
+              <Popover>
+                <PopoverTrigger
+                  className="compact-tier-quota-info"
+                  aria-label="ดูวิธีนับโควต้าระดับ"
+                >
+                  <CircleHelp size={16} aria-hidden="true" />
+                </PopoverTrigger>
+                <PopoverContent
+                  className="compact-tier-quota-popover"
+                  align="start"
+                  side="bottom"
+                  sideOffset={7}
+                >
+                  <PopoverHeader>
+                    <PopoverTitle>
+                      {translate("โควต้านักเตะระดับ 1-3")}
+                    </PopoverTitle>
+                    <PopoverDescription>
+                      <span>{translate("นักเตะระดับ 1 มีได้สูงสุด 3 คน")}</span>
+                      <br />
+                      <span>
+                        {translate("นักเตะระดับ 1-2 มีได้สูงสุด 6 คน")}
+                      </span>
+                      <br />
+                      <span>
+                        {translate("นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน")}
+                      </span>
+                    </PopoverDescription>
+                  </PopoverHeader>
+                </PopoverContent>
+              </Popover>
+              {isTierQuotaOver && (
+                <strong className="compact-tier-quota-warning">
+                  เกินโควต้า
+                </strong>
+              )}
+            </div>
+            <div
+              className="compact-tier-quota-dots"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              <span className="sr-only">
+                {tierQuotaSummary}
+                {isTierQuotaOver ? `, ${translate("เกินโควต้า")}` : ""}
+              </span>
+              <span className="compact-tier-quota-dot-track" aria-hidden="true">
+                {tierQuotaDots.map((tierLevel, index) => (
+                  <span
+                    className={`compact-tier-quota-dot${tierLevel ? ` compact-tier-quota-dot--${tierLevel}` : ""}`}
+                    key={index}
+                  />
+                ))}
+              </span>
+            </div>
+          </div>
+
+          <Dialog>
+            <DialogTrigger className="compact-market-filter-dialog-trigger">
+              {translate("กรองนักเตะ")}
+            </DialogTrigger>
+            <DialogContent
+              className="compact-market-filter-dialog"
+              closeLabel={translate("ปิดตัวกรอง")}
+            >
+              <DialogHeader>
+                <DialogTitle>Filter</DialogTitle>
+              </DialogHeader>
               {renderMarketFilters()}
-            </AccordionContent>
-          </AccordionItem>
-        </Accordion>
+              <DialogFooter className="compact-market-filter-dialog-footer">
+                <DialogClose render={<Button />}>
+                  {translate("เสร็จสิ้น")}
+                </DialogClose>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+          <Accordion
+            className="compact-market-filter-accordion"
+            value={filterAccordionValue}
+            onValueChange={setFilterAccordionValue}
+          >
+            <AccordionItem value="filters">
+              <AccordionTrigger className="compact-market-filter-trigger">
+                Filter
+              </AccordionTrigger>
+              <AccordionContent className="compact-market-filter-content">
+                {renderMarketFilters()}
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
+        </div>
         <div className="compact-market-list">
           {players.map((player) => {
             const compatible = vacantPositions.has(player.position);

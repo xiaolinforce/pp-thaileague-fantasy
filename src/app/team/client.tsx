@@ -1281,7 +1281,7 @@ export default function TeamClient({
         </p>
 
         <Tabs
-          className="team-workspace-tabs-sticky"
+          className={`team-workspace-tabs-sticky team-workspace-tabs-sticky--${workspaceView}`}
           value={workspaceView}
           onValueChange={(value) => {
             if (value === "squad" || value === "market") {
