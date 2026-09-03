@@ -310,6 +310,7 @@ function SidebarContent({
     return (
       <Link
         href={href}
+        prefetch={false}
         className={className}
         aria-current={ariaCurrent}
         onNavigate={(event) => {

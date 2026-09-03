@@ -7,6 +7,11 @@ Postgres through Drizzle ORM. Server Components load competition and fantasy
 state, focused Client Components own interactive team-management screens, and
 Server Actions validate authenticated player and administrative changes.
 
+Vercel Functions run in `sin1` so the application runtime is colocated with the
+production Neon compute in Singapore. Keep this deployment affinity aligned if
+the database region changes; cross-region SQL round trips multiply quickly on
+authenticated pages.
+
 ```text
 Thai League + reviewed external sources
                          |
@@ -64,20 +69,20 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 
 ## Route model
 
-| Route            | Rendering and data                                                                            |
-| ---------------- | --------------------------------------------------------------------------------------------- |
-| `/`              | Dynamic Email OTP, Google, and Guest onboarding; authenticated users redirect to the game.    |
-| `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google.                                      |
-| `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.            |
-| `/points`        | Server-renders the selected Gameweek score and its breakdown.                                 |
-| `/leagues`       | Server-loads the current team's Overall and Private League summaries.                         |
-| `/leagues/[id]`  | Authorizes membership, then renders paginated standings and role-appropriate controls.        |
-| `/fixtures`      | Server-loads competition fixtures, then delegates interactive browsing to a Client Component. |
-| `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                        |
-| `/settings`      | Authenticated language preference; member value persists on the manager row.                  |
-| `/rules`         | Public long-form rules built from shared executable rule and scoring constants.               |
-| `/help`          | Public FAQ and real support destinations; no account data is required.                        |
-| `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                 |
+| Route            | Rendering and data                                                                                 |
+| ---------------- | -------------------------------------------------------------------------------------------------- |
+| `/`              | Dynamic Email OTP, Google, and Guest onboarding; authenticated users redirect to the game.         |
+| `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google.                                           |
+| `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.                 |
+| `/points`        | Server-renders the selected Gameweek score and its breakdown.                                      |
+| `/leagues`       | Server-loads the current team's Overall and Private League summaries.                              |
+| `/leagues/[id]`  | Authorizes membership, then renders paginated standings and role-appropriate controls.             |
+| `/fixtures`      | Server-loads a fixture-only read model, then delegates interactive browsing to a Client Component. |
+| `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                             |
+| `/settings`      | Authenticated language preference; member value persists on the manager row.                       |
+| `/rules`         | Public long-form rules built from shared executable rule and scoring constants.                    |
+| `/help`          | Public FAQ and real support destinations; no account data is required.                             |
+| `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                      |
 
 The root layout provides Mitr, the language context, shared tooltips, and toast
 feedback. Guest and Email OTP sign-in complete account provisioning through a
@@ -85,6 +90,15 @@ Server Action before client navigation so the application shell receives the
 new identity immediately. Database-backed pages are dynamically rendered: their
 data modules are server-only and call the current Next.js connection API before
 querying.
+
+Authentication and Fantasy profile readers use React request memoization so a
+layout and its page share one session/identity lookup. Existing complete
+profiles take a read-only path; provisioning writes run only when account state
+may need creation or repair. The full competition read model is shared through
+a tagged 60-second server cache, while `/fixtures` uses a smaller fixture-only
+model cached for five minutes. Fantasy mutations invalidate the relevant tags.
+Main navigation does not automatically prefetch these authenticated database
+routes, avoiding duplicate hidden-sidebar requests and speculative SQL work.
 
 ## Read flow
 

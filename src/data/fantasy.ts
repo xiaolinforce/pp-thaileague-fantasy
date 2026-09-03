@@ -23,6 +23,7 @@ import {
 import type { FantasyChip } from "@/lib/fantasy/rules";
 import { hasGameweekDeadlinePassed } from "@/lib/fantasy/points-gameweek";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
+import { logServerTiming } from "@/lib/server/performance";
 
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
 
@@ -66,6 +67,7 @@ export type FantasyState = {
 };
 
 export async function getFantasyState(): Promise<FantasyState> {
+  const startedAt = Date.now();
   await connection();
   const profile = await requireFantasyProfile();
   const fantasySeason = profile.season;
@@ -121,7 +123,7 @@ export async function getFantasyState(): Promise<FantasyState> {
     }
   }
 
-  return {
+  const state = {
     seasonId: fantasySeason.id,
     seasonFinished: profile.seasonFinished,
     team: {
@@ -160,7 +162,11 @@ export async function getFantasyState(): Promise<FantasyState> {
       bench_boost: fantasySeason.chipUsesPerSeason - chipUses.bench_boost,
       wildcard: fantasySeason.chipUsesPerSeason - chipUses.wildcard,
     },
-  };
+  } satisfies FantasyState;
+  logServerTiming("fantasy.state", startedAt, {
+    squadMembers: state.selection.members.length,
+  });
+  return state;
 }
 
 export type PlayerPointsRow = {

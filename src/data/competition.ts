@@ -1,6 +1,7 @@
 import "server-only";
 
 import { and, asc, eq, inArray } from "drizzle-orm";
+import { unstable_cache } from "next/cache";
 import { connection } from "next/server";
 import { db } from "@/db";
 import {
@@ -36,6 +37,7 @@ import type {
   CompetitionPosition,
   LocalizedText,
 } from "@/lib/competition-types";
+import { logServerTiming } from "@/lib/server/performance";
 
 const COMPETITION_SEASON_EXTERNAL_ID = "224";
 const OFFICIAL_PLAYER_STATS_SOURCE_URL =
@@ -95,9 +97,8 @@ function formatFixtureTime(date: Date | null): LocalizedText {
   return { th: time, en: time };
 }
 
-export async function getCompetitionDataset(): Promise<CompetitionDataset> {
-  await connection();
-
+async function loadCompetitionDataset(): Promise<CompetitionDataset> {
+  const startedAt = Date.now();
   const season = await db.query.competitionSeasons.findFirst({
     where: eq(competitionSeasons.externalId, COMPETITION_SEASON_EXTERNAL_ID),
   });
@@ -457,7 +458,7 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
     null,
   );
 
-  return {
+  const dataset = {
     season: localized(season.nameTh, season.nameEn, "2026/27"),
     players: playerViews,
     fixtures: fixtureViews,
@@ -491,5 +492,21 @@ export async function getCompetitionDataset(): Promise<CompetitionDataset> {
         })),
       },
     },
-  };
+  } satisfies CompetitionDataset;
+  logServerTiming("competition.dataset", startedAt, {
+    players: dataset.players.length,
+    fixtures: dataset.fixtures.length,
+  });
+  return dataset;
+}
+
+const getCachedCompetitionDataset = unstable_cache(
+  loadCompetitionDataset,
+  ["competition-dataset-v1"],
+  { revalidate: 60, tags: ["competition-dataset"] },
+);
+
+export async function getCompetitionDataset(): Promise<CompetitionDataset> {
+  await connection();
+  return getCachedCompetitionDataset();
 }

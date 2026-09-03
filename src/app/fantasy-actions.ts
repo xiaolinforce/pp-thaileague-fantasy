@@ -1,7 +1,7 @@
 "use server";
 
 import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { db } from "@/db";
 import { transactionDb } from "@/db/transaction";
@@ -377,6 +377,8 @@ async function getCurrentPlayerSnapshots(
 }
 
 function revalidateFantasyPages() {
+  revalidateTag("competition-dataset", "max");
+  revalidateTag("fixtures-dataset", "max");
   for (const path of ["/team", "/points", "/leagues"]) {
     revalidatePath(path);
   }

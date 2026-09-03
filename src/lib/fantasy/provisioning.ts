@@ -17,6 +17,7 @@ import {
 import { createGuestTeamName } from "@/lib/auth/names";
 import { resolveFantasyGameweekContext } from "@/lib/fantasy/gameweek-context";
 import { THAI_LEAGUE_FANTASY_RULES } from "@/lib/fantasy/rules";
+import { logServerTiming } from "@/lib/server/performance";
 
 export const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
 
@@ -66,10 +67,15 @@ async function ensureInitialRevision(
     .onConflictDoNothing();
 }
 
-async function getActiveSeasonAndGameweek() {
-  const season = await db.query.fantasySeasons.findFirst({
-    where: eq(fantasySeasons.slug, FANTASY_SEASON_SLUG),
-  });
+async function getActiveSeasonAndGameweek(
+  existingSeason?: typeof fantasySeasons.$inferSelect | null,
+) {
+  const season =
+    existingSeason?.slug === FANTASY_SEASON_SLUG
+      ? existingSeason
+      : await db.query.fantasySeasons.findFirst({
+          where: eq(fantasySeasons.slug, FANTASY_SEASON_SLUG),
+        });
   if (!season) throw new Error("Fantasy season was not found.");
   const gameweeks = await db
     .select()
@@ -169,14 +175,24 @@ async function ensureSeasonTeam(input: {
 export async function ensureFantasyProfile(input: {
   authUserId: string;
   isAnonymous: boolean;
+  existing?: {
+    manager: typeof fantasyManagers.$inferSelect | null;
+    team: typeof fantasyTeams.$inferSelect | null;
+    season: typeof fantasySeasons.$inferSelect | null;
+  };
 }) {
-  const existingManager = await db.query.fantasyManagers.findFirst({
-    where: eq(fantasyManagers.authUserId, input.authUserId),
-  });
+  const startedAt = Date.now();
+  const existingManager =
+    input.existing?.manager?.authUserId === input.authUserId
+      ? input.existing.manager
+      : await db.query.fantasyManagers.findFirst({
+          where: eq(fantasyManagers.authUserId, input.authUserId),
+        });
   const { season, gameweek, gameweeks, canProvisionSelection, seasonFinished } =
-    await getActiveSeasonAndGameweek();
+    await getActiveSeasonAndGameweek(input.existing?.season);
   let manager = existingManager;
   let created = false;
+  let managerUpdated = false;
   if (!manager) {
     const inserted = await db
       .insert(fantasyManagers)
@@ -201,8 +217,38 @@ export async function ensureFantasyProfile(input: {
       .where(eq(fantasyManagers.id, manager.id))
       .returning();
     manager = rows[0] ?? manager;
+    managerUpdated = true;
   }
-  const team = await ensureSeasonTeam({ season, manager });
+  const existingTeam =
+    input.existing?.team?.managerId === manager.id &&
+    input.existing.team.fantasySeasonId === season.id
+      ? input.existing.team
+      : null;
+  const team = existingTeam ?? (await ensureSeasonTeam({ season, manager }));
+  const existingSelection = await getExistingSelection(team, gameweek);
+
+  if (
+    existingManager &&
+    existingTeam &&
+    !managerUpdated &&
+    (existingSelection || !canProvisionSelection)
+  ) {
+    logServerTiming("fantasy.profile", startedAt, {
+      fastPath: true,
+      created: false,
+    });
+    return {
+      manager,
+      team,
+      season,
+      gameweek,
+      gameweeks,
+      selection: existingSelection ?? null,
+      seasonFinished,
+      created: false,
+    };
+  }
+
   const overallLeagues = await db
     .select({ id: fantasyLeagues.id })
     .from(fantasyLeagues)
@@ -224,8 +270,12 @@ export async function ensureFantasyProfile(input: {
       .onConflictDoNothing();
   }
   const selection = canProvisionSelection
-    ? await ensureInitialSelection(team, gameweek)
-    : await getExistingSelection(team, gameweek);
+    ? (existingSelection ?? (await ensureInitialSelection(team, gameweek)))
+    : existingSelection;
+  logServerTiming("fantasy.profile", startedAt, {
+    fastPath: false,
+    created,
+  });
   return {
     manager,
     team,

@@ -13,6 +13,7 @@ import {
   fantasyTeams,
 } from "@/db/schema";
 import { requireFantasyProfile } from "@/lib/auth/context";
+import { logServerTiming } from "@/lib/server/performance";
 import {
   LEAGUE_STANDINGS_PAGE_SIZE,
   OVERALL_STANDINGS_LIMIT,
@@ -105,6 +106,7 @@ async function getStandingsForLeagues(input: {
 }
 
 export async function getLeagueOverview() {
+  const startedAt = Date.now();
   await connection();
   const profile = await requireFantasyProfile();
   const leagueRows = await db
@@ -190,7 +192,7 @@ export async function getLeagueOverview() {
         b.updatedAt.localeCompare(a.updatedAt),
     );
 
-  return {
+  const overview = {
     isGuest: profile.isAnonymous,
     teamId: profile.team.id,
     gameweek: {
@@ -207,6 +209,10 @@ export async function getLeagueOverview() {
       memberLimit: PRIVATE_LEAGUE_MEMBER_LIMIT,
     },
   };
+  logServerTiming("leagues.overview", startedAt, {
+    privateLeagues: overview.privateLeagues.length,
+  });
+  return overview;
 }
 
 export async function getLeagueDetail(leagueId: string, requestedPage = 1) {

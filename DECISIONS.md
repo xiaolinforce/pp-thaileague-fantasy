@@ -4,6 +4,27 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-03 — Runtime locality and bounded read caching own page performance
+
+**Decision:** Run Vercel Functions in Singapore (`sin1`) beside the production
+Neon compute. Memoize session and profile readers within each render request,
+use a read-only fast path for already-provisioned accounts, cache the shared
+competition dataset for 60 seconds, and give Fixtures a smaller five-minute
+read model. Disable automatic prefetch for authenticated primary navigation.
+
+**Context:** Production traces showed Functions in Washington, DC making 14–32
+HTTP SQL calls to Neon in Singapore per navigation. Profile provisioning wrote
+idempotent rows on every page, Fixtures loaded the complete player/stat model,
+and duplicate desktop/mobile navigation links speculatively prefetched dynamic
+routes.
+
+**Consequences:** Warm reads avoid repeated competition queries, normal page
+loads no longer perform provisioning writes, and navigation does not create
+hidden database traffic. Fantasy actions invalidate tagged read models; direct
+database maintenance can remain cached only until the short expiry. Moving the
+database requires reviewing `vercel.json`, and timing regressions are visible
+as structured `server_timing` runtime logs.
+
 ## 2026-09-02 — A completed season remains available read-only
 
 **Decision:** When no `open` or `planned` Gameweek remains, use the latest
