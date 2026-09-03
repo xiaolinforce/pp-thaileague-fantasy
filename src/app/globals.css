@@ -3100,13 +3100,15 @@ textarea:focus-visible {
 }
 
 @media (width < 48rem) {
-  .compact-transfer-stats strong,
-  .compact-position-quota-stats strong {
-    font-size: 14px;
+  .compact-transfer-stats span,
+  .compact-position-quota-stats span {
+    font-size: 10px;
   }
 
+  .compact-transfer-stats strong,
+  .compact-position-quota-stats strong,
   .compact-transfer-stats strong.compact-transfer-unlimited {
-    font-size: 18px;
+    font-size: 12px;
   }
 }
 
