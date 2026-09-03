@@ -224,7 +224,8 @@ preference is stored on the device under `thai-fantasy-language`.
 This is a prototype boundary:
 
 - URLs and server metadata are not locale-prefixed;
-- public pages and Guests without a stored preference first render in Thai;
+- public pages and users without a stored preference use Thai; a browser's
+  language does not override the first-use default;
 - dictionary replacement depends on exact Thai source copy; and
 - Settings is the only production language control; there is no floating
   development language control in the product UI.

@@ -5,3 +5,9 @@ export function parseInterfaceLanguage(
 ): InterfaceLanguage | null {
   return value === "th" || value === "en" ? value : null;
 }
+
+export function getInitialInterfaceLanguage(
+  storedLanguage: unknown,
+): InterfaceLanguage {
+  return parseInterfaceLanguage(storedLanguage) ?? "th";
+}

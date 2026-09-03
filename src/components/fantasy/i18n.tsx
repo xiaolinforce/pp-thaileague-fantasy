@@ -12,6 +12,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { getInitialInterfaceLanguage } from "@/lib/auth/preferences";
 export type Language = "th" | "en";
 
 const translations: Record<string, string> = {
@@ -969,12 +970,7 @@ export function LanguageProvider({
       return () => window.cancelAnimationFrame(frame);
     }
     const stored = window.localStorage.getItem("thai-fantasy-language");
-    const preferred: Language =
-      stored === "th" || stored === "en"
-        ? stored
-        : window.navigator.language.toLowerCase().startsWith("en")
-          ? "en"
-          : "th";
+    const preferred = getInitialInterfaceLanguage(stored);
     const frame = window.requestAnimationFrame(() =>
       setLanguageState(preferred),
     );
