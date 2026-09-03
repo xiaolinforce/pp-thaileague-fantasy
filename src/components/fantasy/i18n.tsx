@@ -275,8 +275,10 @@ const translations: Record<string, string> = {
   "โควต้านักเตะระดับ 1-3": "Player quota for Tiers 1-3",
   ดูวิธีนับโควต้าระดับ: "How tier quotas work",
   โควต้าระดับเป็นแบบสะสม: "Tier quotas are cumulative",
-  "นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน นักเตะระดับ 1 มีได้สูงสุด 3 คน นักเตะระดับ 2 มีได้สูงสุด 6 คน":
-    "Tiers 1–3 can be selected up to 9 players in total. Tier 1 is capped at 3 players, and Tier 2 is capped at 6 players.",
+  "นักเตะระดับ 1 มีได้สูงสุด 3 คน": "Tier 1 has a maximum of 3 players",
+  "นักเตะระดับ 1-2 มีได้สูงสุด 6 คน": "Tiers 1-2 have a maximum of 6 players",
+  "นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน":
+    "Tiers 1-3 have a maximum of 9 players in total",
   "ระดับ 1 เติมวง 1–3 ระดับ 2 เติมวง 4–6 แล้วถอยกลับไปวง 3–1 ส่วนระดับ 3 เติมวง 7–9 แล้วถอยกลับไปวง 6–1 โดยข้ามวงที่ถูกใช้แล้ว ระดับ 4 ไม่ใช้วงกลมชุดนี้":
     "Tier 1 fills circles 1–3. Tier 2 fills 4–6, then works backward through 3–1. Tier 3 fills 7–9, then works backward through 6–1, skipping occupied circles. Tier 4 does not use these circles.",
   "ใช้ระดับ 1 {level1} คน ระดับ 2 {level2} คน และระดับ 3 {level3} คน":

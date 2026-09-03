@@ -310,9 +310,13 @@ export default function TransfersClient({
                     {translate("โควต้านักเตะระดับ 1-3")}
                   </PopoverTitle>
                   <PopoverDescription>
-                    {translate(
-                      "นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน นักเตะระดับ 1 มีได้สูงสุด 3 คน นักเตะระดับ 2 มีได้สูงสุด 6 คน",
-                    )}
+                    <span>{translate("นักเตะระดับ 1 มีได้สูงสุด 3 คน")}</span>
+                    <br />
+                    <span>{translate("นักเตะระดับ 1-2 มีได้สูงสุด 6 คน")}</span>
+                    <br />
+                    <span>
+                      {translate("นักเตะระดับ 1-3 มีรวมได้สูงสุด 9 คน")}
+                    </span>
                   </PopoverDescription>
                 </PopoverHeader>
               </PopoverContent>
