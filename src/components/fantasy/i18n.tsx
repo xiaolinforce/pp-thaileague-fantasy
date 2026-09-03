@@ -322,6 +322,8 @@ const translations: Record<string, string> = {
   ซื้อขายในมุมมองเดียว: "Transfers in the same view",
   "เลือกคนในทีม แล้วเลือกนักเตะตำแหน่งเดียวกันเข้ามาแทน":
     "Choose a squad player, then select a replacement in the same position",
+  "ซื้อนักเตะจากตลาดนักเตะให้ครบ 15 คนแล้วจัด 11 ตัวจริงลงสนามกันเลย":
+    "Buy 15 players from the Player Market, then choose your starting XI",
   โควต้าผ่าน: "Quotas valid",
   เกินโควต้า: "Over quota",
   ฟรี: "Free",

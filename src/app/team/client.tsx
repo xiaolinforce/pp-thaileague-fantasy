@@ -1286,6 +1286,11 @@ export default function TeamClient({
             </AccordionItem>
           </Accordion>
         </section>
+        <p className="team-squad-guidance">
+          {translate(
+            "ซื้อนักเตะจากตลาดนักเตะให้ครบ 15 คนแล้วจัด 11 ตัวจริงลงสนามกันเลย",
+          )}
+        </p>
 
         <Tabs
           className="team-workspace-tabs-sticky"
