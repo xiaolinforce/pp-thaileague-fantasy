@@ -555,6 +555,7 @@ function VacantSquadSlot({
   return (
     <div
       className={`squad-token-shell vacant-squad-token-shell${swapState ? ` swap-${swapState}` : ""}`}
+      onClick={isSource ? onSelect : undefined}
     >
       {captain && <SquadCaptainBadge captain={captain} />}
       {swapState && !isSource ? (
@@ -582,7 +583,10 @@ function VacantSquadSlot({
         <button
           type="button"
           className="squad-token-action squad-swap-action"
-          onClick={onSwap}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSwap();
+          }}
           disabled={actionsDisabled || swapDisabled}
           aria-pressed={isSource}
           aria-label={
