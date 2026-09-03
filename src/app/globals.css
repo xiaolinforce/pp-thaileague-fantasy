@@ -8832,6 +8832,10 @@ body {
     padding: 0;
   }
 
+  .search-field .market-search-input {
+    font-size: 16px;
+  }
+
   .compact-market-filter-dialog-footer {
     margin-top: 0;
     border-top: 0;
