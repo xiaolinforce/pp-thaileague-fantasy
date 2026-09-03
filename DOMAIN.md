@@ -128,18 +128,25 @@ Gameweek that already has locked selections or scores.
 Before the deadline, a manager may fill every vacant draft slot automatically.
 The suggestion preserves players already in the draft, ignores market display
 filters, and uses the current published ranking with fresh availability, club,
-position, Thai-status, and effective-tier data. It first attempts to maximize use of the
-three nominal slots at each of Levels 1–3 when a valid allocation exists,
-then favors higher projected points with bounded random variation so repeated
-empty drafts need not receive the same squad. Club, foreign-player, cumulative
-tier, position, duplicate-player, lineup, and bench constraints remain hard
-limits.
+position, Thai-status, and effective-tier data. It first minimizes the total
+shortfall from the three nominal slots at each of Levels 1–3 and then minimizes
+the largest shortfall at any one of those levels. Among equally good tier
+allocations it prefers goalkeepers whose tier is the best available among the
+goalkeepers at their club, then maximizes foreign-player use up to the hard
+limit. Tied candidates are chosen with bounded random variation; projected
+points and overall rank do not influence the suggestion. Club, foreign-player,
+cumulative tier, position, duplicate-player, lineup, and bench constraints
+remain hard limits.
 
-The strongest newly selected players occupy vacant starting slots before bench
-slots of the same position. Existing valid captaincy is preserved; any missing
-captain or vice-captain is assigned from the highest-projected starters. The
-suggestion changes only the client draft and has no transfer or persistence
-effect until the manager saves through the normal validation path.
+For goalkeeper inference, a lower tier number is better; goalkeepers tied for
+their club's best tier are treated equally because the current data does not
+store an explicit depth chart. A likely club starter occupies a vacant Fantasy
+starting-goalkeeper slot before a fallback, and otherwise newly selected
+players with better tiers occupy vacant starting slots before bench slots of
+the same position. Existing valid captaincy is preserved; any missing captain
+or vice-captain is assigned from the best-tier starters, with randomness used
+for ties. The suggestion changes only the client draft and has no transfer or
+persistence effect until the manager saves through the normal validation path.
 
 ## Deadlines and Gameweeks
 

@@ -14,7 +14,10 @@ import {
   players,
   playerRegistrations,
 } from "@/db/schema";
-import type { AutoFillCandidate } from "@/lib/fantasy/auto-fill";
+import {
+  classifyLikelyClubStartingGoalkeepers,
+  type AutoFillCandidate,
+} from "@/lib/fantasy/auto-fill";
 import type { FantasyPosition } from "@/lib/fantasy/rules";
 
 export async function getFantasyAutoFillCandidates(
@@ -51,8 +54,6 @@ export async function getFantasyAutoFillCandidates(
       clubId: competitionEntries.clubId,
       position: fantasyPlayers.lockedPosition,
       isThai: fantasyPlayers.isThai,
-      projectedPoints: fantasyPlayerRankings.projectedPoints,
-      overallRank: fantasyPlayerRankings.overallRank,
     })
     .from(fantasyPlayerRankings)
     .innerJoin(
@@ -78,10 +79,7 @@ export async function getFantasyAutoFillCandidates(
         eq(competitionEntries.competitionSeasonId, season.competitionSeasonId),
       ),
     )
-    .orderBy(
-      asc(fantasyPlayerRankings.overallRank),
-      asc(competitionEntries.id),
-    );
+    .orderBy(asc(fantasyPlayers.id), asc(competitionEntries.id));
   const fantasyPlayerIds = [...new Set(rows.map((row) => row.fantasyPlayerId))];
   if (fantasyPlayerIds.length === 0) return [];
 
@@ -118,10 +116,9 @@ export async function getFantasyAutoFillCandidates(
       position: row.position as FantasyPosition,
       tier: tierByPlayer.get(row.fantasyPlayerId) ?? 4,
       isThai: row.isThai,
-      projectedPoints: row.projectedPoints,
-      overallRank: row.overallRank,
+      isLikelyClubStartingGoalkeeper: false,
     });
   }
 
-  return [...candidatesById.values()];
+  return classifyLikelyClubStartingGoalkeepers([...candidatesById.values()]);
 }

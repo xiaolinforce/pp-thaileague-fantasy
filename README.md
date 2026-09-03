@@ -19,8 +19,9 @@ provisional/final Gameweek scores, and presents Classic league standings.
   limits, automatic substitutions, captain/vice-captain, Triple Captain, Bench
   Boost, Wildcard, free transfers, and transfer-point deductions capped at 12
   points per Gameweek.
-- Ranking-weighted squad auto-fill that completes vacant slots, targets the
-  full tier allocation, and keeps the result editable until the manager saves.
+- Tier-guided squad auto-fill that completes vacant slots, targets the full
+  tier allocation, prefers likely first-choice goalkeepers and foreign players,
+  and keeps the result editable until the manager saves.
 - Real Overall and invite-only Private Classic leagues with owner controls,
   membership limits, audit history, persisted latest Overall ranks, and no
   seeded competitors.

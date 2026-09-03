@@ -3,13 +3,16 @@ import test from "node:test";
 
 import { createEmptySquadDraft } from "./team-draft.ts";
 import { validateLineup, type LineupPlayer } from "./rules.ts";
-import { autoFillSquadDraft, type AutoFillCandidate } from "./auto-fill.ts";
+import {
+  autoFillSquadDraft,
+  classifyLikelyClubStartingGoalkeepers,
+  type AutoFillCandidate,
+} from "./auto-fill.ts";
 
 const positions = ["goalkeeper", "defender", "midfielder", "forward"] as const;
 
 function createCandidates() {
   const candidates: AutoFillCandidate[] = [];
-  let rank = 1;
   for (const position of positions) {
     for (const tier of [1, 2, 3, 4]) {
       for (let index = 0; index < 12; index += 1) {
@@ -19,14 +22,12 @@ function createCandidates() {
           position,
           tier,
           isThai: index % 3 !== 0,
-          projectedPoints: 240 - rank * 0.4,
-          overallRank: rank,
+          isLikelyClubStartingGoalkeeper: false,
         });
-        rank += 1;
       }
     }
   }
-  return candidates;
+  return classifyLikelyClubStartingGoalkeepers(candidates);
 }
 
 function seededRandom(seed: number) {
@@ -57,6 +58,57 @@ function toLineup(
   });
 }
 
+test("classifies each club's best-tier goalkeepers and preserves ties", () => {
+  const candidates: AutoFillCandidate[] = [
+    {
+      id: "club-a-first",
+      clubId: "club-a",
+      position: "goalkeeper",
+      tier: 2,
+      isThai: true,
+      isLikelyClubStartingGoalkeeper: false,
+    },
+    {
+      id: "club-a-backup",
+      clubId: "club-a",
+      position: "goalkeeper",
+      tier: 3,
+      isThai: true,
+      isLikelyClubStartingGoalkeeper: false,
+    },
+    {
+      id: "club-b-tied-one",
+      clubId: "club-b",
+      position: "goalkeeper",
+      tier: 1,
+      isThai: false,
+      isLikelyClubStartingGoalkeeper: false,
+    },
+    {
+      id: "club-b-tied-two",
+      clubId: "club-b",
+      position: "goalkeeper",
+      tier: 1,
+      isThai: true,
+      isLikelyClubStartingGoalkeeper: false,
+    },
+  ];
+
+  const classified = classifyLikelyClubStartingGoalkeepers(candidates);
+  assert.deepEqual(
+    classified.map((candidate) => [
+      candidate.id,
+      candidate.isLikelyClubStartingGoalkeeper,
+    ]),
+    [
+      ["club-a-first", true],
+      ["club-a-backup", false],
+      ["club-b-tied-one", true],
+      ["club-b-tied-two", true],
+    ],
+  );
+});
+
 test("fills an empty squad with exact tier targets and valid captaincy", () => {
   const candidates = createCandidates();
   const result = autoFillSquadDraft({
@@ -81,38 +133,77 @@ test("fills an empty squad with exact tier targets and valid captaincy", () => {
     lineup.filter((player) => player.captainRole === "vice_captain").length,
     1,
   );
-  const rankedStarters = lineup
+  const starterTiers = lineup
     .filter((player) => player.lineupRole === "starter")
-    .sort(
-      (left, right) =>
-        right.projectedPoints - left.projectedPoints ||
-        left.overallRank - right.overallRank,
-    );
+    .map((player) => player.tier)
+    .sort((left, right) => left - right);
   assert.equal(
-    lineup.find((player) => player.captainRole === "captain")?.id,
-    rankedStarters[0].id,
+    lineup.find((player) => player.captainRole === "captain")?.tier,
+    starterTiers[0],
   );
   assert.equal(
-    lineup.find((player) => player.captainRole === "vice_captain")?.id,
-    rankedStarters[1].id,
+    lineup.find((player) => player.captainRole === "vice_captain")?.tier,
+    starterTiers[1],
+  );
+  assert.equal(lineup.filter((player) => !player.isThai).length, 7);
+  const goalkeepers = lineup.filter(
+    (player) => player.position === "goalkeeper",
+  );
+  assert.equal(goalkeepers.length, 2);
+  assert.equal(
+    goalkeepers.every(
+      (goalkeeper) => goalkeeper.isLikelyClubStartingGoalkeeper,
+    ),
+    true,
   );
   for (const position of positions) {
-    const starterPoints = lineup
+    const starterTiersForPosition = lineup
       .filter(
         (player) =>
           player.position === position && player.lineupRole === "starter",
       )
-      .map((player) => player.projectedPoints);
-    const benchPoints = lineup
+      .map((player) => player.tier);
+    const benchTiersForPosition = lineup
       .filter(
         (player) =>
           player.position === position && player.lineupRole === "bench",
       )
-      .map((player) => player.projectedPoints);
-    if (starterPoints.length > 0 && benchPoints.length > 0) {
-      assert.ok(Math.min(...starterPoints) >= Math.max(...benchPoints));
+      .map((player) => player.tier);
+    if (
+      starterTiersForPosition.length > 0 &&
+      benchTiersForPosition.length > 0
+    ) {
+      assert.ok(
+        Math.max(...starterTiersForPosition) <=
+          Math.min(...benchTiersForPosition),
+      );
     }
   }
+});
+
+test("prefers a likely club starting goalkeeper before maximizing foreigners", () => {
+  const preferredGoalkeeperId = "goalkeeper-4-1";
+  const candidates = createCandidates().map((candidate) => ({
+    ...candidate,
+    isLikelyClubStartingGoalkeeper: candidate.id === preferredGoalkeeperId,
+  }));
+  const result = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates,
+    random: seededRandom(13),
+  });
+
+  assert.ok(result);
+  const preferredGoalkeeper = result.members.find(
+    (member) => member.fantasyPlayerId === preferredGoalkeeperId,
+  );
+  assert.ok(preferredGoalkeeper);
+  assert.equal(preferredGoalkeeper.lineupRole, "starter");
+  const lineup = toLineup(result.members, candidates);
+  assert.equal(lineup.filter((player) => !player.isThai).length, 7);
+  assert.equal(lineup.filter((player) => player.tier === 1).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 2).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 3).length, 3);
 });
 
 test("preserves selected players and existing captaincy while filling vacancies", () => {
@@ -203,6 +294,23 @@ test("the same seed is repeatable while different seeds provide variety", () => 
   assert.ok(first && repeated && different);
   assert.deepEqual(first.addedPlayerIds, repeated.addedPlayerIds);
   assert.notDeepEqual(first.addedPlayerIds, different.addedPlayerIds);
+});
+
+test("candidate input order does not act as an implicit ranking", () => {
+  const candidates = createCandidates();
+  const ordered = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates,
+    random: seededRandom(29),
+  });
+  const reversed = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates: [...candidates].reverse(),
+    random: seededRandom(29),
+  });
+
+  assert.ok(ordered && reversed);
+  assert.deepEqual(ordered, reversed);
 });
 
 test("returns null when no valid club allocation can fill the squad", () => {

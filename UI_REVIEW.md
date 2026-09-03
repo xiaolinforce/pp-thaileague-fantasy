@@ -36,7 +36,7 @@ when new behavior invalidates prior coverage.
 | `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                 |
 | `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                            |
 | `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                                          |
-| `/help`          | Long-form reading     | In progress | Simplified public support contacts and legal links; refreshed rendered evidence is pending.                                                                            |
+| `/help`          | Long-form reading     | In progress | Simplified public support contacts and legal links; refreshed rendered evidence is pending.                                                                           |
 | `/privacy`       | Long-form reading     | In progress | Public bilingual policy implemented from the shared reading pattern; operator identity and final legal review remain pending.                                         |
 | `/terms`         | Long-form reading     | In progress | Public bilingual service terms implemented from the shared reading pattern; operator identity and final legal review remain pending.                                  |
 | `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                                                            |
@@ -731,6 +731,24 @@ build`, migration on the confirmed Neon development branch, responsive DOM
 - **Verification:** in-app Browser DOM and computed-style inspection at Desktop
   and 360px; Thai/English rendered checks; followed by project type, lint,
   formatting, and production-build checks.
+
+### 2026-09-03 — Auto-fill rule explanation
+
+- **Route and task:** `/rules`; document the tier-first auto-fill behavior,
+  likely first-choice goalkeeper preference, foreign-player target, and removal
+  of projected points and overall rank from selection.
+- **Language and responsive evidence:** Thai and English rendered in the in-app
+  Browser at the normal Desktop viewport and 360px Mobile. The additional list
+  item wraps within the existing reading card without clipping; measured
+  document width equals client width at both sizes. The Guest preference was
+  restored to Thai after review.
+- **Accessibility:** the explanation remains a semantic list item under Squad
+  selection with no new control, focus target, or color-dependent meaning.
+- **Known exclusions:** no authenticated member preference or altered Fantasy
+  lifecycle state was required because the rule content is shared and static.
+- **Verification:** targeted responsive rendered inspection in Thai and
+  English, followed by Fantasy tests, types, lint, formatting, and production
+  build checks.
 
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final

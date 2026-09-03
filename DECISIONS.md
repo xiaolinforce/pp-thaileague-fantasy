@@ -4,6 +4,28 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-03 — Auto-fill uses tier goals instead of projected points
+
+**Decision:** Preserve selected players and compare valid auto-fill suggestions
+lexicographically: minimize the total Level 1–3 nominal-slot shortfall, minimize
+the largest single-level shortfall, prefer likely first-choice goalkeepers,
+maximize foreign-player use, and finally randomize ties. Infer a likely
+first-choice goalkeeper from the best current tier among eligible goalkeepers
+at the same club. Do not use projected points or overall rank for selection,
+lineup placement, or missing captaincy.
+
+**Context:** The manager wants auto-fill to express the visible squad rules
+rather than reproduce the unpublished differences inside the projection. A
+goalkeeper's relative tier within his own club is the best current proxy for a
+club starter because the persisted player data has no explicit depth chart.
+
+**Consequences:** Exact 3/3/3 Level 1–3 use wins whenever feasible, balanced
+shortfalls win when it is not, and likely club starters take priority over
+using an additional foreign-player slot. Better-tier players fill starting
+vacancies before bench vacancies, while tied goalkeepers and other candidates
+remain variable. The published ranking still defines eligibility and effective
+tiers, but its projected points and internal order do not affect auto-fill.
+
 ## 2026-09-03 — Runtime locality and bounded read caching own page performance
 
 **Decision:** Run Vercel Functions in Singapore (`sin1`) beside the production
@@ -238,6 +260,10 @@ must all recognize Levels 1–4. Historical selection snapshots remain the
 source of truth once real Gameweeks lock.
 
 ## 2026-08-24 — Auto-fill is a ranking-weighted local draft suggestion
+
+**Superseded on 2026-09-03:** Auto-fill now uses tier targets, likely
+first-choice goalkeepers, foreign-player use, and random ties without projected
+points or overall rank, as defined by the decision above.
 
 **Decision:** Auto-fill preserves selected players and fills only vacancies
 from the complete eligible pool, independent of visible market filters. It

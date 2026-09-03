@@ -13,9 +13,31 @@ export type AutoFillCandidate = {
   position: FantasyPosition;
   tier: number;
   isThai: boolean;
-  projectedPoints: number;
-  overallRank: number;
+  isLikelyClubStartingGoalkeeper: boolean;
 };
+
+export function classifyLikelyClubStartingGoalkeepers(
+  candidates: AutoFillCandidate[],
+) {
+  const bestGoalkeeperTierByClub = new Map<string, number>();
+  for (const candidate of candidates) {
+    if (candidate.position !== "goalkeeper") continue;
+    bestGoalkeeperTierByClub.set(
+      candidate.clubId,
+      Math.min(
+        candidate.tier,
+        bestGoalkeeperTierByClub.get(candidate.clubId) ??
+          Number.POSITIVE_INFINITY,
+      ),
+    );
+  }
+  return candidates.map((candidate) => ({
+    ...candidate,
+    isLikelyClubStartingGoalkeeper:
+      candidate.position === "goalkeeper" &&
+      candidate.tier === bestGoalkeeperTierByClub.get(candidate.clubId),
+  }));
+}
 
 export type AutoFillResult = {
   members: DraftLineupMember[];
@@ -28,11 +50,16 @@ type SearchState = {
   clubCounts: Map<string, number>;
   foreignCount: number;
   tierCounts: Map<number, number>;
+  likelyStartingGoalkeeperCount: number;
   lastIndexByPosition: Map<FantasyPosition, number>;
-  score: number;
+  randomScore: number;
 };
 
 const BEAM_WIDTH = 768;
+const tierTargetDeficitCache = new Map<
+  string,
+  { total: number; largest: number }
+>();
 const positions: FantasyPosition[] = [
   "goalkeeper",
   "defender",
@@ -54,21 +81,97 @@ function countBy<T>(values: T[]) {
   return counts;
 }
 
-function candidatePriority(candidate: AutoFillCandidate, random: () => number) {
-  const maximumTier = Math.max(
+function tierTargetDeficit(
+  tierCounts: Map<number, number>,
+  remainingPickCount = 0,
+) {
+  const highestTier = Math.max(
     ...THAI_LEAGUE_FANTASY_RULES.tierSlots.map((slot) => slot.level),
   );
-  const tierPriority =
-    candidate.tier < maximumTier
-      ? 10 ** ((maximumTier - candidate.tier) * 4)
-      : 0;
-  const boundedRandom = Math.min(1, Math.max(0, random()));
-  const qualityVariation = 0.88 + boundedRandom * 0.24;
-  const rankTieBreaker = 1 / Math.max(1, candidate.overallRank);
+  const deficits = THAI_LEAGUE_FANTASY_RULES.tierSlots
+    .filter((slot) => slot.level < highestTier)
+    .map((slot) => Math.max(0, slot.slots - (tierCounts.get(slot.level) ?? 0)));
+  const cacheKey = `${remainingPickCount}:${deficits.join(":")}`;
+  const cached = tierTargetDeficitCache.get(cacheKey);
+  if (cached) return cached;
+  let best = {
+    total: deficits.reduce((sum, deficit) => sum + deficit, 0),
+    largest: Math.max(0, ...deficits),
+  };
+
+  function allocate(index: number, remaining: number, next: number[]) {
+    if (index === deficits.length) {
+      const objective = {
+        total: next.reduce((sum, deficit) => sum + deficit, 0),
+        largest: Math.max(0, ...next),
+      };
+      if (
+        objective.total < best.total ||
+        (objective.total === best.total && objective.largest < best.largest)
+      ) {
+        best = objective;
+      }
+      return;
+    }
+    for (
+      let filled = 0;
+      filled <= Math.min(deficits[index], remaining);
+      filled += 1
+    ) {
+      allocate(index + 1, remaining - filled, [
+        ...next,
+        deficits[index] - filled,
+      ]);
+    }
+  }
+
+  allocate(0, remainingPickCount, []);
+  tierTargetDeficitCache.set(cacheKey, best);
+  return best;
+}
+
+function searchStateObjective(
+  state: SearchState,
+  remainingPickCount: number,
+  remainingGoalkeeperCount: number,
+) {
+  const tierDeficit = tierTargetDeficit(state.tierCounts, remainingPickCount);
+  return {
+    ...tierDeficit,
+    likelyStartingGoalkeeperCount:
+      state.likelyStartingGoalkeeperCount + remainingGoalkeeperCount,
+    foreignCount: Math.min(
+      THAI_LEAGUE_FANTASY_RULES.foreignPlayerLimit,
+      state.foreignCount + remainingPickCount,
+    ),
+  };
+}
+
+function compareSearchStates(
+  left: {
+    state: SearchState;
+    objective: ReturnType<typeof searchStateObjective>;
+  },
+  right: {
+    state: SearchState;
+    objective: ReturnType<typeof searchStateObjective>;
+  },
+) {
+  const leftObjective = left.objective;
+  const rightObjective = right.objective;
   return (
-    tierPriority +
-    Math.max(0, candidate.projectedPoints) * qualityVariation +
-    rankTieBreaker
+    leftObjective.total - rightObjective.total ||
+    leftObjective.largest - rightObjective.largest ||
+    rightObjective.likelyStartingGoalkeeperCount -
+      leftObjective.likelyStartingGoalkeeperCount ||
+    rightObjective.foreignCount - leftObjective.foreignCount ||
+    right.state.randomScore - left.state.randomScore ||
+    left.state.picked
+      .map((candidate) => candidate.id)
+      .join("\u0000")
+      .localeCompare(
+        right.state.picked.map((candidate) => candidate.id).join("\u0000"),
+      )
   );
 }
 
@@ -99,6 +202,7 @@ function canAddCandidate(state: SearchState, candidate: AutoFillCandidate) {
 function assignCaptaincy(
   members: DraftLineupMember[],
   candidatesById: Map<string, AutoFillCandidate>,
+  randomPriorityByCandidate: Map<string, number>,
 ) {
   const starterMembers = members.filter(
     (member) => member.lineupRole === "starter" && member.fantasyPlayerId,
@@ -123,8 +227,9 @@ function assignCaptaincy(
     .filter((candidate): candidate is AutoFillCandidate => Boolean(candidate))
     .sort(
       (left, right) =>
-        right.projectedPoints - left.projectedPoints ||
-        left.overallRank - right.overallRank ||
+        left.tier - right.tier ||
+        (randomPriorityByCandidate.get(right.id) ?? 0) -
+          (randomPriorityByCandidate.get(left.id) ?? 0) ||
         left.id.localeCompare(right.id),
     );
 
@@ -165,6 +270,11 @@ export function autoFillSquadDraft({
   const candidatesById = new Map(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
+  const randomPriorityByCandidate = new Map(
+    [...candidates]
+      .sort((left, right) => left.id.localeCompare(right.id))
+      .map((candidate) => [candidate.id, Math.min(1, Math.max(0, random()))]),
+  );
   const occupiedCandidates = members.flatMap((member) => {
     if (!member.fantasyPlayerId) return [];
     const candidate = candidatesById.get(member.fantasyPlayerId);
@@ -185,7 +295,11 @@ export function autoFillSquadDraft({
       member.fantasyPlayerId === null && member.vacancyPosition !== null,
   );
   if (vacancies.length === 0) {
-    const withCaptaincy = assignCaptaincy(members, candidatesById);
+    const withCaptaincy = assignCaptaincy(
+      members,
+      candidatesById,
+      randomPriorityByCandidate,
+    );
     return { members: withCaptaincy, addedPlayerIds: [] };
   }
 
@@ -238,6 +352,8 @@ export function autoFillSquadDraft({
     vacancies.map((member) => member.vacancyPosition!),
   );
   const positionOrder = [...positions].sort((left, right) => {
+    if (left === "goalkeeper" && right !== "goalkeeper") return -1;
+    if (right === "goalkeeper" && left !== "goalkeeper") return 1;
     const leftNeed = vacancyCounts.get(left) ?? 0;
     const rightNeed = vacancyCounts.get(right) ?? 0;
     const leftRatio =
@@ -253,13 +369,6 @@ export function autoFillSquadDraft({
   const pickSequence = positionOrder.flatMap((position) =>
     Array.from({ length: vacancyCounts.get(position) ?? 0 }, () => position),
   );
-  const priorityByCandidate = new Map(
-    candidates.map((candidate) => [
-      candidate.id,
-      candidatePriority(candidate, random),
-    ]),
-  );
-
   let states: SearchState[] = [
     {
       picked: [],
@@ -267,8 +376,11 @@ export function autoFillSquadDraft({
       clubCounts,
       foreignCount,
       tierCounts,
+      likelyStartingGoalkeeperCount: occupiedCandidates.filter(
+        (candidate) => candidate.isLikelyClubStartingGoalkeeper,
+      ).length,
       lastIndexByPosition: new Map(),
-      score: 0,
+      randomScore: 0,
     },
   ];
 
@@ -297,16 +409,34 @@ export function autoFillSquadDraft({
           clubCounts: incrementCount(state.clubCounts, candidate.clubId),
           foreignCount: state.foreignCount + (candidate.isThai ? 0 : 1),
           tierCounts: incrementCount(state.tierCounts, candidate.tier),
+          likelyStartingGoalkeeperCount:
+            state.likelyStartingGoalkeeperCount +
+            (candidate.isLikelyClubStartingGoalkeeper ? 1 : 0),
           lastIndexByPosition: nextIndexes,
-          score: state.score + (priorityByCandidate.get(candidate.id) ?? 0),
+          randomScore:
+            state.randomScore +
+            (randomPriorityByCandidate.get(candidate.id) ?? 0),
         });
       }
     }
 
     if (expanded.length === 0) return null;
+    const remainingPickSequence = pickSequence.slice(step + 1);
+    const remainingGoalkeeperCount = remainingPickSequence.filter(
+      (remainingPosition) => remainingPosition === "goalkeeper",
+    ).length;
     states = expanded
-      .sort((left, right) => right.score - left.score)
-      .slice(0, BEAM_WIDTH);
+      .map((state) => ({
+        state,
+        objective: searchStateObjective(
+          state,
+          remainingPickSequence.length,
+          remainingGoalkeeperCount,
+        ),
+      }))
+      .sort(compareSearchStates)
+      .slice(0, BEAM_WIDTH)
+      .map(({ state }) => state);
   }
 
   const best = states[0];
@@ -317,12 +447,21 @@ export function autoFillSquadDraft({
       position,
       best.picked
         .filter((candidate) => candidate.position === position)
-        .sort(
-          (left, right) =>
-            right.projectedPoints - left.projectedPoints ||
-            left.overallRank - right.overallRank ||
-            left.id.localeCompare(right.id),
-        ),
+        .sort((left, right) => {
+          if (
+            position === "goalkeeper" &&
+            left.isLikelyClubStartingGoalkeeper !==
+              right.isLikelyClubStartingGoalkeeper
+          ) {
+            return left.isLikelyClubStartingGoalkeeper ? -1 : 1;
+          }
+          return (
+            left.tier - right.tier ||
+            (randomPriorityByCandidate.get(right.id) ?? 0) -
+              (randomPriorityByCandidate.get(left.id) ?? 0) ||
+            left.id.localeCompare(right.id)
+          );
+        }),
     ]),
   );
   const candidateBySlotId = new Map<string, AutoFillCandidate>();
@@ -355,7 +494,11 @@ export function autoFillSquadDraft({
       captainRole: "none" as const,
     };
   });
-  const withCaptaincy = assignCaptaincy(filledMembers, candidatesById);
+  const withCaptaincy = assignCaptaincy(
+    filledMembers,
+    candidatesById,
+    randomPriorityByCandidate,
+  );
   const lineup = withCaptaincy.flatMap<LineupPlayer>((member) => {
     if (!member.fantasyPlayerId) return [];
     const candidate = candidatesById.get(member.fantasyPlayerId);

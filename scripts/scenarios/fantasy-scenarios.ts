@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 import { transactionDb } from "../../src/db/transaction.ts";
 import {
   autoFillSquadDraft,
+  classifyLikelyClubStartingGoalkeepers,
   type AutoFillCandidate,
 } from "../../src/lib/fantasy/auto-fill.ts";
 import {
@@ -726,8 +727,6 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
     position: FantasyPosition;
     tier: number;
     is_thai: boolean;
-    projected_points: number;
-    overall_rank: number;
   }>(sql`
     with latest_run as (
       select id
@@ -742,9 +741,7 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
            ce.club_id,
            fp.locked_position as position,
            coalesce(tier.level, 4)::int as tier,
-           fp.is_thai,
-           ranking.projected_points,
-           ranking.overall_rank
+           fp.is_thai
     from latest_run run
     join fantasy_player_rankings ranking on ranking.ranking_run_id = run.id
     join fantasy_players fp on fp.id = ranking.fantasy_player_id
@@ -765,17 +762,17 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
       and registration.status = 'active'
       and ce.competition_season_id = ${season.competition_season_id}::uuid
       and fp.locked_position in ('goalkeeper', 'defender', 'midfielder', 'forward')
-    order by fp.id, ranking.overall_rank, registration.updated_at desc
+    order by fp.id, registration.updated_at desc
   `);
-  return candidatesResult.rows.map((row) => ({
+  const candidates = candidatesResult.rows.map((row) => ({
     id: row.id,
     clubId: row.club_id,
     position: row.position,
     tier: row.tier,
     isThai: row.is_thai,
-    projectedPoints: Number(row.projected_points),
-    overallRank: row.overall_rank,
+    isLikelyClubStartingGoalkeeper: false,
   }));
+  return classifyLikelyClubStartingGoalkeepers(candidates);
 }
 
 function generateSquad(
