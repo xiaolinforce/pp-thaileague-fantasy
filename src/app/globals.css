@@ -3298,7 +3298,8 @@ textarea:focus-visible {
   background: var(--paper);
 }
 
-.compact-tier-quota-dot:nth-child(3n):not(:last-child) {
+.compact-tier-quota-dot:nth-child(3),
+.compact-tier-quota-dot:nth-child(6) {
   margin-right: 8px;
 }
 

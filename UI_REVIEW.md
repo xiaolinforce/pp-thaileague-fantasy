@@ -864,6 +864,24 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   Repository-wide formatting reports the existing 175-file baseline drift;
   every file changed for this task passes targeted Prettier checks.
 
+### 2026-09-03 — Six-dot Level 3 quota group
+
+- **Route and task:** `/team`; retain the 3/3/6 quota structure visually by
+  separating the first two three-dot groups and presenting the final six dots
+  as one uninterrupted group.
+- **Language and responsive evidence:** verified the complete twelve-dot meter
+  in Thai at 360px Mobile and 1280px Desktop, plus English at 360px Mobile. The
+  final six dots use the standard 5px spacing throughout, while the larger
+  13px visual separation remains only after dots 3 and 6. Neither viewport
+  introduced horizontal overflow.
+- **Accessibility:** the change is presentation-only. The existing written
+  live-region summary and focusable quota explanation remain unchanged.
+- **Verification:** all 94 Fantasy tests, Email tests, types, targeted Prettier,
+  and the production build passed with no browser console error. Repository-wide
+  lint retains the pre-existing `react-hooks/set-state-in-effect` error in
+  `src/app/team/transfers-client.tsx`; repository-wide formatting retains its
+  existing baseline drift outside this change.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.
