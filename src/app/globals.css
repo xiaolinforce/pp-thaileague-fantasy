@@ -3881,6 +3881,10 @@ textarea:focus-visible {
   color: white;
 }
 
+button.vacant-squad-slot {
+  cursor: pointer;
+}
+
 .vacant-squad-token-shell:hover {
   transform: none;
 }

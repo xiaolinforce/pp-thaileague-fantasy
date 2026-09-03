@@ -84,6 +84,7 @@ export default function TransfersClient({
   onPlayerSelect,
   onPlayerRemove,
   isAutoFilling,
+  marketPositionFilterRequest,
 }: {
   data: CompetitionDataset;
   fantasy: FantasyState;
@@ -94,6 +95,10 @@ export default function TransfersClient({
   onPlayerSelect: (player: CompetitionPlayerView) => void;
   onPlayerRemove: (player: CompetitionPlayerView) => void;
   isAutoFilling: boolean;
+  marketPositionFilterRequest: {
+    position: CompetitionPosition;
+    requestId: number;
+  } | null;
 }) {
   const { language, translate } = useLanguage();
   const [query, setQuery] = useState("");
@@ -117,6 +122,11 @@ export default function TransfersClient({
     return () =>
       desktopQuery.removeEventListener("change", syncFilterVisibility);
   }, []);
+
+  useEffect(() => {
+    if (!marketPositionFilterRequest) return;
+    setPosition(marketPositionFilterRequest.position);
+  }, [marketPositionFilterRequest]);
 
   const clubs = useMemo(
     () =>

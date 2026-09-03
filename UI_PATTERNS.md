@@ -118,6 +118,8 @@ proven behaviors unless a deliberate product decision replaces them:
 - A new team presents 15 visible position-locked vacancies. An untouched empty
   draft does not trigger an unsaved-change warning; a partial squad stays local
   and cannot be saved.
+- Selecting a vacancy filters the player market to its position. On Mobile, it
+  also switches to the market tab.
 - Keep selected players visible in the market, identify them as owned, and
   expose removal rather than another transfer-in action.
 - A compatible market player fills the first matching vacancy directly.

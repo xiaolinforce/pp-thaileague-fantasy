@@ -541,6 +541,7 @@ function VacantSquadSlot({
   const isSource = swapState === "source";
   const localizedPosition = getLocalizedPositionLabel(position, language);
   const shortPosition = getShortPositionLabel(position);
+  const canSelectSlot = !swapState || swapState === "available";
   const slotContent = (
     <>
       <span className="vacant-squad-icon">
@@ -558,20 +559,19 @@ function VacantSquadSlot({
       onClick={isSource ? onSelect : undefined}
     >
       {captain && <SquadCaptainBadge captain={captain} />}
-      {swapState && !isSource ? (
+      {canSelectSlot ? (
         <button
           type="button"
           className="vacant-squad-slot"
           onClick={onSelect}
-          disabled={swapState === "unavailable"}
           aria-label={
             language === "th"
               ? swapState === "available"
                 ? `สลับกับช่องว่าง ${localizedPosition}`
-                : `ไม่สามารถสลับกับช่องว่าง ${localizedPosition}`
+                : `เลือกนักเตะตำแหน่ง ${localizedPosition}`
               : swapState === "available"
                 ? `Swap with vacant ${localizedPosition} slot`
-                : `Cannot swap with vacant ${localizedPosition} slot`
+                : `Choose a ${localizedPosition}`
           }
         >
           {slotContent}
@@ -660,6 +660,8 @@ export default function TeamClient({
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [workspaceView, setWorkspaceView] =
     useState<TeamWorkspaceView>("squad");
+  const [marketPositionFilterRequest, setMarketPositionFilterRequest] =
+    useState<{ position: CompetitionPosition; requestId: number } | null>(null);
   const workspaceViewRef = useRef<TeamWorkspaceView>("squad");
   const workspaceScrollPositions = useRef<
     Partial<Record<TeamWorkspaceView, number>>
@@ -1227,8 +1229,17 @@ export default function TeamClient({
     setSwapFrom(null);
   };
 
-  const selectVacancy = (slotId: string) => {
-    if (!swapFrom) return;
+  const selectVacancy = (slotId: string, position: CompetitionPosition) => {
+    if (!swapFrom) {
+      setMarketPositionFilterRequest((current) => ({
+        position,
+        requestId: (current?.requestId ?? 0) + 1,
+      }));
+      if (window.matchMedia("(width < 48rem)").matches) {
+        changeWorkspaceView("market");
+      }
+      return;
+    }
     if (swapFrom === slotId) {
       setSwapFrom(null);
       return;
@@ -1453,7 +1464,9 @@ export default function TeamClient({
                           <VacantSquadSlot
                             key={slot.member.slotId}
                             position={slot.position}
-                            onSelect={() => selectVacancy(slot.member.slotId)}
+                            onSelect={() =>
+                              selectVacancy(slot.member.slotId, slot.position)
+                            }
                             onSwap={() => startVacancySwap(slot.member.slotId)}
                             actionsDisabled={interactionsDisabled}
                             hideAction={Boolean(swapFrom)}
@@ -1504,7 +1517,9 @@ export default function TeamClient({
                     ) : (
                       <VacantSquadSlot
                         position={slot.position}
-                        onSelect={() => selectVacancy(slot.member.slotId)}
+                        onSelect={() =>
+                          selectVacancy(slot.member.slotId, slot.position)
+                        }
                         onSwap={() => startVacancySwap(slot.member.slotId)}
                         actionsDisabled={interactionsDisabled}
                         hideAction={Boolean(swapFrom)}
@@ -1537,6 +1552,7 @@ export default function TeamClient({
             onPlayerSelect={setSelected}
             onPlayerRemove={removePlayer}
             isAutoFilling={isAutoFilling}
+            marketPositionFilterRequest={marketPositionFilterRequest}
           />
         </div>
       </main>
