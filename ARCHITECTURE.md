@@ -54,6 +54,7 @@ create synthetic manager identities.
 | Game rules           | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
 | Squad auto-fill      | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                 |
 | Authentication       | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
+| Observability        | `src/instrumentation*.ts`, Sentry    | Privacy-minimized client/server/edge errors, sampled traces, masked error replays, and releases.  |
 | Account provisioning | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
 | League operations    | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
 | Transactional email  | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
@@ -99,6 +100,16 @@ fixture-only model used by `/fixtures` are shared through tagged five-minute
 server caches. Fantasy mutations invalidate the relevant tags.
 Main navigation does not automatically prefetch these authenticated database
 routes, avoiding duplicate hidden-sidebar requests and speculative SQL work.
+
+Sentry initializes through the Next.js instrumentation conventions for the
+browser, Node.js, and Edge runtimes. Environments are tagged as `development`,
+`preview`, or `production`; errors remain fully sampled while traces are
+sampled at 5% in Production. Session Replay records only sessions containing an
+error and masks all text, inputs, and media. Cookies, headers, query values,
+HTTP bodies, database values, user details, and local variables are disabled at
+the SDK boundary. Vercel Runtime Logs remain the short-term raw operational log
+source, while Sentry owns longer-lived error correlation, releases, source maps,
+the daily auth-maintenance check-in, and public uptime monitoring.
 
 ## Read flow
 

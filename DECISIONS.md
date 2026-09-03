@@ -4,6 +4,26 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-03 — Sentry owns privacy-minimized application monitoring
+
+**Decision:** Use Sentry Developer Free for uncaught client, server, and Edge
+errors, sampled performance traces, masked error-only Session Replay, releases,
+source maps, public uptime, and the existing daily auth-maintenance Cron. Keep
+Vercel Runtime Logs as the short-lived raw operational log source.
+
+**Context:** Vercel Hobby logs are useful for immediate diagnosis but do not
+provide durable grouping, release correlation, replay, uptime, or missed-Cron
+notification. A full log drain or Datadog deployment would add cost and
+operational scope before the public traffic level justifies it.
+
+**Consequences:** Production traces sample at 5%, normal sessions are not
+recorded, and an error may retain a fully masked replay. The SDK disables
+automatic collection of user details, cookies, headers, query values, HTTP
+bodies, database values, and local variables. Build credentials remain secret
+in Vercel, Preview and Production use separate environment tags, and quota or
+traffic growth must trigger a sampling and plan review before enabling broader
+logging.
+
 ## 2026-09-03 — Auto-fill rebuilds the strongest valid starting eleven
 
 **Decision:** After completing the 15-player squad, compare every valid

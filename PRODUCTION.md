@@ -11,6 +11,7 @@
 | Bot protection      | Cloudflare Turnstile for Email OTP requests              |
 | Transactional email | Resend from `no-reply@auth.ppfootball.net`               |
 | User support        | `support@ppfootball.net`, forwarded to the product owner |
+| Monitoring          | Sentry Developer Free plus Vercel Runtime Logs           |
 
 The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
@@ -26,9 +27,9 @@ audit rows between environments.
    code that depends on it. Never rewrite migration history.
 5. Fast-forward or merge the reviewed commit to `main` and wait for the Vercel
    Production deployment to become Ready.
-6. Check `/`, `/privacy`, `/terms`, authenticated `/team`, Google sign-in, Email
-   OTP, and Vercel runtime logs. Confirm `fantasy.ppfootball.net` points to the
-   new Current deployment.
+6. Check `/`, `/api/health`, `/privacy`, `/terms`, authenticated `/team`, Google
+   sign-in, Email OTP, Vercel runtime logs, and Sentry for release/source-map
+   errors. Confirm `fantasy.ppfootball.net` points to the new Current deployment.
 7. If a release fails, immediately promote the last known-good Vercel deployment.
    If a data write is involved, stop writes, preserve logs, and restore or
    forward-fix Neon only after identifying the exact affected interval.
@@ -57,14 +58,24 @@ requires the Production-only `CRON_SECRET` and deletes only:
 - privacy-safe email delivery metadata older than 90 days.
 
 Accounts and every Fantasy manager, team, selection, score, transfer, league,
-and audit row are intentionally preserved. Review the cron runtime log weekly
-and investigate any `auth_maintenance_failed` event or a missing daily run.
+and audit row are intentionally preserved. Sentry receives an
+`auth-maintenance` check-in for every authorized execution. Review it weekly and
+investigate any failed or missing run alongside the Vercel runtime log.
 
 ## Monitoring cadence
 
+Sentry monitors `https://fantasy.ppfootball.net/api/health` for application
+availability, groups uncaught errors by release, and emails the account owner
+for high-priority new issues, regressions, failed/missed Cron runs, and outages.
+Production events are isolated with the `production` environment tag. Session
+Replay is error-only and masks text, inputs, and media; the SDK does not collect
+cookies, request/response bodies, query values, headers, database values, user
+details, or local variables.
+
 Daily during an open Gameweek:
 
-- Vercel function errors, latency, and recent 5xx responses;
+- Sentry error/outage issues, auth-maintenance monitor status, and sampled traces;
+- Vercel function errors, latency, structured timing logs, and recent 5xx responses;
 - successful Google and Email OTP sign-in from a non-admin test session;
 - Resend delivery failures, suppressions, and quota consumption; and
 - Neon compute/database availability and connection errors.
@@ -113,8 +124,9 @@ confirmation and authorization.
 
 1. Classify the impact: availability, authentication/email, data integrity,
    unauthorized access, or source-data correctness.
-2. Stop the smallest affected write path. Preserve Vercel logs, Neon evidence,
-   deployment IDs, timestamps, and the responsible commit.
+2. Stop the smallest affected write path. Preserve Sentry issue/event and
+   release links, Vercel logs, Neon evidence, deployment IDs, timestamps, and
+   the responsible commit.
 3. Restore service by promoting a known-good deployment or applying a reviewed
    forward fix. Do not experiment directly on Production.
 4. For database incidents, use Neon point-in-time restore to a separate branch

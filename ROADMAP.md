@@ -32,14 +32,16 @@ Fantasy service:
    privacy/terms pages, configured Google OAuth, and approved
    `AUTH_PRODUCTION_READY`.
 2. Account recovery/support, abuse response, retention, and daily expired-auth
-   cleanup are documented and implemented. Provider quota alerts and broader
-   auth/email observability still need an external notification destination.
+   cleanup are documented and implemented. Sentry now provides external error,
+   Cron, and uptime notifications; provider quota alerts and broader auth/email
+   business-event observability remain.
 3. Review the admin role assignment process and audit retention policy.
 4. The maintenance schedule, upstream failure behavior, and current operational
    owner are documented. Source terms review, automated freshness reporting,
    and external alerting remain.
 5. Backup/recovery, migration promotion, rollback, monitoring, and incident
-   procedures are documented. A recovery drill and external alerts remain.
+   procedures are documented, and Sentry supplies application alerts. A named
+   recovery drill remains.
 6. Expand automated coverage to Server Actions, database invariants,
    source-data maintenance, and end-to-end critical paths.
 7. Decide the production localization and SEO model instead of relying on

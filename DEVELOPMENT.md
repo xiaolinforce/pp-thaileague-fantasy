@@ -34,6 +34,8 @@ Set the pooled Neon connection string for the intended development branch:
 | `NEXT_PUBLIC_SITE_URL`                                          | Optional public metadata base URL; local fallback is `http://localhost:3006`.               |
 | `FANTASY_SCENARIO_BRANCH_ID`                                    | Exact disposable Neon branch ID required by the destructive QA scenario runner.             |
 | `FANTASY_SCENARIO_SEASON_SLUG`, `FANTASY_SCENARIO_PRIMARY_TEAM` | Optional scenario target overrides when more than one season or tester team exists.         |
+| `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_ENVIRONMENT`      | Public Sentry ingestion endpoint and `development`/`preview`/`production` event tag.         |
+| `SENTRY_AUTH_TOKEN`                                             | Secret build-only token for Sentry release and source-map uploads; never expose to clients.  |
 
 Never commit a real connection string, auth secret, OAuth credential, email API
 key, or Turnstile secret. The Turnstile site key is intentionally public; do
@@ -73,6 +75,23 @@ Logs to compare `durationMs` after deployment. Test cold and warm requests
 separately: competition data and the fixture-only model have five-minute tagged
 caches. In-app Fantasy mutations invalidate those tags; direct data maintenance
 may remain visible for at most the cache lifetime.
+
+### Error monitoring
+
+Sentry receives uncaught browser, Server Component, Route Handler, Server
+Action, and Edge errors through the Next.js instrumentation hooks. Keep the DSN
+in `.env.local` for local verification and set the environment tag to
+`development`; Vercel Preview and Production use their matching tags. The
+ignored `.env.sentry-build-plugin` file may be used for a one-off local
+source-map test, but the persistent build token belongs in Vercel environment
+variables.
+
+Do not attach email addresses, OTPs, cookies, session values, OAuth tokens,
+Turnstile responses, request/response bodies, raw database values, or invite
+codes to Sentry events or logs. The shared SDK configuration disables those
+automatic data categories and fully masks error-only Session Replays. Use
+`Sentry.logger` only for bounded operational events with field names reviewed
+for the same privacy rule.
 
 ## Commands
 
