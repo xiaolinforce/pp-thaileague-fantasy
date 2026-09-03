@@ -435,6 +435,7 @@ function SquadPlayer({
     <Localized>
       <div
         className={`squad-token-shell${swapState ? ` swap-${swapState}` : ""}`}
+        onClick={swapState === "source" ? () => onSelect(player) : undefined}
       >
         {captain && <SquadCaptainBadge captain={captain} />}
         <span className="squad-player-tier">
@@ -446,7 +447,10 @@ function SquadPlayer({
         </span>
         <button
           className="squad-token"
-          onClick={() => onSelect(player)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onSelect(player);
+          }}
           aria-label={ariaLabel}
           aria-pressed={swapState === "source" ? true : undefined}
           disabled={swapState === "unavailable"}
