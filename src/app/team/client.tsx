@@ -373,11 +373,18 @@ function formatClientViolation(
       return format("คุณเลือกผู้เล่นต่างชาติเกิน {count} คน", {
         count: violation.details?.limit,
       });
-    case "tier_quota":
-      return format("ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน", {
-        level: violation.details?.level,
-        count: violation.details?.limit,
-      });
+    case "tier_quota": {
+      const level = violation.details?.level;
+      return format(
+        level === 1
+          ? "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน"
+          : "ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน",
+        {
+          level,
+          count: violation.details?.limit,
+        },
+      );
+    }
     case "transfer_limit":
       return format(
         "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)",

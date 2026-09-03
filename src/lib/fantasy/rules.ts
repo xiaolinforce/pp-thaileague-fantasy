@@ -197,14 +197,19 @@ export function validateSquad(
     }
   }
 
+  let previousTierOverflow = 0;
   for (const tier of getCumulativeTierLimits(rules)) {
     const usedSlots = squad.filter(
       (player) => player.tier <= tier.level,
     ).length;
-    if (usedSlots > tier.limit) {
+    const tierOverflow = Math.max(0, usedSlots - tier.limit);
+    if (tierOverflow > previousTierOverflow) {
       violations.push({
         code: "tier_quota",
-        message: `ผู้เล่นระดับ 1–${tier.level} รวมกันได้ไม่เกิน ${tier.limit} คน`,
+        message:
+          tier.level === 1
+            ? `ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน ${tier.limit} คน`
+            : `ผู้เล่นระดับ 1–${tier.level} รวมกันได้ไม่เกิน ${tier.limit} คน`,
         details: {
           level: tier.level,
           limit: tier.limit,
@@ -212,6 +217,7 @@ export function validateSquad(
         },
       });
     }
+    previousTierOverflow = tierOverflow;
   }
 
   return violations;

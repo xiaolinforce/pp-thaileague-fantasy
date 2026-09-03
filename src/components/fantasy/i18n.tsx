@@ -162,6 +162,8 @@ const translations: Record<string, string> = {
     "You have selected more than {count} foreign players",
   "ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน":
     "You can select no more than {count} players from Tiers 1–{level} combined",
+  "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน":
+    "You can select no more than {count} Tier 1 players",
   ลบนักเตะออกจากตำแหน่งแล้ว: "Player removed from the slot",
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
@@ -224,7 +226,7 @@ const translations: Record<string, string> = {
   "เลือกผู้เล่นจากสโมสรเดียวกันได้ไม่เกิน 3 คน":
     "Select no more than 3 players from one club",
   "มีนักเตะต่างชาติได้ไม่เกิน 7 คน": "Select no more than 7 foreign players",
-  "ผู้เล่นระดับ 1–1 รวมกันได้ไม่เกิน 3 คน":
+  "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน 3 คน":
     "Select no more than 3 Tier 1 players",
   "ผู้เล่นระดับ 1–2 รวมกันได้ไม่เกิน 6 คน":
     "Select no more than 6 players across Tiers 1–2",

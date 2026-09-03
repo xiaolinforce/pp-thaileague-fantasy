@@ -86,11 +86,20 @@ test("accepts the four-tier nominal allocation", () => {
   assert.deepEqual(validateSquad(makeSquad()), []);
 });
 
-test("rejects four level-one players", () => {
+test("reports only the level-one quota when its overflow carries forward", () => {
   const violations = validateSquad(
-    makeSquad([1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3]),
+    makeSquad([1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 4, 4]),
   );
-  assert.ok(violations.some((violation) => violation.code === "tier_quota"));
+  assert.deepEqual(
+    violations.filter((violation) => violation.code === "tier_quota"),
+    [
+      {
+        code: "tier_quota",
+        message: "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน 3 คน",
+        details: { level: 1, limit: 3, actual: 4 },
+      },
+    ],
+  );
 });
 
 test("allows lower tiers to fill unused higher-tier slots", () => {
