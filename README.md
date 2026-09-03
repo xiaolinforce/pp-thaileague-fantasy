@@ -21,7 +21,8 @@ provisional/final Gameweek scores, and presents Classic league standings.
   points per Gameweek.
 - Tier-guided squad auto-fill that completes vacant slots, targets the full
   tier allocation, prefers likely first-choice goalkeepers and foreign players,
-  and keeps the result editable until the manager saves.
+  rebuilds the strongest valid starting eleven while preserving captaincy, and
+  keeps the result editable until the manager saves.
 - Real Overall and invite-only Private Classic leagues with owner controls,
   membership limits, audit history, persisted latest Overall ranks, and no
   seeded competitors.

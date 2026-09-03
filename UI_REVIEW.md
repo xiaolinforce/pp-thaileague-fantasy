@@ -769,6 +769,26 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   formatting remains blocked by pre-existing style drift outside this change;
   every file changed for this task passes targeted Prettier checks.
 
+### 2026-09-03 — Auto-fill strongest-lineup explanation
+
+- **Route and task:** `/rules`; explain that auto-fill rebuilds a valid starting
+  eleven from all 15 selected players with better tiers first and orders the
+  three outfield substitutes by the same rule.
+- **Language and responsive evidence:** Thai and English rendered in the in-app
+  Browser at the normal Desktop viewport and 360px Mobile. The expanded
+  auto-fill list item remains contained in the Squad selection card; Mobile
+  document and client widths both measured 345px. The Guest preference and
+  viewport were restored to Thai and Desktop after review.
+- **Accessibility:** the updated explanation remains one semantic list item
+  with no new control, focus target, or color-dependent meaning.
+- **Known exclusions:** the Auto-fill action was not submitted in the browser
+  because that would replace the current unsaved draft; its complete-squad
+  lineup behavior is covered by deterministic rule tests instead.
+- **Verification:** responsive Thai/English rendered inspection, all Fantasy
+  tests, auth/email tests, types, lint, and production build passed. The seven
+  files changed for this task pass targeted Prettier checks; repository-wide
+  formatting still reports the existing 168-file baseline drift.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

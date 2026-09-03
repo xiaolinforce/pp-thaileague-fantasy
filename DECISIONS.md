@@ -4,6 +4,25 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-03 — Auto-fill rebuilds the strongest valid starting eleven
+
+**Decision:** After completing the 15-player squad, compare every valid
+11-player lineup. Preserve valid existing captain and vice-captain assignments
+as starters, prefer a likely club starting goalkeeper, then maximize Level 1,
+Level 2, Level 3, and Level 4 starters in that order. Randomize only exact ties
+and order the three outfield substitutes by the same tier-first rule.
+
+**Context:** Filling stronger newly selected players into starter-shaped
+vacancies did not reconsider stronger players already on the bench or allow a
+better valid formation. The full squad is small enough to evaluate all 1,365
+possible starting elevens deterministically and keep formation rules explicit.
+
+**Consequences:** Auto-fill may change formation, starting roles, and bench
+order without changing the 15 selected players. Existing valid captaincy can
+keep a lower-tier player in the starting eleven. Projected points and overall
+rank remain excluded, and the result stays an unsaved client draft until the
+manager saves normally.
+
 ## 2026-09-03 — Auto-fill captaincy is tier and position ordered
 
 **Decision:** Preserve each valid captain or vice-captain already assigned to a

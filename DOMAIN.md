@@ -140,11 +140,13 @@ remain hard limits.
 
 For goalkeeper inference, a lower tier number is better; goalkeepers tied for
 their club's best tier are treated equally because the current data does not
-store an explicit depth chart. A likely club starter occupies a vacant Fantasy
-starting-goalkeeper slot before a fallback, and otherwise newly selected
-players with better tiers occupy vacant starting slots before bench slots of
-the same position. Existing valid captaincy is preserved; any missing captain
-or vice-captain is assigned independently from the best remaining tier,
+store an explicit depth chart. After completing the squad, auto-fill compares
+every valid starting eleven from all 15 selected players. Existing valid
+captain and vice-captain assignments remain starters. It then prefers a likely
+club starting goalkeeper and maximizes Level 1 starters, followed by Levels 2,
+3, and 4 in order; randomness breaks an otherwise exact tie. The remaining
+outfield substitutes are ordered by the same tier-first rule. Any missing
+captain or vice-captain is assigned independently from the best remaining tier,
 favoring forwards, then midfielders, defenders, and goalkeepers. Randomness
 breaks ties within the same tier and position. The suggestion changes only the
 client draft and has no transfer or persistence effect until the manager saves

@@ -426,8 +426,90 @@ test("preserves an existing captain and fills only the missing vice-captain", ()
     preservedCaptain.fantasyPlayerId,
   );
   assert.equal(
+    lineup.find((player) => player.captainRole === "captain")?.lineupRole,
+    "starter",
+  );
+  assert.equal(
     lineup.find((player) => player.captainRole === "vice_captain")?.position,
     "forward",
+  );
+});
+
+test("rebuilds the strongest valid starting eleven from the complete squad", () => {
+  const candidates: AutoFillCandidate[] = [
+    ["gk-1", "goalkeeper", 1, true],
+    ["gk-2", "goalkeeper", 4, true],
+    ["def-1", "defender", 1, false],
+    ["def-2", "defender", 2, false],
+    ["def-3", "defender", 3, false],
+    ["def-4", "defender", 4, false],
+    ["def-5", "defender", 4, false],
+    ["mid-1", "midfielder", 1, false],
+    ["mid-2", "midfielder", 2, false],
+    ["mid-3", "midfielder", 2, false],
+    ["mid-4", "midfielder", 3, false],
+    ["mid-5", "midfielder", 3, false],
+    ["fwd-1", "forward", 4, false],
+    ["fwd-2", "forward", 4, false],
+    ["fwd-3", "forward", 4, false],
+  ].map(([id, position, tier, isLikelyClubStartingGoalkeeper], index) => ({
+    id: id as string,
+    clubId: `club-${index}`,
+    position: position as AutoFillCandidate["position"],
+    tier: tier as number,
+    isThai: true,
+    isLikelyClubStartingGoalkeeper: isLikelyClubStartingGoalkeeper as boolean,
+  }));
+  const idsByPosition = new Map(
+    positions.map((position) => [
+      position,
+      candidates
+        .filter((candidate) => candidate.position === position)
+        .map((candidate) => candidate.id),
+    ]),
+  );
+  const members = createEmptySquadDraft().map((member) => {
+    const position = member.vacancyPosition!;
+    const fantasyPlayerId = idsByPosition.get(position)?.shift();
+    assert.ok(fantasyPlayerId);
+    return {
+      ...member,
+      fantasyPlayerId,
+      vacancyPosition: null,
+    };
+  });
+  assert.equal(
+    members.find((member) => member.fantasyPlayerId === "mid-5")?.lineupRole,
+    "bench",
+  );
+
+  const result = autoFillSquadDraft({
+    members,
+    candidates,
+    random: seededRandom(59),
+  });
+
+  assert.ok(result);
+  const lineup = toLineup(result.members, candidates);
+  assert.deepEqual(validateLineup(lineup), []);
+  assert.equal(
+    lineup.filter((player) => player.tier <= 3 && player.lineupRole === "bench")
+      .length,
+    0,
+  );
+  assert.equal(
+    lineup.find((player) => player.id === "mid-5")?.lineupRole,
+    "starter",
+  );
+  assert.deepEqual(
+    lineup
+      .filter(
+        (player) =>
+          player.lineupRole === "bench" && player.position !== "goalkeeper",
+      )
+      .sort((left, right) => left.benchOrder! - right.benchOrder!)
+      .map((player) => player.tier),
+    [4, 4, 4],
   );
 });
 
