@@ -12,6 +12,8 @@ export type AutoFillCandidate = {
   clubId: string;
   position: FantasyPosition;
   tier: number;
+  overallRank: number;
+  projectedPoints: number;
   isThai: boolean;
   isLikelyClubStartingGoalkeeper: boolean;
 };
@@ -51,11 +53,15 @@ type SearchState = {
   foreignCount: number;
   tierCounts: Map<number, number>;
   likelyStartingGoalkeeperCount: number;
+  largestQualityBand: number;
+  qualityBandTotal: number;
   lastIndexByPosition: Map<FantasyPosition, number>;
   randomScore: number;
 };
 
 const BEAM_WIDTH = 768;
+const QUALITY_POOL_FRACTION = 0.25;
+const MINIMUM_QUALITY_POOL_SIZE = 3;
 const tierTargetDeficitCache = new Map<
   string,
   { total: number; largest: number }
@@ -85,6 +91,41 @@ function countBy<T>(values: T[]) {
     counts.set(value, (counts.get(value) ?? 0) + 1);
   }
   return counts;
+}
+
+function buildQualityBandByCandidate(candidates: AutoFillCandidate[]) {
+  const groupedCandidates = new Map<string, AutoFillCandidate[]>();
+  for (const candidate of candidates) {
+    const key = `${candidate.position}:${candidate.tier}`;
+    groupedCandidates.set(key, [
+      ...(groupedCandidates.get(key) ?? []),
+      candidate,
+    ]);
+  }
+
+  const qualityBandByCandidate = new Map<string, number>();
+  for (const group of groupedCandidates.values()) {
+    const ordered = [...group].sort(
+      (left, right) =>
+        right.projectedPoints - left.projectedPoints ||
+        left.overallRank - right.overallRank ||
+        left.id.localeCompare(right.id),
+    );
+    const qualityPoolSize = Math.min(
+      ordered.length,
+      Math.max(
+        MINIMUM_QUALITY_POOL_SIZE,
+        Math.ceil(ordered.length * QUALITY_POOL_FRACTION),
+      ),
+    );
+    ordered.forEach((candidate, index) => {
+      qualityBandByCandidate.set(
+        candidate.id,
+        Math.floor(index / Math.max(1, qualityPoolSize)),
+      );
+    });
+  }
+  return qualityBandByCandidate;
 }
 
 function tierTargetDeficit(
@@ -171,6 +212,8 @@ function compareSearchStates(
     rightObjective.likelyStartingGoalkeeperCount -
       leftObjective.likelyStartingGoalkeeperCount ||
     rightObjective.foreignCount - leftObjective.foreignCount ||
+    left.state.largestQualityBand - right.state.largestQualityBand ||
+    left.state.qualityBandTotal - right.state.qualityBandTotal ||
     right.state.randomScore - left.state.randomScore ||
     left.state.picked
       .map((candidate) => candidate.id)
@@ -232,6 +275,7 @@ function getPreservedCaptaincyIds(members: DraftLineupMember[]) {
 function assignCaptaincy(
   members: DraftLineupMember[],
   candidatesById: Map<string, AutoFillCandidate>,
+  qualityBandByCandidate: Map<string, number>,
   randomPriorityByCandidate: Map<string, number>,
 ) {
   const starterMembers = members.filter(
@@ -246,6 +290,8 @@ function assignCaptaincy(
         left.tier - right.tier ||
         captaincyPositionPriority[left.position] -
           captaincyPositionPriority[right.position] ||
+        (qualityBandByCandidate.get(left.id) ?? Number.POSITIVE_INFINITY) -
+          (qualityBandByCandidate.get(right.id) ?? Number.POSITIVE_INFINITY) ||
         (randomPriorityByCandidate.get(right.id) ?? 0) -
           (randomPriorityByCandidate.get(left.id) ?? 0) ||
         left.id.localeCompare(right.id),
@@ -288,6 +334,7 @@ export function autoFillSquadDraft({
   const candidatesById = new Map(
     candidates.map((candidate) => [candidate.id, candidate]),
   );
+  const qualityBandByCandidate = buildQualityBandByCandidate(candidates);
   const randomPriorityByCandidate = new Map(
     [...candidates]
       .sort((left, right) => left.id.localeCompare(right.id))
@@ -316,6 +363,7 @@ export function autoFillSquadDraft({
     const withCaptaincy = assignCaptaincy(
       members,
       candidatesById,
+      qualityBandByCandidate,
       randomPriorityByCandidate,
     );
     return { members: withCaptaincy, addedPlayerIds: [] };
@@ -397,6 +445,8 @@ export function autoFillSquadDraft({
       likelyStartingGoalkeeperCount: occupiedCandidates.filter(
         (candidate) => candidate.isLikelyClubStartingGoalkeeper,
       ).length,
+      largestQualityBand: 0,
+      qualityBandTotal: 0,
       lastIndexByPosition: new Map(),
       randomScore: 0,
     },
@@ -421,6 +471,8 @@ export function autoFillSquadDraft({
         nextIds.add(candidate.id);
         const nextIndexes = new Map(state.lastIndexByPosition);
         nextIndexes.set(position, index);
+        const qualityBand =
+          qualityBandByCandidate.get(candidate.id) ?? Number.POSITIVE_INFINITY;
         expanded.push({
           picked: [...state.picked, candidate],
           pickedIds: nextIds,
@@ -430,6 +482,8 @@ export function autoFillSquadDraft({
           likelyStartingGoalkeeperCount:
             state.likelyStartingGoalkeeperCount +
             (candidate.isLikelyClubStartingGoalkeeper ? 1 : 0),
+          largestQualityBand: Math.max(state.largestQualityBand, qualityBand),
+          qualityBandTotal: state.qualityBandTotal + qualityBand,
           lastIndexByPosition: nextIndexes,
           randomScore:
             state.randomScore +
@@ -475,6 +529,9 @@ export function autoFillSquadDraft({
           }
           return (
             left.tier - right.tier ||
+            (qualityBandByCandidate.get(left.id) ?? Number.POSITIVE_INFINITY) -
+              (qualityBandByCandidate.get(right.id) ??
+                Number.POSITIVE_INFINITY) ||
             (randomPriorityByCandidate.get(right.id) ?? 0) -
               (randomPriorityByCandidate.get(left.id) ?? 0) ||
             left.id.localeCompare(right.id)
@@ -515,6 +572,7 @@ export function autoFillSquadDraft({
   const withCaptaincy = assignCaptaincy(
     filledMembers,
     candidatesById,
+    qualityBandByCandidate,
     randomPriorityByCandidate,
   );
   const lineup = withCaptaincy.flatMap<LineupPlayer>((member) => {

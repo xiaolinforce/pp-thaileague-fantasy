@@ -24,6 +24,33 @@ in Vercel, Preview and Production use separate environment tags, and quota or
 traffic growth must trigger a sampling and plan review before enabling broader
 logging.
 
+## 2026-09-03 — Auto-fill randomizes inside published quality bands
+
+**Decision:** Keep the existing lexicographic priorities—tier-target balance,
+likely first-choice goalkeepers, then foreign-player use—and apply ranking
+quality only where randomness previously broke a tie. Within each position and
+tier, order the current published ranking by projected points and use overall
+rank to break equal projections. Split that order into equal-size bands whose
+size is at least three players or 25% of the group, rounded up. Prefer the
+feasible suggestion with the lowest worst band, then the lowest total band
+distance, and randomize after those comparisons. Use the same band-before-random
+rule for assigning equally tiered new players to slots and for missing
+captaincy when tier and position are equal.
+
+**Context:** Fully uniform random ties can select players with materially weaker
+scoring prospects even when several similarly strong choices remain. Sorting
+directly by projected points would make Auto-fill deterministic and would let
+small unpublished projection differences dominate the visible squad goals.
+
+**Consequences:** Auto-fill retains variety among strong candidates and falls
+through to lower bands only when club, foreign-player, tier, position, or other
+hard constraints require it. Published projection values never outrank the
+visible tier, goalkeeper, foreign-player, formation, or captaincy rules. No
+schema migration is required because each immutable ranking snapshot already
+stores projected points and overall rank. This decision supersedes only the
+projection-exclusion clauses in the Auto-fill decisions below; their other
+priorities remain current.
+
 ## 2026-09-03 — Auto-fill preserves formation and fills vacancies only
 
 **Decision:** Treat every draft slot's starter or substitute role and bench
@@ -70,6 +97,9 @@ manager saves normally.
 
 ## 2026-09-03 — Auto-fill captaincy is tier and position ordered
 
+**Updated:** The quality-band decision above now applies before the final random
+tie; tier and position priority remain unchanged.
+
 **Decision:** Preserve each valid captain or vice-captain already assigned to a
 starter and fill only a missing role. Choose independently from the best
 remaining tier, then prefer forwards, midfielders, defenders, and goalkeepers
@@ -86,6 +116,10 @@ best remaining tier. A role attached to a bench player, vacancy, or missing
 candidate is not preserved because both captaincy roles must belong to starters.
 
 ## 2026-09-03 — Auto-fill uses tier goals instead of projected points
+
+**Partially superseded:** Projected points and overall rank now define quality
+bands only after the tier, goalkeeper, and foreign-player objectives tie, as
+defined above.
 
 **Decision:** Preserve selected players and compare valid auto-fill suggestions
 lexicographically: minimize the total Level 1–3 nominal-slot shortfall, minimize

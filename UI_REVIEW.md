@@ -811,6 +811,31 @@ build`, migration on the confirmed Neon development branch, responsive DOM
   `src/app/team/transfers-client.tsx`; repository-wide formatting reports the
   existing baseline drift outside this change.
 
+### 2026-09-03 — Auto-fill quality-band explanation
+
+- **Route and task:** `/rules`; explain that projected points and overall rank
+  apply only after tier balance, likely first-choice goalkeeper, and foreign
+  player priorities tie, restricting randomness to the best feasible quality
+  band within the same position and Level.
+- **Language and responsive evidence:** Thai and English rendered in the in-app
+  Browser at 1280px Desktop and 360px Mobile. The longer explanation remains
+  contained in the Squad selection card; document and client widths both
+  measured 1265px on Desktop and 345px on Mobile. The Guest preference was
+  restored to Thai after review.
+- **Accessibility:** the quality-band rule is a separate semantic list item and
+  preserves the existing heading, list, reading, and focus structure without
+  introducing color-dependent meaning or a new control.
+- **Known exclusions:** the Auto-fill action was not submitted because it would
+  modify the current unsaved draft. Deterministic rule tests cover quality-band
+  selection, fallback, foreign-player precedence, captaincy, and repeatable
+  randomness without database or simulation writes.
+- **Verification:** targeted Thai/English responsive rendered inspection, all
+  92 Fantasy tests, auth/email tests, types, and production build passed.
+  Targeted Prettier checks pass for every changed file. Repository-wide lint
+  remains blocked by the pre-existing `react-hooks/set-state-in-effect` error
+  in `src/app/team/transfers-client.tsx`; repository-wide formatting reports
+  the existing 177-file baseline drift outside this change.
+
 - `src/app/globals.css` currently contains foundations, shared multi-page
   styles, route-local sections, responsive rules, legacy selectors, and final
   cascade overrides in one file. Do not perform a speculative bulk split.

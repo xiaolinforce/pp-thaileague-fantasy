@@ -133,10 +133,14 @@ shortfall from the three nominal slots at each of Levels 1–3 and then minimize
 the largest shortfall at any one of those levels. Among equally good tier
 allocations it prefers goalkeepers whose tier is the best available among the
 goalkeepers at their club, then maximizes foreign-player use up to the hard
-limit. Tied candidates are chosen with bounded random variation; projected
-points and overall rank do not influence the suggestion. Club, foreign-player,
-cumulative tier, position, duplicate-player, lineup, and bench constraints
-remain hard limits.
+limit. Only after those priorities tie does it prefer the best feasible quality
+band, minimizing first the worst band used and then the total band distance.
+Quality bands are calculated separately within each position and tier from the
+published projected points, with overall rank breaking equal projections. Each
+band contains the larger of three players or 25% of that position-tier group,
+rounded up; randomness breaks ties inside the best feasible band profile. Club,
+foreign-player, cumulative tier, position, duplicate-player, lineup, and bench
+constraints remain hard limits.
 
 For goalkeeper inference, a lower tier number is better; goalkeepers tied for
 their club's best tier are treated equally because the current data does not
@@ -144,13 +148,15 @@ store an explicit depth chart. Auto-fill treats the manager's current formation
 and lineup assignment as fixed: it fills each vacant slot without changing any
 existing starter, substitute, or bench order. When starter and substitute slots
 for the same position are both vacant, the better-tier newly selected player
-fills the starter slot first; a likely club starting goalkeeper takes priority
-for a vacant starting-goalkeeper slot. Existing valid captain and vice-captain
-assignments remain unchanged. Any missing captain or vice-captain is assigned
-independently from the best remaining tier, favoring forwards, then midfielders,
-defenders, and goalkeepers. Randomness breaks ties within the same tier and
-position. The suggestion changes only the client draft and has no transfer or
-persistence effect until the manager saves through the normal validation path.
+fills the starter slot first; quality band precedes randomness within the same
+tier. A likely club starting goalkeeper takes priority for a vacant
+starting-goalkeeper slot. Existing valid captain and vice-captain assignments
+remain unchanged. Any missing captain or vice-captain is assigned independently
+from the best remaining tier, favoring forwards, then midfielders, defenders,
+and goalkeepers. The same quality-band preference precedes randomness when tier
+and position tie. The suggestion changes only the client draft and has no
+transfer or persistence effect until the manager saves through the normal
+validation path.
 
 ## Deadlines and Gameweeks
 

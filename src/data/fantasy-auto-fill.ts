@@ -53,6 +53,8 @@ export async function getFantasyAutoFillCandidates(
       fantasyPlayerId: fantasyPlayers.id,
       clubId: competitionEntries.clubId,
       position: fantasyPlayers.lockedPosition,
+      overallRank: fantasyPlayerRankings.overallRank,
+      projectedPoints: fantasyPlayerRankings.projectedPoints,
       isThai: fantasyPlayers.isThai,
     })
     .from(fantasyPlayerRankings)
@@ -115,6 +117,8 @@ export async function getFantasyAutoFillCandidates(
       clubId: row.clubId,
       position: row.position as FantasyPosition,
       tier: tierByPlayer.get(row.fantasyPlayerId) ?? 4,
+      overallRank: row.overallRank,
+      projectedPoints: row.projectedPoints,
       isThai: row.isThai,
       isLikelyClubStartingGoalkeeper: false,
     });

@@ -54,7 +54,7 @@ create synthetic manager identities.
 | Game rules           | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
 | Squad auto-fill      | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                 |
 | Authentication       | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
-| Observability        | `src/instrumentation*.ts`, Sentry    | Privacy-minimized client/server/edge errors, sampled traces, masked error replays, and releases.  |
+| Observability        | `src/instrumentation*.ts`, Sentry    | Privacy-minimized client/server/edge errors, sampled traces, masked error replays, and releases. |
 | Account provisioning | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
 | League operations    | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
 | Transactional email  | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
@@ -132,9 +132,11 @@ other public sources are enrichment only.
 
 The Team client may request an auto-fill suggestion through a read-only Server
 Action. The action authenticates the current manager, reloads the published
-ranking and current player eligibility from PostgreSQL, and returns only a
-completed local draft. It does not persist a selection or consume transfers;
-the normal save action remains the only confirmation boundary.
+ranking—including its projected-points and overall-rank snapshot—and current
+player eligibility from PostgreSQL. The pure rule layer uses those ranking
+values only to form quality bands before otherwise tied random choices, then
+returns a completed local draft. It does not persist a selection or consume
+transfers; the normal save action remains the only confirmation boundary.
 
 ## Write flow
 

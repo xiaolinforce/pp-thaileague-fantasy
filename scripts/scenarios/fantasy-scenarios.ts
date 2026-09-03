@@ -726,6 +726,8 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
     club_id: string;
     position: FantasyPosition;
     tier: number;
+    overall_rank: number;
+    projected_points: number;
     is_thai: boolean;
   }>(sql`
     with latest_run as (
@@ -741,6 +743,8 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
            ce.club_id,
            fp.locked_position as position,
            coalesce(tier.level, 4)::int as tier,
+           ranking.overall_rank,
+           ranking.projected_points,
            fp.is_thai
     from latest_run run
     join fantasy_player_rankings ranking on ranking.ranking_run_id = run.id
@@ -769,6 +773,8 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
     clubId: row.club_id,
     position: row.position,
     tier: row.tier,
+    overallRank: row.overall_rank,
+    projectedPoints: row.projected_points,
     isThai: row.is_thai,
     isLikelyClubStartingGoalkeeper: false,
   }));
