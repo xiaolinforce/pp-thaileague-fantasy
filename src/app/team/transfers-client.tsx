@@ -563,7 +563,7 @@ export default function TransfersClient({
               closeLabel={translate("ปิดตัวกรอง")}
             >
               <DialogHeader>
-                <DialogTitle>Filter</DialogTitle>
+                <DialogTitle>{translate("กรองนักเตะ")}</DialogTitle>
               </DialogHeader>
               {renderMarketFilters()}
               <DialogFooter className="compact-market-filter-dialog-footer">
@@ -580,7 +580,7 @@ export default function TransfersClient({
           >
             <AccordionItem value="filters">
               <AccordionTrigger className="compact-market-filter-trigger">
-                Filter
+                {translate("กรองนักเตะ")}
               </AccordionTrigger>
               <AccordionContent className="compact-market-filter-content">
                 {renderMarketFilters()}
