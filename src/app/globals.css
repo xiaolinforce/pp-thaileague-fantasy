@@ -8172,32 +8172,9 @@ textarea:focus-visible {
   text-underline-offset: 3px;
 }
 
-.help-page-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 320px;
-  align-items: start;
-  gap: 18px;
-}
-
-.help-faq {
-  padding: 26px;
-}
-
-.help-faq [data-slot="accordion-trigger"] {
-  min-height: 58px;
-  color: var(--ink);
-  font-size: 16px;
-  text-align: start;
-}
-
-.help-faq [data-slot="accordion-content"] p {
-  margin: 0 0 18px;
-  color: #555f66;
-  line-height: 1.7;
-}
-
 .help-support-column {
   display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -8205,20 +8182,9 @@ textarea:focus-visible {
   padding: 22px;
 }
 
-.help-support-card > svg {
-  margin-bottom: 13px;
-  color: var(--orange-deep);
-}
-
 .help-support-card h2 {
-  margin: 0;
+  margin: 0 0 18px;
   font-size: 19px;
-}
-
-.help-support-card p {
-  margin: 7px 0 18px;
-  color: var(--muted);
-  line-height: 1.65;
 }
 
 .help-support-card .primary-button,
@@ -8238,21 +8204,9 @@ textarea:focus-visible {
   background: #f7f9fd;
 }
 
-.help-support-card--facebook > svg {
-  color: #4167a9;
-}
-
-.help-public-note {
-  margin: 0;
-  padding-inline: 4px;
-  color: var(--muted);
-  line-height: 1.55;
-}
-
 @media (width < 80rem) {
   .rules-page-layout,
-  .legal-page-layout,
-  .help-page-layout {
+  .legal-page-layout {
     grid-template-columns: minmax(0, 1fr);
   }
 
@@ -8276,10 +8230,6 @@ textarea:focus-visible {
   .help-support-column {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .help-public-note {
-    grid-column: 1 / -1;
-  }
 }
 
 @media (width < 48rem) {
@@ -8302,7 +8252,6 @@ textarea:focus-visible {
   .account-task-card,
   .profile-editor-section,
   .settings-page-card,
-  .help-faq,
   .rules-document,
   .legal-document {
     padding: 19px 16px;
@@ -8367,10 +8316,6 @@ textarea:focus-visible {
 
   .help-support-column {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .help-public-note {
-    grid-column: auto;
   }
 }
 

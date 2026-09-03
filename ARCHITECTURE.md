@@ -81,7 +81,7 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 | `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                             |
 | `/settings`      | Authenticated language preference; member value persists on the manager row.                       |
 | `/rules`         | Public long-form rules built from shared executable rule and scoring constants.                    |
-| `/help`          | Public FAQ and real support destinations; no account data is required.                             |
+| `/help`          | Public support destinations and legal links; no account data is required.                          |
 | `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                      |
 
 The root layout provides Mitr, the language context, shared tooltips, and toast

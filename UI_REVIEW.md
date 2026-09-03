@@ -36,7 +36,7 @@ when new behavior invalidates prior coverage.
 | `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                 |
 | `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                            |
 | `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                                          |
-| `/help`          | Long-form reading     | Reviewed    | Public bilingual FAQ, rules path, and real Facebook support destination reviewed.                                                                                     |
+| `/help`          | Long-form reading     | In progress | Simplified public support contacts and legal links; refreshed rendered evidence is pending.                                                                            |
 | `/privacy`       | Long-form reading     | In progress | Public bilingual policy implemented from the shared reading pattern; operator identity and final legal review remain pending.                                         |
 | `/terms`         | Long-form reading     | In progress | Public bilingual service terms implemented from the shared reading pattern; operator identity and final legal review remain pending.                                  |
 | `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                                                            |
@@ -154,7 +154,7 @@ a state is not implemented rather than inventing it.
 - member editable team name, unchanged form, duplicate/format validation,
   pending save, success, server error, and seasonal rename limit;
 - member language setting and post-reload database persistence;
-- public long rules content, section navigation, FAQ, and support link; and
+- public long rules content, section navigation, and support/legal links; and
 - sign-out pending/failure behavior.
 
 ### Fantasy Admin
