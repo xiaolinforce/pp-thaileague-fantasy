@@ -224,7 +224,7 @@ function ChipOptions({
         [
           ["triple_captain", "กัปตัน ×3"],
           ["bench_boost", "นับตัวสำรอง"],
-          ["wildcard", "เปลี่ยนตัวอิสระ"],
+          ["wildcard", "ซื้อขายตัวอิสระ"],
         ] as const
       ).map(([chip, label]) => {
         const isActive = activeChip === chip;
@@ -1017,11 +1017,6 @@ export default function TeamClient({
         replaceDraftMembers(result.members);
         setSwapFrom(null);
         setSelected(null);
-        toast.success(translate("เติมนักเตะอัตโนมัติแล้ว"), {
-          description: translate(
-            "เติมนักเตะ {count} คน พร้อมเลือกกัปตันและรองกัปตันแล้ว",
-          ).replace("{count}", String(result.addedCount)),
-        });
       } catch {
         toast.error(translate("เติมทีมอัตโนมัติไม่สำเร็จ"), {
           description: translate(
