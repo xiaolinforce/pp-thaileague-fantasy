@@ -9030,13 +9030,28 @@ body {
     display: none;
   }
 
-  .squad-captain-role,
-  .vacant-squad-token-shell .squad-swap-action {
+  .squad-captain-role {
     left: calc(50% - 24px);
   }
 
+  .vacant-squad-token-shell .squad-token-action {
+    bottom: 48px;
+    width: 24px;
+    height: 24px;
+    border-radius: 7px;
+  }
+
+  .vacant-squad-token-shell .squad-token-action svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .vacant-squad-token-shell .squad-swap-action {
+    left: calc(50% - 30px);
+  }
+
   .vacant-squad-token-shell .squad-undo-action {
-    right: calc(50% - 24px);
+    right: calc(50% - 30px);
   }
 
   .squad-captain-role {
