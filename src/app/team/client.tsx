@@ -116,7 +116,7 @@ type PlayerSwapState = "source" | "available" | "unavailable";
 type TeamWorkspaceView = "squad" | "market";
 
 type GameweekDetailsProps = {
-  deadlineAt: string;
+  deadlineLabels: Record<Language, string>;
   gameweekNumber: number;
   isEditable: boolean;
   seasonFinished: boolean;
@@ -130,7 +130,7 @@ type GameweekDetailsProps = {
 };
 
 function GameweekDetails({
-  deadlineAt,
+  deadlineLabels,
   gameweekNumber,
   isEditable,
   seasonFinished,
@@ -152,46 +152,7 @@ function GameweekDetails({
       ) : null}
       <div className="deadline">
         <span>{translate("เดดไลน์จัดทีม")}</span>
-        <strong>
-          {language === "th"
-            ? (() => {
-                const parts = new Intl.DateTimeFormat("th-TH", {
-                  weekday: "short",
-                  day: "numeric",
-                  month: "short",
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hourCycle: "h23",
-                  timeZone: "Asia/Bangkok",
-                }).formatToParts(new Date(deadlineAt));
-                const weekday = parts.find(
-                  (part) => part.type === "weekday",
-                )?.value;
-                const day = parts.find((part) => part.type === "day")?.value;
-                const month = parts.find(
-                  (part) => part.type === "month",
-                )?.value;
-                const hour = parts.find((part) => part.type === "hour")?.value;
-                const minute = parts.find(
-                  (part) => part.type === "minute",
-                )?.value;
-                return `${weekday}ที่ ${day} ${month} ${hour}:${minute}`;
-              })()
-            : (() => {
-                const parts = new Intl.DateTimeFormat("en-GB", {
-                  day: "numeric",
-                  month: "short",
-                  year: "numeric",
-                  hour: "numeric",
-                  minute: "2-digit",
-                  hourCycle: "h23",
-                  timeZone: "Asia/Bangkok",
-                }).formatToParts(new Date(deadlineAt));
-                const value = (type: Intl.DateTimeFormatPartTypes) =>
-                  parts.find((part) => part.type === type)?.value ?? "";
-                return `${value("day")} ${value("month").slice(0, 3)} ${value("year")}, ${value("hour")}:${value("minute")}`;
-              })()}
-        </strong>
+        <strong>{deadlineLabels[language]}</strong>
       </div>
       <div className="countdown">
         {isEditable ? (
@@ -626,9 +587,11 @@ function VacantSquadSlot({
 export default function TeamClient({
   data,
   fantasy,
+  deadlineLabels,
 }: {
   data: CompetitionDataset;
   fantasy: FantasyState;
+  deadlineLabels: Record<Language, string>;
 }) {
   const { language, translate } = useLanguage();
   const { setNavigationBlocked } = useNavigationBlocker();
@@ -1230,7 +1193,7 @@ export default function TeamClient({
         <section className="gameweek-banner compact-gameweek">
           <div className="compact-gameweek__desktop">
             <GameweekDetails
-              deadlineAt={fantasy.gameweek.deadlineAt}
+              deadlineLabels={deadlineLabels}
               gameweekNumber={fantasy.gameweek.number}
               isEditable={isEditable}
               seasonFinished={fantasy.seasonFinished}
@@ -1261,7 +1224,7 @@ export default function TeamClient({
               </AccordionTrigger>
               <AccordionContent className="compact-gameweek__content">
                 <GameweekDetails
-                  deadlineAt={fantasy.gameweek.deadlineAt}
+                  deadlineLabels={deadlineLabels}
                   gameweekNumber={fantasy.gameweek.number}
                   isEditable={isEditable}
                   seasonFinished={fantasy.seasonFinished}

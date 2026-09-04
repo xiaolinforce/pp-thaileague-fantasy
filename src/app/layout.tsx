@@ -24,6 +24,13 @@ export const metadata: Metadata = {
   ),
   title: "PP Thai League Fantasy — เกมแฟนตาซีฟุตบอลไทย",
   description: "จัดทีมในฝัน เลือกนักเตะไทยลีก และแข่งขันกับเพื่อนตลอดฤดูกาล",
+  // Prevent iOS data detectors from rewriting server-rendered text into links.
+  formatDetection: {
+    telephone: false,
+    date: false,
+    email: false,
+    address: false,
+  },
   openGraph: {
     title: "PP Thai League Fantasy — เกมแฟนตาซีฟุตบอลไทย",
     description: "จัดทีมไทยลีกในฝันของคุณ วางแผน และท้าทายเพื่อนตลอดฤดูกาล",

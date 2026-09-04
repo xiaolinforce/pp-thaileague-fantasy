@@ -111,6 +111,20 @@ the SDK boundary. Vercel Runtime Logs remain the short-term raw operational log
 source, while Sentry owns longer-lived error correlation, releases, source maps,
 the daily auth-maintenance check-in, and public uptime monitoring.
 
+Shared Sentry hooks under `src/lib/observability/sentry.ts` also scrub exception
+messages, breadcrumbs, structured logs, and transaction events. In particular,
+Drizzle's `Failed query` message contains bound values independently of SDK
+database instrumentation, so its query text and parameters are replaced while
+the chained database cause and stack locations remain available. Recognized
+Facebook native-bridge errors receive `error_origin=facebook_browser_bridge`;
+they retain their severity and are not dropped because their user impact is
+not yet established.
+
+Team deadline labels are formatted once on the server in both supported
+languages and serialized into the Client Component. This avoids depending on
+identical Node/browser ICU date abbreviations during hydration. Root metadata
+disables automatic phone/date/email/address link detection on iOS.
+
 ## Read flow
 
 1. A route resolves the Better Auth session and calls a server-only read model.
@@ -156,6 +170,12 @@ and finalization use the transaction-capable Neon serverless client. Private
 League mutations use the same client and lock the current team plus target
 league with `FOR UPDATE`, so the 10-owned, 20-membership, and 100-team limits
 remain valid under concurrent requests.
+
+Auth maintenance uses one HTTP `db.batch` transaction for its four independent
+expiry deletes. Do not use callback `db.transaction` with the HTTP client, and
+do not replace the batch with separate awaited deletes: a failed statement must
+roll back the whole cleanup. Retention cutoffs and the exclusion of Fantasy
+history are unchanged.
 
 Member team-name edits lock and reload the season team before writing the
 normalized name and incrementing its seasonal rename count. A case-insensitive

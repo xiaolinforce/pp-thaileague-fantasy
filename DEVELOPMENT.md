@@ -93,6 +93,20 @@ automatic data categories and fully masks error-only Session Replays. Use
 `Sentry.logger` only for bounded operational events with field names reviewed
 for the same privacy rule.
 
+Keep the shared Sentry privacy hooks enabled in Browser, Node and Edge configs.
+SDK data-collection switches alone do not scrub SQL parameters embedded in
+exception messages. `test:observability` checks redaction and ensures that
+Facebook bridge classification never drops genuine application errors.
+`test:maintenance` exercises the actual Drizzle HTTP batch through a fake
+transport (including failure propagation), without loading `.env.local` or
+contacting Neon.
+
+When reviewing incidents, separate `development` from `production` and compare
+the event release with the deployed release. After shipping a maintenance fix,
+verify a successful `auth-maintenance` check-in before resolving its monitor
+issue. Hydration and Facebook-browser incidents require a check on the affected
+mobile browser; a clean desktop reload alone does not establish recovery.
+
 ## Commands
 
 | Command                          | Purpose                                                               |
@@ -316,6 +330,8 @@ checks before handoff:
 npm run test:rules
 npm run test:email
 npm run test:auth
+npm run test:maintenance
+npm run test:observability
 npm run types
 npm run lint
 npm run format:check

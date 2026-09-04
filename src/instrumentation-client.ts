@@ -1,4 +1,10 @@
 import * as Sentry from "@sentry/nextjs";
+import {
+  prepareBrowserSentryEvent,
+  scrubSentryBreadcrumb,
+  scrubSentryEvent,
+  scrubSentryLog,
+} from "@/lib/observability/sentry";
 
 const environment = process.env.NEXT_PUBLIC_SENTRY_ENVIRONMENT ?? "development";
 
@@ -7,6 +13,10 @@ Sentry.init({
   enabled: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
   environment,
   enableLogs: true,
+  beforeSend: (event) => prepareBrowserSentryEvent(event, navigator.userAgent),
+  beforeBreadcrumb: scrubSentryBreadcrumb,
+  beforeSendTransaction: scrubSentryEvent,
+  beforeSendLog: scrubSentryLog,
   integrations: [
     Sentry.replayIntegration({
       maskAllText: true,

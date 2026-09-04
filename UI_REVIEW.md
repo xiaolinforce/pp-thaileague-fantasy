@@ -48,6 +48,24 @@ change does not claim that every state has fresh screenshot evidence.
 
 ## Recommended audit order
 
+### 2026-09-04 Sentry hydration follow-up
+
+- `/team`, local development Guest with an empty GW1 squad: checked Chrome at
+  1280px and 360px, Thai and English, hard reload, language persistence, and the
+  expanded mobile Gameweek accordion. Both server-provided deadline labels
+  displayed correctly; no application console errors or horizontal overflow
+  were observed. Restored the original Thai preference and viewport afterward.
+- Confirmed `format-detection` disables telephone, date, email and address
+  rewriting. Team deadline formatting now runs on the server rather than
+  independently during browser hydration. Countdown behavior is unchanged.
+- This is a mitigation for Sentry `PP-THAILEAGUE-FANTASY-7`, not a confirmed
+  reproduction of its six Production events. Physical iOS Safari/Facebook
+  browsers, member language hydration, populated squads and other routes were
+  not re-audited in this focused pass. Keep the issue open until the deployed
+  release has been checked in the affected browsers.
+
+### Remaining audit priorities
+
 1. **Fixtures and Leagues:** establish data-browser and ranking patterns shared
    by the remaining competition surfaces.
 2. **Account surfaces:** complete member-state evidence for Profile and

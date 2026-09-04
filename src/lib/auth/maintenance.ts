@@ -29,29 +29,36 @@ export async function cleanupExpiredAuthArtifacts(
     now.getTime() - EMAIL_DELIVERY_RETENTION_DAYS * DAY_IN_MS,
   );
 
-  return db.transaction(async (transaction) => {
-    const deletedSessions = await transaction
+  // These statements are independent. Neon HTTP executes the batch in one
+  // transaction; callback transactions are not supported by this driver.
+  const [
+    deletedSessions,
+    deletedVerifications,
+    deletedRateLimits,
+    deletedEmailDeliveries,
+  ] = await db.batch([
+    db
       .delete(authSessions)
       .where(lt(authSessions.expiresAt, now))
-      .returning({ id: authSessions.id });
-    const deletedVerifications = await transaction
+      .returning({ id: authSessions.id }),
+    db
       .delete(authVerifications)
       .where(lt(authVerifications.expiresAt, now))
-      .returning({ id: authVerifications.id });
-    const deletedRateLimits = await transaction
+      .returning({ id: authVerifications.id }),
+    db
       .delete(authRateLimits)
       .where(lt(authRateLimits.lastRequest, rateLimitCutoff))
-      .returning({ id: authRateLimits.id });
-    const deletedEmailDeliveries = await transaction
+      .returning({ id: authRateLimits.id }),
+    db
       .delete(authEmailDeliveries)
       .where(lt(authEmailDeliveries.createdAt, deliveryCutoff))
-      .returning({ id: authEmailDeliveries.id });
+      .returning({ id: authEmailDeliveries.id }),
+  ]);
 
-    return {
-      deletedEmailDeliveries: deletedEmailDeliveries.length,
-      deletedRateLimits: deletedRateLimits.length,
-      deletedSessions: deletedSessions.length,
-      deletedVerifications: deletedVerifications.length,
-    };
-  });
+  return {
+    deletedEmailDeliveries: deletedEmailDeliveries.length,
+    deletedRateLimits: deletedRateLimits.length,
+    deletedSessions: deletedSessions.length,
+    deletedVerifications: deletedVerifications.length,
+  };
 }
