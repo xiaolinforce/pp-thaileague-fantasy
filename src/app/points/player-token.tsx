@@ -54,9 +54,15 @@ export function PointsPlayerToken({
       : member.captainRole === "vice_captain"
         ? "V"
         : null;
+  const hasPlayed = (result?.minutes ?? 0) > 0;
+  const scoreDisplay = hasPlayed ? points : "-";
   const captainPoints = result?.totalPoints ?? points;
   const captainPointsDisplay =
-    captainPoints > 0 ? `+${captainPoints}` : `${captainPoints}`;
+    !hasPlayed
+      ? "-"
+      : captainPoints > 0
+        ? `+${captainPoints}`
+        : `${captainPoints}`;
   const detailRows = Object.entries(result?.breakdown ?? {}).filter(
     ([, value]) => value !== 0,
   );
@@ -91,7 +97,7 @@ export function PointsPlayerToken({
       >
         {shortName}
       </span>
-      <strong className="points-player-score squad-fixture">{points}</strong>
+      <strong className="points-player-score squad-fixture">{scoreDisplay}</strong>
     </>
   );
 
@@ -155,7 +161,7 @@ export function PointsPlayerToken({
         </div>
 
         <div className="points-player-dialog-score">
-          <strong>{points}</strong>
+          <strong>{scoreDisplay}</strong>
           <span>{translate("คะแนน")}</span>
         </div>
 
@@ -166,7 +172,7 @@ export function PointsPlayerToken({
               <strong>{value > 0 ? `+${value}` : value}</strong>
             </div>
           ))}
-          {multiplier > 1 && (
+          {multiplier > 1 && hasPlayed && (
             <div>
               <span>
                 {language === "th" ? "ตัวคูณกัปตัน" : "Captain multiplier"}
@@ -186,3 +192,4 @@ export function PointsPlayerToken({
     </Dialog>
   );
 }
+
