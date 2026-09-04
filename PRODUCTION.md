@@ -17,6 +17,39 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-09-04 bot participant maintenance
+
+Migration `0015` and batch `opening-2026-27-20260904` were applied to Neon
+`production` (`br-tiny-shape-azrvakql`) for open GW1 before its
+2026-09-04 17:30 Asia/Bangkok deadline. The batch created 100 bot managers and
+teams, 100 distinct valid auto-filled squads, 1,500 selection-player snapshots,
+100 initial revisions, 100 Overall memberships, and 100 `create_bot_team` audit
+entries. The post-import report counted 158 season teams: 58 human/Guest teams
+and 100 bots. These are team counts, not active-user counts.
+
+The development rehearsal verified idempotency, scoring, rankings, and
+carryover and rolled back all test participants. Production import verification
+passed for the bot records, identities, squads, revisions, and memberships;
+the health endpoint remained healthy. No scores or historical selections were
+created. GW1 had not been scored, so Overall ranks remain pending under the
+existing ranking lifecycle. Bot squads remain unchanged unless separately
+requested, apart from the normal Gameweek carryover.
+
+The pre-migration restore timestamp was 2026-09-04 05:00:28 UTC, within the
+then-configured six-hour Neon history window. Runtime deployment remained at
+`1134cd2821be783301a1d3513373c6b88965c512`; this additive schema/data operation
+does not require a UI deployment. Bot support source is recorded in commit
+`82108a9`.
+
+**Outstanding pre-existing configuration mismatch:** Production code and the
+2026-09-03 decision use nominal tier slots 3/3/6/3, but production
+`fantasy_tier_definitions` still stores 3/3/3/6. The full `db:verify:fantasy`
+command stops at this mismatch after league integrity passes. The new squads
+pass the deployed executable rules. Automatic approval review rejected
+reconciling the two metadata rows as outside the bot-import authorization;
+no tier definitions were changed. Obtain explicit owner authorization before
+that separate audited correction.
+
 ## Release checklist
 
 1. Merge and verify the target commit on `dev`.
