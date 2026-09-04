@@ -314,3 +314,32 @@ never rewritten.
   migrations as immutable history.
 - Preserve selection snapshots and append audit/revision records when changing
   consequential fantasy state.
+
+## Admin workspace
+
+The six operational pages under `/admin/fantasy` share a role-protected layout
+and route-aware `AppShell`. Each entry point in `src/data/admin.ts` also checks
+the admin session before querying the shared Drizzle client. Admin readers do
+not provision a personal team. Gameweek controls depend on the Gameweek itself,
+not the administrator's selection. Date labels are formatted on the server in
+both languages to avoid Node/browser locale differences during hydration.
+
+The participant directory and audit log use 30-row pages. Team counts use the
+season's managers and teams. Seven-day activity uses selection `confirmed_at`,
+excluding bots and abandoned managers. Carryover revisions have no confirmation
+timestamp and do not count as recent activity. Fifteen-player counts include
+carryover on active teams; they do not imply validation against every current
+squad rule. Audit display allowlists correction fields rather than serializing
+arbitrary source or bot provisioning payloads. Lock and finalize append their
+audit entry inside the lifecycle transaction. Mutations invalidate admin pages.
+
+Player filters use current active registrations and available Fantasy players.
+Match editors use registrations for the chosen fixture's clubs, including
+historical registrations for correction work, and load existing stored stats.
+Server Actions retain their fresh session and database validation boundaries.
+
+Admin pages defer recursive localization of server-authored content until
+hydration. Lazy RSC table rows may not be traversable during server rendering;
+translating them only on the client prevents a mismatched initial tree. Explicit
+client labels and names continue using the shared language context. This keeps
+the documented client-display localization boundary without adding route i18n.

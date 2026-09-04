@@ -714,3 +714,20 @@ rows, validate limits transactionally, and append an audit row. Invite input is
 case-insensitive but stored/displayed uppercase from an alphabet that excludes
 `I`, `L`, `O`, `0`, and `1`. League detail is available only to members, and
 only the owner receives the active invite code.
+
+## 2026-09-04 — Separate admin navigation and internal participant reporting
+
+**Decision:** Split administration into six task-focused routes sharing the
+existing shell, with an explicit return to player mode. Show bot labels and
+counts inside role-protected admin pages only. This is the internal-reporting
+exception to the earlier prohibition on bot labels on website pages; player
+surfaces continue to omit bot metadata.
+
+**Measurement:** Count season teams rather than unique people. Seven-day activity
+uses explicit save/revert confirmation times and excludes bots, abandoned
+managers and automatic carryover. Show fifteen-player completeness separately.
+No visit tracking, bot mutation interface or schema migration is introduced.
+
+**Consequences:** Lifecycle controls no longer depend on the admin's personal
+team. New lock/finalize operations record their operator and state transition in
+the same database transaction. Existing history is not backfilled or rewritten.

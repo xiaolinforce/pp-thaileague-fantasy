@@ -120,3 +120,11 @@ lineup, transfer, chip, scoring, substitution, and auto-fill behavior.
    snapshots.
 6. Delete the temporary import implementation and generated artifacts after
    the verified data is persisted.
+
+## Admin reporting provenance
+
+Admin counts read persisted season teams and manager status/bot markers.
+Activity reads selection confirmation timestamps rather than visits, session
+refreshes or transfer-revision creation timestamps. Audit history exposes only
+recorded operations and allowlisted before/after fields; operations before audit
+collection are not reconstructed. No external source is fetched by admin pages.

@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Dialog,
   DialogClose,
@@ -39,6 +39,7 @@ export function NavigationBlockerProvider({
   children: ReactNode;
 }) {
   const router = useRouter();
+  const pathname = usePathname();
   const { translate } = useLanguage();
   const [isBlocked, setIsBlocked] = useState(false);
   const [pendingHref, setPendingHref] = useState<string | null>(null);
@@ -83,7 +84,9 @@ export function NavigationBlockerProvider({
             </DialogTitle>
             <DialogDescription>
               {translate(
-                "การเปลี่ยนแปลงทีมของคุณจะหายไป หากออกจากหน้านี้โดยไม่บันทึก",
+                pathname.startsWith("/admin/")
+                  ? "ข้อมูลที่แก้ไขจะหายไป หากออกจากหน้านี้โดยไม่บันทึก"
+                  : "การเปลี่ยนแปลงทีมของคุณจะหายไป หากออกจากหน้านี้โดยไม่บันทึก",
               )}
             </DialogDescription>
           </DialogHeader>

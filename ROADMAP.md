@@ -97,3 +97,11 @@ substitute for those authorization checks.
 - Automated player price changes without an approved pricing model.
 - Native mobile applications.
 - Writing corrections back to Thai League or Transfermarkt.
+
+## Admin workspace delivered 2026-09-04
+
+- Dedicated admin sidebar and six operational pages with participant/team
+  browsing, seven-day save/revert activity, current data editors and audit history.
+- Explicit confirmations and transactional audit records for lock/finalize.
+- Bot and account management remain read-only; online-user tracking, bot
+  scheduling, and automatic source ingestion are not part of this workspace.

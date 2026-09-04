@@ -239,3 +239,17 @@ For every new or changed pattern, capture enough evidence to identify:
 - any state deliberately excluded because the product does not implement it.
 
 Record route-level evidence and maturity in `UI_REVIEW.md`.
+
+## Administrative operations
+
+The admin workspace separates overview, participant browsing, Gameweek lifecycle,
+match stats, classifications, and audit history. Filters are URL-backed; match
+and player selectors load their dependent choices and current saved values.
+Form edits use the shared navigation blocker. Confirmation identifies the
+player, match or Gameweek and the effects of the operation; form values remain
+available when cancelling or recovering from an error. Pending submissions
+disable the form and completion/failure is announced locally.
+
+Participant counts link to matching directory filters. Tables retain their
+headers and scroll within an explicitly labelled keyboard-focusable region on
+small screens. Current player data is separate from saved team snapshots.

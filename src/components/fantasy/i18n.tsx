@@ -13,9 +13,11 @@ import {
   type ReactNode,
 } from "react";
 import { getInitialInterfaceLanguage } from "@/lib/auth/preferences";
+import { adminTranslations } from "@/lib/admin-copy";
 export type Language = "th" | "en";
 
 const translations: Record<string, string> = {
+  ...adminTranslations,
   // Navigation and shared shell
   ทีมของฉัน: "My Team",
   ทีม: "Team",
@@ -1062,9 +1064,15 @@ function localizeNode(
   return node;
 }
 
-export function Localized({ children }: { children: ReactNode }) {
+export function Localized({
+  children,
+  enabled = true,
+}: {
+  children: ReactNode;
+  enabled?: boolean;
+}) {
   const { translate } = useLanguage();
-  return <>{localizeNode(children, translate)}</>;
+  return <>{enabled ? localizeNode(children, translate) : children}</>;
 }
 
 export function LanguageSwitcher({

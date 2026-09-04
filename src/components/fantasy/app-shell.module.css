@@ -41,3 +41,22 @@
     display: initial;
   }
 }
+.adminMode {
+  color: #fff;
+  font-size: 13px;
+  margin: 20px 16px -24px;
+}
+.returnToPlayer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  color: #fff;
+  border: 1px solid #59616a;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+.returnToPlayer:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

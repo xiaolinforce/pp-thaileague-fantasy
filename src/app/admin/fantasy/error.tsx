@@ -1,13 +1,20 @@
 "use client";
 
-import { CompetitionError } from "@/components/fantasy/data-state";
+import { useLanguage } from "@/components/fantasy/i18n";
 
 export default function Error({ reset }: { error: Error; reset: () => void }) {
+  const { translate: t } = useLanguage();
   return (
-    <CompetitionError
-      reset={reset}
-      title="โหลดเครื่องมือผู้ดูแลไม่สำเร็จ"
-      description="ตรวจสอบสิทธิ์และการเชื่อมต่อข้อมูล แล้วลองเปิดเครื่องมือผู้ดูแลอีกครั้ง"
-    />
+    <section role="alert">
+      <h1>{t("โหลดเครื่องมือผู้ดูแลไม่สำเร็จ")}</h1>
+      <p>
+        {t(
+          "ตรวจสอบสิทธิ์และการเชื่อมต่อข้อมูล แล้วลองเปิดเครื่องมือผู้ดูแลอีกครั้ง",
+        )}
+      </p>
+      <button className="primary-button" onClick={reset}>
+        {t("ลองอีกครั้ง")}
+      </button>
+    </section>
   );
 }

@@ -343,3 +343,13 @@ or preserved Guest teams; team counts do not measure active people.
 - Upgrading a Guest to a new member preserves the Guest manager/team. If the
   destination account already owns a team, that account team wins: the Guest
   manager becomes `abandoned`, stays in historical rankings, and is not merged.
+
+## Internal participation measurements
+
+Admin participation statistics count season teams, not unique people. Member,
+Guest, bot and preserved Guest counts use manager identity markers. Recent
+activity means a member or non-abandoned Guest has a selection confirmation
+from saving or reverting a squad within seven days. Automatic Gameweek carryover
+and bot actions are excluded. The fifteen-player statistic counts active teams
+with fifteen stored selection members in the chosen Gameweek, including
+carryover. It is a completeness measure, not a new Fantasy eligibility rule.

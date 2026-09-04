@@ -25,22 +25,22 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
-| Route            | Archetype             | Status      | Current basis and next review focus                                                                                                                                   |
-| ---------------- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/team`          | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                                                           |
-| `/points`        | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                                                             |
-| `/`              | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                                       |
-| `/upgrade`       | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                                            |
-| `/fixtures`      | Data browser          | In progress | Focused Gameweek browsing implemented; empty, bilingual, and responsive states remain the next review focus.                                                          |
-| `/leagues`       | Ranking/community     | In progress | Persisted Overall waiting/Top 100 states and responsive language modes reviewed; populated Top 100 and authenticated Private operations still need rendered evidence. |
-| `/profile`       | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                 |
-| `/settings`      | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                            |
-| `/rules`         | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                                          |
-| `/help`          | Long-form reading     | In progress | Simplified public support contacts and legal links; refreshed rendered evidence is pending.                                                                           |
-| `/privacy`       | Long-form reading     | In progress | Public bilingual policy implemented from the shared reading pattern; operator identity and final legal review remain pending.                                         |
-| `/terms`         | Long-form reading     | In progress | Public bilingual service terms implemented from the shared reading pattern; operator identity and final legal review remain pending.                                  |
-| `/admin/fantasy` | Operational tool      | Unreviewed  | Audit authorized workflows, lifecycle safety, corrections, and dense data.                                                                                            |
-| `/auth/complete` | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                                                          |
+| Route                         | Archetype             | Status      | Current basis and next review focus                                                                                                                                   |
+| ----------------------------- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/team`                       | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                                                           |
+| `/points`                     | Summary and detail    | Reference   | Refined baseline for primary result, comparison, detail, and empty state.                                                                                             |
+| `/`                           | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                                       |
+| `/upgrade`                    | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                                            |
+| `/fixtures`                   | Data browser          | In progress | Focused Gameweek browsing implemented; empty, bilingual, and responsive states remain the next review focus.                                                          |
+| `/leagues`                    | Ranking/community     | In progress | Persisted Overall waiting/Top 100 states and responsive language modes reviewed; populated Top 100 and authenticated Private operations still need rendered evidence. |
+| `/profile`                    | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                 |
+| `/settings`                   | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                            |
+| `/rules`                      | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                                          |
+| `/help`                       | Long-form reading     | In progress | Simplified public support contacts and legal links; refreshed rendered evidence is pending.                                                                           |
+| `/privacy`                    | Long-form reading     | In progress | Public bilingual policy implemented from the shared reading pattern; operator identity and final legal review remain pending.                                         |
+| `/terms`                      | Long-form reading     | In progress | Public bilingual service terms implemented from the shared reading pattern; operator identity and final legal review remain pending.                                  |
+| `/admin/fantasy` and children | Operational tool      | In progress | Six-page workspace reviewed in Thai/English and responsive modes; live mutations and populated historical/bot states remain excluded.                                 |
+| `/auth/complete`              | System transition     | Unreviewed  | Audit waiting, failure/retry, redirect clarity, and assistive announcements.                                                                                          |
 
 The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
@@ -918,3 +918,38 @@ build`, migration on the confirmed Neon development branch, responsive DOM
 This documentation baseline does not include a fresh rendered audit of the
 Unreviewed routes, new screenshots, database mutations, or UI code changes. It
 establishes the contract and inventory required for those bounded audits.
+
+## 2026-09-04 — Dedicated admin workspace
+
+- **Routes:** overview, participants, participant detail, Gameweeks, matches,
+  player classification, and audit history under `/admin/fantasy`.
+- **Evidence:** authorized local Chrome session; Thai and English source/display
+  modes. Desktop 1280px and Mobile 360px were visually inspected; widths at 768,
+  1279 and 1280px confirmed correct drawer/sidebar transitions and no document
+  overflow. Table scrolling remains local to labelled regions.
+- **Interactions:** player search, fixture-dependent player selection, saved
+  tier/Thai values, Bot empty filter, participant details, historical audit
+  records, confirmation/cancellation, unsaved-navigation warning, and both
+  directions of player/admin mode switching. Confirmation was inspected without
+  submitting stats, classifications, locks or finalization.
+- **Data:** overview counts matched the read-only development participant
+  report: 23 teams, 1 member, 22 Guests, 0 bots and 0 preserved Guests. No current
+  saved squads were available in this development state. Counts are team counts,
+  not claims about unique people or page visits.
+- **Localization fixes:** recursive translation of lazy server rows initially
+  caused hydration mismatches. Admin translation now waits until hydration using
+  the shared Localized component's opt-in boundary. Date labels are formatted
+  on the server in both languages. Confirmation uses explicit bilingual copy
+  with protected player/fixture names. Hard reload after these fixes introduced
+  no new application console errors in the inspected admin pages.
+- **Access:** unauthenticated HTTP requests to all six primary admin routes
+  returned redirects to sign-in. Every data reader and existing mutation retains
+  its server-side admin check. No authorization bypass or simulation was added.
+- **Exclusions:** successful/failed real database mutations, provisional/final
+  transitions, populated historical squads, nonzero bot/activity states, and
+  multi-page datasets were not manufactured for screenshots. Pending/result
+  handling and atomic lifecycle audit writes were code-reviewed; broader database
+  scenario coverage remains part of the operational audit backlog.
+- **Verification:** Fantasy, email and auth tests; types, lint, repository
+  formatting, production build and read-only participant reporting. The original
+  Thai language preference and default viewport were restored after review.

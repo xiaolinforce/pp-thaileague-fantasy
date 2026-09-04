@@ -367,3 +367,12 @@ Also confirm as applicable:
 | `DEVELOPMENT.md`  | Toolchain, environment, commands, migration, verification, or documentation workflow changes. |
 | `ROADMAP.md`      | Current scope, production blockers, next steps, or out-of-scope decisions change.             |
 | `DECISIONS.md`    | A durable choice is made whose alternatives are likely to be reconsidered.                    |
+
+## Reviewing the admin workspace
+
+Use the local `/admin/fantasy` workspace with an existing authorized admin
+session. Check mode switching, URL-backed filters, loaded current values and
+confirmation cancellation before exercising any mutation. Compare participant
+counts with `npm run db:report:participants`. Full mutation/scoring scenarios
+still require a confirmed disposable development branch; do not lock a real
+Gameweek or change player stats merely to capture UI evidence.

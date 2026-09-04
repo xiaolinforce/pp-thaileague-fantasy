@@ -377,6 +377,7 @@ async function getCurrentPlayerSnapshots(
 }
 
 function revalidateFantasyPages() {
+  revalidatePath("/admin/fantasy", "layout");
   revalidateTag("competition-dataset", "max");
   revalidateTag("fixtures-dataset", "max");
   for (const path of ["/team", "/points", "/leagues"]) {
@@ -974,7 +975,7 @@ export async function updateFantasyPlayerClassificationAction(
 }
 
 export async function lockFantasyGameweekAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const gameweekId = String(formData.get("gameweekId") ?? "");
   await transactionDb.transaction(async (tx) => {
     const gameweekRows = await tx
@@ -1132,13 +1133,26 @@ export async function lockFantasyGameweekAction(formData: FormData) {
         .where(eq(fantasyGameweeks.id, nextGameweek.id));
     }
     await recalculateGameweek(gameweek.id, tx);
+    await tx.insert(fantasyAdminAuditLog).values({
+      action: "lock_gameweek",
+      entityType: "fantasy_gameweek",
+      entityId: gameweek.id,
+      changedBy: `${admin.user.email} (${admin.user.id})`,
+      reason: "Admin confirmed Gameweek lock",
+      before: { number: gameweek.number, status: gameweek.status },
+      after: {
+        number: gameweek.number,
+        status: "provisional",
+        nextGameweek: nextGameweek?.number ?? null,
+      },
+    });
   });
   revalidatePath("/", "layout");
   revalidateFantasyPages();
 }
 
 export async function finalizeFantasyGameweekAction(formData: FormData) {
-  await requireAdmin();
+  const admin = await requireAdmin();
   const gameweekId = String(formData.get("gameweekId") ?? "");
   await transactionDb.transaction(async (tx) => {
     const gameweekRows = await tx
@@ -1162,6 +1176,15 @@ export async function finalizeFantasyGameweekAction(formData: FormData) {
       })
       .where(eq(fantasyGameweeks.id, gameweek.id));
     await recalculateGameweek(gameweek.id, tx);
+    await tx.insert(fantasyAdminAuditLog).values({
+      action: "finalize_gameweek",
+      entityType: "fantasy_gameweek",
+      entityId: gameweek.id,
+      changedBy: `${admin.user.email} (${admin.user.id})`,
+      reason: "Admin confirmed final scores",
+      before: { number: gameweek.number, status: gameweek.status },
+      after: { number: gameweek.number, status: "final" },
+    });
   });
   revalidateFantasyPages();
 }

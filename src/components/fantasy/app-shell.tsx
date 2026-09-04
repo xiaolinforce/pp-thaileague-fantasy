@@ -16,6 +16,11 @@ import {
   UserPlus,
   UserRound,
   ShieldCheck,
+  LayoutDashboard,
+  Users,
+  History,
+  ArrowLeft,
+  Database,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -111,6 +116,19 @@ const accountNavigation = [
     requiresAdmin: true,
   },
 ] as const;
+
+const adminNavigation = [
+  { label: "ภาพรวม", href: "/admin/fantasy", icon: LayoutDashboard },
+  { label: "ผู้เล่นและทีม", href: "/admin/fantasy/participants", icon: Users },
+  { label: "Gameweek", href: "/admin/fantasy/gameweeks", icon: CalendarDays },
+  {
+    label: "ผลการแข่งขันและสถิติ",
+    href: "/admin/fantasy/matches",
+    icon: ListChecks,
+  },
+  { label: "ข้อมูลนักเตะ", href: "/admin/fantasy/players", icon: Database },
+  { label: "ประวัติการแก้ไข", href: "/admin/fantasy/audit", icon: History },
+];
 
 function ManagerMenu({
   identity,
@@ -291,6 +309,8 @@ function SidebarContent({
 }) {
   const { requestNavigation } = useNavigationBlocker();
   const { pointsEnabled } = useNavigationAvailability();
+  const adminMode =
+    pathname.startsWith("/admin/") && identity?.role === "admin";
   const { language, translate } = useLanguage();
   const pointsDisabledLabel =
     language === "th"
@@ -325,51 +345,69 @@ function SidebarContent({
   return (
     <>
       <Brand />
+      {adminMode && (
+        <p className={styles.adminMode}>{translate("ผู้ดูแลระบบ")}</p>
+      )}
       <nav className="side-nav" aria-label={translate("เมนูหลัก")}>
-        {navigation.map(({ label, href, icon: Icon }) => {
-          const active = pathname === href || pathname.startsWith(`${href}/`);
-          const disabled = href === "/points" && !pointsEnabled;
+        {(adminMode ? adminNavigation : navigation).map(
+          ({ label, href, icon: Icon }) => {
+            const active =
+              pathname === href ||
+              (href !== "/admin/fantasy" && pathname.startsWith(`${href}/`));
+            const disabled = href === "/points" && !pointsEnabled;
 
-          if (disabled) {
+            if (disabled) {
+              return (
+                <button
+                  key={href}
+                  type="button"
+                  className={styles.disabledNavigationItem}
+                  disabled
+                  aria-label={pointsDisabledLabel}
+                  title={pointsDisabledLabel}
+                >
+                  <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+                  <span>{translate(label)}</span>
+                  <LockKeyhole
+                    className={styles.disabledNavigationLock}
+                    strokeWidth={1.8}
+                    aria-hidden="true"
+                  />
+                </button>
+              );
+            }
+
             return (
-              <button
-                key={href}
-                type="button"
-                className={styles.disabledNavigationItem}
-                disabled
-                aria-label={pointsDisabledLabel}
-                title={pointsDisabledLabel}
-              >
-                <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
-                <span>{translate(label)}</span>
-                <LockKeyhole
-                  className={styles.disabledNavigationLock}
-                  strokeWidth={1.8}
-                  aria-hidden="true"
-                />
-              </button>
+              <Fragment key={href}>
+                {linkFor({
+                  href,
+                  className: active ? "active" : undefined,
+                  ariaCurrent: active ? "page" : undefined,
+                  children: (
+                    <>
+                      <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
+                      <span>{translate(label)}</span>
+                      {active && <span className="nav-pip" />}
+                    </>
+                  ),
+                })}
+              </Fragment>
             );
-          }
-
-          return (
-            <Fragment key={href}>
-              {linkFor({
-                href,
-                className: active ? "active" : undefined,
-                ariaCurrent: active ? "page" : undefined,
-                children: (
-                  <>
-                    <Icon size={20} strokeWidth={1.8} aria-hidden="true" />
-                    <span>{translate(label)}</span>
-                    {active && <span className="nav-pip" />}
-                  </>
-                ),
-              })}
-            </Fragment>
-          );
-        })}
+          },
+        )}
       </nav>
       <div className="sidebar-bottom">
+        {adminMode &&
+          linkFor({
+            href: "/team",
+            className: styles.returnToPlayer,
+            children: (
+              <>
+                <ArrowLeft size={19} aria-hidden="true" />
+                <span>{translate("กลับโหมดผู้เล่น")}</span>
+              </>
+            ),
+          })}
         <ManagerMenu
           identity={identity}
           pathname={pathname}

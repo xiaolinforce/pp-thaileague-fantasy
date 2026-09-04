@@ -43,22 +43,27 @@ open.
 
 ## Routes
 
-| Route            | Purpose                                                            |
-| ---------------- | ------------------------------------------------------------------ |
-| `/`              | Account/Guest onboarding and sign-in.                              |
-| `/upgrade`       | Upgrade the current Guest while preserving its team when possible. |
-| `/team`          | Lineup, captaincy, chips, player discovery, and squad revisions.   |
-| `/points`        | Gameweek score and category breakdown.                             |
-| `/leagues`       | Overall standings plus Private League creation and joining.        |
-| `/leagues/[id]`  | Member-only standings and owner/member League controls.            |
-| `/fixtures`      | Competition fixtures grouped by Gameweek.                          |
-| `/profile`       | Account details, the public team name, or Guest upgrade.           |
-| `/settings`      | Interface language preference for the current identity/device.     |
-| `/rules`         | Public rules generated from the executable Fantasy configuration.  |
-| `/help`          | Public Facebook and email support, plus privacy and terms links.   |
-| `/privacy`       | Public bilingual privacy policy and data-rights contact.           |
-| `/terms`         | Public bilingual service and fair-play terms.                      |
-| `/admin/fantasy` | Internal match stats, classification, locking, and finalization.   |
+| Route                         | Purpose                                                              |
+| ----------------------------- | -------------------------------------------------------------------- |
+| `/`                           | Account/Guest onboarding and sign-in.                                |
+| `/upgrade`                    | Upgrade the current Guest while preserving its team when possible.   |
+| `/team`                       | Lineup, captaincy, chips, player discovery, and squad revisions.     |
+| `/points`                     | Gameweek score and category breakdown.                               |
+| `/leagues`                    | Overall standings plus Private League creation and joining.          |
+| `/leagues/[id]`               | Member-only standings and owner/member League controls.              |
+| `/fixtures`                   | Competition fixtures grouped by Gameweek.                            |
+| `/profile`                    | Account details, the public team name, or Guest upgrade.             |
+| `/settings`                   | Interface language preference for the current identity/device.       |
+| `/rules`                      | Public rules generated from the executable Fantasy configuration.    |
+| `/help`                       | Public Facebook and email support, plus privacy and terms links.     |
+| `/privacy`                    | Public bilingual privacy policy and data-rights contact.             |
+| `/terms`                      | Public bilingual service and fair-play terms.                        |
+| `/admin/fantasy`              | Admin overview with season-team counts and pending operations.       |
+| `/admin/fantasy/participants` | Filtered, paginated team directory and read-only details at `/[id]`. |
+| `/admin/fantasy/gameweeks`    | Gameweek status, locking, and finalization.                          |
+| `/admin/fantasy/matches`      | Fixture-scoped player statistics and corrections.                    |
+| `/admin/fantasy/players`      | Current player search, effective tiers and Thai status.              |
+| `/admin/fantasy/audit`        | Paginated administrative operation history.                          |
 
 ## Getting started
 
