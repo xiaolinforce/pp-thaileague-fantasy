@@ -138,6 +138,43 @@ Overall standings, preserved GW1 player snapshots, and carried squads into open
 GW2. Its deadline is 2026-09-11 16:30 Asia/Bangkok, 90 minutes before that
 Gameweek's first fixture. See `PRODUCTION.md` for execution and verification.
 
+## Fixture schedule review (2026-09-04)
+
+Owner-approved batch `fixtures-acl-schedule-20260904` updated development
+(`br-green-queen-az934b4e`) and production (`br-tiny-shape-azrvakql`) from the
+reviewed [Jay Worapath post](https://www.facebook.com/permalink.php?story_fbid=pfbid02rsPMKv2eEBJZxvh7dZxQRTExJDGUn1DFBSXy3LXKiGcwcjVUwFa1GFcV8DHK9cw6l&id=61568845133252)
+and its [five-match schedule graphic](https://www.facebook.com/photo/?fbid=122198734820628171&set=a.122096751608628171).
+This is an owner-approved schedule override from that announcement; it does
+not assert an independent official API refresh. Original fixture source IDs,
+source URLs, venues, and matchweek assignments remain intact. Audit rows retain
+the reviewed announcement URLs and complete before/after fixture values.
+
+The batch supplied kickoff times for all 24 previously `time_tbc` fixtures in
+matchweeks 7, 10, and 17 (official IDs `37628`–`37651`) and rescheduled five
+previously announced fixtures. Dates and times below use Asia/Bangkok:
+
+| Official fixture ID | Match | New kickoff |
+| --- | --- | --- |
+| `37441` | Ratchaburi – Sukhothai | 2026-10-09 19:00 |
+| `37440` | Uthai Thani – Rasisalai | 2026-10-10 19:00 |
+| `37473` | Buriram – BG Pathum | 2026-12-30 18:00 |
+| `37471` | Sisaket – Port | 2026-12-09 19:00 |
+| `37479` | PT Prachuap – BG Pathum | 2026-12-07 19:00 |
+
+Matchweek 7 spans 2026-10-30 through 2026-11-02, except Chiangrai–Port on
+2026-12-30 at 19:00 and Buriram–PT Prachuap on 2027-01-03 at 18:00.
+Matchweek 10 spans 2026-11-27 through 2026-11-29, except BG Pathum–Ratchaburi
+on 2027-01-03 at 19:00. Matchweek 17 runs 2027-02-12 through 2027-02-14.
+Deferred matches retain their original scoring Gameweek; this operation does
+not introduce blank/double Gameweek reassignment or change scoring rules.
+
+The existing 90-minute rule moves planned deadlines to 17:30 on 2026-10-09
+(GW4), 2026-10-30 (GW7), 2026-11-27 (GW10), and 2027-02-12 (GW17).
+GW9 and GW11 deadlines are unchanged. Both databases now have known kickoff
+times for all 240 fixtures. Each branch has 34 batch audit entries: 29 fixture
+changes, four deadline changes, and one completion record. See `PRODUCTION.md`
+for execution and verification evidence.
+
 ## Preseason development snapshot
 
 As of 2026-09-02, the Neon `development` branch contains:

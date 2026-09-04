@@ -17,6 +17,34 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-09-04 ACL fixture schedule maintenance
+
+The owner authorized `fixtures-acl-schedule-20260904` on both environments.
+Development `br-green-queen-az934b4e` was updated and verified first; production
+`br-tiny-shape-azrvakql` was then updated through the authenticated Neon SQL
+Editor. Each atomic transaction asserted the branch ID, season, all 29 exact
+old fixture values, planned Gameweek states, and absence of target match stats
+before updating 29 kickoffs/statuses and four Gameweek deadlines. See
+`DATA_SOURCES.md` for the reviewed announcement, affected matches, and deadlines.
+
+Pre-write restore timestamps recorded in the audit log are
+`2026-09-04 15:50:23.144208 UTC` for development and
+`2026-09-04 15:52:47.337102 UTC` for production. These timestamps are recovery
+references subject to the configured Neon history window, not separate backups.
+Both branches have 34 batch audit records, including full before/after values
+and the source links. Transaction assertions verified unchanged unrelated
+fixture fields, Gameweek fields, selection snapshots, selections, team scores,
+and player match stats. Original matchweek assignments are preserved.
+
+Development passed `db:verify:competition` and `db:verify:fantasy`. Production
+SQL verification at `2026-09-04 15:53:30 UTC` found zero target or deadline
+mismatches and 240 fixtures with no unknown kickoffs. The full-season
+external-ID/matchweek/UTC-kickoff/status fingerprint matched development:
+`20f849d8488f7a0043dc280a1bc40620`. The npm database verifiers ran on development
+only; production was checked through SQL and in-transaction assertions.
+No application deployment is required. Existing competition caches refresh
+within their five-minute lifetime.
+
 ## Transactional email operations (2026-09-04)
 
 Mailjet sender `*@auth.ppfootball.net` is Active. Vercel DNS hosts its separate
