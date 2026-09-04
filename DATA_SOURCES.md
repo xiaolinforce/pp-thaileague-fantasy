@@ -59,6 +59,50 @@ Nationality determines the implemented Thai-player eligibility decision. It is
 not a quality proxy in player ranking. Individual performance, expected
 minutes, market evidence, position, and club context take precedence.
 
+## Reviewed Thai display names
+
+Thai player names should use reviewed spelling and recognizable football names.
+The official registration name is identity evidence, but can contain middle
+names, spelling inconsistencies, duplicate spaces, or invisible characters.
+Resolve display-name corrections by stable player/source IDs, preserve the
+original values in the admin audit log, and do not overwrite an approved
+correction with a subsequent unreviewed roster import. A name-only correction
+does not change eligibility, English names, classifications, or selection history.
+
+On 2026-09-04, the owner-requested `players.full_name_th` corrections were
+applied to both `development` (`br-green-queen-az934b4e`) and `production`
+(`br-tiny-shape-azrvakql`):
+
+- Transfermarkt `670857`, Jude Soonsup-Bell: `จู๊ด เจคอบ ซุ่นทรัพย์` to
+  `จู๊ด เบลล์`.
+- Transfermarkt `620319`, Hugo Boutsingkham: `อูโก้ เทียร์รี่ บง บุดสิงห์คำ` to
+  `อูโก้ บุตรสิงห์คำ`.
+
+Each branch has two `correct_player_thai_name` audit entries for batch
+`player-thai-names-20260904`. Thai short names remain `จู๊ด` and `อูโก้`.
+The review covered all 550 master records: 328 had Thai names, including 308
+active players and 20 inactive identities. All 462 active registrations matched
+the live official roster by registration ID, and all 308 stored active Thai
+names matched that source before these two overrides. Matching the registration
+source is not independent proof of spelling correctness. Further normalization
+and common-name recommendations were reviewed but not applied in this batch.
+
+Following explicit owner approval later on 2026-09-04, both branches received
+the additional batch `player-thai-names-20260904-review14`: six character-data
+corrections and eight common display-name changes, with fourteen
+`correct_player_thai_name` audit entries per branch. The six corrections remove
+the duplicated vowel in Nuttasit Choosai, duplicate spaces in Kongpop Sroirak
+and Phongsakon Sangkasopha, zero-width spaces in Supanut Sudathip, doubled
+`เ` in Piphob Saengjan, and decomposed sara am in Adisak Lambelsah.
+The eight approved display names are `เบนจามิน เดวิส`, `เอเลียส ดอเลาะ`,
+`เคนเน็ต ดูกอล`, `ลีออน เจมส์`, `วิลเลี่ยม เวเดอร์เฌอ`, `อาทิตย์ เบิร์ก`,
+`อับดุลเราะห์มาน เอสซาดี`, and `โยนัส ชวาเบ`.
+
+Thai short names were corrected for Nuttasit (`ณัฐสิทธิ์`), Supanut (`ศุภณัฐ`),
+and Elias (`เอเลียส`). Piphob and Adisak remain inactive. All other player
+fields, including English names and source identities, were verified unchanged.
+The review's unresolved-name group was not part of the approved change set.
+
 ## Current development snapshot
 
 As of 2026-09-02, the Neon `development` branch contains:

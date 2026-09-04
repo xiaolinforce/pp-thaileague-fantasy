@@ -51,6 +51,43 @@ was 2026-09-04 05:06:18 UTC. Full `db:verify:fantasy` checks then passed on
 both production and development, and the production health endpoint remained
 healthy. Production retained 158 teams, including the 100 bot participants.
 
+## 2026-09-04 player display-name maintenance
+
+The owner explicitly authorized two Thai player-name corrections on development
+and production. Production branch `br-tiny-shape-azrvakql` was confirmed in the
+Neon console and with `current_setting('neon.branch_id', true)`; the pre-write
+restore timestamp was `2026-09-04 10:27:19.708656 UTC`.
+
+The atomic operation changed only `players.full_name_th` and `updated_at` for
+Jude Soonsup-Bell and Hugo Boutsingkham and inserted two
+`correct_player_thai_name` audit entries. Stable IDs, English names, Thai short
+names, registrations, rankings, and historical Fantasy records were preserved.
+See `DATA_SOURCES.md` for the approved names and batch identifier.
+
+Development passed `db:verify:competition` and `db:verify:fantasy`. Production
+was updated through the authenticated Neon SQL Editor because the Vercel
+production environment pull redacts its sensitive database connection value.
+Production verification read back both new names and two audit entries and
+confirmed 550 players, 462 active registrations, 240 fixtures, 16 clubs, and
+30 Gameweeks. The hash of every player's ID, English full name, Thai full/short
+names, and active flag matched the expected roster with exactly the two name
+changes. The full npm database verifiers were run on development only.
+
+The owner subsequently approved the review's six character-data corrections
+and eight common-name changes. Batch `player-thai-names-20260904-review14`
+was applied atomically to each branch with stable-ID and exact old-value
+guards, adding fourteen audit entries per environment. Three Thai short names
+were also corrected. The production pre-write restore timestamp was
+`2026-09-04 10:46:12.33492 UTC`.
+
+Both development database verifiers passed again. Production SQL verification
+at `2026-09-04 10:49:05.3662 UTC` read back all fourteen names and audit entries;
+the roster fingerprint was `f0d6bdc424ebc1af25e762c17b342bbf`, matching the
+expected development result. A separate hash of all player fields except Thai
+full/short names and `updated_at` was unchanged before and after the operation.
+The counts remained 550 players, 462 active players/registrations, 240 fixtures,
+16 clubs, and 30 Gameweeks. The two historical inactive players stayed inactive.
+
 ## Release checklist
 
 1. Merge and verify the target commit on `dev`.
