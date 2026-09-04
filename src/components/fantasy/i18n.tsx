@@ -298,6 +298,7 @@ const translations: Record<string, string> = {
   รองกัปตัน: "Vice-captain",
   ปิด: "Close",
   ค้นหาชื่อนักเตะ: "Search players",
+  ล้างตัวกรอง: "Clear filters",
   กรองสโมสร: "Filter by club",
   ทุกสโมสร: "All clubs",
   กรองระดับ: "Filter by tier",

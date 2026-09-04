@@ -271,6 +271,23 @@ export default function TransfersClient({
     onMembersChange(nextMembers);
   }
 
+  const hasActiveFilters =
+    query !== "" ||
+    clubId !== "all" ||
+    position !== "ALL" ||
+    tier !== "all" ||
+    nationality !== "all" ||
+    sort !== "points";
+
+  function clearMarketFilters() {
+    setQuery("");
+    setClubId("all");
+    onPositionChange("ALL");
+    setTier("all");
+    setNationality("all");
+    setSort("points");
+  }
+
   const renderMarketFilters = () => (
     <div className="compact-market-toolbar">
       <div className="compact-market-primary-filters">
@@ -426,6 +443,16 @@ export default function TransfersClient({
           </SelectContent>
         </Select>
       </div>
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="compact-market-reset-filters"
+        onClick={clearMarketFilters}
+        disabled={!hasActiveFilters}
+      >
+        {translate("ล้างตัวกรอง")}
+      </Button>
     </div>
   );
 

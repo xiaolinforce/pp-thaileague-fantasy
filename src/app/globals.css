@@ -3411,6 +3411,15 @@ textarea:focus-visible {
   height: 44px;
 }
 
+.compact-market-reset-filters {
+  justify-self: end;
+  color: var(--muted);
+}
+
+.compact-market-reset-filters:not(:disabled):hover {
+  color: var(--orange-deep);
+}
+
 .compact-market-list {
   flex: 1;
   min-height: 0;
@@ -8927,6 +8936,10 @@ body {
   .compact-position-nationality-filters,
   .compact-market-selects {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .compact-market-reset-filters {
+    width: 100%;
   }
 
   .unified-team-workspace .squad-card {
