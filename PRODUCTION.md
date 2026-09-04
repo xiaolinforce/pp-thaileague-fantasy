@@ -41,14 +41,15 @@ then-configured six-hour Neon history window. Runtime deployment remained at
 does not require a UI deployment. Bot support source is recorded in commit
 `82108a9`.
 
-**Outstanding pre-existing configuration mismatch:** Production code and the
-2026-09-03 decision use nominal tier slots 3/3/6/3, but production
-`fantasy_tier_definitions` still stores 3/3/3/6. The full `db:verify:fantasy`
-command stops at this mismatch after league integrity passes. The new squads
-pass the deployed executable rules. Automatic approval review rejected
-reconciling the two metadata rows as outside the bot-import authorization;
-no tier definitions were changed. Obtain explicit owner authorization before
-that separate audited correction.
+**Resolved configuration mismatch:** Following explicit owner authorization,
+the two stale production `fantasy_tier_definitions` rows were corrected on
+2026-09-04 at 05:06 UTC: Level 3 from 3 to 6 slots and Level 4 from 6 to 3.
+The resulting 3/3/6/3 allocation matches the deployed executable rules and the
+2026-09-03 decision. Both changes and their `reconcile_tier_slot_metadata`
+audit entries committed in one transaction; the pre-change restore timestamp
+was 2026-09-04 05:06:18 UTC. Full `db:verify:fantasy` checks then passed on
+both production and development, and the production health endpoint remained
+healthy. Production retained 158 teams, including the 100 bot participants.
 
 ## Release checklist
 
