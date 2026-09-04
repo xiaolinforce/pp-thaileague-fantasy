@@ -2617,6 +2617,53 @@ textarea:focus-visible {
   color: var(--orange);
 }
 
+.development-language-tester {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 50;
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--orange) 32%, white);
+  border-radius: 12px;
+  color: var(--orange-deep);
+  background: color-mix(in srgb, white 94%, var(--orange-soft));
+  box-shadow: 0 5px 16px rgba(40, 35, 30, 0.14);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    box-shadow 150ms ease;
+}
+
+.development-language-tester:active {
+  cursor: grabbing;
+}
+
+.development-language-tester:hover {
+  color: var(--orange-deep);
+  border-color: var(--orange);
+  background: #fff3e8;
+  box-shadow: 0 7px 18px rgba(245, 102, 23, 0.23);
+}
+
+.development-language-tester:focus-visible {
+  outline: 3px solid rgba(245, 102, 23, 0.42);
+  outline-offset: 2px;
+}
+
+@media (width < 48rem) {
+  .development-language-tester {
+    bottom: 84px;
+  }
+}
+
 .language-switcher {
   padding: 3px;
   border-radius: 14px;

@@ -26,6 +26,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useState, type ReactNode } from "react";
+import { DevelopmentLanguageTester } from "@/components/fantasy/development-language-tester";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { useNavigationAvailability } from "@/components/fantasy/navigation-availability";
 import {
@@ -59,6 +60,8 @@ const navigation = [
     icon: CalendarDays,
   },
 ];
+
+const showDevelopmentLanguageTester = process.env.NODE_ENV === "development";
 
 export function Brand({ compact = false }: { compact?: boolean }) {
   return (
@@ -428,6 +431,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <a className="skip-link" href="#main-content">
           ข้ามไปยังเนื้อหาหลัก
         </a>
+        {showDevelopmentLanguageTester ? <DevelopmentLanguageTester /> : null}
         <aside className="sidebar">
           <SidebarContent pathname={pathname} identity={identity} />
         </aside>

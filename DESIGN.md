@@ -227,8 +227,9 @@ This is a prototype boundary:
 - public pages and users without a stored preference use Thai; a browser's
   language does not override the first-use default;
 - dictionary replacement depends on exact Thai source copy; and
-- Settings is the only production language control; there is no floating
-  development language control in the product UI.
+- Settings is the only production language control. During local development,
+  the App Shell includes a draggable language tester that remembers its local
+  position; it must not render in production.
 
 Add Thai source copy and its English dictionary entry in the same change. Test
 business-critical warnings and actions in both languages; do not rely on
