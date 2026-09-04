@@ -133,6 +133,11 @@ moves to Mailjet when Resend is near quota or returns a safely retryable hard
 failure. Google is enabled separately with
 `AUTH_GOOGLE_ENABLED=true` and its OAuth credentials.
 
+If delivery fails, the website shows a temporary email-unavailable message
+instead of asking for an unsent OTP. Sentry owns operational email alerts.
+See `PRODUCTION.md` for sender verification, shared-account budgets, and the
+alert rule; local and Preview share the development database budget.
+
 Keep `AUTH_PRODUCTION_READY=false` until the public domain, OAuth verification,
 privacy policy, and terms have been reviewed. The production gate disables
 both Email OTP and Google even if their individual flags are set.

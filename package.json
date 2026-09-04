@@ -11,6 +11,7 @@
     "format:check": "prettier --check .",
     "types": "tsc -p tsconfig.json --noEmit --skipLibCheck",
     "test:email": "node --experimental-strip-types --test src/lib/email/*.test.ts",
+    "test:email:integration": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/email-delivery.test.ts",
     "test:auth": "node --experimental-strip-types --test src/lib/auth/*.test.ts",
     "test:maintenance": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/auth-maintenance.test.ts",
     "test:observability": "node --experimental-strip-types --test src/lib/observability/*.test.ts",

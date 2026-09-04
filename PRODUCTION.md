@@ -9,13 +9,49 @@
 | Database            | Separate Neon `production` branch                        |
 | Member sign-in      | Google OAuth and passwordless Email OTP                  |
 | Bot protection      | Cloudflare Turnstile for Email OTP requests              |
-| Transactional email | Resend from `no-reply@auth.ppfootball.net`               |
+| Transactional email | Resend → Mailjet from `no-reply@auth.ppfootball.net`     |
 | User support        | `support@ppfootball.net`, forwarded to the product owner |
 | Monitoring          | Sentry Developer Free plus Vercel Runtime Logs           |
 
 The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
+
+## Transactional email operations (2026-09-04)
+
+Mailjet sender `*@auth.ppfootball.net` is Active. Vercel DNS hosts its separate
+Mailjet ownership TXT, `mailjet._domainkey.auth` DKIM and `auth` SPF records;
+Mailjet's DNS check reports SPF/DKIM OK. Existing Resend and support-forwarding
+records remain in place. Local, Preview `dev`, and Production are configured
+with `AUTH_EMAIL_PROVIDERS=resend,mailjet` and the verified sender above.
+Environment changes take effect only on a new deployment.
+
+| Shared account allocation                  | Resend daily/monthly | Mailjet daily/monthly |
+| ------------------------------------------ | -------------------- | --------------------- |
+| Local + Preview `dev` (one development DB) | 10 / 100             | 20 / 200              |
+| Production (separate DB)                   | 90 / 2,900           | 180 / 5,800           |
+
+Warning starts at 80%; a provider is skipped at 90% of either allocation.
+Budgets count app-accepted messages in UTC; they do not query provider billing
+or reserve capacity atomically. Check provider dashboards for account-wide
+usage, rejected messages and sends outside this app before raising limits.
+The email option becomes unavailable only when every configured provider is
+at its stop threshold or has recently failed. A request-time failure shows
+the same temporary message; Google remains an alternative. After a failure,
+availability can retry after 60 seconds; quota resets follow UTC boundaries.
+
+Sentry alert `3945024` ("Notify ItsMePP") listens to captured events in this
+project across all environments, filtered by `area=transactional_email`.
+It notifies the owner's existing Sentry account at `piyawach.p@hotmail.com`,
+throttled to once per issue per hour. Events cover near quota, quota stop,
+provider failure, fallback, total unavailability, recovery, and audit-write
+failure. Notifications use Sentry's mail service, independently of app email
+providers. Keep Sentry ingestion/notification quotas and account email enabled.
+This is request-driven detection, not a scheduled provider-quota poll.
+
+Local Mailjet OTP delivery was observed in the owner's Gmail inbox. The
+synthetic `notification_test` event triggered the Sentry rule on 2026-09-04;
+Sentry history confirms the action, while Hotmail inbox receipt was not inspected.
 
 ## 2026-09-04 bot participant maintenance
 

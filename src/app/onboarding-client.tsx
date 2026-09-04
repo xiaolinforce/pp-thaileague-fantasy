@@ -13,6 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { completeAuthenticationAction } from "@/app/auth-actions";
+import { checkEmailAvailabilityAction } from "@/app/auth-email-actions";
 import { useSetAppIdentity } from "@/components/fantasy/identity";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { authClient } from "@/lib/auth/client";
@@ -85,11 +86,13 @@ function errorMessage(error: unknown) {
 
 export default function OnboardingClient({
   emailEnabled,
+  emailAvailable = true,
   googleEnabled,
   turnstileSiteKey,
   upgradeMode = false,
 }: {
   emailEnabled: boolean;
+  emailAvailable?: boolean;
   googleEnabled: boolean;
   turnstileSiteKey: string | null;
   upgradeMode?: boolean;
@@ -100,10 +103,11 @@ export default function OnboardingClient({
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
+  const [emailUnavailable, setEmailUnavailable] = useState(!emailAvailable);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaEpoch, setCaptchaEpoch] = useState(0);
   const [busyAction, setBusyAction] = useState<
-    "guest" | "google" | "send-otp" | "verify-otp" | null
+    "guest" | "google" | "send-otp" | "verify-otp" | "check-email" | null
   >(null);
   const [error, setError] = useState("");
   const [authView, setAuthView] = useState<"choices" | "email">("choices");
@@ -122,7 +126,16 @@ export default function OnboardingClient({
       if (result.error) throw result.error;
       setOtpSent(true);
     } catch (requestError) {
-      setError(errorMessage(requestError));
+      if (
+        requestError &&
+        typeof requestError === "object" &&
+        "code" in requestError &&
+        requestError.code === "EMAIL_DELIVERY_UNAVAILABLE"
+      ) {
+        setEmailUnavailable(true);
+      } else {
+        setError(errorMessage(requestError));
+      }
       setCaptchaToken("");
       setCaptchaEpoch((value) => value + 1);
     } finally {
@@ -182,6 +195,51 @@ export default function OnboardingClient({
     setLanguage(language === "th" ? "en" : "th");
   };
 
+  const checkEmail = async () => {
+    setBusyAction("check-email");
+    setError("");
+    try {
+      setEmailUnavailable(!(await checkEmailAvailabilityAction()));
+    } catch {
+      setEmailUnavailable(true);
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  const emailStatus =
+    emailEnabled && emailUnavailable ? (
+      <div
+        id="email-delivery-status"
+        className="auth-email-status"
+        role="status"
+      >
+        <p>ขณะนี้ไม่สามารถส่งรหัส OTP ทางอีเมลได้ กรุณาลองใหม่ภายหลัง</p>
+        {googleEnabled && (
+          <p>คุณยังสามารถเข้าสู่ระบบด้วย Google โดยใช้อีเมลเดียวกับบัญชีเดิม</p>
+        )}
+        <button
+          type="button"
+          className="auth-text-button"
+          onClick={checkEmail}
+          disabled={busy}
+          aria-busy={busyAction === "check-email"}
+        >
+          {busyAction === "check-email" ? "กำลังตรวจสอบ…" : "ตรวจสอบอีกครั้ง"}
+        </button>
+        {googleEnabled && authView === "email" && (
+          <button
+            type="button"
+            className="auth-text-button"
+            onClick={signInWithGoogle}
+            disabled={busy}
+          >
+            เข้าสู่ระบบด้วย Google
+          </button>
+        )}
+      </div>
+    ) : null;
+
   const showEmailForm = () => {
     setError("");
     setAuthView("email");
@@ -211,6 +269,7 @@ export default function OnboardingClient({
           ? "สมัครสมาชิกด้วย EMAIL"
           : "เข้าสู่ระบบหรือสมัครด้วย EMAIL"}
       </h3>
+      {!otpSent && emailStatus}
       <label htmlFor="auth-email">อีเมล</label>
       <div className="auth-input-wrap">
         <Mail aria-hidden="true" />
@@ -275,7 +334,7 @@ export default function OnboardingClient({
         </>
       ) : (
         <>
-          {turnstileSiteKey && (
+          {turnstileSiteKey && !emailUnavailable && (
             <Turnstile
               key={captchaEpoch}
               siteKey={turnstileSiteKey}
@@ -288,6 +347,7 @@ export default function OnboardingClient({
             onClick={sendOtp}
             disabled={
               busy ||
+              emailUnavailable ||
               !email.includes("@") ||
               Boolean(turnstileSiteKey && !captchaToken)
             }
@@ -382,9 +442,13 @@ export default function OnboardingClient({
                   type="button"
                   className="auth-button email-choice-button"
                   onClick={showEmailForm}
-                  disabled={busy || !emailEnabled}
+                  disabled={busy || !emailEnabled || emailUnavailable}
                   aria-describedby={
-                    emailEnabled ? undefined : "email-upgrade-unavailable"
+                    emailUnavailable
+                      ? "email-delivery-status"
+                      : emailEnabled
+                        ? undefined
+                        : "email-upgrade-unavailable"
                   }
                   title={
                     emailEnabled
@@ -400,6 +464,7 @@ export default function OnboardingClient({
                     การสมัครสมาชิกด้วยอีเมลยังไม่เปิดใช้งาน
                   </p>
                 ) : null}
+                {emailStatus}
               </div>
             ) : (
               <div className="member-card">{emailAuthForm}</div>
@@ -510,13 +575,17 @@ export default function OnboardingClient({
                     type="button"
                     className="auth-button email-choice-button"
                     onClick={showEmailForm}
-                    disabled={busy}
+                    disabled={busy || emailUnavailable}
+                    aria-describedby={
+                      emailUnavailable ? "email-delivery-status" : undefined
+                    }
                   >
                     <Mail aria-hidden="true" />
                     เข้าสู่ระบบหรือสมัครด้วย EMAIL
                   </button>
                 )}
 
+                {emailStatus}
                 {!emailEnabled && !googleEnabled && (
                   <p className="auth-unavailable">
                     การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้

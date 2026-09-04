@@ -9,6 +9,7 @@ import { db } from "@/db";
 import * as schema from "@/db/schema";
 import { sendAuthenticationOtp } from "@/lib/email/transactional";
 import { linkAnonymousFantasyProfile } from "@/lib/fantasy/provisioning";
+import { awaitEmailDelivery } from "@/lib/auth/email-delivery-hook";
 
 const THIRTY_DAYS = 60 * 60 * 24 * 30;
 const ONE_DAY = 60 * 60 * 24;
@@ -66,6 +67,7 @@ const authPlugins = [
 
 export const auth = betterAuth({
   appName: "PP Thai League Fantasy",
+  hooks: { before: awaitEmailDelivery },
   advanced: {
     cookiePrefix: "pp-thaileague-fantasy",
   },

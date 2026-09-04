@@ -4,6 +4,23 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-04 — Report email availability and notify through Sentry
+
+**Decision:** Await explicit OTP delivery before returning success. Expose a
+temporary, bilingual unavailable state with a retry action and existing Google
+alternative. Keep Resend first and Mailjet as fallback; notify the owner through
+Sentry's existing Hotmail account, without adding an admin alert surface.
+
+**Context:** Better Auth's default delivery wrapper swallows sender failures,
+so users could be asked for a code that was never accepted by a mail provider.
+Alerts sent through those same providers would also fail during exhaustion.
+
+**Consequences:** Use request-local auth context overrides with integration
+coverage for the installed Better Auth version. Sentry alerts are independent
+of transactional mail but depend on Sentry ingestion and notification capacity.
+Per-database budgets divide shared provider capacity between development and
+Production; they remain advisory rather than atomic account-wide reservations.
+
 ## 2026-09-04 — Explicitly marked bots participate in Overall
 
 **Decision:** Allow 100 owner-requested bot teams in Production, initialized

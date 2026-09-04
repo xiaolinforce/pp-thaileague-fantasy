@@ -25,6 +25,17 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
+2026-09-04 focused email-delivery review: `/upgrade` was rendered at
+1280×720 and 390×844 in Thai and English with both provider budgets exhausted.
+The email choice was disabled, the temporary message and retry action were
+visible, Google remained enabled, and copy fit without horizontal overflow.
+Budget restoration re-enabled the email choice. A real local Mailjet request
+advanced to OTP entry and its message arrived in Gmail. Failure/503 and
+recovery are also covered against the actual Better Auth handler and fake
+provider transports. Temporary local budget overrides were restored; no test
+route or production bypass was added. This is bounded state evidence, not a
+full authentication-flow audit; the route maturity labels below remain valid.
+
 | Route                         | Archetype             | Status      | Current basis and next review focus                                                                                                                                   |
 | ----------------------------- | --------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `/team`                       | Interactive workspace | Reference   | Refined baseline for hierarchy, responsive transformation, and local state.                                                                                           |

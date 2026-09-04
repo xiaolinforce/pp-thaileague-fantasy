@@ -109,29 +109,30 @@ mobile browser; a clean desktop reload alone does not establish recovery.
 
 ## Commands
 
-| Command                          | Purpose                                                               |
-| -------------------------------- | --------------------------------------------------------------------- |
-| `npm run dev`                    | Start the development server on port 3006.                            |
-| `npm run build`                  | Create a production Next.js build.                                    |
-| `npm run start`                  | Serve an existing production build.                                   |
-| `npm run lint`                   | Run ESLint.                                                           |
-| `npm run types`                  | Run TypeScript without emitting files.                                |
-| `npm run test:email`             | Run transactional email routing and fallback tests.                   |
-| `npm run test:auth`              | Run authentication preference parsing tests.                          |
-| `npm run test:rules`             | Run squad, transfer, deadline, scoring, and substitution tests.       |
-| `npm run format:check`           | Check repository formatting with Prettier.                            |
-| `npm run format`                 | Rewrite formatting across the repository; use intentionally.          |
-| `npm run db:check`               | Verify that the configured database can be reached.                   |
-| `npm run db:generate`            | Generate a new Drizzle migration from schema changes.                 |
-| `npm run db:migrate`             | Apply committed Drizzle migrations.                                   |
-| `npm run db:studio`              | Open Drizzle Studio for the configured database.                      |
-| `npm run db:rank:leagues`        | Backfill the latest persisted Overall standings after scoring exists. |
-| `npm run db:report:participants` | Report human and bot season-team totals without identity details.     |
-| `npm run db:scenario -- <name>`  | Apply one fast, guarded Fantasy QA database scenario.                 |
-| `npm run db:verify:competition`  | Assert expected source/import structure.                              |
-| `npm run db:verify:fantasy`      | Verify Fantasy, ranking, Gameweek, and League invariants.             |
-| `npm run db:verify:player-stats` | Verify stored official current-season player-stat rows.               |
-| `npm run db:verify:transaction`  | Prove rollback on the exact development branch.                       |
+| Command                          | Purpose                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `npm run dev`                    | Start the development server on port 3006.                                        |
+| `npm run build`                  | Create a production Next.js build.                                                |
+| `npm run start`                  | Serve an existing production build.                                               |
+| `npm run lint`                   | Run ESLint.                                                                       |
+| `npm run types`                  | Run TypeScript without emitting files.                                            |
+| `npm run test:email`             | Run transactional email routing and fallback tests.                               |
+| `npm run test:email:integration` | Exercise real delivery orchestration with fake provider/database HTTP transports. |
+| `npm run test:auth`              | Run authentication preference parsing tests.                                      |
+| `npm run test:rules`             | Run squad, transfer, deadline, scoring, and substitution tests.                   |
+| `npm run format:check`           | Check repository formatting with Prettier.                                        |
+| `npm run format`                 | Rewrite formatting across the repository; use intentionally.                      |
+| `npm run db:check`               | Verify that the configured database can be reached.                               |
+| `npm run db:generate`            | Generate a new Drizzle migration from schema changes.                             |
+| `npm run db:migrate`             | Apply committed Drizzle migrations.                                               |
+| `npm run db:studio`              | Open Drizzle Studio for the configured database.                                  |
+| `npm run db:rank:leagues`        | Backfill the latest persisted Overall standings after scoring exists.             |
+| `npm run db:report:participants` | Report human and bot season-team totals without identity details.                 |
+| `npm run db:scenario -- <name>`  | Apply one fast, guarded Fantasy QA database scenario.                             |
+| `npm run db:verify:competition`  | Assert expected source/import structure.                                          |
+| `npm run db:verify:fantasy`      | Verify Fantasy, ranking, Gameweek, and League invariants.                         |
+| `npm run db:verify:player-stats` | Verify stored official current-season player-stat rows.                           |
+| `npm run db:verify:transaction`  | Prove rollback on the exact development branch.                                   |
 
 The production deployment runs `/api/cron/auth-maintenance` daily at 02:17
 Asia/Bangkok (19:17 UTC). Vercel supplies `CRON_SECRET` as a bearer token. The

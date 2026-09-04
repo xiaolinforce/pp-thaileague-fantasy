@@ -18,6 +18,12 @@ export type Language = "th" | "en";
 
 const translations: Record<string, string> = {
   ...adminTranslations,
+  "ขณะนี้ไม่สามารถส่งรหัส OTP ทางอีเมลได้ กรุณาลองใหม่ภายหลัง":
+    "Email codes are temporarily unavailable. Please try again later.",
+  "คุณยังสามารถเข้าสู่ระบบด้วย Google โดยใช้อีเมลเดียวกับบัญชีเดิม":
+    "You can still sign in with Google using the same email as your existing account.",
+  ตรวจสอบอีกครั้ง: "Check availability again",
+  "เข้าสู่ระบบด้วย Google": "Sign in with Google",
   // Navigation and shared shell
   ทีมของฉัน: "My Team",
   ทีม: "Team",

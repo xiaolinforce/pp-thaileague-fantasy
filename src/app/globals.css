@@ -425,6 +425,23 @@ textarea:focus-visible {
   line-height: 1.6;
 }
 
+.auth-email-status {
+  padding: 12px;
+  border-radius: 10px;
+  background: var(--orange-soft);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.auth-email-status p + p {
+  margin-top: 8px;
+}
+.auth-email-status .auth-text-button {
+  display: block;
+  min-height: 44px;
+  text-align: start;
+}
+
 .auth-legal-notice {
   margin: 16px 8px 0;
   color: var(--muted);
