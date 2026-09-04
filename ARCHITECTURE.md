@@ -240,6 +240,20 @@ state until each dataset exists.
 
 ## Persistence model
 
+Bot managers have `is_bot=true`, `status=bot`, a unique `bot_key`, and a
+`bot_batch_key` for operational targeting. A database check requires these
+markers together and disallows auth ownership for bots. Human managers default
+to `is_bot=false` with null bot metadata. Bot creation uses a reviewed temporary
+server-side operation, the shared database clients, the existing auto-fill
+solver and lineup validation, and transactional selection snapshots, revision 1,
+Overall membership, and admin audit writes. The candidate loader accepts a
+transaction client so fresh eligibility can be validated within the write
+transaction. No public bot mutation endpoint or scheduler exists.
+
+Scoring, Gameweek carryover, and Overall standings include bots through the same
+team/selection tables. Internal participant reporting groups teams by `is_bot`;
+bot metadata is not added to public UI payloads or display components.
+
 The schema is organized into four related groups:
 
 - Authentication: users, sessions, provider accounts, OTP verifications,

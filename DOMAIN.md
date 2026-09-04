@@ -310,6 +310,17 @@ League sharing, and live price changes are not implemented.
 
 ## Accounts, Guests, and names
 
+Internally marked bot managers may also own one team per season without an auth
+account. Their initial squad is auto-filled and saved before the current open
+Gameweek deadline, with normal classification snapshots, captaincy, and revision
+1 at zero transfers. They receive no retroactive selections or fabricated scores.
+Bots participate in Overall, Gameweek averages, and highest scores normally,
+but are not automatically enrolled in Private Leagues. Their squads carry into
+later Gameweeks through the existing lifecycle; transfers, lineup changes, or
+chip use require a separate owner instruction. Bot identities and histories are
+retained indefinitely. Internal reports distinguish bot teams from human-owned
+or preserved Guest teams; team counts do not measure active people.
+
 - A user may start as a device-bound Guest or authenticate with Email OTP or
   Google. There are no passwords.
 - Guest and member sessions expire after 30 days and slide forward when the

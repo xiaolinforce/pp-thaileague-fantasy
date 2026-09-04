@@ -54,6 +54,7 @@ async function verifyFantasyGame() {
 
   const leagueIntegrity = await db.execute<{
     seeded_managers: number;
+    invalid_bot_identities: number;
     duplicate_team_names: number;
     missing_overall_leagues: number;
     teams_missing_overall: number;
@@ -69,6 +70,12 @@ async function verifyFantasyGame() {
   }>(sql`
     select
       (select count(*)::int from fantasy_managers where status = 'seeded') as seeded_managers,
+      (select count(*)::int from fantasy_managers
+       where (is_bot and (status::text <> 'bot' or auth_user_id is not null
+         or bot_key is null or length(trim(bot_key)) = 0
+         or bot_batch_key is null or length(trim(bot_batch_key)) = 0))
+         or (not is_bot and (status::text = 'bot' or bot_key is not null
+         or bot_batch_key is not null))) as invalid_bot_identities,
       (
         select count(*)::int from (
           select fantasy_season_id, lower(name)

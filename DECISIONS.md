@@ -4,6 +4,27 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-04 — Explicitly marked bots participate in Overall
+
+**Decision:** Allow 100 owner-requested bot teams in Production, initialized
+once for the current open Gameweek using the existing squad auto-fill rules.
+Store `is_bot`, a unique bot key, a batch key, and `status=bot` on the manager;
+require null auth ownership. Bots participate in Overall and Gameweek average
+and highest points under the normal rules. Keep their identities and history
+indefinitely; future squad changes require another owner instruction.
+
+**Context:** The owner wants additional competitors during early adoption and
+explicitly requests no bot labels or disclosure copy on any website page.
+Internal reports must distinguish bots from real participants. This supersedes
+the real-teams-only restriction of the 2026-08-31 Classic League decision; it
+does not restore obsolete demo seeds or change Private League permissions.
+
+**Consequences:** Provisioning is a reviewed, idempotent temporary database
+operation with fresh validation, snapshots, initial transfer revisions, Overall
+membership, and audit records. No fabricated scores, past selections, auth
+accounts, public management endpoint, or recurring bot automation are created.
+Internal team counts remain distinct from claims about human users or activity.
+
 ## 2026-09-03 — Level 3 receives six nominal squad slots
 
 **Decision:** Apply a 3/3/6/3 nominal slot allocation for Levels 1–4 to the
@@ -671,6 +692,10 @@ preserve stable IDs, history, and audit context, apply to development unless
 production is explicitly authorized, and remove temporary files afterward.
 
 ## 2026-08-31 — Classic leagues contain only real provisioned teams
+
+**Partially superseded on 2026-09-04:** Explicitly marked bots may participate
+in Overall. Private League restrictions and the exclusion of obsolete demo
+seeds remain unchanged.
 
 **Decision:** Maintain one automatic Overall Classic league per Fantasy season
 for every Guest and member team. Private Classic leagues are member-only,

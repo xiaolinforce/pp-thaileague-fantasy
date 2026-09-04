@@ -106,6 +106,13 @@
       "when": 1788274235303,
       "tag": "0014_curved_absorbing_man",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1788497145950,
+      "tag": "0015_perpetual_triathlon",
+      "breakpoints": true
     }
   ]
 }

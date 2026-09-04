@@ -34,8 +34,8 @@ Set the pooled Neon connection string for the intended development branch:
 | `NEXT_PUBLIC_SITE_URL`                                          | Optional public metadata base URL; local fallback is `http://localhost:3006`.               |
 | `FANTASY_SCENARIO_BRANCH_ID`                                    | Exact disposable Neon branch ID required by the destructive QA scenario runner.             |
 | `FANTASY_SCENARIO_SEASON_SLUG`, `FANTASY_SCENARIO_PRIMARY_TEAM` | Optional scenario target overrides when more than one season or tester team exists.         |
-| `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_ENVIRONMENT`      | Public Sentry ingestion endpoint and `development`/`preview`/`production` event tag.         |
-| `SENTRY_AUTH_TOKEN`                                             | Secret build-only token for Sentry release and source-map uploads; never expose to clients.  |
+| `NEXT_PUBLIC_SENTRY_DSN`, `NEXT_PUBLIC_SENTRY_ENVIRONMENT`      | Public Sentry ingestion endpoint and `development`/`preview`/`production` event tag.        |
+| `SENTRY_AUTH_TOKEN`                                             | Secret build-only token for Sentry release and source-map uploads; never expose to clients. |
 
 Never commit a real connection string, auth secret, OAuth credential, email API
 key, or Turnstile secret. The Turnstile site key is intentionally public; do
@@ -112,6 +112,7 @@ for the same privacy rule.
 | `npm run db:migrate`             | Apply committed Drizzle migrations.                                   |
 | `npm run db:studio`              | Open Drizzle Studio for the configured database.                      |
 | `npm run db:rank:leagues`        | Backfill the latest persisted Overall standings after scoring exists. |
+| `npm run db:report:participants` | Report human and bot season-team totals without identity details.     |
 | `npm run db:scenario -- <name>`  | Apply one fast, guarded Fantasy QA database scenario.                 |
 | `npm run db:verify:competition`  | Assert expected source/import structure.                              |
 | `npm run db:verify:fantasy`      | Verify Fantasy, ranking, Gameweek, and League invariants.             |
@@ -163,6 +164,22 @@ that rebuild or overwrite this source data. For a requested change:
 Never commit source payloads, spreadsheets, CSV exports, screenshots, database
 exports, or task-local maintenance scripts. See `DATA_SOURCES.md` for the
 current source authority and persisted snapshot.
+
+### Bot participants and internal reporting
+
+Bot provisioning is a separate owner-authorized, task-scoped maintenance
+operation, not a QA scenario. Confirm the branch, preview all squads using the
+published candidate pool, validate fresh eligibility and the open deadline in
+the write transaction, and preserve snapshots, revisions, Overall membership,
+and audit context. Use unique bot keys and a batch key so retries cannot add
+duplicate participants or replace existing squads. Rehearse with rollback on
+development before production. Never copy human or bot team rows between
+environments. Remove temporary import tools and plans after verification.
+
+`db:report:participants` is read-only and reports season teams, including
+preserved Guests, rather than unique humans or active users. Run `db:check`
+against the intended environment first. `db:verify:fantasy` additionally checks
+bot identity invariants while continuing to reject obsolete seeded managers.
 
 ### Fantasy QA scenarios
 

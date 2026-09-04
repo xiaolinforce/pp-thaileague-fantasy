@@ -17,6 +17,15 @@ Do not silently combine or infer source facts in UI code. Resolve them during
 the maintenance task, preserve provenance and audit context in PostgreSQL, and
 run the relevant database verification before handoff.
 
+## Bot squad provenance
+
+Bot squads are generated from the persisted, published Fantasy candidate pool
+using the existing auto-fill solver. They are not sourced people, external
+competition facts, or historical scores. Operational provenance belongs in
+`fantasy_managers.bot_key`, `bot_batch_key`, and `create_bot_team` admin audit
+entries with the target Gameweek, random seed, and candidate-pool hash. This
+does not authorize roster, fixture, tier, or historical-score changes.
+
 ## Current season identifiers
 
 | Item                      | Value                   |

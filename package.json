@@ -17,6 +17,7 @@
     "db:generate": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs generate",
     "db:migrate": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs migrate",
     "db:rank:leagues": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/backfill-league-standings.ts",
+    "db:report:participants": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/report-fantasy-participants.ts",
     "db:scenario": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/run-fantasy-scenario.ts",
     "db:studio": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs studio",
     "db:verify:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-competition-data.ts",

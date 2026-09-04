@@ -25,8 +25,9 @@ provisional/final Gameweek scores, and presents Classic league standings.
   high-quality players from the published projection while preserving
   captaincy and keeping the result editable until the manager saves.
 - Real Overall and invite-only Private Classic leagues with owner controls,
-  membership limits, audit history, persisted latest Overall ranks, and no
-  seeded competitors.
+  membership limits, audit history, and persisted latest Overall ranks.
+- Internally marked bot managers with saved auto-filled squads, normal Overall
+  participation and scoring, and separate internal participant counts.
 - FPL-inspired scoring without bonus/BPS or Defensive Contributions, with a
   Thai Fantasy-specific 10 points for a goalkeeper goal.
 - Read-only access to the final team, points, fixtures, and standings after the
@@ -106,8 +107,10 @@ Competition rosters, classifications, effective tiers, ranking versions, and
 season setup are maintained in the database with source provenance and audit
 context. Repository scripts do not rebuild or overwrite that source data. A
 real account or Guest receives an empty opening draft and chooses all 15
-players before the first save. Standings therefore contain only real
-account-owned or historically preserved Guest teams.
+players before the first save. Standings include account-owned teams,
+historically preserved Guest teams, and explicitly provisioned bot teams.
+Bot identities are tracked internally; saved squads use the same scoring
+and Gameweek lifecycle.
 The League ranking command backfills current Overall standings only after a
 provisional or final Gameweek exists; normal scoring recalculation keeps those
 latest rows current afterward. Runtime Overall reads fetch the current team's

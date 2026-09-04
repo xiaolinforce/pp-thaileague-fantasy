@@ -23,8 +23,9 @@ import type { FantasyPosition } from "@/lib/fantasy/rules";
 export async function getFantasyAutoFillCandidates(
   season: typeof fantasySeasons.$inferSelect,
   gameweek: typeof fantasyGameweeks.$inferSelect,
+  database: Pick<typeof db, "select"> = db,
 ) {
-  const publishedRuns = await db
+  const publishedRuns = await database
     .select({
       id: fantasyRankingRuns.id,
     })
@@ -48,7 +49,7 @@ export async function getFantasyAutoFillCandidates(
   const publishedRun = publishedRuns[0];
   if (!publishedRun) return null;
 
-  const rows = await db
+  const rows = await database
     .select({
       fantasyPlayerId: fantasyPlayers.id,
       clubId: competitionEntries.clubId,
@@ -85,7 +86,7 @@ export async function getFantasyAutoFillCandidates(
   const fantasyPlayerIds = [...new Set(rows.map((row) => row.fantasyPlayerId))];
   if (fantasyPlayerIds.length === 0) return [];
 
-  const tierRows = await db
+  const tierRows = await database
     .select({
       fantasyPlayerId: fantasyPlayerTiers.fantasyPlayerId,
       level: fantasyPlayerTiers.level,

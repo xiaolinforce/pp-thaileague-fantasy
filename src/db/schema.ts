@@ -108,6 +108,7 @@ export const fantasyManagerStatusEnum = pgEnum("fantasy_manager_status", [
   "guest",
   "member",
   "abandoned",
+  "bot",
 ]);
 
 export const fantasyRankingStatusEnum = pgEnum("fantasy_ranking_status", [
@@ -972,12 +973,21 @@ export const fantasyManagers = pgTable(
       onDelete: "set null",
     }),
     status: fantasyManagerStatusEnum("status").default("guest").notNull(),
+    isBot: boolean("is_bot").default(false).notNull(),
+    botKey: text("bot_key"),
+    botBatchKey: text("bot_batch_key"),
     preferredLanguage: varchar("preferred_language", { length: 2 }),
     ...timestamps,
   },
   (table) => [
     uniqueIndex("fantasy_managers_auth_user_unique").on(table.authUserId),
     index("fantasy_managers_status_idx").on(table.status),
+    uniqueIndex("fantasy_managers_bot_key_unique").on(table.botKey),
+    index("fantasy_managers_bot_batch_idx").on(table.botBatchKey),
+    check(
+      "fantasy_managers_bot_identity_check",
+      sql`(${table.isBot} and ${table.status}::text = 'bot' and ${table.authUserId} is null and ${table.botKey} is not null and length(trim(${table.botKey})) > 0 and ${table.botBatchKey} is not null and length(trim(${table.botBatchKey})) > 0) or (not ${table.isBot} and ${table.status}::text <> 'bot' and ${table.botKey} is null and ${table.botBatchKey} is null)`,
+    ),
     check(
       "fantasy_managers_preferred_language_check",
       sql`${table.preferredLanguage} is null or ${table.preferredLanguage} in ('th', 'en')`,

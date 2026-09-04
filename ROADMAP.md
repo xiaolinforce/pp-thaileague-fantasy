@@ -12,6 +12,9 @@
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.
 - Published-ranking-weighted, randomized auto-fill for vacant squad slots.
+- Internally marked bot teams with one-time owner-requested auto-fill, normal
+  Overall/scoring participation, permanent history, and separate internal counts.
+  Later bot team changes require explicit owner instructions; no scheduler is enabled.
 - Pure player-points and team-score engines with automatic substitutions.
 - Provisional and final Gameweek recalculation.
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,

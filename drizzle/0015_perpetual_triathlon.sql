@@ -1,0 +1,7 @@
+ALTER TYPE "public"."fantasy_manager_status" ADD VALUE 'bot';--> statement-breakpoint
+ALTER TABLE "fantasy_managers" ADD COLUMN "is_bot" boolean DEFAULT false NOT NULL;--> statement-breakpoint
+ALTER TABLE "fantasy_managers" ADD COLUMN "bot_key" text;--> statement-breakpoint
+ALTER TABLE "fantasy_managers" ADD COLUMN "bot_batch_key" text;--> statement-breakpoint
+CREATE UNIQUE INDEX "fantasy_managers_bot_key_unique" ON "fantasy_managers" USING btree ("bot_key");--> statement-breakpoint
+CREATE INDEX "fantasy_managers_bot_batch_idx" ON "fantasy_managers" USING btree ("bot_batch_key");--> statement-breakpoint
+ALTER TABLE "fantasy_managers" ADD CONSTRAINT "fantasy_managers_bot_identity_check" CHECK (("fantasy_managers"."is_bot" and "fantasy_managers"."status"::text = 'bot' and "fantasy_managers"."auth_user_id" is null and "fantasy_managers"."bot_key" is not null and length(trim("fantasy_managers"."bot_key")) > 0 and "fantasy_managers"."bot_batch_key" is not null and length(trim("fantasy_managers"."bot_batch_key")) > 0) or (not "fantasy_managers"."is_bot" and "fantasy_managers"."status"::text <> 'bot' and "fantasy_managers"."bot_key" is null and "fantasy_managers"."bot_batch_key" is null));
