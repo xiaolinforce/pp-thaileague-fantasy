@@ -5526,18 +5526,27 @@ button.vacant-squad-slot {
   padding: 8px 18px;
   border-bottom: 1px solid #f0eeeb;
   display: grid;
-  grid-template-columns: 46px minmax(120px, 1fr) 20px 28px 20px minmax(
-      120px,
-      1fr
-    );
+  grid-template-columns: minmax(120px, 1fr) 20px 60px 20px minmax(120px, 1fr);
   align-items: center;
   gap: 8px;
 }
 
-.fixture-row time {
+.fixture-match-state,
+.fixture-row-mobile-state {
   color: var(--orange-deep);
   font-weight: 900;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.fixture-match-state {
+  width: 60px;
+  justify-self: center;
+}
+
+.fixture-row-mobile-state {
+  display: none;
 }
 
 .fixture-club {
@@ -5679,12 +5688,6 @@ button.vacant-squad-slot {
 
 .away-badge {
   background: var(--orange);
-}
-
-.fixture-vs {
-  color: #9da1a3;
-  font-size: 12px;
-  text-align: center;
 }
 
 .broadcast {
@@ -7692,11 +7695,12 @@ button.vacant-squad-slot {
     padding: 14px 13px;
   }
 
-  .fixture-row time {
+  .fixture-row-mobile-state {
     grid-area: time;
     align-self: start;
     padding-top: 2px;
     line-height: 1;
+    display: block;
   }
 
   .fixture-row .fixture-club {
@@ -7713,11 +7717,11 @@ button.vacant-squad-slot {
   }
 
   .fixture-row .club-color,
-  .fixture-row .fixture-vs {
+  .fixture-row .fixture-match-state {
     display: none;
   }
 
-  .fixture-row time,
+  .fixture-row-mobile-state,
   .fixture-club strong {
     font-size: 13px;
   }
@@ -8522,6 +8526,7 @@ button.vacant-squad-slot {
 .points-row,
 .league-row,
 .fixture-row time,
+.fixture-match-state,
 .fixture-club strong,
 .difficulty-row > strong,
 .stats-ranking > article,
@@ -8888,7 +8893,8 @@ body {
   font-weight: 500;
 }
 
-.fixture-row time {
+.fixture-row time,
+.fixture-match-state {
   font-weight: 400;
 }
 
@@ -10655,7 +10661,7 @@ body {
   .fixture-row {
     width: 100%;
     min-width: 0;
-    grid-template-columns: 46px minmax(0, 1fr) 18px 20px 18px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 18px 60px 18px minmax(0, 1fr);
     gap: 6px;
     padding-inline: 14px;
   }
@@ -10772,7 +10778,7 @@ body {
     row-gap: 10px;
   }
 
-  .fixture-row time {
+  .fixture-row-mobile-state {
     align-self: center;
     padding-top: 0;
   }

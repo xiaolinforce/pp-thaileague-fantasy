@@ -230,6 +230,26 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-05 — Fixture time and result presentation
+
+- **Route and task:** `/fixtures`; use the persisted home and away scores in
+  the fixture read model, show the result when both scores are available, and
+  keep the fixture-state column aligned across rows.
+- **Status:** In progress → In progress.
+- **Data/auth/Gameweek state:** real Guest fixture data for Gameweek 2, where
+  every match is upcoming and therefore renders its kickoff time.
+- **Viewports/accessibility:** Desktop browser inspection confirmed that the
+  kickoff replaces `VS`, uses the former time treatment, and occupies one fixed
+  60px column between aligned club-colour markers. On Mobile below 768px, the
+  implementation keeps that same time-or-result value in the existing left
+  fixture column while the central state is hidden. Each visible state has a
+  Thai or English accessible label that identifies it as kickoff or result.
+- **Known exclusions:** the inspected Gameweek did not contain a completed
+  fixture, so the rendered score state awaits naturally imported results; no
+  database mutation, mock, or production simulation was added for evidence.
+- **Verification:** targeted Prettier check, `npm run types`, clean diff
+  whitespace check, layout detector, and bounded in-app browser inspection.
+
 ### 2026-09-02 — Completed-season resilience and shared UI hardening
 
 - **Route and task:** `/team`, `/points`, `/fixtures`, and `/leagues`; keep the

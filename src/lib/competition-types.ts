@@ -79,6 +79,8 @@ export type CompetitionFixtureView = {
   kickoffAt: string | null;
   dateLabel: LocalizedText;
   timeLabel: LocalizedText;
+  homeScore: number | null;
+  awayScore: number | null;
   home: CompetitionClubView;
   away: CompetitionClubView;
   venue: LocalizedText | null;

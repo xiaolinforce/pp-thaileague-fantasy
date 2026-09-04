@@ -303,6 +303,8 @@ async function loadCompetitionDataset(): Promise<CompetitionDataset> {
           kickoffAt: fixture.kickoffAt?.toISOString() ?? null,
           dateLabel: formatFixtureDate(fixture.kickoffAt),
           timeLabel: formatFixtureTime(fixture.kickoffAt),
+          homeScore: fixture.homeScore,
+          awayScore: fixture.awayScore,
           home,
           away,
           venue: venue

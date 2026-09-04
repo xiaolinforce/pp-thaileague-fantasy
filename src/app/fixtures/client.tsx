@@ -24,6 +24,28 @@ function formatMatchDate(kickoffAt: string | null, language: "th" | "en") {
   }).format(new Date(kickoffAt));
 }
 
+function getFixtureState(
+  fixture: CompetitionFixtureView,
+  language: "th" | "en",
+) {
+  const hasScore = fixture.homeScore !== null && fixture.awayScore !== null;
+  if (hasScore) {
+    const score = `${fixture.homeScore}–${fixture.awayScore}`;
+    return {
+      label: score,
+      accessibleLabel:
+        language === "th" ? `ผลการแข่งขัน ${score}` : `Result ${score}`,
+    };
+  }
+
+  const timeLabel = localize(fixture.timeLabel, language);
+  return {
+    label: timeLabel,
+    accessibleLabel:
+      language === "th" ? `เวลาแข่งขัน ${timeLabel}` : `Kickoff ${timeLabel}`,
+  };
+}
+
 export default function FixturesClient({ data }: { data: FixturesPageData }) {
   const { language } = useLanguage();
   const [week, setWeek] = useState(() =>
@@ -64,38 +86,50 @@ export default function FixturesClient({ data }: { data: FixturesPageData }) {
                 <div className="match-day">
                   <span>{date}</span>
                 </div>
-                {fixtures.map((fixture) => (
-                  <article className="fixture-row" key={fixture.id}>
-                    <time dateTime={fixture.kickoffAt ?? undefined}>
-                      {localize(fixture.timeLabel, language)}
-                    </time>
-                    <div className="fixture-club home">
-                      <strong>{localize(fixture.home.name, language)}</strong>
-                    </div>
-                    <ClubColor
-                      color={fixture.home.colors[0]}
-                      secondaryColor={fixture.home.colors[1]}
-                      className="fixture-club-color fixture-club-color--home"
-                      label={text(
-                        `สีประจำทีม ${localize(fixture.home.name, language)}`,
-                        `${localize(fixture.home.name, language)} team colours`,
-                      )}
-                    />
-                    <b className="fixture-vs">VS</b>
-                    <ClubColor
-                      color={fixture.away.colors[0]}
-                      secondaryColor={fixture.away.colors[1]}
-                      className="fixture-club-color fixture-club-color--away"
-                      label={text(
-                        `สีประจำทีม ${localize(fixture.away.name, language)}`,
-                        `${localize(fixture.away.name, language)} team colours`,
-                      )}
-                    />
-                    <div className="fixture-club">
-                      <strong>{localize(fixture.away.name, language)}</strong>
-                    </div>
-                  </article>
-                ))}
+                {fixtures.map((fixture) => {
+                  const fixtureState = getFixtureState(fixture, language);
+                  return (
+                    <article className="fixture-row" key={fixture.id}>
+                      <time
+                        className="fixture-row-mobile-state"
+                        dateTime={fixture.kickoffAt ?? undefined}
+                        aria-label={fixtureState.accessibleLabel}
+                      >
+                        {fixtureState.label}
+                      </time>
+                      <div className="fixture-club home">
+                        <strong>{localize(fixture.home.name, language)}</strong>
+                      </div>
+                      <ClubColor
+                        color={fixture.home.colors[0]}
+                        secondaryColor={fixture.home.colors[1]}
+                        className="fixture-club-color fixture-club-color--home"
+                        label={text(
+                          `สีประจำทีม ${localize(fixture.home.name, language)}`,
+                          `${localize(fixture.home.name, language)} team colours`,
+                        )}
+                      />
+                      <b
+                        className="fixture-match-state"
+                        aria-label={fixtureState.accessibleLabel}
+                      >
+                        {fixtureState.label}
+                      </b>
+                      <ClubColor
+                        color={fixture.away.colors[0]}
+                        secondaryColor={fixture.away.colors[1]}
+                        className="fixture-club-color fixture-club-color--away"
+                        label={text(
+                          `สีประจำทีม ${localize(fixture.away.name, language)}`,
+                          `${localize(fixture.away.name, language)} team colours`,
+                        )}
+                      />
+                      <div className="fixture-club">
+                        <strong>{localize(fixture.away.name, language)}</strong>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             ))}
             {fixturesByDate.size === 0 && (
