@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, eq, inArray } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import { connection } from "next/server";
 
 import { db } from "@/db";
@@ -237,17 +237,8 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
     (row) => row.gameweek.id === selectedGameweek.id,
   )?.selection;
 
-  const [fixtureRows, squadRows, teamScore] = await Promise.all([
-    db
-      .select({ id: fixtures.id })
-      .from(fixtures)
-      .where(
-        and(
-          eq(fixtures.competitionSeasonId, season.competitionSeasonId),
-          eq(fixtures.matchweek, selectedGameweek.number),
-        ),
-      ),
-    selectedSelection
+  const pointsSquadQuery = (selectionId?: string) =>
+    selectionId
       ? db
           .select({
             member: fantasyTeamSelectionPlayers,
@@ -280,19 +271,58 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
               clubVisualIdentities.clubId,
             ),
           )
-          .where(
-            eq(fantasyTeamSelectionPlayers.selectionId, selectedSelection.id),
-          )
-      : Promise.resolve([]),
-    selectedSelection
-      ? db.query.fantasyTeamGameweekScores.findFirst({
-          where: eq(
-            fantasyTeamGameweekScores.selectionId,
-            selectedSelection.id,
+          .where(eq(fantasyTeamSelectionPlayers.selectionId, selectionId))
+      : Promise.resolve([]);
+  const [fixtureRows, squadRows, teamScore, highestScoreRows] =
+    await Promise.all([
+      db
+        .select({ id: fixtures.id })
+        .from(fixtures)
+        .where(
+          and(
+            eq(fixtures.competitionSeasonId, season.competitionSeasonId),
+            eq(fixtures.matchweek, selectedGameweek.number),
           ),
+        ),
+      pointsSquadQuery(selectedSelection?.id),
+      selectedSelection
+        ? db.query.fantasyTeamGameweekScores.findFirst({
+            where: eq(
+              fantasyTeamGameweekScores.selectionId,
+              selectedSelection.id,
+            ),
+          })
+        : Promise.resolve(undefined),
+      db
+        .select({
+          selection: fantasyTeamSelections,
+          score: fantasyTeamGameweekScores,
+          teamName: fantasyTeams.name,
         })
-      : Promise.resolve(undefined),
-  ]);
+        .from(fantasyTeamGameweekScores)
+        .innerJoin(
+          fantasyTeamSelections,
+          eq(fantasyTeamGameweekScores.selectionId, fantasyTeamSelections.id),
+        )
+        .innerJoin(
+          fantasyTeams,
+          eq(fantasyTeamSelections.fantasyTeamId, fantasyTeams.id),
+        )
+        .innerJoin(
+          fantasyTeamSelectionPlayers,
+          eq(fantasyTeamSelectionPlayers.selectionId, fantasyTeamSelections.id),
+        )
+        .where(eq(fantasyTeamSelections.fantasyGameweekId, selectedGameweek.id))
+        .orderBy(
+          desc(fantasyTeamGameweekScores.totalPoints),
+          asc(fantasyTeams.name),
+        )
+        .limit(1),
+    ]);
+  const highestScoreRow = highestScoreRows[0];
+  const highestScoringSquad = await pointsSquadQuery(
+    highestScoreRow?.selection.id,
+  );
   const fixtureIds = fixtureRows.map((fixture) => fixture.id);
   const pointRows = fixtureIds.length
     ? await db
@@ -326,6 +356,41 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
     byPlayer.set(row.stats.fantasyPlayerId, current);
   }
   const members: FantasyPointsSquadMember[] = squadRows
+    .map((row) => ({
+      fantasyPlayerId: row.member.fantasyPlayerId,
+      clubId: row.member.clubIdSnapshot,
+      position: row.member.positionSnapshot as FantasySquadMember["position"],
+      tier: row.member.tierSnapshot,
+      isThai: row.member.isThaiSnapshot,
+      lineupRole: row.member.lineupRole,
+      benchOrder: row.member.benchOrder,
+      captainRole: row.member.captainRole,
+      name: {
+        th: row.fullNameTh ?? row.fullNameEn,
+        en: row.fullNameEn,
+      },
+      shortName: {
+        th:
+          row.shortNameTh ??
+          row.shortNameEn ??
+          row.fullNameTh ??
+          row.fullNameEn,
+        en: row.shortNameEn ?? row.fullNameEn,
+      },
+      club: { th: row.clubNameTh, en: row.clubNameEn },
+      clubShort: {
+        th: row.clubShortNameTh ?? row.clubAbbreviation ?? row.clubNameTh,
+        en: row.clubShortNameEn ?? row.clubAbbreviation ?? row.clubNameEn,
+      },
+      color: row.color ?? "#1b6a55",
+      accent: row.accent ?? "#f4f1eb",
+    }))
+    .sort((a, b) => {
+      if (a.lineupRole !== b.lineupRole)
+        return a.lineupRole === "starter" ? -1 : 1;
+      return (a.benchOrder ?? -1) - (b.benchOrder ?? -1);
+    });
+  const highestScoringMembers: FantasyPointsSquadMember[] = highestScoringSquad
     .map((row) => ({
       fantasyPlayerId: row.member.fantasyPlayerId,
       clubId: row.member.clubIdSnapshot,
@@ -401,6 +466,15 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
           totalPoints: teamScore.totalPoints,
           autoSubstitutions: teamScore.autoSubstitutions,
           computedAt: teamScore.computedAt.toISOString(),
+        }
+      : null,
+    highestScoringTeam: highestScoreRow
+      ? {
+          name: highestScoreRow.teamName,
+          totalPoints: highestScoreRow.score.totalPoints,
+          activeChip: highestScoreRow.selection.activeChip,
+          autoSubstitutions: highestScoreRow.score.autoSubstitutions,
+          squad: highestScoringMembers,
         }
       : null,
   };

@@ -7,6 +7,7 @@ import { getFantasyNavigationAvailability } from "@/data/navigation";
 import { parsePointsGameweek } from "@/lib/fantasy/points-gameweek";
 import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
+import { HighestScoreDialog } from "./highest-score-dialog";
 import { PointsPlayerToken } from "./player-token";
 
 const positionRows = [
@@ -142,11 +143,10 @@ export default async function PointsPage({
               <strong>{total}</strong>
               <span>คะแนน</span>
             </article>
-            <article className="points-score-card points-score-card--supporting">
-              <span>คะแนนสูงสุด</span>
-              <strong>{points.gameweekSummary.highestPoints}</strong>
-              <small>คะแนน</small>
-            </article>
+            <HighestScoreDialog
+              team={points.highestScoringTeam}
+              players={points.players}
+            />
           </section>
 
           <section className="product-card points-pitch-card">

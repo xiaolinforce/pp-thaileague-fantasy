@@ -400,6 +400,8 @@ const translations: Record<string, string> = {
   ล้างคำค้น: "Clear search",
   ทั้งหมด: "All",
   คะแนนสูงสุด: "Highest score",
+  ทีมคะแนนสูงสุด: "Highest-scoring team",
+  ดูทีมคะแนนสูงสุด: "View highest-scoring team",
   ฟอร์มดีที่สุด: "Best Form",
   ราคาสูงสุด: "Highest Price",
   ตัวกรอง: "Filters",

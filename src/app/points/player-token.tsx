@@ -27,6 +27,7 @@ export function PointsPlayerToken({
   showPositionBadge = false,
   result,
   multiplier = 1,
+  readOnly = false,
 }: {
   member: FantasyPointsSquadMember;
   points: number;
@@ -35,6 +36,7 @@ export function PointsPlayerToken({
   showPositionBadge?: boolean;
   result?: PlayerPointsRow;
   multiplier?: number;
+  readOnly?: boolean;
 }) {
   const { language, translate } = useLanguage();
   const name = localize(member.name, language);
@@ -58,6 +60,52 @@ export function PointsPlayerToken({
   const detailRows = Object.entries(result?.breakdown ?? {}).filter(
     ([, value]) => value !== 0,
   );
+  const token = (
+    <>
+      {captain && (
+        <span className="points-captain-role">
+          <i
+            className={`captain-badge ${
+              captain === "C"
+                ? "captain-badge--captain"
+                : "captain-badge--vice-captain"
+            }`}
+            aria-label={
+              captain === "C" ? translate("กัปตัน") : translate("รองกัปตัน")
+            }
+          >
+            {captain}
+          </i>
+        </span>
+      )}
+      <span className="points-player-kit">
+        <PlayerKit color={member.color} accent={member.accent} size="medium" />
+        {showPositionBadge && position !== "GK" && (
+          <span className="points-player-position">
+            <PositionBadge position={position} />
+          </span>
+        )}
+      </span>
+      <span
+        className={`points-player-name squad-name squad-name--${member.isThai ? "thai" : "foreign"}`}
+      >
+        {shortName}
+      </span>
+      <strong className="points-player-score squad-fixture">{points}</strong>
+    </>
+  );
+
+  if (readOnly) {
+    return (
+      <div
+        className={`points-player-token is-read-only${counted ? " is-counted" : " is-uncounted"}${substitution ? ` is-sub-${substitution}` : ""}`}
+        title={`${name} · ${club}`}
+      >
+        {token}
+      </div>
+    );
+  }
+
   return (
     <Dialog>
       <DialogTrigger
@@ -74,40 +122,7 @@ export function PointsPlayerToken({
           />
         }
       >
-        {captain && (
-          <span className="points-captain-role">
-            <i
-              className={`captain-badge ${
-                captain === "C"
-                  ? "captain-badge--captain"
-                  : "captain-badge--vice-captain"
-              }`}
-              aria-label={
-                captain === "C" ? translate("กัปตัน") : translate("รองกัปตัน")
-              }
-            >
-              {captain}
-            </i>
-          </span>
-        )}
-        <span className="points-player-kit">
-          <PlayerKit
-            color={member.color}
-            accent={member.accent}
-            size="medium"
-          />
-          {showPositionBadge && position !== "GK" && (
-            <span className="points-player-position">
-              <PositionBadge position={position} />
-            </span>
-          )}
-        </span>
-        <span
-          className={`points-player-name squad-name squad-name--${member.isThai ? "thai" : "foreign"}`}
-        >
-          {shortName}
-        </span>
-        <strong className="points-player-score squad-fixture">{points}</strong>
+        {token}
       </DialogTrigger>
 
       <DialogContent

@@ -4855,6 +4855,22 @@ button.vacant-squad-slot {
   background: var(--paper);
 }
 
+.points-score-card--interactive {
+  width: 100%;
+  border: 1px solid var(--line);
+  cursor: pointer;
+}
+
+.points-score-card--interactive:hover {
+  border-color: color-mix(in srgb, var(--orange) 42%, var(--line));
+  box-shadow: 0 8px 20px rgba(160, 73, 19, 0.1);
+}
+
+.points-score-card--interactive:focus-visible {
+  outline: 3px solid var(--orange);
+  outline-offset: 3px;
+}
+
 .points-score-card--supporting::after {
   display: none;
 }
@@ -4974,6 +4990,10 @@ button.vacant-squad-slot {
   outline: 3px solid #fff;
   outline-offset: 4px;
   border-radius: 10px;
+}
+
+.points-player-token.is-read-only {
+  cursor: default;
 }
 
 .points-captain-role {
@@ -5123,6 +5143,11 @@ button.vacant-squad-slot {
   padding-block: 12px 7px;
 }
 
+.points-bench-item .points-captain-role {
+  top: 8px;
+  left: calc(50% - 31px);
+}
+
 .points-bench-item .points-player-kit .kit-medium svg {
   width: 36px;
   height: 36px;
@@ -5140,6 +5165,20 @@ button.vacant-squad-slot {
 .points-player-dialog {
   max-height: min(720px, calc(100dvh - 32px));
   overflow-y: auto;
+}
+
+.points-highest-team-dialog {
+  width: min(680px, calc(100% - 32px));
+  max-width: 680px;
+}
+
+@media (width >= 80rem) {
+  [data-slot="dialog-content"].points-highest-team-dialog {
+    height: min(720px, calc(100dvh - 64px));
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
 }
 
 .points-player-dialog-score {
