@@ -168,6 +168,10 @@ proven behaviors unless a deliberate product decision replaces them:
   multiplier; do not add a duplicate page-level calculation.
 - Open the player's positive and negative category breakdown in the shared
   dialog rather than duplicating a large details table below the pitch.
+- Display recorded player scores, including zero, on the pitch and bench and
+  in player dialogs. Use a dash only when no score result exists. A recorded
+  result with zero minutes explains that the player did not play, rather than
+  claiming scoring details are unavailable; retain any recorded deductions.
 - Empty squad state explains that no team was saved and points to the valid next
   action.
 - On Desktop, place the selector and comparison rail beside the pitch. On

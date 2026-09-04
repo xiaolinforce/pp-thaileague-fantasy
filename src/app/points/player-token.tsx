@@ -54,8 +54,9 @@ export function PointsPlayerToken({
       : member.captainRole === "vice_captain"
         ? "V"
         : null;
+  const hasResult = result !== undefined;
   const hasPlayed = (result?.minutes ?? 0) > 0;
-  const scoreDisplay = hasPlayed ? points : "-";
+  const scoreDisplay = hasResult ? points : "-";
   const captainPoints = result?.totalPoints ?? points;
   const captainPointsDisplay =
     !hasPlayed
@@ -181,7 +182,14 @@ export function PointsPlayerToken({
             </div>
           )}
         </div>
-        {detailRows.length === 0 && (
+        {hasResult && !hasPlayed && (
+          <p className="points-player-dialog-empty">
+            {language === "th"
+              ? "ไม่ได้ลงสนามใน Gameweek นี้"
+              : "Did not play in this Gameweek."}
+          </p>
+        )}
+        {!hasResult && (
           <p className="points-player-dialog-empty">
             {language === "th"
               ? "ยังไม่มีรายละเอียดคะแนนใน Gameweek นี้"
@@ -192,4 +200,3 @@ export function PointsPlayerToken({
     </Dialog>
   );
 }
-
