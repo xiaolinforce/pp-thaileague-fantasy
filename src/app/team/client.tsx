@@ -660,8 +660,7 @@ export default function TeamClient({
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [workspaceView, setWorkspaceView] =
     useState<TeamWorkspaceView>("squad");
-  const [marketPositionFilterRequest, setMarketPositionFilterRequest] =
-    useState<{ position: CompetitionPosition; requestId: number } | null>(null);
+  const [marketPosition, setMarketPosition] = useState("ALL");
   const router = useRouter();
 
   const changeWorkspaceView = (nextView: TeamWorkspaceView) => {
@@ -1207,10 +1206,7 @@ export default function TeamClient({
 
   const selectVacancy = (slotId: string, position: CompetitionPosition) => {
     if (!swapFrom) {
-      setMarketPositionFilterRequest((current) => ({
-        position,
-        requestId: (current?.requestId ?? 0) + 1,
-      }));
+      setMarketPosition(position);
       if (window.matchMedia("(width < 48rem)").matches) {
         changeWorkspaceView("market");
       }
@@ -1528,7 +1524,8 @@ export default function TeamClient({
             onPlayerSelect={setSelected}
             onPlayerRemove={removePlayer}
             isAutoFilling={isAutoFilling}
-            marketPositionFilterRequest={marketPositionFilterRequest}
+            position={marketPosition}
+            onPositionChange={setMarketPosition}
           />
         </div>
       </main>

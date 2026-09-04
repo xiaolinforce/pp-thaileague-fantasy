@@ -98,7 +98,8 @@ export default function TransfersClient({
   onPlayerSelect,
   onPlayerRemove,
   isAutoFilling,
-  marketPositionFilterRequest,
+  position,
+  onPositionChange,
 }: {
   data: CompetitionDataset;
   fantasy: FantasyState;
@@ -109,15 +110,12 @@ export default function TransfersClient({
   onPlayerSelect: (player: CompetitionPlayerView) => void;
   onPlayerRemove: (player: CompetitionPlayerView) => void;
   isAutoFilling: boolean;
-  marketPositionFilterRequest: {
-    position: CompetitionPosition;
-    requestId: number;
-  } | null;
+  position: string;
+  onPositionChange: (position: string) => void;
 }) {
   const { language, translate } = useLanguage();
   const [query, setQuery] = useState("");
   const [clubId, setClubId] = useState("all");
-  const [position, setPosition] = useState("ALL");
   const [tier, setTier] = useState("all");
   const [nationality, setNationality] = useState("all");
   const [sort, setSort] = useState("points");
@@ -136,11 +134,6 @@ export default function TransfersClient({
     return () =>
       desktopQuery.removeEventListener("change", syncFilterVisibility);
   }, []);
-
-  useEffect(() => {
-    if (!marketPositionFilterRequest) return;
-    setPosition(marketPositionFilterRequest.position);
-  }, [marketPositionFilterRequest]);
 
   const clubs = useMemo(
     () =>
@@ -333,7 +326,7 @@ export default function TransfersClient({
       <div className="compact-position-nationality-filters">
         <Select
           value={position}
-          onValueChange={(value) => value && setPosition(String(value))}
+          onValueChange={(value) => value && onPositionChange(String(value))}
         >
           <SelectTrigger aria-label="กรองตำแหน่งผู้เล่น">
             <SelectValue />

@@ -130,6 +130,12 @@ Database commands use a small Windows Node user-info compatibility shim. Keep
 the wrapper in package scripts unless the underlying Windows issue is confirmed
 resolved for the pinned toolchain.
 
+Prettier excludes generated migration history under `drizzle/` so formatting
+does not rewrite committed SQL, snapshots, or the migration journal.
+`.gitattributes` keeps text-file checkouts on LF line endings across platforms,
+matching Prettier and preventing Windows `core.autocrlf` from reintroducing
+format-check failures.
+
 ## Database workflow
 
 1. Change `src/db/schema.ts`.

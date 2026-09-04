@@ -1,3 +1,6 @@
 .agents/skills/impeccable/
 .agents/skills/web-design-guidelines/
 .agents/skills/pp-thaileague-ui-review/agents/openai.yaml
+
+# Generated migration history must remain unchanged.
+drizzle/
