@@ -206,8 +206,9 @@ team mutation remains closed.
 - Pre-deadline revisions can be confirmed or cancelled.
 - Wildcard makes that Gameweek's transfers free and preserves the accumulated
   free-transfer balance before adding the normal weekly allowance.
-- Gameweek 1 and Wildcard transfers are exempt from the chargeable-transfer
-  limit.
+- Gameweek 1 and Wildcard transfers are free and exempt from the
+  chargeable-transfer limit. Opening-Gameweek settlement uses the same
+  unlimited-transfer rule as the displayed draft allowance and validation.
 - League tie-breaking counts locked net transfers, excluding Wildcard weeks.
 
 ## Chips
@@ -227,6 +228,15 @@ is unavailable in Gameweek 1 and becomes available from Gameweek 2.
 
 Appearance points are 1 for playing fewer than 60 minutes and 2 for playing at
 least 60 minutes. Zero minutes scores zero appearance points.
+
+For Fantasy scoring, a confirmed appearance has a minimum recorded duration of
+one minute, including a substitute who enters during stoppage time or plays for
+less than a full minute. Zero minutes means the player did not enter the pitch.
+This owner-confirmed convention also preserves automatic-substitution and
+captaincy behavior: a brief appearance counts as having played. On 2026-09-04,
+Marlon and Kirati Kaewnongdang entering at 90+5 therefore each earn one appearance
+point. Retain the actual substitution timestamp in the source/audit context;
+the one-minute minimum is a Fantasy convention, not an exact elapsed-time claim.
 
 | Event                                | Goalkeeper | Defender | Midfielder | Forward |
 | ------------------------------------ | ---------: | -------: | ---------: | ------: |

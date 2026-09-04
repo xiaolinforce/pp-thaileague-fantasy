@@ -344,6 +344,18 @@ test("opening Gameweek and wildcard transfers bypass the paid-transfer cap", () 
   }
 });
 
+test("opening Gameweek settlement keeps unlimited transfers free", () => {
+  assert.deepEqual(
+    settleTransfers({
+      freeTransfersBefore: 2,
+      transferCount: 13,
+      wildcard: false,
+      openingGameweek: true,
+    }),
+    { transferPoints: 0, freeTransfersAfter: 2 },
+  );
+});
+
 test("adds two free transfers and caps the balance at four", () => {
   assert.deepEqual(
     settleTransfers({

@@ -491,17 +491,20 @@ export function settleTransfers({
   freeTransfersBefore,
   transferCount,
   wildcard,
+  openingGameweek = false,
   rules = THAI_LEAGUE_FANTASY_RULES,
 }: {
   freeTransfersBefore: number;
   transferCount: number;
   wildcard: boolean;
+  openingGameweek?: boolean;
   rules?: FantasyRules;
 }) {
   const usage = getTransferUsage({
     freeTransfersBefore,
     transferCount,
     wildcard,
+    openingGameweek,
     rules,
   });
 

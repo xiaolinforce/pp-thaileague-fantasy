@@ -103,7 +103,42 @@ and Elias (`เอเลียส`). Piphob and Adisak remain inactive. All othe
 fields, including English names and source identities, were verified unchanged.
 The review's unresolved-name group was not part of the approved change set.
 
-## Current development snapshot
+## Opening-match review (2026-09-04)
+
+Owner-approved batch `gw1-pattani-bg-20260904` was applied to development and
+production for official fixture `37419`, Pattani FC 0-0 BG Pathum United.
+The fixture is finished; GW1 remains provisional with seven fixtures unplayed.
+The batch records 46 reviewed player-stat rows: 31 appearances and 15 unused
+substitutes. Stored source payloads and admin audit entries retain source URLs,
+official registration IDs, substitution events, and the owner's decisions.
+
+Evidence was reviewed on [AiScore](https://www.aiscore.com/th/match-pattani-bg-pathum-united/69759igpv4gigk2),
+[FotMob](https://www.fotmob.com/matches/bg-pathum-united-vs-pattani-fc/3lbwl03y#1000017717),
+and the [official match statistics](https://thaileague.co.th/fixtures/224/match/37419?selectedTab=match-stat&optaSeasonId=2026).
+The official API report was not yet approved at review time; this import does
+not assert official report approval. AiScore and FotMob both reported two
+Pattani goalkeeper saves and one BG save. Damyan Damyanov earns six points.
+Marlon and Kirati Kaewnongdang entered at 90+5 and each receive the
+owner-approved minimum one Fantasy minute and one appearance point, as defined
+in `DOMAIN.md`. No MOTM, bonus, or BPS points were added.
+
+Matheus Costa's existing Transfermarkt identity `1114322` was matched to
+official registration `2026:62606` / person `94997`, BG shirt 22, Brazilian
+forward. The batch activates that identity and adds his registration and
+Fantasy record with Level 3 effective from GW2. The registration's start date
+records the first verified appearance, not an asserted contract start. The
+official roster's implausible birth date `2026-08-14` was ignored; the existing
+unknown birth date remains unchanged. There are now 463 active registrations.
+The published 462-player preseason ranking remains immutable. Costa is
+available for manual GW2 selection; auto-fill will not consider him until a
+future ranking publication includes him. No projection or rank was fabricated.
+
+The existing authenticated Gameweek lock action calculated team scores and
+Overall standings, preserved GW1 player snapshots, and carried squads into open
+GW2. Its deadline is 2026-09-11 16:30 Asia/Bangkok, 90 minutes before that
+Gameweek's first fixture. See `PRODUCTION.md` for execution and verification.
+
+## Preseason development snapshot
 
 As of 2026-09-02, the Neon `development` branch contains:
 

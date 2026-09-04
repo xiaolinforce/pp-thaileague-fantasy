@@ -481,6 +481,7 @@ export async function saveFantasySelectionAction(
     freeTransfersBefore: team.freeTransfers,
     transferCount,
     wildcard: input.activeChip === "wildcard",
+    openingGameweek: gameweek.number === 1,
   });
   const transferViolations = validateTransferLimit({
     freeTransfersBefore: team.freeTransfers,
@@ -1042,6 +1043,7 @@ export async function lockFantasyGameweekAction(formData: FormData) {
         freeTransfersBefore: selection.freeTransfersBefore,
         transferCount: selection.netTransferCount,
         wildcard: activeChip === "wildcard",
+        openingGameweek: gameweek.number === 1,
       });
       const transferViolations = validateTransferLimit({
         freeTransfersBefore: selection.freeTransfersBefore,

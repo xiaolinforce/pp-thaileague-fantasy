@@ -124,6 +124,65 @@ full/short names and `updated_at` was unchanged before and after the operation.
 The counts remained 550 players, 462 active players/registrations, 240 fixtures,
 16 clubs, and 30 Gameweeks. The two historical inactive players stayed inactive.
 
+## 2026-09-04 GW1 first-match scoring and GW2 opening
+
+The owner authorized batch `gw1-pattani-bg-20260904` on both Neon branches.
+Development `br-green-queen-az934b4e` and production
+`br-tiny-shape-azrvakql` were checked before writes. The operation was first
+rehearsed in rollback transactions, then committed independently in each
+environment. Production used the authenticated Neon SQL Editor. The
+pre-write restore timestamp was `2026-09-04 15:15:03.11773 UTC`, within the
+then-configured six-hour history window.
+
+Each branch received 46 reviewed match-stat and points records, the 0-0
+finished fixture result, Matheus Costa's official registration and Level 3
+effective GW2, and 49 import audit entries. Sources and owner decisions are
+recorded in `DATA_SOURCES.md`. The authenticated existing admin lock action
+then locked GW1, recalculated team scores and Overall standings, opened GW2,
+carried squads and transfer entitlements forward, and recorded `lock_gameweek`.
+GW1 remains provisional (`score_complete=false`); seven fixtures are scheduled.
+
+Production verification through `2026-09-04 15:26:30.7104 UTC` confirmed:
+
+- 197 locked GW1 selections with 197 provisional scores and Overall standings;
+- 113 nonempty squads and 84 empty selections, with 197 GW2 drafts carried over;
+- all original GW1 player snapshots unchanged and no carryover mismatch;
+- zero player-stat, score-breakdown, team-score, or standing mismatches;
+- 413 total team points, a rounded average of 4 among nonempty squads, and a
+  highest score of 15; and
+- GW2 open with deadline `2026-09-11 16:30 Asia/Bangkok`.
+
+Development had 23 empty squads and therefore 23 zero-point provisional scores.
+Its competition and Fantasy database verifiers passed, as did all 97 Fantasy
+rule tests. The complete 46-player scoring fingerprint matched both branches:
+`916e49e745534ef79a8e04a1bbe1e32a`. Production SQL checks independently verified
+team lineup, bench, captain, transfer, and total points against persisted match
+results, and standings against team scores. Full npm database verifiers were
+run on development only. The production Team page showed GW2, the deadline,
+and Costa as Level 3 with one GW1 point. The minimum-appearance convention is
+documented in `DOMAIN.md` and the bilingual rule content.
+
+**Opening-transfer correction:** End-to-end verification found that the lock
+action had deducted 44 points from one production team despite the existing
+GW1 unlimited-transfer rule. `settleTransfers` did not receive the
+`openingGameweek` flag already used by draft allowance and validation. The
+source fix now passes that flag when saving and locking selections, with a
+regression test for 13 transfers against two free transfers. Rule tests, types,
+lint, format checks, and the production build passed. These source changes are
+in the workspace and have not been deployed by this maintenance task.
+
+Batch `gw1-opening-transfer-settlement-20260904` corrected the affected locked
+selection's transfer deduction, its team score, its Overall standing, and the
+GW1 average atomically, retaining before/after audit data. Its restore timestamp
+was `2026-09-04 15:25:38.713956 UTC`. The team's total changed from -44 to 0;
+rank 197 remained correct because all other teams had positive scores or tied
+at zero with fewer counted transfers. Net transfer counts, historical
+revisions, free-transfer entitlements, player snapshots, and GW2 drafts were
+preserved. Development had no affected deductions. Both branches now have zero
+GW1 transfer deductions, and the production Points page shows the corrected
+team total and average. Subsequent score recalculation reads the corrected
+locked selection; this data correction does not depend on deploying the patch.
+
 ## Release checklist
 
 1. Merge and verify the target commit on `dev`.
