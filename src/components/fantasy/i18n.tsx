@@ -338,7 +338,7 @@ const translations: Record<string, string> = {
   โควต้าผ่าน: "Quotas valid",
   เกินโควต้า: "Over quota",
   ฟรี: "Free",
-  เปลี่ยนตัวอิสระ: "Wildcard",
+  ซื้อขายตัวอิสระ: "Wildcard",
   เปลี่ยนฟรีได้อีก: "Free transfers",
   เปลี่ยนฟรีคงเหลือ: "Free transfers remaining",
   เปลี่ยนเกิน: "Transfers over limit",
@@ -1142,3 +1142,4 @@ export function LanguageSwitcher({
     </div>
   );
 }
+

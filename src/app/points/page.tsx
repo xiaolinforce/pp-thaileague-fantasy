@@ -107,7 +107,7 @@ export default async function PointsPage({
       : points.fantasy.selection.activeChip === "bench_boost"
         ? "นับตัวสำรอง"
         : points.fantasy.selection.activeChip === "wildcard"
-          ? "เปลี่ยนตัวอิสระ"
+          ? "ซื้อขายตัวอิสระ"
           : null;
 
   return (
