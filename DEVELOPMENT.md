@@ -406,3 +406,17 @@ passed; the 200-team lifecycle rehearsal used 41 SQL statements including
 transaction and verification reads. Production migration remains a separate
 promotion: coordinate migration 0016 with the matching application release, as
 older writers do not supply its required season keys.
+
+## Dependency security patches (2026-09-05)
+
+The lockfile resolves `fast-uri` 3.1.7 and `qs` 6.16.0. A scoped override moves
+`@esbuild-kit/core-utils` to esbuild 0.25.12, matching Drizzle Kit’s existing
+esbuild generation instead of accepting the audit suggestion to downgrade
+Drizzle Kit. `db:generate` still reads the schema successfully with no changes.
+Both the complete dependency audit and production audit report zero known
+vulnerabilities at verification time. Review/remove the scoped override when
+Drizzle Kit drops the legacy loader.
+
+Upstream advisories: [fast-uri](https://github.com/fastify/fast-uri/security/advisories/GHSA-f65p-4m7j-42xc),
+[qs](https://github.com/ljharb/qs/security/advisories/GHSA-4mjr-xmp4-gh2g), and
+[esbuild](https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99).

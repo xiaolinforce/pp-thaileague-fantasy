@@ -65,5 +65,10 @@
   "volta": {
     "node": "24.18.1",
     "npm": "12.0.2"
+  },
+  "overrides": {
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.12"
+    }
   }
 }
