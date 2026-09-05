@@ -1,0 +1,106 @@
+name: Production release
+
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build and verify without applying migrations or promoting
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm install --global npm@12.0.2
+      - run: npm ci
+      - run: npm run test:release
+      - run: npm run test:rules
+      - run: npm run test:email
+      - run: npm run test:auth
+      - run: npm run test:observability
+      - run: npm run test:i18n
+      - run: npm run test:readiness
+      - run: npm run types
+      - run: npm run lint
+      - run: npx prettier --check .github/workflows/production-release.yml scripts/release scripts/tests/release.test.ts
+
+  release:
+    needs: checks
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: Production
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+      NEON_PRODUCTION_BRANCH_ID: ${{ vars.NEON_PRODUCTION_BRANCH_ID }}
+      GITHUB_TOKEN: ${{ github.token }}
+      RELEASE_STATE_PATH: ${{ runner.temp }}/production-release.json
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24.18.1
+          cache: npm
+      - run: npm install --global npm@12.0.2 vercel@59.11.7
+      - run: npm ci
+      - name: Verify release configuration and main commit
+        run: node scripts/release/vercel.ts prepare
+      - name: Check migration history and compatibility before building
+        run: node scripts/release/migrate.ts check
+      - name: Load production build configuration
+        run: vercel pull --yes --environment=production
+      - name: Build the production candidate
+        run: vercel build --prod
+      - name: Stage the candidate without assigning production domains
+        shell: bash
+        run: |
+          candidate_url=$(vercel deploy --prebuilt --prod --skip-domain --yes --meta githubCommitSha="$GITHUB_SHA" --meta githubCommitRef=main)
+          node scripts/release/vercel.ts candidate "$candidate_url"
+      - name: Apply reviewed compatible migrations atomically
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        run: |
+          node scripts/release/vercel.ts prepare
+          node scripts/release/migrate.ts apply
+      - name: Verify the migration journal
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        run: node scripts/release/migrate.ts verify
+      - name: Check candidate liveness, database readiness and public documents
+        run: node scripts/release/vercel.ts check
+      - name: Promote the exact verified candidate
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        run: node scripts/release/vercel.ts promote
+      - name: Verify the production alias and application
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        run: node scripts/release/vercel.ts production
+      - name: Record failure and preserve recovery context
+        if: failure()
+        run: |
+          printf '%s\n' 'Release failed. Inspect the failing step before retrying. A committed migration is not automatically reverted; do not roll back application code without checking schema compatibility.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Remove downloaded build environment
+        if: always()
+        run: rm -f .vercel/.env.production.local
