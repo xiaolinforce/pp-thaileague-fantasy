@@ -391,3 +391,14 @@ keys bind team/Gameweek/selection/player to the same season, including parent
 updates. Partial unique indexes protect bench order and each captaincy role;
 bench order must be non-null and substitutes cannot hold captaincy. Migration
 0016 backfills only this season key and validates all existing records.
+
+### Cache invalidation boundaries
+
+Squad confirmation invalidates only `fantasy-ownership`; the roster, fixture and
+statistics dataset remains warm. Ownership percentages are grouped in SQL, with
+the numerator and distinct populated-squad denominator read in one statement.
+Stats/classification changes invalidate `competition-dataset`; lifecycle changes
+also invalidate fixtures and ownership. Name changes refresh dynamic identity
+data without invalidating shared datasets. Server Actions use `refresh()` for
+the active router instead of expiring all page dependencies. Chip usage reads
+only the current team and groups its locked selections in SQL.

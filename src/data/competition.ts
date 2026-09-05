@@ -17,8 +17,6 @@ import {
   fantasyPlayers,
   fantasyPlayerTiers,
   fantasySeasons,
-  fantasyTeamSelectionPlayers,
-  fantasyTeamSelections,
   playerRegistrations,
   players,
   venues,
@@ -37,6 +35,7 @@ import type {
   CompetitionPosition,
   LocalizedText,
 } from "@/lib/competition-types";
+import { getPlayerOwnership } from "./ownership";
 import { logServerTiming } from "@/lib/server/performance";
 
 const COMPETITION_SEASON_EXTERNAL_ID = "224";
@@ -97,7 +96,7 @@ function formatFixtureTime(date: Date | null): LocalizedText {
   return { th: time, en: time };
 }
 
-async function loadCompetitionDataset(): Promise<CompetitionDataset> {
+async function loadCompetitionDataset() {
   const startedAt = Date.now();
   const season = await db.query.competitionSeasons.findFirst({
     where: eq(competitionSeasons.externalId, COMPETITION_SEASON_EXTERNAL_ID),
@@ -163,47 +162,24 @@ async function loadCompetitionDataset(): Promise<CompetitionDataset> {
     fantasyGameweekRows.find((gameweek) => gameweek.status === "open") ??
     fantasyGameweekRows.find((gameweek) => gameweek.status === "planned") ??
     fantasyGameweekRows.at(-1);
-  const [fantasyPointRows, ownershipRows] = fantasyPlayerIds.length
-    ? await Promise.all([
-        db
-          .select({
-            stats: fantasyPlayerMatchStats,
-            points: fantasyPlayerMatchPoints,
-          })
-          .from(fantasyPlayerMatchStats)
-          .innerJoin(
-            fantasyPlayerMatchPoints,
-            eq(
-              fantasyPlayerMatchStats.id,
-              fantasyPlayerMatchPoints.playerMatchStatsId,
-            ),
-          )
-          .where(
-            inArray(fantasyPlayerMatchStats.fantasyPlayerId, fantasyPlayerIds),
+  const fantasyPointRows = fantasyPlayerIds.length
+    ? await db
+        .select({
+          stats: fantasyPlayerMatchStats,
+          points: fantasyPlayerMatchPoints,
+        })
+        .from(fantasyPlayerMatchStats)
+        .innerJoin(
+          fantasyPlayerMatchPoints,
+          eq(
+            fantasyPlayerMatchStats.id,
+            fantasyPlayerMatchPoints.playerMatchStatsId,
           ),
-        currentFantasyGameweek
-          ? db
-              .select({
-                fantasyPlayerId: fantasyTeamSelectionPlayers.fantasyPlayerId,
-                selectionId: fantasyTeamSelections.id,
-              })
-              .from(fantasyTeamSelectionPlayers)
-              .innerJoin(
-                fantasyTeamSelections,
-                eq(
-                  fantasyTeamSelectionPlayers.selectionId,
-                  fantasyTeamSelections.id,
-                ),
-              )
-              .where(
-                eq(
-                  fantasyTeamSelections.fantasyGameweekId,
-                  currentFantasyGameweek.id,
-                ),
-              )
-          : Promise.resolve([]),
-      ])
-    : [[], []];
+        )
+        .where(
+          inArray(fantasyPlayerMatchStats.fantasyPlayerId, fantasyPlayerIds),
+        )
+    : [];
   const fantasyPlayerByPlayerId = new Map(
     fantasyPlayerRows.map((player) => [player.playerId, player]),
   );
@@ -234,16 +210,6 @@ async function loadCompetitionDataset(): Promise<CompetitionDataset> {
     });
     pointsByFantasyPlayer.set(row.stats.fantasyPlayerId, list);
   }
-  const ownershipByFantasyPlayer = new Map<string, number>();
-  for (const row of ownershipRows) {
-    ownershipByFantasyPlayer.set(
-      row.fantasyPlayerId,
-      (ownershipByFantasyPlayer.get(row.fantasyPlayerId) ?? 0) + 1,
-    );
-  }
-  const selectionCount = new Set(ownershipRows.map((row) => row.selectionId))
-    .size;
-
   const entryIds = entryRows.map(({ entry }) => entry.id);
   const registrationRows = entryIds.length
     ? await db
@@ -401,16 +367,7 @@ async function loadCompetitionDataset(): Promise<CompetitionDataset> {
           points: matchPoints.reduce((sum, item) => sum + item.points, 0),
           form: calculateFiveFixtureForm(recentMatches),
           fantasyAppearances: matchPoints.length,
-          selected:
-            fantasyPlayer && selectionCount > 0
-              ? Number(
-                  (
-                    ((ownershipByFantasyPlayer.get(fantasyPlayer.id) ?? 0) /
-                      selectionCount) *
-                    100
-                  ).toFixed(1),
-                )
-              : 0,
+          selected: 0, // Merged from the independently cached ownership read model.
           trend: "same" as const,
           tier,
           isThai: fantasyPlayer?.isThai ?? false,
@@ -499,16 +456,28 @@ async function loadCompetitionDataset(): Promise<CompetitionDataset> {
     players: dataset.players.length,
     fixtures: dataset.fixtures.length,
   });
-  return dataset;
+  return { dataset, ownershipGameweekId: currentFantasyGameweek?.id ?? null };
 }
 
 const getCachedCompetitionDataset = unstable_cache(
   loadCompetitionDataset,
-  ["competition-dataset-v1"],
+  ["competition-dataset-v2"],
   { revalidate: 300, tags: ["competition-dataset"] },
 );
 
 export async function getCompetitionDataset(): Promise<CompetitionDataset> {
   await connection();
-  return getCachedCompetitionDataset();
+  const { dataset, ownershipGameweekId } = await getCachedCompetitionDataset();
+  const ownership = ownershipGameweekId
+    ? await getPlayerOwnership(ownershipGameweekId)
+    : {};
+  return {
+    ...dataset,
+    players: dataset.players.map((player) => ({
+      ...player,
+      selected: player.fantasyPlayerId
+        ? (ownership[player.fantasyPlayerId] ?? 0)
+        : 0,
+    })),
+  };
 }

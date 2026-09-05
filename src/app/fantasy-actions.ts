@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
-import { revalidatePath, revalidateTag } from "next/cache";
+import { refresh, revalidatePath, revalidateTag } from "next/cache";
 
 import { db } from "@/db";
 import { transactionDb } from "@/db/transaction";
@@ -252,9 +252,7 @@ export async function updateFantasyTeamNameAction(input: {
   }
 
   if (!result.ok) return result;
-  revalidateFantasyPages();
-  revalidatePath("/profile");
-  revalidatePath("/", "layout");
+  refreshFantasyMutation("name");
   return result;
 }
 
@@ -282,13 +280,16 @@ export async function updateInterfaceLanguageAction(input: {
   return { ok: true, message: "บันทึกภาษาสำหรับบัญชีนี้แล้ว" };
 }
 
-function revalidateFantasyPages() {
-  revalidatePath("/admin/fantasy", "layout");
-  revalidateTag("competition-dataset", "max");
-  revalidateTag("fixtures-dataset", "max");
-  for (const path of ["/team", "/points", "/leagues"]) {
-    revalidatePath(path);
-  }
+function refreshFantasyMutation(
+  kind: "squad" | "name" | "stats" | "classification" | "lifecycle",
+) {
+  if (kind === "squad" || kind === "lifecycle")
+    revalidateTag("fantasy-ownership", "max");
+  if (kind === "stats" || kind === "classification" || kind === "lifecycle")
+    revalidateTag("competition-dataset", "max");
+  if (kind === "lifecycle") revalidateTag("fixtures-dataset", "max");
+  // Refresh dynamic account data without expiring shared roster/fixture caches.
+  refresh();
 }
 
 export async function saveFantasySelectionAction(input: FantasySelectionInput) {
@@ -297,7 +298,7 @@ export async function saveFantasySelectionAction(input: FantasySelectionInput) {
     { seasonId: season.id, teamId: team.id, managerId: manager.id },
     input,
   );
-  if (result.ok) revalidateFantasyPages();
+  if (result.ok) refreshFantasyMutation("squad");
   return result;
 }
 
@@ -310,7 +311,7 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
       tx,
     ),
   );
-  revalidateFantasyPages();
+  refreshFantasyMutation("stats");
 }
 
 export async function updateFantasyPlayerClassificationAction(
@@ -324,7 +325,7 @@ export async function updateFantasyPlayerClassificationAction(
       tx,
     ),
   );
-  revalidateFantasyPages();
+  refreshFantasyMutation("classification");
 }
 
 export async function lockFantasyGameweekAction(formData: FormData) {
@@ -332,8 +333,7 @@ export async function lockFantasyGameweekAction(formData: FormData) {
   await transactionDb.transaction((tx) =>
     lockFantasyGameweek(formData, `${admin.user.email} (${admin.user.id})`, tx),
   );
-  revalidatePath("/", "layout");
-  revalidateFantasyPages();
+  refreshFantasyMutation("lifecycle");
 }
 
 export async function finalizeFantasyGameweekAction(formData: FormData) {
@@ -345,5 +345,5 @@ export async function finalizeFantasyGameweekAction(formData: FormData) {
       tx,
     ),
   );
-  revalidateFantasyPages();
+  refreshFantasyMutation("lifecycle");
 }

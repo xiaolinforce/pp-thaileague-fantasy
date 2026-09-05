@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
 import { connection } from "next/server";
 
 import { db } from "@/db";
@@ -101,28 +101,22 @@ export async function getFantasyState(): Promise<FantasyState> {
       revision.revision > baselineRevision && revision.status === "confirmed",
   );
 
-  const allSelections = await db
-    .select()
+  const chipRows = await db
+    .select({ chip: fantasyTeamSelections.activeChip, uses: count() })
     .from(fantasyTeamSelections)
-    .innerJoin(
-      fantasyTeams,
-      eq(fantasyTeamSelections.fantasyTeamId, fantasyTeams.id),
+    .where(
+      and(
+        eq(fantasyTeamSelections.fantasyTeamId, current.team.id),
+        eq(fantasyTeamSelections.status, "locked"),
+      ),
     )
-    .where(eq(fantasyTeams.fantasySeasonId, fantasySeason.id));
+    .groupBy(fantasyTeamSelections.activeChip);
   const chipUses: Record<FantasyChip, number> = {
     triple_captain: 0,
     bench_boost: 0,
     wildcard: 0,
   };
-  for (const row of allSelections) {
-    if (
-      row.fantasy_team_selections.fantasyTeamId === current.team.id &&
-      row.fantasy_team_selections.status === "locked" &&
-      row.fantasy_team_selections.activeChip
-    ) {
-      chipUses[row.fantasy_team_selections.activeChip] += 1;
-    }
-  }
+  for (const row of chipRows) if (row.chip) chipUses[row.chip] = row.uses;
 
   const state = {
     seasonId: fantasySeason.id,
