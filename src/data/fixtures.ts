@@ -22,6 +22,7 @@ import type {
   CompetitionFixtureView,
   LocalizedText,
 } from "@/lib/competition-types";
+import { getInitialFixtureMatchweek } from "@/lib/fixture-matchweeks";
 import { logServerTiming } from "@/lib/server/performance";
 
 const COMPETITION_SEASON_EXTERNAL_ID = "224";
@@ -116,10 +117,13 @@ async function loadFixturesDataset(): Promise<FixturesDataset> {
         .where(eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id))
         .orderBy(asc(fantasyGameweeks.number))
     : [];
+  const initialFixtureMatchweek = getInitialFixtureMatchweek(fixtureRows);
   const currentGameweek =
-    gameweeks.find((gameweek) => gameweek.status === "open") ??
-    gameweeks.find((gameweek) => gameweek.status === "planned") ??
-    gameweeks.at(-1);
+    initialFixtureMatchweek !== null
+      ? { number: initialFixtureMatchweek }
+      : (gameweeks.find((gameweek) => gameweek.status === "open") ??
+        gameweeks.find((gameweek) => gameweek.status === "planned") ??
+        gameweeks.at(-1));
 
   const clubByEntry = new Map<string, CompetitionClubView>();
   for (const { entry, club, visualIdentity } of entryRows) {
