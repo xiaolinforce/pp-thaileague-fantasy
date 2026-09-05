@@ -179,6 +179,12 @@ The project currently uses one `DATABASE_URL` for runtime and migrations.
 Environment isolation therefore depends on selecting the correct Neon branch.
 Confirm the target before any migration or direct data-maintenance operation.
 
+The guarded production Actions workflow, migration compatibility policy and
+activation status are documented in [RELEASE.md](RELEASE.md). Run
+`npm run test:release` when modifying its guards. Building the application alone
+does not migrate the database; production automation requires the documented
+GitHub and Vercel configuration before activation.
+
 ### Source-data maintenance
 
 Competition rosters, fixtures, player facts, classifications, and ranking

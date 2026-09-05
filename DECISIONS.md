@@ -767,3 +767,21 @@ load. Member language settings persist in PostgreSQL; a non-sensitive preference
 cookie supplies Guest SSR language, with one-time localStorage migration. The
 development tester may override the request language using that cookie. Remaining
 game screens retain their compatibility boundary until deliberately migrated.
+
+## 2026-09-05 — Gate production promotion behind migration and readiness
+
+**Decision:** Prepare GitHub Actions as the production release owner. Disable
+Git-triggered main deployments in project configuration, stage an exact production
+build without domain assignment, apply only hash-reviewed compatible migrations,
+verify authenticated readiness, then promote and check the domain mapping.
+Preview remains independent. Activation requires the credentials and settings
+listed in `RELEASE.md` and a successful end-to-end release.
+
+**Context:** Pushing application code previously deployed Vercel without applying
+committed database migrations. Adding migration to every build would also affect
+Preview and concurrent builds, and would not coordinate incompatible writers.
+
+**Consequences:** The runner checks the explicit Neon branch and full migration
+history, serializes transactions, rejects missing compatibility reviews and stops
+coordinated changes before SQL. Application rollback never implies database
+rollback. Migration review remains a prerequisite, not an inferred SQL property.

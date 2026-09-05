@@ -213,6 +213,11 @@ locked selection; this data correction does not depend on deploying the patch.
 
 ## Release checklist
 
+The replacement Actions workflow is prepared but not yet activated. See
+[RELEASE.md](RELEASE.md) for setup status, normal releases, migration reviews
+and failure recovery. Use the checklist below for the existing manual path
+until activation is verified; after activation, use the guarded Actions path.
+
 1. Merge and verify the target commit on `dev`.
 2. Confirm the intended migration is already committed and tested against the
    Neon `development` branch.
