@@ -93,6 +93,7 @@ const facebookBridgeMessages = new Set([
   "Error invoking postMessage: Java exception was raised during method invocation",
   "Error invoking enableButtonsClickedMetaDataLogging: Java object is gone",
   "undefined is not an object (evaluating 'window.webkit.messageHandlers')",
+  "undefined is not an object (evaluating 'window.webkit.messageHandlers[e].postMessage')",
 ]);
 
 export function prepareBrowserSentryEvent<T extends Event>(

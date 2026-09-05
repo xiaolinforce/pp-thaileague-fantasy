@@ -38,7 +38,9 @@ export async function GET(request: Request) {
       {
         schedule: { type: "crontab", value: "17 2 * * *" },
         timezone: "Asia/Bangkok",
-        checkinMargin: 10,
+        // Vercel Hobby can invoke daily jobs anywhere within the scheduled hour.
+        // Allow scheduling jitter without reporting successful late runs as missed.
+        checkinMargin: 60,
         maxRuntime: 5,
         failureIssueThreshold: 1,
         recoveryThreshold: 1,

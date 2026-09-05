@@ -59,6 +59,33 @@ change does not claim that every state has fresh screenshot evidence.
 
 ## Recommended audit order
 
+### 2026-09-05 Shared localization hydration follow-up
+
+- Sentry `K` showed English client text (`Bench`) against Thai server text on
+  Points. Shared `Localized` boundaries now preserve source copy during SSR
+  and first hydration, then translate. Admin delegates to that shared guard.
+- Regression tests compare opaque/lazy and resolved children for Thai and
+  English and retain the missing-Provider exception as a programming error.
+- Local Chrome: populated Points, Rules, and the authorized Admin overview
+  loaded without application console errors; English hard reload and Thai
+  switching were checked at desktop 1280px and mobile 360px. Points/Rules had
+  no document overflow. The saved member preference remained English; the
+  development tester does not overwrite the member's database preference.
+- A temporary development-only fixture checked server-supplied English,
+  device-restored Guest English, switching, protected source text, and a
+  separately streamed Localized boundary. It was removed after verification.
+- The previous development-only LanguageProvider/stream/module-factory errors
+  did not recur during the inspected route reloads. This does not establish
+  their original cause or recovery in Facebook/iOS browsers.
+- A fresh local production-build process on port 3007 also loaded populated
+  English Points, Rules and the authorized Admin overview without new browser
+  errors after database network access was available. The temporary process
+  was stopped afterward. No deployment or database preference write was made.
+- Rules, email, auth, localization and observability tests, TypeScript, lint
+  and build passed. Formatting passed for all changed files; the repository-wide
+  check still reports pre-existing formatting in `DATA_SOURCES.md` and
+  `src/app/points/player-token.tsx`, outside this change.
+
 ### 2026-09-04 Sentry hydration follow-up
 
 - `/team`, local development Guest with an empty GW1 squad: checked Chrome at

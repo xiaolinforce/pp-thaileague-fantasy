@@ -6,7 +6,6 @@ import {
   useId,
   useState,
   useTransition,
-  useSyncExternalStore,
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
@@ -24,18 +23,8 @@ import { Button } from "@/components/ui/button";
 import styles from "./admin.module.css";
 import { adminFieldLabels } from "@/lib/admin-copy";
 
-const subscribeHydration = () => () => {};
-const clientSnapshot = () => true;
-const serverSnapshot = () => false;
-// RSC table rows can remain lazy on the server but resolve before hydration.
-// Defer recursive text replacement until that tree is consistently available.
 export function AdminLocalized({ children }: { children: ReactNode }) {
-  const hydrated = useSyncExternalStore(
-    subscribeHydration,
-    clientSnapshot,
-    serverSnapshot,
-  );
-  return <Localized enabled={hydrated}>{children}</Localized>;
+  return <Localized>{children}</Localized>;
 }
 
 export function AdminHeading({

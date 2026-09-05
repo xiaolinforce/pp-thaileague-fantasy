@@ -9,6 +9,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -1073,6 +1074,10 @@ function localizeNode(
   return node;
 }
 
+const subscribeHydration = () => () => {};
+const clientSnapshot = () => true;
+const serverSnapshot = () => false;
+
 export function Localized({
   children,
   enabled = true,
@@ -1081,7 +1086,17 @@ export function Localized({
   enabled?: boolean;
 }) {
   const { translate } = useLanguage();
-  return <>{enabled ? localizeNode(children, translate) : children}</>;
+  const hydrated = useSyncExternalStore(
+    subscribeHydration,
+    clientSnapshot,
+    serverSnapshot,
+  );
+  // RSC children can be opaque/lazy during SSR but resolved in the browser.
+  // Preserve source text for both SSR and each boundary's first hydration;
+  // only walk the tree once React has attached to the server-rendered HTML.
+  return (
+    <>{enabled && hydrated ? localizeNode(children, translate) : children}</>
+  );
 }
 
 export function LanguageSwitcher({
@@ -1142,4 +1157,3 @@ export function LanguageSwitcher({
     </div>
   );
 }
-

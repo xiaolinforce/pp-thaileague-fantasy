@@ -125,6 +125,14 @@ languages and serialized into the Client Component. This avoids depending on
 identical Node/browser ICU date abbreviations during hydration. Root metadata
 disables automatic phone/date/email/address link detection on iOS.
 
+The shared `Localized` boundary uses a hydration-aware external-store snapshot
+to keep source text unchanged during SSR and initial hydration, including late
+Suspense boundaries. Recursive translation runs afterward over resolved props;
+independently streamed content needs its own boundary around its source copy.
+Admin uses the same shared behavior.
+Explicit `useLanguage` consumers retain the member language supplied by the
+root layout; Guests restore their device preference after mounting.
+
 ## Read flow
 
 1. A route resolves the Better Auth session and calls a server-only read model.

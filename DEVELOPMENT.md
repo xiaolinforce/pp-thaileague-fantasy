@@ -101,6 +101,11 @@ Facebook bridge classification never drops genuine application errors.
 transport (including failure propagation), without loading `.env.local` or
 contacting Neon.
 
+`test:i18n` checks that opaque/lazy and resolved server children emit identical
+source HTML for both language preferences, while direct consumers receive the
+member language. Browser regression checks must also reload English Points
+with a populated bench and exercise Thai/English switching after hydration.
+
 When reviewing incidents, separate `development` from `production` and compare
 the event release with the deployed release. After shipping a maintenance fix,
 verify a successful `auth-maintenance` check-in before resolving its monitor
@@ -136,7 +141,12 @@ mobile browser; a clean desktop reload alone does not establish recovery.
 
 The production deployment runs `/api/cron/auth-maintenance` daily at 02:17
 Asia/Bangkok (19:17 UTC). Vercel supplies `CRON_SECRET` as a bearer token. The
-job deletes only expired sessions and OTP verification rows, rate-limit rows
+Sentry monitor allows 60 minutes for check-in scheduling jitter, matching the
+hour-level timing of Vercel Hobby daily jobs; execution still times out after
+five minutes. The monitor configuration is code-managed and takes effect at
+the next check-in after deployment. A late successful run must not produce a
+missed-check-in alert merely because it started more than ten minutes late.
+The job deletes only expired sessions and OTP verification rows, rate-limit rows
 older than two days, and privacy-safe email delivery records older than 90
 days. It must never delete accounts, Fantasy managers, teams, selections,
 scores, transfers, league history, or audit records.

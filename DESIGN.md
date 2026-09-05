@@ -221,6 +221,14 @@ client-side display preference provided by `LanguageProvider`. A member's
 preference is loaded from `fantasy_managers.preferred_language`; a Guest's
 preference is stored on the device under `thai-fantasy-language`.
 
+Recursive `Localized` boundaries preserve Thai source text during server
+rendering and their first hydration, then apply the active dictionary. This
+also covers streamed Server Component children that are opaque on the server.
+Put a `Localized` boundary inside independently streamed content; an ancestor
+cannot translate the rendered output of an opaque component by walking props.
+Direct bilingual Client Components still use the server-supplied language;
+do not silence text mismatches with `suppressHydrationWarning`.
+
 This is a prototype boundary:
 
 - URLs and server metadata are not locale-prefixed;

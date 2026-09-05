@@ -129,3 +129,30 @@ test("retains real app failures chained to a bridge error without classifying th
   assert.equal(clean.tags?.error_origin, undefined);
   assert.equal(clean.exception?.values?.length, 2);
 });
+
+test("classifies the iOS postMessage variant only in Facebook and keeps its stack", () => {
+  const event: Event = {
+    level: "error",
+    exception: {
+      values: [
+        {
+          value:
+            "undefined is not an object (evaluating 'window.webkit.messageHandlers[e].postMessage')",
+          stacktrace: { frames: [{ filename: "app:///:1", lineno: 697 }] },
+        },
+      ],
+    },
+  };
+  const clean = prepareBrowserSentryEvent(
+    event,
+    "Mozilla/5.0 [FBAN/FBIOS;FBAV/576.0.0;]",
+  );
+  assert.equal(clean.tags?.error_origin, "facebook_browser_bridge");
+  assert.deepEqual(clean.exception, event.exception);
+  assert.equal(clean.level, "error");
+  assert.equal(
+    prepareBrowserSentryEvent(event, "Mobile Safari/605.1.15").tags
+      ?.error_origin,
+    undefined,
+  );
+});
