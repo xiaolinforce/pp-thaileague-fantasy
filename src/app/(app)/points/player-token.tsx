@@ -58,12 +58,11 @@ export function PointsPlayerToken({
   const hasPlayed = (result?.minutes ?? 0) > 0;
   const scoreDisplay = hasResult ? points : "-";
   const captainPoints = result?.totalPoints ?? points;
-  const captainPointsDisplay =
-    !hasPlayed
-      ? "-"
-      : captainPoints > 0
-        ? `+${captainPoints}`
-        : `${captainPoints}`;
+  const captainPointsDisplay = !hasPlayed
+    ? "-"
+    : captainPoints > 0
+      ? `+${captainPoints}`
+      : `${captainPoints}`;
   const detailRows = Object.entries(result?.breakdown ?? {}).filter(
     ([, value]) => value !== 0,
   );
@@ -98,7 +97,9 @@ export function PointsPlayerToken({
       >
         {shortName}
       </span>
-      <strong className="points-player-score squad-fixture">{scoreDisplay}</strong>
+      <strong className="points-player-score squad-fixture">
+        {scoreDisplay}
+      </strong>
     </>
   );
 

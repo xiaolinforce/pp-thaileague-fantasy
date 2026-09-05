@@ -181,13 +181,13 @@ The batch supplied kickoff times for all 24 previously `time_tbc` fixtures in
 matchweeks 7, 10, and 17 (official IDs `37628`–`37651`) and rescheduled five
 previously announced fixtures. Dates and times below use Asia/Bangkok:
 
-| Official fixture ID | Match | New kickoff |
-| --- | --- | --- |
-| `37441` | Ratchaburi – Sukhothai | 2026-10-09 19:00 |
-| `37440` | Uthai Thani – Rasisalai | 2026-10-10 19:00 |
-| `37473` | Buriram – BG Pathum | 2026-12-30 18:00 |
-| `37471` | Sisaket – Port | 2026-12-09 19:00 |
-| `37479` | PT Prachuap – BG Pathum | 2026-12-07 19:00 |
+| Official fixture ID | Match                   | New kickoff      |
+| ------------------- | ----------------------- | ---------------- |
+| `37441`             | Ratchaburi – Sukhothai  | 2026-10-09 19:00 |
+| `37440`             | Uthai Thani – Rasisalai | 2026-10-10 19:00 |
+| `37473`             | Buriram – BG Pathum     | 2026-12-30 18:00 |
+| `37471`             | Sisaket – Port          | 2026-12-09 19:00 |
+| `37479`             | PT Prachuap – BG Pathum | 2026-12-07 19:00 |
 
 Matchweek 7 spans 2026-10-30 through 2026-11-02, except Chiangrai–Port on
 2026-12-30 at 19:00 and Buriram–PT Prachuap on 2027-01-03 at 18:00.
