@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useState,
   type Dispatch,
@@ -15,6 +16,7 @@ const IdentityContext = createContext<AppIdentity>(null);
 const IdentityUpdateContext = createContext<Dispatch<
   SetStateAction<AppIdentity>
 > | null>(null);
+const IdentityLoadingContext = createContext(false);
 
 function SessionHeartbeat() {
   authClient.useSession();
@@ -24,18 +26,32 @@ function SessionHeartbeat() {
 export function IdentityProvider({
   children,
   identity: initialIdentity,
+  initiallyLoading = false,
+  sessionHeartbeat = true,
 }: {
   children: ReactNode;
   identity: AppIdentity;
+  initiallyLoading?: boolean;
+  sessionHeartbeat?: boolean;
 }) {
   const [identity, setIdentity] = useState(initialIdentity);
+  const [loading, setLoading] = useState(initiallyLoading);
+  const updateIdentity = useCallback<Dispatch<SetStateAction<AppIdentity>>>(
+    (nextIdentity) => {
+      setIdentity(nextIdentity);
+      setLoading(false);
+    },
+    [],
+  );
 
   return (
-    <IdentityUpdateContext.Provider value={setIdentity}>
-      <IdentityContext.Provider value={identity}>
-        {identity && <SessionHeartbeat />}
-        {children}
-      </IdentityContext.Provider>
+    <IdentityUpdateContext.Provider value={updateIdentity}>
+      <IdentityLoadingContext.Provider value={loading}>
+        <IdentityContext.Provider value={identity}>
+          {sessionHeartbeat && identity && <SessionHeartbeat />}
+          {children}
+        </IdentityContext.Provider>
+      </IdentityLoadingContext.Provider>
     </IdentityUpdateContext.Provider>
   );
 }
@@ -50,4 +66,8 @@ export function useSetAppIdentity() {
     throw new Error("useSetAppIdentity must be used within IdentityProvider.");
   }
   return setIdentity;
+}
+
+export function useAppIdentityLoading() {
+  return useContext(IdentityLoadingContext);
 }

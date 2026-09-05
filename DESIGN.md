@@ -309,7 +309,9 @@ Public reading pages use explicit bilingual content with Thai canonical paths an
 English `/en/…` paths. Visible language controls navigate to the matching document;
 metadata and the HTML language match the initial content. Shared shell messages
 use explicit common keys instead of traversing the page. Public shells show a
-neutral game-entry control without fetching private account state. Game and admin
+neutral game-entry control during static rendering, then restore the signed-in
+user's manager menu through a read-only identity request. If that request is
+unavailable, the document and game-entry control remain usable. Game and admin
 compatibility translations remain separate namespaces until individually migrated.
 
 League dialogs retain input and preview context on transport errors, clear pending

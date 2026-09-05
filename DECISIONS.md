@@ -753,16 +753,20 @@ the same database transaction. Existing history is not backfilled or rewritten.
 
 **Decision:** Keep the current Thai public URLs and add static `/en/…` documents
 with localized metadata. Separate public and game root layouts, share RootDocument
-and the existing AppShell, and make public account context neutral. Load game and
-admin translation dictionaries only inside their own boundaries. Migrate Points
-copy to server translation and common shell messages to explicit keys first.
+and the existing AppShell, and keep public account context neutral during static
+rendering. Restore an available signed-in identity after hydration through a
+read-only request, without provisioning or running the session heartbeat. Load
+game and admin translation dictionaries only inside their own boundaries. Migrate
+Points copy to server translation and common shell messages to explicit keys first.
 
 **Context:** Database-dependent root providers made legal/help documents fail with
 the game database. Recursive translation of streamed children caused initial
 language changes and bundled internal copy into public pages.
 
 **Consequences:** Public pages survive database outages and send the correct
-language before hydration. Navigation across root layouts performs a full page
+language before hydration. Their account menu shows a loading state until the
+optional identity request completes, then shows the signed-in manager controls or
+the neutral game-entry control. Navigation across root layouts performs a full page
 load. Member language settings persist in PostgreSQL; a non-sensitive preference
 cookie supplies Guest SSR language, with one-time localStorage migration. The
 development tester may override the request language using that cookie. Remaining

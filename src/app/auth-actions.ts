@@ -1,6 +1,9 @@
 "use server";
 
-import { requireFantasyProfile } from "@/lib/auth/context";
+import {
+  getCurrentFantasyIdentity,
+  requireFantasyProfile,
+} from "@/lib/auth/context";
 import { createAppIdentity } from "@/lib/auth/types";
 
 export async function completeAuthenticationAction() {
@@ -24,4 +27,17 @@ export async function completeAuthenticationAction() {
     destination: "/team",
     identity,
   };
+}
+
+export async function loadCurrentAppIdentityAction() {
+  const current = await getCurrentFantasyIdentity();
+  if (!current?.manager || !current.team) return null;
+
+  return createAppIdentity({
+    manager: current.manager,
+    team: current.team,
+    email: current.user.email,
+    isGuest: current.isAnonymous,
+    role: current.role,
+  });
 }

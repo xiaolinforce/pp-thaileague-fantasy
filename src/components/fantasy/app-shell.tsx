@@ -37,7 +37,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useAppIdentity } from "@/components/fantasy/identity";
+import {
+  useAppIdentity,
+  useAppIdentityLoading,
+} from "@/components/fantasy/identity";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
 import {
   Popover,
@@ -136,10 +139,12 @@ const adminNavigation = [
 
 function ManagerMenu({
   identity,
+  identityLoading,
   pathname,
   onNavigate,
 }: {
   identity: AppIdentity;
+  identityLoading: boolean;
   pathname: string;
   onNavigate?: () => void;
 }) {
@@ -193,14 +198,18 @@ function ManagerMenu({
     <button
       type="button"
       className={`manager-card manager-menu-trigger${accountRouteActive ? " active" : ""}`}
-      aria-label={translate("เปิดเมนูทีม")}
+      aria-label={translate(identityLoading ? "กำลังโหลดบัญชี" : "เปิดเมนูทีม")}
       aria-expanded={open}
+      aria-busy={identityLoading}
+      disabled={identityLoading}
     >
       <span className="manager-avatar" aria-hidden="true">
         <UserRound size={20} strokeWidth={1.9} />
       </span>
       <span className="manager-card-copy">
-        {identity ? (
+        {identityLoading ? (
+          <strong>{translate("กำลังโหลดบัญชี")}</strong>
+        ) : identity ? (
           <strong data-localize="off">{identity.teamName}</strong>
         ) : (
           <strong>{translate("เริ่มเล่น Fantasy")}</strong>
@@ -307,10 +316,12 @@ function ManagerMenu({
 function SidebarContent({
   pathname,
   identity,
+  identityLoading,
   onNavigate,
 }: {
   pathname: string;
   identity: AppIdentity;
+  identityLoading: boolean;
   onNavigate?: () => void;
 }) {
   const { requestNavigation } = useNavigationBlocker();
@@ -416,6 +427,7 @@ function SidebarContent({
           })}
         <ManagerMenu
           identity={identity}
+          identityLoading={identityLoading}
           pathname={pathname}
           onNavigate={onNavigate}
         />
@@ -434,6 +446,7 @@ export function AppShell({
   const { message } = useLanguage();
   const pathname = usePathname();
   const identity = useAppIdentity();
+  const identityLoading = useAppIdentityLoading();
   const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
@@ -443,7 +456,11 @@ export function AppShell({
         </a>
         {showDevelopmentLanguageTester ? <DevelopmentLanguageTester /> : null}
         <aside className="sidebar">
-          <SidebarContent pathname={pathname} identity={identity} />
+          <SidebarContent
+            pathname={pathname}
+            identity={identity}
+            identityLoading={identityLoading}
+          />
         </aside>
 
         <div className="main-shell">
@@ -476,6 +493,7 @@ export function AppShell({
                 <SidebarContent
                   pathname={pathname}
                   identity={identity}
+                  identityLoading={identityLoading}
                   onNavigate={() => setMenuOpen(false)}
                 />
               </aside>

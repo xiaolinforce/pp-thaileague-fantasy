@@ -427,10 +427,13 @@ pages. Recheck CSP whenever an external browser integration or Sentry region cha
 
 Rules, Help, Privacy and Terms are static Thai pages with static `/en/…`
 English counterparts, localized HTML language, titles, descriptions, canonical
-URLs and alternate-language links. Their neutral public shell does not resolve
-a session, provision a team, query navigation availability or run the session
-heartbeat. The language selector changes the public URL; cross-root navigation
-uses a full document load. Game routes retain their original URLs.
+URLs and alternate-language links. Their public shell does not resolve a session,
+provision a team, query navigation availability or run the session heartbeat
+during server rendering. After hydration, a read-only Server Action restores the
+current account-menu identity when the database is available; failure leaves the
+document and its neutral game-entry control usable. The language selector changes
+the public URL; cross-root navigation uses a full document load. Game routes retain
+their original URLs.
 
 The lightweight common namespace and explicit message keys own shared-shell copy.
 The compatibility game dictionary loads only with GameProviders; the admin
