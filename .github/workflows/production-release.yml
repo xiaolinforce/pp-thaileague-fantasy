@@ -57,7 +57,6 @@ jobs:
       VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
       NEON_PRODUCTION_BRANCH_ID: ${{ vars.NEON_PRODUCTION_BRANCH_ID }}
       GITHUB_TOKEN: ${{ github.token }}
-      RELEASE_STATE_PATH: ${{ runner.temp }}/production-release.json
     steps:
       - uses: actions/checkout@v4
         with:
@@ -68,6 +67,8 @@ jobs:
           cache: npm
       - run: npm install --global npm@12.0.2 vercel@59.11.7
       - run: npm ci
+      - name: Set the candidate state path on this runner
+        run: echo "RELEASE_STATE_PATH=$RUNNER_TEMP/production-release.json" >> "$GITHUB_ENV"
       - name: Verify release configuration and main commit
         run: node scripts/release/vercel.ts prepare
       - name: Check migration history and compatibility before building

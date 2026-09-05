@@ -2,12 +2,20 @@
 
 ## Activation status — 2026-09-05
 
-The workflow and guards are prepared locally. Production activation and the
+The workflow and guards are committed on `dev`. Production activation and the
 first end-to-end Actions run are pending. GitHub's existing `Production`
 environment is restricted to `main`, with the project/team/Neon branch variables
 configured. The Vercel release token has not been created: automatic approval
 review requires explicit approval of its team scope and one-year lifetime.
 Production currently continues to use its existing Git deployment configuration.
+
+Local release/rules/email/auth/observability/localization/readiness tests,
+TypeScript, lint and production build passed. The development rollback rehearsal
+confirmed that a second migration's SQL failure reverts prior DDL, data and the
+first migration's journal insert. All 17 original journal rows were preserved;
+the wrong-branch check also rejected a development connection with production
+configured as its expected target. Repository-wide formatting still reports
+pre-existing warnings in `DATA_SOURCES.md` and the Points `player-token.tsx`.
 
 ## One-time setup
 
