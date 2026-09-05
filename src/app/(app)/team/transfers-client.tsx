@@ -59,7 +59,7 @@ import {
   type CompetitionPlayerView,
 } from "@/lib/competition-types";
 import {
-  fillFirstMatchingDraftVacancy,
+  fillPreferredOrFirstMatchingDraftVacancy,
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
@@ -98,6 +98,7 @@ export default function TransfersClient({
   onPlayerSelect,
   onPlayerRemove,
   isAutoFilling,
+  preferredVacancySlotId,
   position,
   onPositionChange,
 }: {
@@ -110,6 +111,7 @@ export default function TransfersClient({
   onPlayerSelect: (player: CompetitionPlayerView) => void;
   onPlayerRemove: (player: CompetitionPlayerView) => void;
   isAutoFilling: boolean;
+  preferredVacancySlotId: string | null;
   position: string;
   onPositionChange: (position: string) => void;
 }) {
@@ -262,8 +264,9 @@ export default function TransfersClient({
     }
     if (!player.fantasyPlayerId) return;
     if (ownedIds.has(player.fantasyPlayerId)) return;
-    const nextMembers = fillFirstMatchingDraftVacancy(
+    const nextMembers = fillPreferredOrFirstMatchingDraftVacancy(
       members,
+      preferredVacancySlotId,
       fantasyPositions[player.position],
       player.fantasyPlayerId,
     );

@@ -53,7 +53,8 @@ role. Swapping players who are both in the starting eleven keeps each role with
 its existing player.
 
 Every real player and vacant draft slot may initiate a swap with any other
-meaningfully different lineup slot. A vacancy keeps its required player
+meaningfully different lineup slot. Two vacant slots with the same required
+position cannot be swapped because the move has no lineup effect. A vacancy keeps its required player
 position while exchanging lineup role and bench order with a player or another
 vacancy. Cross-position swaps are allowed only when the placeholder-complete
 lineup still satisfies the starting-formation and bench structure. Captaincy

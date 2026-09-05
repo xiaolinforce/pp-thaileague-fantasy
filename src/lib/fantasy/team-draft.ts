@@ -169,6 +169,25 @@ export function fillFirstMatchingDraftVacancy(
     : null;
 }
 
+export function fillPreferredOrFirstMatchingDraftVacancy(
+  members: DraftLineupMember[],
+  preferredSlotId: string | null,
+  position: FantasyPosition,
+  fantasyPlayerId: string,
+) {
+  const preferredVacancy = preferredSlotId
+    ? members.find((member) => member.slotId === preferredSlotId)
+    : null;
+  if (
+    preferredVacancy?.fantasyPlayerId === null &&
+    preferredVacancy.vacancyPosition === position
+  ) {
+    return fillDraftVacancy(members, preferredVacancy.slotId, fantasyPlayerId);
+  }
+
+  return fillFirstMatchingDraftVacancy(members, position, fantasyPlayerId);
+}
+
 export function swapDraftLineupMembers(
   members: DraftLineupMember[],
   sourceSlotId: string,
@@ -178,6 +197,14 @@ export function swapDraftLineupMembers(
   const source = members.find((member) => member.slotId === sourceSlotId);
   const target = members.find((member) => member.slotId === targetSlotId);
   if (!source || !target) return null;
+
+  if (
+    source.fantasyPlayerId === null &&
+    target.fantasyPlayerId === null &&
+    source.vacancyPosition === target.vacancyPosition
+  ) {
+    return null;
+  }
 
   const hasAssignmentChange =
     source.lineupRole !== target.lineupRole ||

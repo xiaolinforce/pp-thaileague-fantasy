@@ -122,7 +122,8 @@ proven behaviors unless a deliberate product decision replaces them:
   also switches to the market tab.
 - Keep selected players visible in the market, identify them as owned, and
   expose removal rather than another transfer-in action.
-- A compatible market player fills the first matching vacancy directly.
+- A compatible market player fills a selected matching vacancy first, then the
+  first matching vacancy when the selected slot cannot accept that position.
 - Removing a player creates a local Undo action for that vacancy beside Swap.
   Multiple vacancies keep independent Undo histories. Filling a vacancy clears
   its Undo; swapping the vacancy first keeps the history with that vacancy, and

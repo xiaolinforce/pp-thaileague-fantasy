@@ -597,6 +597,9 @@ export default function TeamClient({
   const { setNavigationBlocked } = useNavigationBlocker();
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
+  const [preferredVacancySlotId, setPreferredVacancySlotId] = useState<
+    string | null
+  >(null);
   const [activeChip, setActiveChip] = useState<FantasyChip | null>(
     fantasy.gameweek.number < THAI_LEAGUE_FANTASY_RULES.wildcardStartGameweek &&
       fantasy.selection.activeChip === "wildcard"
@@ -655,6 +658,15 @@ export default function TeamClient({
 
   const replaceDraftMembers = (nextMembers: DraftLineupMember[]) => {
     setMembers(nextMembers);
+    setPreferredVacancySlotId((current) =>
+      current &&
+      nextMembers.some(
+        (member) =>
+          member.slotId === current && member.fantasyPlayerId === null,
+      )
+        ? current
+        : null,
+    );
     setRemovedPlayersBySlot((current) =>
       pruneRemovedDraftPlayers(current, nextMembers),
     );
@@ -1078,6 +1090,7 @@ export default function TeamClient({
     );
     if (!member || !swappableSlotIds.has(member.slotId)) return;
     setSwapFrom(member.slotId);
+    setPreferredVacancySlotId(null);
     setSelected(null);
   };
 
@@ -1089,6 +1102,7 @@ export default function TeamClient({
     }
     if (!swappableSlotIds.has(slotId)) return;
     setSwapFrom(slotId);
+    setPreferredVacancySlotId(null);
     setSelected(null);
   };
 
@@ -1112,6 +1126,7 @@ export default function TeamClient({
       },
     }));
     setSwapFrom(null);
+    setPreferredVacancySlotId(null);
     setSelected(null);
   };
 
@@ -1139,6 +1154,7 @@ export default function TeamClient({
       return pruneRemovedDraftPlayers(remaining, restoredMembers);
     });
     setSwapFrom(null);
+    setPreferredVacancySlotId(null);
     setSelected(null);
   };
 
@@ -1152,6 +1168,7 @@ export default function TeamClient({
   const selectPlayer = (player: CompetitionPlayerView) => {
     if (!player.fantasyPlayerId) return;
     if (!swapFrom) {
+      setPreferredVacancySlotId(null);
       setSelected(player);
       return;
     }
@@ -1173,6 +1190,7 @@ export default function TeamClient({
 
   const selectVacancy = (slotId: string, position: CompetitionPosition) => {
     if (!swapFrom) {
+      setPreferredVacancySlotId(slotId);
       setMarketPosition(position);
       if (window.matchMedia("(width < 48rem)").matches) {
         changeWorkspaceView("market");
@@ -1491,6 +1509,7 @@ export default function TeamClient({
             onPlayerSelect={setSelected}
             onPlayerRemove={removePlayer}
             isAutoFilling={isAutoFilling}
+            preferredVacancySlotId={preferredVacancySlotId}
             position={marketPosition}
             onPositionChange={setMarketPosition}
           />

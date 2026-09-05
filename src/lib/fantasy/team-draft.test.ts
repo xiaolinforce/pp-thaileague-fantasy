@@ -7,6 +7,7 @@ import {
   createEmptySquadDraft,
   fillDraftVacancy,
   fillFirstMatchingDraftVacancy,
+  fillPreferredOrFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
   getValidDraftSwapTargetSlotIds,
   pruneRemovedDraftPlayers,
@@ -226,6 +227,52 @@ test("fills the first matching vacancy without requiring a selected slot", () =>
     fillFirstMatchingDraftVacancy(vacancies, "forward", "fwd-1"),
     null,
   );
+});
+
+test("fills a selected compatible vacancy before another matching vacancy", () => {
+  const vacancies: DraftLineupMember[] = [
+    {
+      slotId: "starter-def",
+      fantasyPlayerId: null,
+      vacancyPosition: "defender",
+      lineupRole: "starter",
+      benchOrder: null,
+      captainRole: "none",
+    },
+    {
+      slotId: "bench-def",
+      fantasyPlayerId: null,
+      vacancyPosition: "defender",
+      lineupRole: "bench",
+      benchOrder: 1,
+      captainRole: "none",
+    },
+    {
+      slotId: "bench-mid",
+      fantasyPlayerId: null,
+      vacancyPosition: "midfielder",
+      lineupRole: "bench",
+      benchOrder: 2,
+      captainRole: "none",
+    },
+  ];
+
+  const preferred = fillPreferredOrFirstMatchingDraftVacancy(
+    vacancies,
+    "bench-def",
+    "defender",
+    "def-3",
+  );
+  assert.equal(preferred?.[0].fantasyPlayerId, null);
+  assert.equal(preferred?.[1].fantasyPlayerId, "def-3");
+
+  const fallback = fillPreferredOrFirstMatchingDraftVacancy(
+    vacancies,
+    "bench-mid",
+    "defender",
+    "def-4",
+  );
+  assert.equal(fallback?.[0].fantasyPlayerId, "def-4");
 });
 
 function makeCompleteDraft() {
@@ -481,5 +528,45 @@ test("swaps two vacancies when their resulting positions remain valid", () => {
     swapped.find((member) => member.slotId === benchMidfielder.slotId)
       ?.lineupRole,
     "starter",
+  );
+});
+
+test("does not expose a same-position vacancy swap", () => {
+  const { members: complete, positionsById } = makeCompleteDraft();
+  const starterDefender = complete.find(
+    (member) =>
+      member.lineupRole === "starter" &&
+      positionsById.get(member.fantasyPlayerId!) === "defender",
+  )!;
+  const benchDefender = complete.find(
+    (member) =>
+      member.lineupRole === "bench" &&
+      positionsById.get(member.fantasyPlayerId!) === "defender",
+  )!;
+  const incomplete = removePlayerFromDraft(
+    removePlayerFromDraft(
+      complete,
+      starterDefender.fantasyPlayerId!,
+      "defender",
+    ),
+    benchDefender.fantasyPlayerId!,
+    "defender",
+  );
+
+  assert.equal(
+    getValidDraftSwapTargetSlotIds(
+      incomplete,
+      starterDefender.slotId,
+      positionsById,
+    ).has(benchDefender.slotId),
+    false,
+  );
+  assert.equal(
+    swapDraftLineupMembers(
+      incomplete,
+      starterDefender.slotId,
+      benchDefender.slotId,
+    ),
+    null,
   );
 });
