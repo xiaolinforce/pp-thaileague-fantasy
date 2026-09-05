@@ -363,3 +363,17 @@ from saving or reverting a squad within seven days. Automatic Gameweek carryover
 and bot actions are excluded. The fifteen-player statistic counts active teams
 with fifteen stored selection members in the chosen Gameweek, including
 carryover. It is a completeness measure, not a new Fantasy eligibility rule.
+
+## Saving and correction consistency
+
+A save accepts exactly 15 distinct UUID player IDs with valid lineup, bench and
+chip values. Every submitted player must resolve to fresh eligible database
+state; missing players are rejected rather than filtered out. Revision squads
+contain exactly the validated IDs. Invalid historical opening baselines fail
+closed and require an administrator review.
+
+The client submits its selection ID and last revision. A newer save from another
+window requires loading the latest team before another confirmation. Locking,
+classification changes and scoring serialize against saves, and the deadline is
+checked again immediately before writing. Server-side correction failures roll
+back inputs, audit context and every derived score/rank together.

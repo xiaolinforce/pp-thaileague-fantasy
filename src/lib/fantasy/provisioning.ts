@@ -29,6 +29,7 @@ async function getSelectionMembers(
   return db
     .select({
       selectionId: fantasyTeamSelectionPlayers.selectionId,
+      fantasySeasonId: fantasyTeamSelectionPlayers.fantasySeasonId,
       fantasyPlayerId: fantasyTeamSelectionPlayers.fantasyPlayerId,
       clubIdSnapshot: fantasyTeamSelectionPlayers.clubIdSnapshot,
       positionSnapshot: fantasyTeamSelectionPlayers.positionSnapshot,
@@ -107,6 +108,7 @@ async function ensureInitialSelection(
     .insert(fantasyTeamSelections)
     .values({
       fantasyTeamId: team.id,
+      fantasySeasonId: team.fantasySeasonId,
       fantasyGameweekId: gameweek.id,
       status: "draft",
       freeTransfersBefore: team.freeTransfers,

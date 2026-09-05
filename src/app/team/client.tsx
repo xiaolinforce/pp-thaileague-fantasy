@@ -970,7 +970,7 @@ export default function TeamClient({
       toast.error(translate("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว"));
       return;
     }
-    if (!completeSelectionMembers) return;
+    if (!completeSelectionMembers || !fantasy.selection.id) return;
     if (captaincyValidationMessages.length > 0) {
       toast.error(translate("บันทึกทีมไม่ได้"), {
         description: captaincyValidationMessages.map(translate).join(" · "),
@@ -980,6 +980,8 @@ export default function TeamClient({
     startTransition(async () => {
       try {
         const result = await saveFantasySelectionAction({
+          selectionId: fantasy.selection.id!,
+          expectedRevision: fantasy.selection.revision,
           members: completeSelectionMembers,
           activeChip,
         });
@@ -990,6 +992,13 @@ export default function TeamClient({
         } else {
           toast.error(translate(result.message), {
             description: result.violations?.map(translate).join(" · "),
+            duration: result.conflict ? Infinity : undefined,
+            action: result.conflict
+              ? {
+                  label: translate("โหลดทีมล่าสุด"),
+                  onClick: () => window.location.reload(),
+                }
+              : undefined,
           });
         }
       } catch {

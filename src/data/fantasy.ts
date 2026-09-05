@@ -55,6 +55,7 @@ export type FantasyState = {
   };
   selection: {
     id: string | null;
+    revision: number;
     status: "draft" | "locked";
     activeChip: FantasyChip | null;
     baselineSquadIds: string[];
@@ -140,6 +141,7 @@ export async function getFantasyState(): Promise<FantasyState> {
     },
     selection: {
       id: selection?.id ?? null,
+      revision: revisions.at(-1)?.revision ?? 0,
       status: selection?.status ?? "locked",
       activeChip: selection?.activeChip ?? null,
       baselineSquadIds,
@@ -436,6 +438,7 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
     },
     selection: {
       id: selectedSelection?.id ?? null,
+      revision: 0, // Historical Points selections are never submitted for editing.
       status: selectedSelection?.status ?? "locked",
       activeChip: selectedSelection?.activeChip ?? null,
       baselineSquadIds: members.map((member) => member.fantasyPlayerId),

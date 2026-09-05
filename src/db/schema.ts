@@ -5,6 +5,7 @@ import {
   check,
   date,
   doublePrecision,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -758,6 +759,10 @@ export const fantasyGameweeks = pgTable(
     ...timestamps,
   },
   (table) => [
+    uniqueIndex("fantasy_gameweeks_id_season_unique").on(
+      table.id,
+      table.fantasySeasonId,
+    ),
     uniqueIndex("fantasy_gameweeks_season_number_unique").on(
       table.fantasySeasonId,
       table.number,
@@ -813,6 +818,10 @@ export const fantasyPlayers = pgTable(
     ...timestamps,
   },
   (table) => [
+    uniqueIndex("fantasy_players_id_season_unique").on(
+      table.id,
+      table.fantasySeasonId,
+    ),
     uniqueIndex("fantasy_players_season_player_unique").on(
       table.fantasySeasonId,
       table.playerId,
@@ -1012,6 +1021,10 @@ export const fantasyTeams = pgTable(
     ...timestamps,
   },
   (table) => [
+    uniqueIndex("fantasy_teams_id_season_unique").on(
+      table.id,
+      table.fantasySeasonId,
+    ),
     uniqueIndex("fantasy_teams_season_manager_unique").on(
       table.fantasySeasonId,
       table.managerId,
@@ -1039,6 +1052,7 @@ export const fantasyTeamSelections = pgTable(
   "fantasy_team_selections",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id").notNull(),
     fantasyTeamId: uuid("fantasy_team_id")
       .notNull()
       .references(() => fantasyTeams.id, { onDelete: "cascade" }),
@@ -1056,6 +1070,20 @@ export const fantasyTeamSelections = pgTable(
     ...timestamps,
   },
   (table) => [
+    foreignKey({
+      name: "fantasy_selection_team_season_fk",
+      columns: [table.fantasyTeamId, table.fantasySeasonId],
+      foreignColumns: [fantasyTeams.id, fantasyTeams.fantasySeasonId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "fantasy_selection_gameweek_season_fk",
+      columns: [table.fantasyGameweekId, table.fantasySeasonId],
+      foreignColumns: [fantasyGameweeks.id, fantasyGameweeks.fantasySeasonId],
+    }).onDelete("cascade"),
+    uniqueIndex("fantasy_team_selections_id_season_unique").on(
+      table.id,
+      table.fantasySeasonId,
+    ),
     uniqueIndex("fantasy_team_selections_team_gameweek_unique").on(
       table.fantasyTeamId,
       table.fantasyGameweekId,
@@ -1075,6 +1103,7 @@ export const fantasyTeamSelectionPlayers = pgTable(
   "fantasy_team_selection_players",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id").notNull(),
     selectionId: uuid("selection_id")
       .notNull()
       .references(() => fantasyTeamSelections.id, { onDelete: "cascade" }),
@@ -1095,6 +1124,29 @@ export const fantasyTeamSelectionPlayers = pgTable(
     ...timestamps,
   },
   (table) => [
+    foreignKey({
+      name: "fantasy_member_selection_season_fk",
+      columns: [table.selectionId, table.fantasySeasonId],
+      foreignColumns: [
+        fantasyTeamSelections.id,
+        fantasyTeamSelections.fantasySeasonId,
+      ],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "fantasy_member_player_season_fk",
+      columns: [table.fantasyPlayerId, table.fantasySeasonId],
+      foreignColumns: [fantasyPlayers.id, fantasyPlayers.fantasySeasonId],
+    }).onDelete("restrict"),
+    uniqueIndex("fantasy_selection_players_bench_unique")
+      .on(table.selectionId, table.benchOrder)
+      .where(sql`${table.lineupRole} = 'bench'`),
+    uniqueIndex("fantasy_selection_players_captain_unique")
+      .on(table.selectionId, table.captainRole)
+      .where(sql`${table.captainRole} <> 'none'`),
+    check(
+      "fantasy_selection_players_bench_captain_check",
+      sql`${table.lineupRole} <> 'bench' or ${table.captainRole} = 'none'`,
+    ),
     uniqueIndex("fantasy_selection_players_selection_player_unique").on(
       table.selectionId,
       table.fantasyPlayerId,
@@ -1109,7 +1161,7 @@ export const fantasyTeamSelectionPlayers = pgTable(
     ),
     check(
       "fantasy_selection_players_bench_order_check",
-      sql`(${table.lineupRole} = 'starter' and ${table.benchOrder} is null) or (${table.lineupRole} = 'bench' and ${table.benchOrder} between 0 and 3)`,
+      sql`(${table.lineupRole} = 'starter' and ${table.benchOrder} is null) or (${table.lineupRole} = 'bench' and ${table.benchOrder} is not null and ${table.benchOrder} between 0 and 3)`,
     ),
   ],
 );

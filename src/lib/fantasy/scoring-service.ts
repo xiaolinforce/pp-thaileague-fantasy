@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { transactionDb } from "@/db/transaction";
 import {
@@ -10,13 +10,13 @@ import {
   fantasyTeamGameweekScores,
   fantasyTeamSelectionPlayers,
   fantasyTeamSelections,
-  fantasySeasons,
   fixtures,
 } from "@/db/schema";
 import {
   refreshOverallLeagueStandings,
   type LeagueStandingsDatabase,
 } from "./league-standings-service.ts";
+import { lockFantasySeason } from "./season-lock";
 import { summarizeGameweekScores } from "./points-presentation.ts";
 import { resolveTeamScore, type GameweekPlayerResult } from "./scoring.ts";
 
@@ -42,14 +42,15 @@ async function recalculateGameweekInTransaction(
   fantasyGameweekId: string,
   database: ScoringDatabase,
 ) {
+  const target = await database.query.fantasyGameweeks.findFirst({
+    where: eq(fantasyGameweeks.id, fantasyGameweekId),
+  });
+  if (!target) throw new Error("Fantasy Gameweek was not found.");
+  const season = await lockFantasySeason(database, target.fantasySeasonId);
   const gameweek = await database.query.fantasyGameweeks.findFirst({
     where: eq(fantasyGameweeks.id, fantasyGameweekId),
   });
   if (!gameweek) throw new Error("Fantasy Gameweek was not found.");
-  const season = await database.query.fantasySeasons.findFirst({
-    where: eq(fantasySeasons.id, gameweek.fantasySeasonId),
-  });
-  if (!season) throw new Error("Fantasy season was not found.");
   const fixtureRows = await database
     .select({ id: fixtures.id })
     .from(fixtures)
@@ -97,12 +98,26 @@ async function recalculateGameweekInTransaction(
         eq(fantasyTeamSelections.status, "locked"),
       ),
     );
+  const allMembers = selections.length
+    ? await database
+        .select()
+        .from(fantasyTeamSelectionPlayers)
+        .where(
+          inArray(
+            fantasyTeamSelectionPlayers.selectionId,
+            selections.map((selection) => selection.id),
+          ),
+        )
+    : [];
+  const membersBySelection = Map.groupBy(
+    allMembers,
+    (member) => member.selectionId,
+  );
+  const playerResults = [...resultByPlayer.values()];
+  const scoreValues: Array<typeof fantasyTeamGameweekScores.$inferInsert> = [];
   const scoredTeams: Array<{ playerCount: number; totalPoints: number }> = [];
   for (const selection of selections) {
-    const members = await database
-      .select()
-      .from(fantasyTeamSelectionPlayers)
-      .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
+    const members = membersBySelection.get(selection.id) ?? [];
     const score = resolveTeamScore({
       selection: members.map((member) => ({
         playerId: member.fantasyPlayerId,
@@ -112,7 +127,7 @@ async function recalculateGameweekInTransaction(
         benchOrder: member.benchOrder,
         captainRole: member.captainRole,
       })),
-      playerResults: [...resultByPlayer.values()],
+      playerResults,
       activeChip: selection.activeChip,
       transferPoints: selection.transferPoints,
     });
@@ -120,30 +135,33 @@ async function recalculateGameweekInTransaction(
       playerCount: members.length,
       totalPoints: score.totalPoints,
     });
+    scoreValues.push({
+      selectionId: selection.id,
+      status: gameweek.scoreComplete ? "final" : "provisional",
+      lineupPoints: score.lineupPoints,
+      benchPoints: score.benchPoints,
+      captainBonus: score.captainBonus,
+      transferPoints: score.transferPoints,
+      totalPoints: score.totalPoints,
+      autoSubstitutions: score.autoSubstitutions,
+      computedAt: new Date(),
+    });
+  }
+  for (let offset = 0; offset < scoreValues.length; offset += 500) {
     await database
       .insert(fantasyTeamGameweekScores)
-      .values({
-        selectionId: selection.id,
-        status: gameweek.scoreComplete ? "final" : "provisional",
-        lineupPoints: score.lineupPoints,
-        benchPoints: score.benchPoints,
-        captainBonus: score.captainBonus,
-        transferPoints: score.transferPoints,
-        totalPoints: score.totalPoints,
-        autoSubstitutions: score.autoSubstitutions,
-        computedAt: new Date(),
-      })
+      .values(scoreValues.slice(offset, offset + 500))
       .onConflictDoUpdate({
         target: fantasyTeamGameweekScores.selectionId,
         set: {
-          status: gameweek.scoreComplete ? "final" : "provisional",
-          lineupPoints: score.lineupPoints,
-          benchPoints: score.benchPoints,
-          captainBonus: score.captainBonus,
-          transferPoints: score.transferPoints,
-          totalPoints: score.totalPoints,
-          autoSubstitutions: score.autoSubstitutions,
-          computedAt: new Date(),
+          status: sql`excluded.status`,
+          lineupPoints: sql`excluded.lineup_points`,
+          benchPoints: sql`excluded.bench_points`,
+          captainBonus: sql`excluded.captain_bonus`,
+          transferPoints: sql`excluded.transfer_points`,
+          totalPoints: sql`excluded.total_points`,
+          autoSubstitutions: sql`excluded.auto_substitutions`,
+          computedAt: sql`excluded.computed_at`,
           updatedAt: new Date(),
         },
       });

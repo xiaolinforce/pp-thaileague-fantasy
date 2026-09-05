@@ -367,3 +367,27 @@ hydration. Lazy RSC table rows may not be traversable during server rendering;
 translating them only on the client prevents a mismatched initial tree. Explicit
 client labels and names continue using the shared language context. This keeps
 the documented client-display localization boundary without adding route i18n.
+
+## Transactional Fantasy persistence hardening (2026-09-05)
+
+Squad saves execute through `selection-service.ts`; admin corrections and lifecycle
+operations execute through `admin-service.ts`. Actions retain session/role checks
+and cache invalidation. Every operation acquires the season row first: saves use
+a shared lock, and classification, scoring and lifecycle changes use an exclusive
+lock. Saves then lock their selection and team, validate current eligibility and
+the deadline, and compare the submitted selection ID and revision. Conflicts
+retain the client draft and offer an explicit reload; they never overwrite a newer
+revision. The obsolete, unused cancel Server Action has been removed.
+
+Stats, override records, player points, team scores, Gameweek summaries and Overall
+standings commit together. Classification, effective tier, draft snapshots and audit
+context also commit together. Locked snapshots remain unchanged. Carryover loads
+all members once and writes in batches of 500; recalculation loads members once
+and upserts scores in batches. This keeps synchronous publication atomic without
+one SQL round trip per team.
+
+Selections and members carry a redundant, non-null season key. Composite foreign
+keys bind team/Gameweek/selection/player to the same season, including parent
+updates. Partial unique indexes protect bench order and each captaincy role;
+bench order must be non-null and substitutes cannot hold captaincy. Migration
+0016 backfills only this season key and validates all existing records.

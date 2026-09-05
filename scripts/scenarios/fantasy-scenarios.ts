@@ -1521,9 +1521,9 @@ async function applyGameweekScenario(
 
   await tx.execute(sql`
     insert into fantasy_team_selections
-      (fantasy_team_id, fantasy_gameweek_id, status, free_transfers_before,
+      (fantasy_season_id, fantasy_team_id, fantasy_gameweek_id, status, free_transfers_before,
        free_transfers_after, net_transfer_count, transfer_points, confirmed_at, locked_at)
-    select team.id,
+    select team.fantasy_season_id, team.id,
            gw.id,
            case when gw.number <= ${plan.scoredThrough} then 'locked'::fantasy_selection_status
                 else 'draft'::fantasy_selection_status end,
@@ -1611,9 +1611,9 @@ async function applyGameweekScenario(
   );
   await tx.execute(sql`
     insert into fantasy_team_selection_players
-      (selection_id, fantasy_player_id, club_id_snapshot, position_snapshot,
+      (fantasy_season_id, selection_id, fantasy_player_id, club_id_snapshot, position_snapshot,
        tier_snapshot, is_thai_snapshot, lineup_role, bench_order, captain_role)
-    select selection.id,
+    select selection.fantasy_season_id, selection.id,
            member.fantasy_player_id::uuid,
            member.club_id::uuid,
            member.position::player_position,
@@ -1656,9 +1656,9 @@ async function applyGameweekScenario(
     if (primaryMemberPayload.length > 0) {
       await tx.execute(sql`
         insert into fantasy_team_selection_players
-          (selection_id, fantasy_player_id, club_id_snapshot, position_snapshot,
+          (fantasy_season_id, selection_id, fantasy_player_id, club_id_snapshot, position_snapshot,
            tier_snapshot, is_thai_snapshot, lineup_role, bench_order, captain_role)
-        select selection.id,
+        select selection.fantasy_season_id, selection.id,
                member.fantasy_player_id::uuid,
                member.club_id::uuid,
                member.position::player_position,

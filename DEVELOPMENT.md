@@ -387,3 +387,22 @@ confirmation cancellation before exercising any mutation. Compare participant
 counts with `npm run db:report:participants`. Full mutation/scoring scenarios
 still require a confirmed disposable development branch; do not lock a real
 Gameweek or change player stats merely to capture UI evidence.
+
+## Fantasy persistence verification
+
+After confirming the development branch, run:
+
+```bash
+node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-persistence.ts --branch-id=<confirmed-development-branch>
+```
+
+This requires a complete squad in an open Gameweek and reviewed scored match data.
+It rejects malformed/unknown-player saves, stale revisions, expired and locked
+selections; verifies concurrent lock exclusion and database constraints; injects a
+scoring failure; and rehearses classification and batched lock/carryover/scoring.
+Every transaction rolls back and checksums verify all affected Fantasy tables.
+It does not reset QA scenarios. On 2026-09-05, branch `br-green-queen-az934b4e`
+passed; the 200-team lifecycle rehearsal used 41 SQL statements including
+transaction and verification reads. Production migration remains a separate
+promotion: coordinate migration 0016 with the matching application release, as
+older writers do not supply its required season keys.

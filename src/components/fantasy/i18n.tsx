@@ -19,6 +19,15 @@ export type Language = "th" | "en";
 
 const translations: Record<string, string> = {
   ...adminTranslations,
+  "ข้อมูลทีมไม่ถูกต้อง กรุณาเลือกนักเตะที่ไม่ซ้ำกันให้ครบ 15 คน":
+    "Invalid squad data. Select exactly 15 different players.",
+  "นักเตะบางคนไม่พร้อมให้เลือกแล้ว กรุณาตรวจสอบทีมอีกครั้ง":
+    "Some players are no longer available. Please review your squad.",
+  "ทีมถูกเปลี่ยนจากหน้าต่างอื่นแล้ว กรุณาโหลดทีมล่าสุดก่อนบันทึกอีกครั้ง":
+    "Your team changed in another window. Load the latest team before saving again.",
+  "ข้อมูลทีมตั้งต้นไม่ถูกต้อง กรุณาติดต่อผู้ดูแล":
+    "The opening squad data is invalid. Please contact support.",
+  โหลดทีมล่าสุด: "Load latest team",
   "ขณะนี้ไม่สามารถส่งรหัส OTP ทางอีเมลได้ กรุณาลองใหม่ภายหลัง":
     "Email codes are temporarily unavailable. Please try again later.",
   "คุณยังสามารถเข้าสู่ระบบด้วย Google โดยใช้อีเมลเดียวกับบัญชีเดิม":
