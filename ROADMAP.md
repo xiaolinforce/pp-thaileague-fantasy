@@ -75,8 +75,8 @@ substitute for those authorization checks.
   `locked` status becomes a real phase.
 - Reconcile prototype price/form/watchlist presentation with a documented,
   persisted product model.
-- Extend the explicit public localization model to further game surfaces when
-  they become public/shareable experiences.
+- Extend explicit localization to further game surfaces when they become
+  public/shareable experiences.
 - Add observability around imports, recalculation, admin correction, and failed
   mutations.
 

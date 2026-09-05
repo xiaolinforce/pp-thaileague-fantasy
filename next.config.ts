@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 
 const isDevelopment = process.env.NODE_ENV === "development";
 // Next's inline hydration scripts need unsafe-inline without per-request nonces.
-// Nonces would disable the static public pages; keep that tradeoff explicit.
+// Per-request nonces would require request-specific CSP plumbing across the app.
 const contentSecurityPolicy = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDevelopment ? " 'unsafe-eval'" : ""}`,

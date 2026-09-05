@@ -753,20 +753,16 @@ the same database transaction. Existing history is not backfilled or rewritten.
 
 **Decision:** Keep the current Thai public URLs and add static `/en/…` documents
 with localized metadata. Separate public and game root layouts, share RootDocument
-and the existing AppShell, and keep public account context neutral during static
-rendering. Restore an available signed-in identity after hydration through a
-read-only request, without provisioning or running the session heartbeat. Load
-game and admin translation dictionaries only inside their own boundaries. Migrate
-Points copy to server translation and common shell messages to explicit keys first.
+and the existing AppShell, and make public account context neutral. Load game and
+admin translation dictionaries only inside their own boundaries. Migrate Points
+copy to server translation and common shell messages to explicit keys first.
 
 **Context:** Database-dependent root providers made legal/help documents fail with
 the game database. Recursive translation of streamed children caused initial
 language changes and bundled internal copy into public pages.
 
 **Consequences:** Public pages survive database outages and send the correct
-language before hydration. Their account menu shows a loading state until the
-optional identity request completes, then shows the signed-in manager controls or
-the neutral game-entry control. Navigation across root layouts performs a full page
+language before hydration. Navigation across root layouts performs a full page
 load. Member language settings persist in PostgreSQL; a non-sensitive preference
 cookie supplies Guest SSR language, with one-time localStorage migration. The
 development tester may override the request language using that cookie. Remaining
@@ -789,3 +785,19 @@ Preview and concurrent builds, and would not coordinate incompatible writers.
 history, serializes transactions, rejects missing compatibility reviews and stops
 coordinated changes before SQL. Application rollback never implies database
 rollback. Migration review remains a prerequisite, not an inferred SQL property.
+
+## 2026-09-06 — Document routes rejoin the game layout
+
+**Decision:** Supersede the separate public-root decision for Rules, Help,
+Privacy and Terms. Place all four routes under `(app)` so their initial render uses
+the same identity, navigation availability and request language as game routes.
+Remove the `/en/…` document routes, public provider, route language controls and
+post-hydration identity request.
+
+**Context:** A neutral public shell made the manager menu inconsistent with the
+rest of the application. Restoring identity after hydration added a second account
+state and a visible loading transition to otherwise shared navigation.
+
+**Consequences:** Document routes render the manager menu consistently from the
+server and follow the same account or device language as the game. They now depend
+on the database-backed layout and may be unavailable during a database outage.

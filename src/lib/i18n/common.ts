@@ -19,7 +19,6 @@ export const commonTranslations: Record<string, string> = {
   ตั้งค่า: "Settings",
   เมนูบัญชี: "Account menu",
   เปิดเมนูทีม: "Open team menu",
-  กำลังโหลดบัญชี: "Loading account",
   "เริ่มเล่น Fantasy": "Start playing Fantasy",
   แอดมิน: "Admin",
   เริ่มจัดทีมไทยลีกของคุณ: "Start building your Thai League squad",

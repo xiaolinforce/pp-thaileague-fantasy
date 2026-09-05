@@ -1,7 +1,3 @@
-import {
-  publicPageMetadata,
-  publicHref,
-} from "../../src/lib/i18n/public-pages";
 import { translateLegacyEnglish } from "../../src/lib/i18n/legacy";
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -98,15 +94,4 @@ test("explicit common keys render in the requested language without game/admin d
   );
   assert.match(namespaced, /Main navigation/);
   assert.match(namespaced, /Admin only/);
-});
-test("public language URLs and metadata agree on the canonical language", () => {
-  const en = publicPageMetadata("rules", "en");
-  assert.equal(en.title, "Game rules | PP Thai League Fantasy");
-  assert.equal(en.alternates?.canonical, "/en/rules");
-  assert.equal(publicHref("/en/privacy", "th"), "/privacy");
-  assert.equal(publicHref("/points", "en"), "/points");
-  assert.equal(
-    publicPageMetadata("help", "th").title,
-    "ช่วยเหลือ | PP Thai League Fantasy",
-  );
 });

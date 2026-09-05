@@ -85,13 +85,13 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 | `/help`          | Public support destinations and legal links; no account data is required.                          |
 | `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                      |
 
-The `(app)` root layout resolves identity, language and navigation, and provides
-Mitr, shared tooltips and toast feedback. The `(public)` and `(english)` root
-layouts render independently of authentication and PostgreSQL. Guest and Email OTP sign-in complete account provisioning through a
-Server Action before client navigation so the application shell receives the
-new identity immediately. Database-backed pages are dynamically rendered: their
-data modules are server-only and call the current Next.js connection API before
-querying.
+The `(app)` root layout resolves identity, language and navigation for game and
+document routes, and provides Mitr, shared tooltips and toast feedback. Guest and
+Email OTP sign-in complete account provisioning through a Server Action before
+client navigation so the application shell receives the new identity immediately.
+Pages are dynamically rendered because the shared layout reads PostgreSQL-backed
+session and navigation state; their data modules remain server-only and call the
+current Next.js connection API before querying.
 
 Authentication and Fantasy profile readers use React request memoization so a
 layout and its page share one session/identity lookup. Existing complete
@@ -420,24 +420,21 @@ permissions. CSP permits the current Turnstile script/frame, Google form
 navigation, Sentry ingestion and replay workers. Inline scripts/styles remain
 allowed for Next hydration and UI styles; production disallows eval. This is
 a baseline CSP, not a claim that arbitrary inline-script injection is blocked.
-Per-request nonces would require dynamic rendering of otherwise static public
-pages. Recheck CSP whenever an external browser integration or Sentry region changes.
+Per-request nonces would add request-specific CSP plumbing across the application.
+Recheck CSP whenever an external browser integration or Sentry region changes.
 
-## Public rendering and localization boundaries (2026-09-05)
+## Document rendering and localization boundaries (2026-09-06)
 
-Rules, Help, Privacy and Terms are static Thai pages with static `/en/…`
-English counterparts, localized HTML language, titles, descriptions, canonical
-URLs and alternate-language links. Their public shell does not resolve a session,
-provision a team, query navigation availability or run the session heartbeat
-during server rendering. After hydration, a read-only Server Action restores the
-current account-menu identity when the database is available; failure leaves the
-document and its neutral game-entry control usable. The language selector changes
-the public URL; cross-root navigation uses a full document load. Game routes retain
-their original URLs.
+Rules, Help, Privacy and Terms use the `(app)` root layout and the same initial
+identity, navigation availability and request language as game routes. The shell
+therefore renders the current manager menu without a second client-side identity
+request. These document routes depend on the database-backed layout and do not
+have separate `/en/…` counterparts; English content follows the account or device
+language used throughout the application.
 
 The lightweight common namespace and explicit message keys own shared-shell copy.
 The compatibility game dictionary loads only with GameProviders; the admin
-namespace loads only inside the protected admin layout. Public content and Points
+namespace loads only inside the protected admin layout. Document content and Points
 do not recursively translate streamed children. Points resolves text on the
 server from the same request language as its layout; remaining game screens keep
 the hydration-safe compatibility boundary while they migrate incrementally.

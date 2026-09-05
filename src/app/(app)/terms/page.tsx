@@ -1,11 +1,14 @@
-import { publicPageMetadata } from "@/lib/i18n/public-pages";
+import type { Metadata } from "next";
 
 import {
   LegalDocument,
   type LegalSection,
 } from "@/components/fantasy/legal-document";
 
-export const metadata = publicPageMetadata("terms", "th");
+export const metadata: Metadata = {
+  title: "Terms of Service | PP Thai League Fantasy",
+  description: "Terms for using PP Thai League Fantasy.",
+};
 
 const sections: LegalSection[] = [
   {

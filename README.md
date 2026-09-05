@@ -175,6 +175,7 @@ Configure `DATABASE_URL` and all auth secrets separately for every Vercel
 environment. Never expose server secrets with a `NEXT_PUBLIC_` prefix; the
 Turnstile site key is the intentional exception because it is public by design.
 
-Public `/rules`, `/help`, `/privacy` and `/terms` also have `/en/…` English
-versions. These eight pages render without the database. Authenticated routes
-are grouped under `src/app/(app)` while keeping their existing URLs.
+Rules, Help, Privacy and Terms use the same database-backed `(app)` layout as the
+game routes so their shell receives the current manager identity and navigation
+state in the initial render. Interface language follows the account or device
+preference; separate `/en/…` document routes are not published.

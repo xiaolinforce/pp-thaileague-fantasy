@@ -2,8 +2,6 @@
 
 import Link from "next/link";
 
-import { PublicLanguageSwitcher } from "@/components/fantasy/public-providers";
-import { publicHref } from "@/lib/i18n/public-pages";
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
 
@@ -18,7 +16,6 @@ export default function HelpPage() {
       <main id="main-content" className="content product-content reading-page">
         <header className="reading-page-header">
           <h1>{language === "th" ? "ช่วยเหลือ" : "Help"}</h1>
-          <PublicLanguageSwitcher />
         </header>
 
         <section
@@ -57,16 +54,10 @@ export default function HelpPage() {
               {language === "th" ? "นโยบายและข้อกำหนด" : "Policies and terms"}
             </h2>
             <div className="help-legal-links">
-              <Link
-                href={publicHref("/privacy", language)}
-                className="secondary-button"
-              >
+              <Link href="/privacy" className="secondary-button">
                 {language === "th" ? "ความเป็นส่วนตัว" : "Privacy"}
               </Link>
-              <Link
-                href={publicHref("/terms", language)}
-                className="secondary-button"
-              >
+              <Link href="/terms" className="secondary-button">
                 {language === "th" ? "ข้อกำหนด" : "Terms"}
               </Link>
             </div>

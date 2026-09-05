@@ -216,22 +216,22 @@ order, active chips, transfer deductions, no results, and corrected scoring.
 
 ## Localization
 
-Thai is the default source language. Public reading pages have static Thai URLs
-and English `/en/…` counterparts with matching HTML language and metadata.
-Members retain their database preference; a non-sensitive device cookie supplies
-Guest language during SSR, migrating any older localStorage-only preference
-once after mounting. The browser language never overrides the Thai first-use default.
+Thai is the default source language. Document and game routes use the same
+request language from the member preference or the non-sensitive device cookie.
+The cookie supplies Guest language during SSR, migrating any older
+localStorage-only preference once after mounting. The browser language never
+overrides the Thai first-use default.
 
 Use explicit bilingual content or typed common message keys for migrated screens.
-Public pages and Points do not recursively translate streamed page content.
+Document pages and Points do not recursively translate streamed page content.
 Unmigrated game screens retain the compatibility `Localized` boundary: it keeps
 source text during SSR and initial hydration, then translates resolved children.
 Independently streamed compatibility content needs its own boundary. Do not
 silence text mismatches with `suppressHydrationWarning`.
 
-Settings owns the member language preference. Public document controls select
-the language URL. The development-only draggable tester also updates the device
-cookie and refreshes server text; it must not render in production. Load admin
+Settings owns the member language preference. The development-only draggable
+tester also updates the device cookie and refreshes server text; it must not
+render in production. Load admin
 messages only inside the protected admin namespace and keep new messages out of
 the legacy dictionary when an explicit namespace is available.
 
@@ -303,16 +303,14 @@ Back to player mode link at the bottom, returning to `/team` without sign-out.
 Operational pages use a visible title, task-specific filters, and focused work
 areas. Internal bot counts and labels appear only within authorized admin pages.
 
-## Public language and recovery contract (2026-09-05)
+## Document shell contract (2026-09-06)
 
-Public reading pages use explicit bilingual content with Thai canonical paths and
-English `/en/…` paths. Visible language controls navigate to the matching document;
-metadata and the HTML language match the initial content. Shared shell messages
-use explicit common keys instead of traversing the page. Public shells show a
-neutral game-entry control during static rendering, then restore the signed-in
-user's manager menu through a read-only identity request. If that request is
-unavailable, the document and game-entry control remain usable. Game and admin
-compatibility translations remain separate namespaces until individually migrated.
+Reading pages share the game layout, request language and manager identity. Their
+shell must expose the same Profile, Settings, upgrade and sign-out controls as the
+rest of the application. Shared shell messages use explicit common keys instead
+of traversing the page, while document content selects its Thai or English copy
+from the common request language. Game and admin compatibility translations remain
+separate namespaces until individually migrated.
 
 League dialogs retain input and preview context on transport errors, clear pending
 state in `finally`, and focus the existing error message so the user can retry or

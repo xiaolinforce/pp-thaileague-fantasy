@@ -3,8 +3,6 @@
 import { ScrollText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
-import { PublicLanguageSwitcher } from "@/components/fantasy/public-providers";
-import { publicHref } from "@/lib/i18n/public-pages";
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
 
@@ -52,7 +50,6 @@ export function LegalDocument({
             <h1>{localize(title)}</h1>
             <p>{localize(summary)}</p>
           </div>
-          <PublicLanguageSwitcher />
         </header>
 
         <div className="legal-page-layout">
@@ -106,15 +103,15 @@ export function LegalDocument({
                 <a href={`mailto:${supportEmail}`}>{supportEmail}</a>
               </p>
               <div>
-                <Link href={publicHref("/privacy", language)}>
+                <Link href="/privacy">
                   {language === "th"
                     ? "นโยบายความเป็นส่วนตัว"
                     : "Privacy Policy"}
                 </Link>
-                <Link href={publicHref("/terms", language)}>
+                <Link href="/terms">
                   {language === "th" ? "ข้อกำหนดการใช้งาน" : "Terms of Service"}
                 </Link>
-                <Link href={publicHref("/help", language)}>
+                <Link href="/help">
                   {language === "th" ? "ช่วยเหลือ" : "Help"}
                 </Link>
               </div>

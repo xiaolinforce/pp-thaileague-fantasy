@@ -1040,6 +1040,10 @@ establishes the contract and inventory required for those bounded audits.
 
 ### 2026-09-05 Audit fixes: public language, Points and League recovery
 
+The public-route evidence below records the 2026-09-05 implementation. The
+separate public root and `/en/…` document routes were retired on 2026-09-06;
+Rules, Help, Privacy and Terms now use the database-backed game layout.
+
 - Production build with an unreachable database: all four Thai and four English
   public pages returned 200, correct HTML language, localized titles, canonical
   alternatives and the configured security headers. Initial public scripts did

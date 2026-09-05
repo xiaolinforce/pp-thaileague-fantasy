@@ -426,6 +426,7 @@ the migration, and no environment variables or production feature gates changed.
 probe `/api/health/ready` using the existing CRON_SECRET Bearer credential for
 database readiness. Expect 401 without authorization, 200 when the dependency
 responds, and 503 when unavailable. Configure such a monitor separately; do not
-place the credential in a URL. Public Thai/English documents should remain 200
-during a database outage. CSP includes the current Turnstile, Google and Sentry
-browser requirements; recheck it when adding external browser integrations.
+place the credential in a URL. Since 2026-09-06 the document routes use the same
+database-backed layout as the game and may be unavailable during a database
+outage. CSP includes the current Turnstile, Google and Sentry browser requirements;
+recheck it when adding external browser integrations.
