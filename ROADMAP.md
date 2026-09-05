@@ -47,8 +47,9 @@ Fantasy service:
    recovery drill remains.
 6. Expand automated coverage to Server Actions, database invariants,
    source-data maintenance, and end-to-end critical paths.
-7. Decide the production localization and SEO model instead of relying on
-   recursive client-side text replacement.
+7. Public Thai/English SEO routes, shared-shell keys, isolated dictionaries and
+   server-translated Points are implemented. Continue migrating the remaining
+   game screens from the compatibility translation boundary to explicit keys.
 8. Review privacy, terms of play, competition/player data usage, club identity,
    and abuse controls.
 9. Run a full rules acceptance review with the product owner and freeze the
@@ -74,8 +75,8 @@ substitute for those authorization checks.
   `locked` status becomes a real phase.
 - Reconcile prototype price/form/watchlist presentation with a documented,
   persisted product model.
-- Add stable localized routes and server-rendered localized metadata if English
-  becomes a first-class public experience.
+- Extend the explicit public localization model to further game surfaces when
+  they become public/shareable experiences.
 - Add observability around imports, recalculation, admin correction, and failed
   mutations.
 

@@ -748,3 +748,22 @@ No visit tracking, bot mutation interface or schema migration is introduced.
 **Consequences:** Lifecycle controls no longer depend on the admin's personal
 team. New lock/finalize operations record their operator and state transition in
 the same database transaction. Existing history is not backfilled or rewritten.
+
+## 2026-09-05 — Public documents render independently in each language
+
+**Decision:** Keep the current Thai public URLs and add static `/en/…` documents
+with localized metadata. Separate public and game root layouts, share RootDocument
+and the existing AppShell, and make public account context neutral. Load game and
+admin translation dictionaries only inside their own boundaries. Migrate Points
+copy to server translation and common shell messages to explicit keys first.
+
+**Context:** Database-dependent root providers made legal/help documents fail with
+the game database. Recursive translation of streamed children caused initial
+language changes and bundled internal copy into public pages.
+
+**Consequences:** Public pages survive database outages and send the correct
+language before hydration. Navigation across root layouts performs a full page
+load. Member language settings persist in PostgreSQL; a non-sensitive preference
+cookie supplies Guest SSR language, with one-time localStorage migration. The
+development tester may override the request language using that cookie. Remaining
+game screens retain their compatibility boundary until deliberately migrated.

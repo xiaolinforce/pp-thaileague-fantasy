@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import { PublicLanguageSwitcher } from "@/components/fantasy/public-providers";
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
 import { buildFantasyRuleSections } from "@/lib/fantasy/rule-content";
@@ -17,10 +18,11 @@ export default function RulesPage() {
   );
 
   return (
-    <AppShell>
+    <AppShell localizeContent={false}>
       <main id="main-content" className="content product-content reading-page">
         <header className="reading-page-header">
           <h1>{language === "th" ? "กติกาเกม" : "Game rules"}</h1>
+          <PublicLanguageSwitcher />
         </header>
 
         <div className="rules-page-layout">

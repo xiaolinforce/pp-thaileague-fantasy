@@ -339,3 +339,18 @@ confirmation and authorization.
 - A decision on the production Thai/English URL and SEO model.
 - More automated database, Server Action, source-adapter, and end-to-end tests.
 - A named backup drill and incident rehearsal before the first live deadline.
+
+## Pending deployment: audit hardening (2026-09-05)
+
+Migration 0016 has been applied and rollback verification passed on development
+`br-green-queen-az934b4e` only. Production needs a coordinated migration/application
+release because old writers do not supply the new required selection/member
+season keys. No production migration or deployment was performed in this task.
+
+After release, `/api/health` remains the public liveness monitor. Operators can
+probe `/api/health/ready` using the existing CRON_SECRET Bearer credential for
+database readiness. Expect 401 without authorization, 200 when the dependency
+responds, and 503 when unavailable. Configure such a monitor separately; do not
+place the credential in a URL. Public Thai/English documents should remain 200
+during a database outage. CSP includes the current Turnstile, Google and Sentry
+browser requirements; recheck it when adding external browser integrations.

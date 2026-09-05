@@ -438,15 +438,13 @@ export async function lockFantasyGameweek(
       const rows = await db
         .insert(fantasyTeamSelections)
         .values(
-          settled
-            .slice(offset, offset + 500)
-            .map(({ team, settlement }) => ({
-              fantasySeasonId: team.fantasySeasonId,
-              fantasyTeamId: team.id,
-              fantasyGameweekId: nextGameweek.id,
-              status: "draft" as const,
-              freeTransfersBefore: settlement.freeTransfersAfter,
-            })),
+          settled.slice(offset, offset + 500).map(({ team, settlement }) => ({
+            fantasySeasonId: team.fantasySeasonId,
+            fantasyTeamId: team.id,
+            fantasyGameweekId: nextGameweek.id,
+            status: "draft" as const,
+            freeTransfersBefore: settlement.freeTransfersAfter,
+          })),
         )
         .onConflictDoUpdate({
           target: [

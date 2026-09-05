@@ -1,3 +1,5 @@
+import { getRequestLanguage } from "@/lib/i18n/server";
+import { translateLegacyEnglish } from "@/lib/i18n/legacy";
 import { Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 
@@ -22,6 +24,9 @@ export default async function PointsPage({
 }: {
   searchParams: Promise<{ gw?: string | string[] }>;
 }) {
+  const language = await getRequestLanguage();
+  const translate =
+    language === "en" ? translateLegacyEnglish : (text: string) => text;
   const navigationAvailability = await getFantasyNavigationAvailability();
   if (!navigationAvailability.pointsEnabled) redirect("/team");
 
@@ -103,18 +108,18 @@ export default async function PointsPage({
   const total = points.teamScore?.totalPoints ?? 0;
   const activeChipLabel =
     points.fantasy.selection.activeChip === "triple_captain"
-      ? "กัปตัน ×3"
+      ? translate("กัปตัน ×3")
       : points.fantasy.selection.activeChip === "bench_boost"
-        ? "นับตัวสำรอง"
+        ? translate("นับตัวสำรอง")
         : points.fantasy.selection.activeChip === "wildcard"
-          ? "ซื้อขายตัวอิสระ"
+          ? translate("ซื้อขายตัวอิสระ")
           : null;
 
   return (
-    <AppShell>
+    <AppShell localizeContent={false}>
       <main id="main-content" className="content product-content">
         <PageHeader
-          title="คะแนน"
+          title={translate("คะแนน")}
           actions={
             <PointsGameweekSwitcher
               gameweeks={points.gameweeks}
@@ -132,16 +137,16 @@ export default async function PointsPage({
           />
           <section
             className="points-score-rail"
-            aria-label="สรุปคะแนน Gameweek"
+            aria-label={translate("สรุปคะแนน Gameweek")}
           >
             <article className="points-score-card points-score-card--supporting">
-              <span>คะแนนเฉลี่ย</span>
+              <span>{translate("คะแนนเฉลี่ย")}</span>
               <strong>{points.gameweekSummary.averagePoints}</strong>
-              <small>คะแนน</small>
+              <small>{translate("คะแนน")}</small>
             </article>
             <article className="points-score-card points-score-card--primary">
               <strong>{total}</strong>
-              <span>คะแนน</span>
+              <span>{translate("คะแนน")}</span>
             </article>
             <HighestScoreDialog
               team={points.highestScoringTeam}
@@ -172,13 +177,15 @@ export default async function PointsPage({
                 <div className="points-empty-squad" role="status">
                   <strong>
                     {points.fantasy.seasonFinished
-                      ? "ไม่มีทีมที่บันทึกไว้สำหรับ Gameweek นี้"
-                      : "ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้"}
+                      ? translate("ไม่มีทีมที่บันทึกไว้สำหรับ Gameweek นี้")
+                      : translate("ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้")}
                   </strong>
                   <span>
                     {points.fantasy.seasonFinished
-                      ? "ฤดูกาลนี้สิ้นสุดแล้ว จึงไม่สามารถจัดทีมย้อนหลังได้"
-                      : "เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน"}
+                      ? translate(
+                          "ฤดูกาลนี้สิ้นสุดแล้ว จึงไม่สามารถจัดทีมย้อนหลังได้",
+                        )
+                      : translate("เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน")}
                   </span>
                 </div>
               ) : (
@@ -216,7 +223,7 @@ export default async function PointsPage({
             {points.squad.length > 0 && (
               <div className="points-bench-panel">
                 <div className="bench-title">
-                  <h3>ม้านั่งสำรอง</h3>
+                  <h3>{translate("ม้านั่งสำรอง")}</h3>
                 </div>
                 <div className="points-bench-grid">
                   {benchMembers.map((member, index) => (

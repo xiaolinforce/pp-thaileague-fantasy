@@ -1,7 +1,7 @@
 "use server";
 
 import { and, eq } from "drizzle-orm";
-import { refresh, revalidatePath, revalidateTag } from "next/cache";
+import { refresh, revalidateTag } from "next/cache";
 
 import { db } from "@/db";
 import { transactionDb } from "@/db/transaction";
@@ -275,8 +275,7 @@ export async function updateInterfaceLanguageAction(input: {
     .update(fantasyManagers)
     .set({ preferredLanguage: language, updatedAt: new Date() })
     .where(eq(fantasyManagers.id, profile.manager.id));
-  revalidatePath("/settings");
-  revalidatePath("/", "layout");
+  refresh();
   return { ok: true, message: "บันทึกภาษาสำหรับบัญชีนี้แล้ว" };
 }
 

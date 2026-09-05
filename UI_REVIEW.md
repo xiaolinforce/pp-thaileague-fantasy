@@ -1011,3 +1011,30 @@ establishes the contract and inventory required for those bounded audits.
 - **Verification:** Fantasy, email and auth tests; types, lint, repository
   formatting, production build and read-only participant reporting. The original
   Thai language preference and default viewport were restored after review.
+
+### 2026-09-05 Audit fixes: public language, Points and League recovery
+
+- Production build with an unreachable database: all four Thai and four English
+  public pages returned 200, correct HTML language, localized titles, canonical
+  alternatives and the configured security headers. Initial public scripts did
+  not contain the game translation dictionary. Liveness remained 200 and the
+  authenticated dependency-readiness probe returned 503; unauthenticated probes
+  returned 401.
+- Rules: English/Thai language selection navigated between `/en/rules` and
+  `/rules`. The production page was checked at 360px with no document overflow.
+  Desktop English and mobile Thai/English content retained the existing reading
+  composition and shared shell. The public shell uses neutral account context.
+- Points: Thai and English were checked in the authenticated development state;
+  English desktop/360px showed the correct Bench and score labels, with no
+  horizontal overflow or captured runtime exception while switching language.
+- Leagues: the English Create form was tested with browser networking offline.
+  It retained the entered name, focused the transport error and re-enabled
+  submit/cancel. The Thai invite preview at 360px was checked with an invalid
+  code; it retained the code, focused the validation error and allowed retry or
+  cancellation. Owner operations and successful create/join writes were not
+  performed against user data; their transport handlers now use the same
+  catch/finally recovery pattern. Browser network overrides were removed.
+- This is bounded regression evidence for selected audit findings, not a new
+  full-route design review. Team/Points geometry, market pagination and provisional
+  score communication remain outside the selected work. Existing formatting
+  warnings remain in DATA_SOURCES.md and the moved Points player-token.tsx.

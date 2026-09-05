@@ -47,6 +47,7 @@ import {
 import { toast } from "@/components/ui/sonner";
 import { authClient } from "@/lib/auth/client";
 import type { AppIdentity } from "@/lib/auth/types";
+import { publicHref } from "@/lib/i18n/public-pages";
 import styles from "./app-shell.module.css";
 
 const navigation = [
@@ -242,10 +243,12 @@ function ManagerMenu({
             const active = pathname === href;
             return (
               <Link
-                href={href}
+                href={publicHref(href, language)}
                 className={active ? "active" : undefined}
                 aria-current={active ? "page" : undefined}
-                onNavigate={(event) => closeAndNavigate(event, href)}
+                onNavigate={(event) =>
+                  closeAndNavigate(event, publicHref(href, language))
+                }
                 key={href}
               >
                 <Icon size={18} aria-hidden="true" />
@@ -421,15 +424,22 @@ function SidebarContent({
   );
 }
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({
+  children,
+  localizeContent = true,
+}: {
+  children: ReactNode;
+  localizeContent?: boolean;
+}) {
+  const { message } = useLanguage();
   const pathname = usePathname();
   const identity = useAppIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
   return (
-    <Localized>
+    <>
       <div className="app-shell">
         <a className="skip-link" href="#main-content">
-          ข้ามไปยังเนื้อหาหลัก
+          {message("skipContent")}
         </a>
         {showDevelopmentLanguageTester ? <DevelopmentLanguageTester /> : null}
         <aside className="sidebar">
@@ -441,7 +451,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="compact-topbar">
               <SheetTrigger
                 className="compact-menu-trigger"
-                aria-label="เปิดเมนูหลัก"
+                aria-label={message("openNavigation")}
               >
                 <Menu size={23} strokeWidth={2} aria-hidden="true" />
               </SheetTrigger>
@@ -453,15 +463,15 @@ export function AppShell({ children }: { children: ReactNode }) {
               showCloseButton={false}
             >
               <SheetHeader className="sr-only">
-                <SheetTitle>เมนูหลัก</SheetTitle>
+                <SheetTitle>{message("mainNavigation")}</SheetTitle>
               </SheetHeader>
               <aside className="drawer-sidebar">
                 <SheetClose
                   className="compact-sidebar-close"
-                  aria-label="ปิดเมนูหลัก"
+                  aria-label={message("closeNavigation")}
                 >
                   <Menu size={17} strokeWidth={2} aria-hidden="true" />
-                  <span className="sr-only">ปิดเมนูหลัก</span>
+                  <span className="sr-only">{message("closeNavigation")}</span>
                 </SheetClose>
                 <SidebarContent
                   pathname={pathname}
@@ -471,10 +481,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </aside>
             </SheetContent>
           </Sheet>
-          {children}
+          {localizeContent ? <Localized>{children}</Localized> : children}
         </div>
       </div>
-    </Localized>
+    </>
   );
 }
 
@@ -487,10 +497,11 @@ type PageHeaderProps = {
 };
 
 export function PageHeader({ title, actions }: PageHeaderProps) {
+  const { translate } = useLanguage();
   return (
     <Localized>
       <>
-        <h1 className="sr-only">{title}</h1>
+        <h1 className="sr-only">{translate(title)}</h1>
         {actions ? (
           <section className="page-intro product-page-intro page-intro--actions-only">
             <div className="intro-actions">{actions}</div>

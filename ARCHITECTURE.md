@@ -85,8 +85,9 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 | `/help`          | Public support destinations and legal links; no account data is required.                          |
 | `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                      |
 
-The root layout provides Mitr, the language context, shared tooltips, and toast
-feedback. Guest and Email OTP sign-in complete account provisioning through a
+The `(app)` root layout resolves identity, language and navigation, and provides
+Mitr, shared tooltips and toast feedback. The `(public)` and `(english)` root
+layouts render independently of authentication and PostgreSQL. Guest and Email OTP sign-in complete account provisioning through a
 Server Action before client navigation so the application shell receives the
 new identity immediately. Database-backed pages are dynamically rendered: their
 data modules are server-only and call the current Next.js connection API before
@@ -130,8 +131,10 @@ to keep source text unchanged during SSR and initial hydration, including late
 Suspense boundaries. Recursive translation runs afterward over resolved props;
 independently streamed content needs its own boundary around its source copy.
 Admin uses the same shared behavior.
-Explicit `useLanguage` consumers retain the member language supplied by the
-root layout; Guests restore their device preference after mounting.
+Explicit `useLanguage` consumers retain the language supplied by their owning
+layout. A small preference cookie supplies Guest language during SSR; an existing
+localStorage-only preference migrates after the first mount. Member settings
+remain authoritative outside the development language tester.
 
 ## Read flow
 
@@ -413,3 +416,25 @@ allowed for Next hydration and UI styles; production disallows eval. This is
 a baseline CSP, not a claim that arbitrary inline-script injection is blocked.
 Per-request nonces would require dynamic rendering of otherwise static public
 pages. Recheck CSP whenever an external browser integration or Sentry region changes.
+
+## Public rendering and localization boundaries (2026-09-05)
+
+Rules, Help, Privacy and Terms are static Thai pages with static `/en/…`
+English counterparts, localized HTML language, titles, descriptions, canonical
+URLs and alternate-language links. Their neutral public shell does not resolve
+a session, provision a team, query navigation availability or run the session
+heartbeat. The language selector changes the public URL; cross-root navigation
+uses a full document load. Game routes retain their original URLs.
+
+The lightweight common namespace and explicit message keys own shared-shell copy.
+The compatibility game dictionary loads only with GameProviders; the admin
+namespace loads only inside the protected admin layout. Public content and Points
+do not recursively translate streamed children. Points resolves text on the
+server from the same request language as its layout; remaining game screens keep
+the hydration-safe compatibility boundary while they migrate incrementally.
+
+`/api/health` remains liveness. `/api/health/ready` requires the existing
+CRON_SECRET Bearer credential before issuing a shared-client `select 1`; it
+returns 200 or a bounded 503 with no SQL/provider details and never caches the
+response. Its five-second response deadline does not claim cancellation of a
+already dispatched driver request. No external monitor was created by this change.

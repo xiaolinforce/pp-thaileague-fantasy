@@ -174,3 +174,7 @@ npm run build
 Configure `DATABASE_URL` and all auth secrets separately for every Vercel
 environment. Never expose server secrets with a `NEXT_PUBLIC_` prefix; the
 Turnstile site key is the intentional exception because it is public by design.
+
+Public `/rules`, `/help`, `/privacy` and `/terms` also have `/en/…` English
+versions. These eight pages render without the database. Authenticated routes
+are grouped under `src/app/(app)` while keeping their existing URLs.

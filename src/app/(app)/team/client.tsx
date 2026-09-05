@@ -77,7 +77,7 @@ import {
   type DraftLineupMember,
   type RemovedDraftPlayersBySlot,
 } from "@/lib/fantasy/team-draft";
-import TransfersClient from "@/app/team/transfers-client";
+import TransfersClient from "./transfers-client";
 
 const rows = ["GK", "DEF", "MID", "FWD"] as const;
 const fantasyPositions: Record<

@@ -216,28 +216,24 @@ order, active chips, transfer deductions, no results, and corrected scoring.
 
 ## Localization
 
-Thai is the source language and fallback HTML language. English is currently a
-client-side display preference provided by `LanguageProvider`. A member's
-preference is loaded from `fantasy_managers.preferred_language`; a Guest's
-preference is stored on the device under `thai-fantasy-language`.
+Thai is the default source language. Public reading pages have static Thai URLs
+and English `/en/…` counterparts with matching HTML language and metadata.
+Members retain their database preference; a non-sensitive device cookie supplies
+Guest language during SSR, migrating any older localStorage-only preference
+once after mounting. The browser language never overrides the Thai first-use default.
 
-Recursive `Localized` boundaries preserve Thai source text during server
-rendering and their first hydration, then apply the active dictionary. This
-also covers streamed Server Component children that are opaque on the server.
-Put a `Localized` boundary inside independently streamed content; an ancestor
-cannot translate the rendered output of an opaque component by walking props.
-Direct bilingual Client Components still use the server-supplied language;
-do not silence text mismatches with `suppressHydrationWarning`.
+Use explicit bilingual content or typed common message keys for migrated screens.
+Public pages and Points do not recursively translate streamed page content.
+Unmigrated game screens retain the compatibility `Localized` boundary: it keeps
+source text during SSR and initial hydration, then translates resolved children.
+Independently streamed compatibility content needs its own boundary. Do not
+silence text mismatches with `suppressHydrationWarning`.
 
-This is a prototype boundary:
-
-- URLs and server metadata are not locale-prefixed;
-- public pages and users without a stored preference use Thai; a browser's
-  language does not override the first-use default;
-- dictionary replacement depends on exact Thai source copy; and
-- Settings is the only production language control. During local development,
-  the App Shell includes a draggable language tester that remembers its local
-  position; it must not render in production.
+Settings owns the member language preference. Public document controls select
+the language URL. The development-only draggable tester also updates the device
+cookie and refreshes server text; it must not render in production. Load admin
+messages only inside the protected admin namespace and keep new messages out of
+the legacy dictionary when an explicit namespace is available.
 
 Add Thai source copy and its English dictionary entry in the same change. Test
 business-critical warnings and actions in both languages; do not rely on
@@ -306,3 +302,17 @@ The shared sidebar and compact drawer identify Administrator mode and retain a
 Back to player mode link at the bottom, returning to `/team` without sign-out.
 Operational pages use a visible title, task-specific filters, and focused work
 areas. Internal bot counts and labels appear only within authorized admin pages.
+
+## Public language and recovery contract (2026-09-05)
+
+Public reading pages use explicit bilingual content with Thai canonical paths and
+English `/en/…` paths. Visible language controls navigate to the matching document;
+metadata and the HTML language match the initial content. Shared shell messages
+use explicit common keys instead of traversing the page. Public shells show a
+neutral game-entry control without fetching private account state. Game and admin
+compatibility translations remain separate namespaces until individually migrated.
+
+League dialogs retain input and preview context on transport errors, clear pending
+state in `finally`, and focus the existing error message so the user can retry or
+close. This applies to create, invite preview, join, rename, invite rotation and
+confirmed member/league operations.
