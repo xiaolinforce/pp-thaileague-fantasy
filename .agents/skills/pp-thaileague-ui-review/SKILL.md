@@ -9,13 +9,23 @@ Preserve the current Thai football product identity. Treat this as refinement of
 
 ## Read before editing
 
-Read `DESIGN.md`, the affected route and shared components, and the project documents named by `AGENTS.md`. Before changing framework behavior, read the relevant guide under `node_modules/next/dist/docs/` for this installed Next.js version.
+For material UI work, read `DESIGN.md`, the affected route and shared
+components, and the project documents named by `AGENTS.md`. For a small,
+localized UI adjustment, inspect the affected route, component, and styles plus
+only the directly relevant design guidance. Before changing framework behavior,
+read the relevant guide under `node_modules/next/dist/docs/` for this installed
+Next.js version.
 
 Use the tokens in `src/app/globals.css`, the shell and Fantasy identity components under `src/components/fantasy`, and the primitives under `src/components/ui`. Do not create a parallel component system.
 
 ## Build the state inventory
 
-Derive reachable states from page composition, data readers, actions, conditionals, loading and error boundaries, dialogs, sheets, validation, authentication gates, and the documented Fantasy lifecycle. Cover every current public route plus `/admin/fantasy` when an authorized development state is available.
+For material UI work or an explicit audit, derive reachable states from page
+composition, data readers, actions, conditionals, loading and error boundaries,
+dialogs, sheets, validation, authentication gates, and the documented Fantasy
+lifecycle. Cover every current public route plus `/admin/fantasy` only for a
+full-route audit. For a small, localized adjustment, cover only the affected
+state and any directly adjacent state that could regress.
 
 For each relevant surface, include:
 
@@ -53,9 +63,19 @@ When changing Thai source copy, update the English dictionary in the same change
 
 ## Verification
 
-Use a real browser for visual and interactive checks. Review desktop and mobile together in a bounded pass, apply the complete batch of supported fixes, then perform one confirmation pass. Capture enough evidence to identify the route, state, language, and viewport.
+Follow `AGENTS.md`'s proportional verification rule. For a small, localized UI
+adjustment, inspect the affected source and diff and run only a quick, directly
+relevant check (such as targeted formatting). Do not launch a browser, run
+project-wide checks, or create audit evidence unless the user requests it or
+rendered behavior is necessary to assess the change.
 
-Run the narrowest relevant checks first, followed by:
+For material UI work or an explicit UI audit, use a real browser for visual and
+interactive checks. Review desktop and mobile together in a bounded pass, apply
+the complete batch of supported fixes, then perform one confirmation pass.
+Capture enough evidence to identify the route, state, language, and viewport.
+
+For material work, run the narrowest relevant checks first, then the applicable
+project checks:
 
 ```text
 npm run test:rules

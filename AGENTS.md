@@ -74,6 +74,12 @@ For a small, localized edit, do not routinely run type checks, lint, broad error
 checks, builds, or real-browser verification. Inspect the affected code and run
 only a narrowly targeted check when it is quick and directly relevant.
 
+This proportionality rule takes precedence over generic verification guidance in
+project-local skills. A skill must not expand a small, localized task into a
+route audit or a full project verification pass. For a localized visual change,
+source and diff inspection are sufficient unless the user asks for browser
+verification or the change cannot be assessed without rendering it.
+
 Run the appropriate project checks for material or higher-risk work, including
 multi-file or cross-cutting changes, new features, changes to routes, data flow,
 database/schema, Fantasy rules, dependencies, or work that took substantial
