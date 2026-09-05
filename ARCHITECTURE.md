@@ -402,3 +402,14 @@ also invalidate fixtures and ownership. Name changes refresh dynamic identity
 data without invalidating shared datasets. Server Actions use `refresh()` for
 the active router instead of expiring all page dependencies. Chip usage reads
 only the current team and groups its locked selections in SQL.
+
+### Browser security headers
+
+All routes send an enforced CSP, frame denial, MIME-sniffing protection, a
+strict-origin-when-cross-origin referrer policy, and disabled unused device/payment
+permissions. CSP permits the current Turnstile script/frame, Google form
+navigation, Sentry ingestion and replay workers. Inline scripts/styles remain
+allowed for Next hydration and UI styles; production disallows eval. This is
+a baseline CSP, not a claim that arbitrary inline-script injection is blocked.
+Per-request nonces would require dynamic rendering of otherwise static public
+pages. Recheck CSP whenever an external browser integration or Sentry region changes.
