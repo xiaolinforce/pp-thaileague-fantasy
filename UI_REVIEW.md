@@ -257,6 +257,32 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-05 — Vacancy targeting and current fixture Gameweek
+
+- **Route and task:** `/team` preserves the selected vacant slot as the first
+  compatible market destination, and no longer offers a no-op swap between two
+  same-position vacancies. `/fixtures` initially opens the earliest Gameweek
+  with at least one fixture that is not `finished` or `cancelled`.
+- **Data/auth/Gameweek state:** the local authenticated fixture dataset rendered
+  GW1 with four recorded results and four upcoming fixtures, while Fantasy GW2
+  was open. The initial Fixtures selector correctly showed GW1 rather than the
+  next Fantasy Gameweek. The local Team workspace rendered a complete GW2
+  squad with its existing player, bench, market, and save controls.
+- **Accessibility and browser evidence:** in-app Browser accessibility trees
+  confirmed the initial `Gameweek 1` selector and its result/kickoff labels,
+  plus the Team workspace's labelled tabs, player-detail buttons, bench, and
+  disabled Save action. Neither route displayed a Next.js error overlay or
+  browser console error.
+- **Known exclusions:** a partial Team draft was not created in the browser to
+  avoid modifying the available user's local working draft. Deterministic draft
+  tests cover preferred same-position filling, fallback filling, and the
+  unavailable same-position vacancy swap.
+- **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`, and
+  `npm run build` passed. The repository-wide formatting check still reports
+  pre-existing formatting in `DATA_SOURCES.md` and
+  `src/app/(app)/points/player-token.tsx`; every file changed for this task is
+  formatted.
+
 ### 2026-09-05 — Fixture time and result presentation
 
 - **Route and task:** `/fixtures`; use the persisted home and away scores in
