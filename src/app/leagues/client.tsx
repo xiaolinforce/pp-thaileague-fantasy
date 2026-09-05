@@ -127,18 +127,28 @@ function CreateLeagueDialog({
     }
     setPending(true);
     setError("");
-    const result = await createPrivateLeagueAction({ name });
-    setPending(false);
-    if (!result.ok) {
-      setError(translate(result.message));
+    try {
+      const result = await createPrivateLeagueAction({ name });
+      if (!result.ok) {
+        setError(translate(result.message));
+        window.requestAnimationFrame(() => errorRef.current?.focus());
+        return;
+      }
+      toast.success(translate(result.message));
+      onOpenChange(false);
+      setName("");
+      if (result.leagueId) onLeagueCreated(result.leagueId);
+      router.refresh();
+    } catch {
+      setError(
+        translate(
+          "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+        ),
+      );
       window.requestAnimationFrame(() => errorRef.current?.focus());
-      return;
+    } finally {
+      setPending(false);
     }
-    toast.success(translate(result.message));
-    onOpenChange(false);
-    setName("");
-    if (result.leagueId) onLeagueCreated(result.leagueId);
-    router.refresh();
   };
 
   return (
@@ -227,35 +237,55 @@ function JoinLeagueDialog({
     setPending(true);
     setError("");
     setPreview(undefined);
-    const result = await previewPrivateLeagueInviteAction({
-      inviteCode: code,
-    });
-    setPending(false);
-    if (!result.ok) {
-      setError(translate(result.message));
+    try {
+      const result = await previewPrivateLeagueInviteAction({
+        inviteCode: code,
+      });
+      if (!result.ok) {
+        setError(translate(result.message));
+        window.requestAnimationFrame(() => errorRef.current?.focus());
+        return;
+      }
+      setPreview(result);
+    } catch {
+      setError(
+        translate(
+          "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+        ),
+      );
       window.requestAnimationFrame(() => errorRef.current?.focus());
-      return;
+    } finally {
+      setPending(false);
     }
-    setPreview(result);
   };
 
   const join = async () => {
     if (!preview || pending) return;
     setPending(true);
     setError("");
-    const result = await joinPrivateLeagueAction({
-      inviteCode: preview.inviteCode,
-    });
-    setPending(false);
-    if (!result.ok) {
-      setError(translate(result.message));
+    try {
+      const result = await joinPrivateLeagueAction({
+        inviteCode: preview.inviteCode,
+      });
+      if (!result.ok) {
+        setError(translate(result.message));
+        window.requestAnimationFrame(() => errorRef.current?.focus());
+        return;
+      }
+      toast.success(translate(result.message));
+      onOpenChange(false);
+      if (result.leagueId) onLeagueOpened(result.leagueId);
+      router.refresh();
+    } catch {
+      setError(
+        translate(
+          "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+        ),
+      );
       window.requestAnimationFrame(() => errorRef.current?.focus());
-      return;
+    } finally {
+      setPending(false);
     }
-    toast.success(translate(result.message));
-    onOpenChange(false);
-    if (result.leagueId) onLeagueOpened(result.leagueId);
-    router.refresh();
   };
 
   return (
@@ -793,29 +823,43 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
     if (pendingTask || name.trim() === league.name) return;
     setPendingTask("rename");
     setFormError("");
-    const result = await renamePrivateLeagueAction({
-      leagueId: league.id,
-      name,
-    });
-    setPendingTask("");
-    if (!result.ok) return reportFailure(result.message);
-    toast.success(translate(result.message));
-    router.refresh();
+    try {
+      const result = await renamePrivateLeagueAction({
+        leagueId: league.id,
+        name,
+      });
+      if (!result.ok) return reportFailure(result.message);
+      toast.success(translate(result.message));
+      router.refresh();
+    } catch {
+      reportFailure(
+        "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      );
+    } finally {
+      setPendingTask("");
+    }
   };
 
   const regenerate = async () => {
     if (pendingTask) return;
     setPendingTask("regenerate");
     setFormError("");
-    const result = await regeneratePrivateLeagueInviteAction({
-      leagueId: league.id,
-    });
-    setPendingTask("");
-    if (!result.ok) return reportFailure(result.message);
-    setInviteCode(result.inviteCode ?? "");
-    setConfirmAction(null);
-    toast.success(translate(result.message));
-    router.refresh();
+    try {
+      const result = await regeneratePrivateLeagueInviteAction({
+        leagueId: league.id,
+      });
+      if (!result.ok) return reportFailure(result.message);
+      setInviteCode(result.inviteCode ?? "");
+      setConfirmAction(null);
+      toast.success(translate(result.message));
+      router.refresh();
+    } catch {
+      reportFailure(
+        "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      );
+    } finally {
+      setPendingTask("");
+    }
   };
 
   const copy = async (kind: "code" | "link") => {
@@ -842,15 +886,23 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
     >,
     destination?: string,
   ) => {
+    if (pendingTask) return;
     setPendingTask(task);
     setFormError("");
-    const result = await action();
-    setPendingTask("");
-    if (!result.ok) return reportFailure(result.message);
-    setConfirmAction(null);
-    toast.success(translate(result.message));
-    if (destination) router.push(destination);
-    router.refresh();
+    try {
+      const result = await action();
+      if (!result.ok) return reportFailure(result.message);
+      setConfirmAction(null);
+      toast.success(translate(result.message));
+      if (destination) router.push(destination);
+      router.refresh();
+    } catch {
+      reportFailure(
+        "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+      );
+    } finally {
+      setPendingTask("");
+    }
   };
 
   const pageHref = (page: number) => `/leagues/${league.id}?page=${page}`;
