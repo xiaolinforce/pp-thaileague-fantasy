@@ -403,9 +403,11 @@ scoring failure; and rehearses classification and batched lock/carryover/scoring
 Every transaction rolls back and checksums verify all affected Fantasy tables.
 It does not reset QA scenarios. On 2026-09-05, branch `br-green-queen-az934b4e`
 passed; the 200-team lifecycle rehearsal used 41 SQL statements including
-transaction and verification reads. Production migration remains a separate
-promotion: coordinate migration 0016 with the matching application release, as
-older writers do not supply its required season keys.
+transaction and verification reads. Production migration was applied separately
+on 2026-09-05 after the owner deployed the matching application release; see
+`PRODUCTION.md` for the branch, journal, recovery reference, and verification.
+Older writers do not supply its required season keys, so rollback must account
+for application/schema compatibility.
 
 ## Dependency security patches (2026-09-05)
 

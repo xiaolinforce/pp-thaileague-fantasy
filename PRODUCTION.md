@@ -218,15 +218,19 @@ locked selection; this data correction does not depend on deploying the patch.
    Neon `development` branch.
 3. Take or identify a Neon restore point before a Production schema or source-data write.
 4. Apply each forward migration to the Neon `production` branch before promoting
-   code that depends on it. Never rewrite migration history.
+   code that depends on it. If it breaks older writers, prepare the replacement
+   deployment first and pause writes across the migration/promotion interval.
+   Never rewrite migration history.
 5. Fast-forward or merge the reviewed commit to `main` and wait for the Vercel
    Production deployment to become Ready.
 6. Check `/`, `/api/health`, `/privacy`, `/terms`, authenticated `/team`, Google
    sign-in, Email OTP, Vercel runtime logs, and Sentry for release/source-map
    errors. Confirm `fantasy.ppfootball.net` points to the new Current deployment.
-7. If a release fails, immediately promote the last known-good Vercel deployment.
-   If a data write is involved, stop writes, preserve logs, and restore or
-   forward-fix Neon only after identifying the exact affected interval.
+7. If a release fails, check schema compatibility before promoting a previous
+   Vercel deployment. For a migration that breaks older writers, coordinate a
+   write pause and the application/schema transition; an application rollback
+   alone is insufficient. Preserve logs and restore or forward-fix Neon only
+   after identifying the exact affected interval.
 
 ## Account support and recovery
 
@@ -340,14 +344,51 @@ confirmation and authorization.
 - More automated database, Server Action, source-adapter, and end-to-end tests.
 - A named backup drill and incident rehearsal before the first live deadline.
 
-## Pending deployment: audit hardening (2026-09-05)
+## Production release: audit hardening (2026-09-05)
 
-Migration 0016 has been applied and rollback verification passed on development
-`br-green-queen-az934b4e` only. Production needs a coordinated migration/application
-release because old writers do not supply the new required selection/member
-season keys. No production migration or deployment was performed in this task.
+The owner pushed commit `98581cd69d89a85860297072eeffe577da9c7464` to `main`.
+Vercel deployment `dpl_7RNLFxBrF6k87tAKptP5tpCmvqNX` was Ready and assigned to
+`fantasy.ppfootball.net`, but production still had migration 0015. The owner then
+authorized production migration and verification. Development had already passed
+migration 0016 and the full persistence rollback rehearsal.
 
-After release, `/api/health` remains the public liveness monitor. Operators can
+Neon production `br-tiny-shape-azrvakql`, database `neondb`, was confirmed through
+SQL. Preflight found no invalid season references, invalid bench assignments,
+duplicate bench orders, or duplicate captains. The authenticated Neon SQL Editor
+applied the exact committed `0016_medical_carnage.sql`, its Drizzle journal entry,
+and a `schema.migration.0016` admin audit record in one atomic DO statement. The
+wrapper asserted the branch and previous migration, locked the season rows and
+affected tables, and checked original row counts and checksums before completion.
+The migration statement completed in 358 ms; post-migration verification was at
+`2026-09-05 12:04:33.120521 UTC`.
+
+The pre-write restore timestamp is `2026-09-05 12:04:32.820992 UTC`, subject to
+the six-hour Neon history retention verified in Backup & Restore. This is a
+time-limited recovery reference, not a separate permanent backup. The migration
+SHA-256 recorded in Drizzle and the audit log is
+`a849f85db8280491956842e2b673f86aa2e5b76a7192efd7963d2a8bb3ebc78f`.
+
+All 394 selections and 3,390 selection members were preserved; checksums of all
+pre-existing columns matched before and after. Both required season columns,
+six migration indexes, and six validated constraints were present, with zero
+selection/member season mismatches. A separate production transaction verified
+a compatible member insert, rejection of null/invalid seasons, null bench order,
+and duplicate bench order. All test writes rolled back, and the member checksum
+remained identical. Existing scores and revisions numbered 197 and 232.
+
+Authenticated browser checks loaded Team, Points, the highest-scoring squad,
+Leagues, the top-100 standings, and Fixtures. No browser exceptions or failed
+requests were observed during the instrumented Points/Leagues/Fixtures flows.
+Vercel returned no error/warning logs for this production deployment from
+`2026-09-05 12:04:33 UTC` through `12:12:08 UTC`.
+All eight public Thai/English document URLs
+returned 200 with localized titles and security headers. `/api/health` returned
+200; an unauthenticated readiness request correctly returned 401. These checks
+did not submit a real squad change, create a league, send an OTP, or repeat a
+fresh OAuth sign-in. No additional application deployment was needed to activate
+the migration, and no environment variables or production feature gates changed.
+
+`/api/health` remains the public liveness monitor. Operators can
 probe `/api/health/ready` using the existing CRON_SECRET Bearer credential for
 database readiness. Expect 401 without authorization, 200 when the dependency
 responds, and 503 when unavailable. Configure such a monitor separately; do not
