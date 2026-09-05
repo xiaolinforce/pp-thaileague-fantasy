@@ -211,6 +211,35 @@ GW1 transfer deductions, and the production Points page shows the corrected
 team total and average. Subsequent score recalculation reads the corrected
 locked selection; this data correction does not depend on deploying the patch.
 
+## 2026-09-05 GW1 four-match scoring
+
+The owner authorized batch `gw1-sep5-four-matches-20260905` for development
+`br-green-queen-az934b4e` and production `br-tiny-shape-azrvakql`. Both branch
+IDs and target fixture pre-states were checked before writes. The development
+write was rehearsed in a rollback transaction, committed, and verified before
+the production transaction ran through the authenticated Neon SQL Editor. The
+production pre-write state was recorded in Neon query history at approximately
+`2026-09-05 15:35 UTC`, inside the configured recovery window.
+
+Each branch now has finished results and 179 reviewed player-stat and point
+records across fixtures `37415`–`37418`: 126 appearances, 53 unused substitutes,
+and 289 total player points. Fixture totals are `37415`=77, `37416`=66,
+`37417`=70, and `37418`=76. Score breakdown checks returned zero mismatches.
+Douglas Souza has 60 minutes and seven points; Patrick Valverde has a penalty
+goal, a straight red card, and three points. Source decisions, the three
+unresolved Rasisalai lineup identities, and the scoring fingerprint are
+recorded in `DATA_SOURCES.md` and the database batch audit.
+
+The authenticated admin scoring action recalculated GW1 teams and Overall
+standings after the import. Development has 200 provisional team scores, an
+average of 12, and a high score of 20. Production has 197 provisional team
+scores, an average of 19, and a high score of 36. Production verification read
+back branch `br-tiny-shape-azrvakql`, all four finished results, 179 rows, 126
+appearances, 289 points, zero breakdown mismatches, and one batch audit. The
+development competition and Fantasy database verifiers passed, as did all 100
+Fantasy rule tests. GW1 remains provisional while the remaining three fixtures
+are unplayed, and GW2 remains open for team changes.
+
 ## Release checklist
 
 The guarded Actions workflow is active. Use [RELEASE.md](RELEASE.md) for normal

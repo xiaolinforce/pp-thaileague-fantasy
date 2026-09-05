@@ -138,6 +138,34 @@ Overall standings, preserved GW1 player snapshots, and carried squads into open
 GW2. Its deadline is 2026-09-11 16:30 Asia/Bangkok, 90 minutes before that
 Gameweek's first fixture. See `PRODUCTION.md` for execution and verification.
 
+## 2026-09-05 four-match review
+
+Owner-approved batch `gw1-sep5-four-matches-20260905` was applied to development
+and production for official fixtures `37415`–`37418`: Rayong 1-0 PT Prachuap,
+Rasisalai 1-2 Port, True Bangkok United 3-1 Sisaket United, and Singha
+Chiangrai United 1-0 Chonburi. The batch records 179 reviewed player-stat rows,
+including 126 appearances and 53 unused substitutes. The four fixture point
+totals are 77, 66, 70, and 76 respectively, for 289 player points in total.
+
+Evidence was reviewed on the official Thai League match pages and the matching
+AiScore event and lineup pages. Stored source payloads retain both URLs, lineup
+status, player interval, shirt number, and owner decisions. Douglas Souza is
+recorded at the owner-confirmed 60-minute threshold: two appearance points,
+five goal points, one midfielder clean-sheet point, and minus one for a yellow
+card, totaling seven. Patrick Valverde's event is a penalty goal followed by a
+straight red card, totaling three points. No MOTM, bonus, or BPS points were
+added.
+
+AiScore listed three Rasisalai shirts that did not resolve to an active Fantasy
+registration: C. Mueanta (4, unused), Piyawat Petra (93, appeared and booked),
+and P. Wongsa (97, unused). These source entries are preserved in the batch
+audit instead of assigning them to an unverified player identity. Piyawat
+Petra's appearance and yellow-card effects net to zero, so the unresolved row
+does not change a team or player point total. The complete reviewed scoring
+fingerprint is
+`c7ac83fafadd179a022e90816dd8d3c1a7f99cce83f59adf258e87c2a1861444`.
+See `PRODUCTION.md` for branch-level verification.
+
 ## Fixture schedule review (2026-09-04)
 
 Owner-approved batch `fixtures-acl-schedule-20260904` updated development
