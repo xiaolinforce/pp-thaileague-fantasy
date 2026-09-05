@@ -34,6 +34,19 @@ test("readiness authorizes before querying and hides dependency failures", async
   assert.equal(ready.status, 200);
   assert.deepEqual(await ready.json(), { ready: true });
   assert.equal(queries, 1);
+  process.env.READINESS_SECRET = "dedicated-readiness-only";
+  t.after(() => {
+    delete process.env.READINESS_SECRET;
+  });
+  const dedicated = await GET(
+    new Request("http://localhost/api/health/ready", {
+      headers: { authorization: "Bearer dedicated-readiness-only" },
+    }),
+  );
+  assert.equal(dedicated.status, 200);
+  delete process.env.CRON_SECRET;
+  assert.equal((await GET(request())).status, 401);
+  process.env.CRON_SECRET = "readiness-test-only";
   neonConfig.fetchFunction = async () => {
     throw new Error("sensitive database failure");
   };

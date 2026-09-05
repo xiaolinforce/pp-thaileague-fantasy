@@ -5,17 +5,24 @@ export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const secret = process.env.CRON_SECRET;
+  const secrets = [
+    process.env.READINESS_SECRET,
+    process.env.CRON_SECRET,
+  ].filter((secret): secret is string => Boolean(secret));
   const respond = (status: number, ready: boolean) =>
     Response.json(
       { ready },
       { status, headers: { "Cache-Control": "no-store" } },
     );
-  if (!secret) return respond(503, false);
+  if (!secrets.length) return respond(503, false);
   const actual = Buffer.from(request.headers.get("authorization") ?? "");
-  const expected = Buffer.from(`Bearer ${secret}`);
-  if (actual.length !== expected.length || !timingSafeEqual(actual, expected))
-    return respond(401, false);
+  const authorized = secrets.some((secret) => {
+    const expected = Buffer.from(`Bearer ${secret}`);
+    return (
+      actual.length === expected.length && timingSafeEqual(actual, expected)
+    );
+  });
+  if (!authorized) return respond(401, false);
 
   let timer: ReturnType<typeof setTimeout> | undefined;
   try {

@@ -90,7 +90,7 @@ async function health(origin: string, protectedDeployment: boolean) {
           headers: {
             ...baseHeaders,
             ...(path.endsWith("/ready")
-              ? { Authorization: `Bearer ${required("CRON_SECRET")}` }
+              ? { Authorization: `Bearer ${required("READINESS_SECRET")}` }
               : {}),
           },
           redirect: "error",
@@ -132,7 +132,7 @@ async function run() {
     for (const key of [
       "DATABASE_URL",
       "NEON_PRODUCTION_BRANCH_ID",
-      "CRON_SECRET",
+      "READINESS_SECRET",
       "VERCEL_AUTOMATION_BYPASS_SECRET",
     ])
       required(key);

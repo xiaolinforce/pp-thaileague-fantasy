@@ -50,7 +50,7 @@ jobs:
     environment: Production
     env:
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
-      CRON_SECRET: ${{ secrets.CRON_SECRET }}
+      READINESS_SECRET: ${{ secrets.READINESS_SECRET }}
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_AUTOMATION_BYPASS_SECRET: ${{ secrets.VERCEL_AUTOMATION_BYPASS_SECRET }}
       VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
@@ -73,14 +73,10 @@ jobs:
         run: node scripts/release/vercel.ts prepare
       - name: Check migration history and compatibility before building
         run: node scripts/release/migrate.ts check
-      - name: Load production build configuration
-        run: vercel pull --yes --environment=production
-      - name: Build the production candidate
-        run: vercel build --prod
-      - name: Stage the candidate without assigning production domains
+      - name: Build and stage on Vercel without assigning production domains
         shell: bash
         run: |
-          candidate_url=$(vercel deploy --prebuilt --prod --skip-domain --yes --meta githubCommitSha="$GITHUB_SHA" --meta githubCommitRef=main)
+          candidate_url=$(vercel deploy --prod --skip-domain --yes --meta githubCommitSha="$GITHUB_SHA" --meta githubCommitRef=main)
           node scripts/release/vercel.ts candidate "$candidate_url"
       - name: Apply reviewed compatible migrations atomically
         if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
@@ -102,6 +98,3 @@ jobs:
         if: failure()
         run: |
           printf '%s\n' 'Release failed. Inspect the failing step before retrying. A committed migration is not automatically reverted; do not roll back application code without checking schema compatibility.' >> "$GITHUB_STEP_SUMMARY"
-      - name: Remove downloaded build environment
-        if: always()
-        run: rm -f .vercel/.env.production.local

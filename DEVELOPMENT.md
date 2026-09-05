@@ -185,6 +185,11 @@ activation status are documented in [RELEASE.md](RELEASE.md). Run
 does not migrate the database; production automation requires the documented
 GitHub and Vercel configuration before activation.
 
+`READINESS_SECRET` optionally authorizes `/api/health/ready` for CI and monitors.
+Store it server-only in Vercel Production and GitHub's Production environment.
+It provides no maintenance permission. Existing `CRON_SECRET` readiness probes
+continue to work; the Cron route still accepts only `CRON_SECRET`.
+
 ### Source-data maintenance
 
 Competition rosters, fixtures, player facts, classifications, and ranking

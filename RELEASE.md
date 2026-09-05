@@ -2,12 +2,11 @@
 
 ## Activation status — 2026-09-05
 
-The workflow and guards are committed on `dev`. Production activation and the
-first end-to-end Actions run are pending. GitHub's existing `Production`
-environment is restricted to `main`, with the project/team/Neon branch variables
-configured. The Vercel release token has not been created: automatic approval
-review requires explicit approval of its team scope and one-year lifetime.
-Production currently continues to use its existing Git deployment configuration.
+The workflow and guards are committed on `dev`; activation is in progress.
+GitHub's `Production` environment is restricted to `main` and contains the
+required variables and encrypted secrets. The approved Vercel token is scoped
+to this project only and expires on 2027-09-06. The first complete production
+release still needs to pass before activation is considered verified.
 
 Local release/rules/email/auth/observability/localization/readiness tests,
 TypeScript, lint and production build passed. The development rollback rehearsal
@@ -26,8 +25,10 @@ pre-existing warnings in `DATA_SOURCES.md` and the Points `player-token.tsx`.
    - `NEON_PRODUCTION_BRANCH_ID`: `br-tiny-shape-azrvakql`
 3. Store these encrypted environment secrets, never repository files:
    - `DATABASE_URL`: Neon production `neondb` connection, confirmed by branch ID.
-   - `CRON_SECRET`: the existing production readiness/maintenance credential.
-   - `VERCEL_TOKEN`: a dedicated token scoped to ItsMePP's projects. Record its
+   - `READINESS_SECRET`: dedicated read-only readiness credential, also stored as
+     a Secret in Vercel Production. The existing `CRON_SECRET` remains unchanged
+     and can still authorize readiness; CI does not receive Cron credentials.
+   - `VERCEL_TOKEN`: a dedicated token scoped to this project. Record its
      expiry and rotate it in GitHub before expiration.
    - `VERCEL_AUTOMATION_BYPASS_SECRET`: project deployment-protection automation
      bypass secret, used only for checking the staged candidate.
@@ -50,8 +51,10 @@ checks are ready. No browser needs to remain open after activation.
 Only `main` can enter the production environment. Its release job:
 
 1. Verifies the current main commit, configuration and migration history.
-2. Pulls production build configuration and builds with the pinned Vercel CLI.
-3. Creates a production candidate with `--prebuilt --prod --skip-domain`.
+2. Uses the pinned Vercel CLI to build remotely with production configuration.
+3. Creates a production candidate with `--prod --skip-domain`. Sensitive build
+   credentials, including Sentry upload credentials, stay available inside
+   Vercel; they are not pulled as redacted values into a local prebuilt build.
 4. Confirms the candidate's project, target, exact commit and Ready state.
 5. Applies reviewed compatible migrations in one transaction, then verifies
    that the migration journal is current.
