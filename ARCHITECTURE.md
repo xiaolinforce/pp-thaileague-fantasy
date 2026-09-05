@@ -330,7 +330,7 @@ never rewritten.
 ## Architectural conventions
 
 Release tooling under `scripts/release` runs outside the application runtime.
-The prepared GitHub Actions workflow owns production build/migrate/check/promote;
+The active GitHub Actions workflow owns production build/migrate/check/promote;
 its Neon Pool exists only for the guarded migration transaction. Application
 access continues through the shared Drizzle client. See `RELEASE.md` for
 activation status, environment boundaries and recovery procedures.

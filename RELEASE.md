@@ -2,11 +2,27 @@
 
 ## Activation status — 2026-09-05
 
-The workflow and guards are committed on `dev`; activation is in progress.
-GitHub's `Production` environment is restricted to `main` and contains the
-required variables and encrypted secrets. The approved Vercel token is scoped
-to this project only and expires on 2027-09-06. The first complete production
-release still needs to pass before activation is considered verified.
+Automatic production releases are active. GitHub's default branch is `main`;
+its `Production` environment permits only `main` and contains the required
+variables and encrypted secrets. The approved Vercel token is scoped to this
+project only and expires on 2027-09-06. Auto-assign Custom Production Domains
+is disabled and the runner restores that setting after promotion.
+
+[Production run 33972826869, attempt 2](https://github.com/xiaolinforce/pp-thaileague-fantasy/actions/runs/33972826869/attempts/2)
+passed on 2026-09-05 at 14:59:25 UTC for application commit `4fd100d`.
+It confirmed production `br-tiny-shape-azrvakql`, all 17 migration hashes and
+zero pending migrations; apply and verification passed without new schema writes.
+Candidate `dpl_5LHAjc39HnMKMHxCDNJBxb35grkE` passed liveness, authorized readiness
+and Thai/English document checks, then promotion and the exact public alias
+check passed. Team, Points, Leagues and Fixtures also loaded in the existing
+authenticated browser session after promotion. No application browser errors
+or Vercel runtime warnings/errors were found in the sampled verification window.
+
+The first attempt stopped before promotion on readiness HTTP 401. Re-saving the
+same approved readiness credential to both platforms resolved the mismatch;
+the second attempt passed. Cron credentials and maintenance scheduling were
+unchanged. Future token expiry/rotation must update the GitHub secret before
+running another release.
 
 Local release/rules/email/auth/observability/localization/readiness tests,
 TypeScript, lint and production build passed. The development rollback rehearsal
