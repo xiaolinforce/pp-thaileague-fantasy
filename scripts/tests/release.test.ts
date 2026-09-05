@@ -5,6 +5,7 @@ import {
   assertDeployment,
   migrationFromSource,
   planMigrations,
+  releaseHealthPaths,
 } from "../release/core.ts";
 import type { Deployment, Migration } from "../release/core.ts";
 
@@ -26,6 +27,15 @@ const applied = [{ created_at: "100", hash: "a" }];
 const policy = {
   "0001_expand": { sha256: "b", compatibility: "compatible" as const },
 };
+
+test("release checks only currently published health and document routes", () => {
+  assert.deepEqual(releaseHealthPaths, [
+    "/api/health",
+    "/api/health/ready",
+    "/rules",
+    "/privacy",
+  ]);
+});
 
 test("LF and CRLF checkouts produce the same committed migration hash", () => {
   assert.deepEqual(

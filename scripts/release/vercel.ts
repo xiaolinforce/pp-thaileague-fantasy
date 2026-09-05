@@ -1,6 +1,6 @@
 import { appendFile, readFile, writeFile } from "node:fs/promises";
 import { setTimeout as delay } from "node:timers/promises";
-import { assertDeployment, ReleaseError } from "./core.ts";
+import { assertDeployment, releaseHealthPaths, ReleaseError } from "./core.ts";
 import type { Deployment } from "./core.ts";
 
 const productionOrigin = "https://fantasy.ppfootball.net";
@@ -75,14 +75,7 @@ async function health(origin: string, protectedDeployment: boolean) {
         ),
       }
     : {};
-  for (const path of [
-    "/api/health",
-    "/api/health/ready",
-    "/rules",
-    "/en/rules",
-    "/privacy",
-    "/en/privacy",
-  ]) {
+  for (const path of releaseHealthPaths) {
     let passed = false;
     for (let attempt = 0; attempt < 4; attempt++) {
       try {

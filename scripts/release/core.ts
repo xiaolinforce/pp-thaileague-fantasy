@@ -2,6 +2,13 @@ import { createHash } from "node:crypto";
 
 export class ReleaseError extends Error {}
 
+export const releaseHealthPaths = [
+  "/api/health",
+  "/api/health/ready",
+  "/rules",
+  "/privacy",
+] as const;
+
 export type Migration = {
   tag: string;
   timestamp: number;
