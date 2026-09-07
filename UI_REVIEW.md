@@ -1102,3 +1102,24 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
   full-route design review. Team/Points geometry, market pagination and provisional
   score communication remain outside the selected work. Existing formatting
   warnings remain in DATA_SOURCES.md and the moved Points player-token.tsx.
+
+### 2026-09-07 — Per-team opening Gameweek transfers
+
+- **Route and task:** `/team`; show unlimited transfers throughout each team's
+  first playing Gameweek, including a team that joins after Gameweek 1 and
+  revisions after its first complete save.
+- **Rendered evidence:** the authenticated English development state at
+  Gameweek 2 had an earlier locked complete squad and continued to show the
+  normal numeric balance (`4`), confirming that the new condition does not
+  grant unlimited transfers to every team in the active Gameweek.
+- **Opening-state coverage:** the opening condition is derived from the absence
+  of an earlier locked complete squad. Deterministic rule coverage verifies no
+  previous squad, incomplete carried drafts, and a prior complete squad. The
+  read, save, validation, and lifecycle-lock paths use that same condition.
+- **Language and accessibility:** Thai source copy and the English dictionary
+  describe the team's first playing Gameweek. The infinity value retains a
+  written accessible label and does not rely on the symbol alone.
+- **Known exclusions:** a second account and database history were not created
+  solely for browser evidence. The rendered opening state therefore remains
+  covered by deterministic rules and source inspection rather than a fabricated
+  production-like participant record.

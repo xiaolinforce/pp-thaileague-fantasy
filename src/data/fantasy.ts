@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, inArray } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, lt } from "drizzle-orm";
 import { connection } from "next/server";
 
 import { db } from "@/db";
@@ -20,7 +20,11 @@ import {
   fixtures,
   players,
 } from "@/db/schema";
-import type { FantasyChip } from "@/lib/fantasy/rules";
+import {
+  isTeamOpeningGameweek,
+  THAI_LEAGUE_FANTASY_RULES,
+  type FantasyChip,
+} from "@/lib/fantasy/rules";
 import { hasGameweekDeadlinePassed } from "@/lib/fantasy/points-gameweek";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { logServerTiming } from "@/lib/server/performance";
@@ -45,6 +49,7 @@ export type FantasyState = {
     id: string;
     name: string;
     freeTransfers: number;
+    openingGameweek: boolean;
   };
   gameweek: {
     id: string;
@@ -76,7 +81,7 @@ export async function getFantasyState(): Promise<FantasyState> {
   const selection = profile.selection;
   const current = { team: profile.team };
 
-  const [members, revisions] = selection
+  const [members, revisions, previousLockedSquads] = selection
     ? await Promise.all([
         db
           .select()
@@ -87,8 +92,32 @@ export async function getFantasyState(): Promise<FantasyState> {
           .from(fantasyTransferRevisions)
           .where(eq(fantasyTransferRevisions.selectionId, selection.id))
           .orderBy(asc(fantasyTransferRevisions.revision)),
+        db
+          .select({
+            squadSize: count(fantasyTeamSelectionPlayers.fantasyPlayerId),
+          })
+          .from(fantasyTeamSelections)
+          .innerJoin(
+            fantasyGameweeks,
+            eq(fantasyTeamSelections.fantasyGameweekId, fantasyGameweeks.id),
+          )
+          .innerJoin(
+            fantasyTeamSelectionPlayers,
+            eq(
+              fantasyTeamSelectionPlayers.selectionId,
+              fantasyTeamSelections.id,
+            ),
+          )
+          .where(
+            and(
+              eq(fantasyTeamSelections.fantasyTeamId, current.team.id),
+              eq(fantasyTeamSelections.status, "locked"),
+              lt(fantasyGameweeks.number, gameweek.number),
+            ),
+          )
+          .groupBy(fantasyTeamSelections.id),
       ])
-    : [[], []];
+    : [[], [], []];
   const baselineRevision = revisions[0]?.revision ?? 0;
   const baselineSquadIds = Array.isArray(revisions[0]?.squad)
     ? revisions[0].squad.filter(
@@ -125,6 +154,10 @@ export async function getFantasyState(): Promise<FantasyState> {
       id: current.team.id,
       name: current.team.name,
       freeTransfers: current.team.freeTransfers,
+      openingGameweek: isTeamOpeningGameweek(
+        previousLockedSquads.map((item) => item.squadSize),
+        THAI_LEAGUE_FANTASY_RULES,
+      ),
     },
     gameweek: {
       id: gameweek.id,

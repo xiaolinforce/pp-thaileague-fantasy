@@ -7,6 +7,7 @@ import {
   getNetTransfers,
   getTransferUsage,
   getValidLineupSwapTargetIds,
+  isTeamOpeningGameweek,
   settleTransfers,
   swapLineupAssignments,
   THAI_LEAGUE_FANTASY_RULES,
@@ -282,6 +283,12 @@ test("does not count the first completed squad as transfers", () => {
   );
 });
 
+test("keeps transfers unlimited until a team has a prior locked complete squad", () => {
+  assert.equal(isTeamOpeningGameweek([]), true);
+  assert.equal(isTeamOpeningGameweek([0, 7]), true);
+  assert.equal(isTeamOpeningGameweek([0, 15]), false);
+});
+
 test("allows up to three chargeable transfers and rejects the fourth", () => {
   assert.deepEqual(
     validateTransferLimit({
@@ -328,7 +335,7 @@ test("allows up to three chargeable transfers and rejects the fourth", () => {
   );
 });
 
-test("opening Gameweek and wildcard transfers bypass the paid-transfer cap", () => {
+test("team-opening Gameweek and wildcard transfers bypass the paid-transfer cap", () => {
   for (const exception of [
     { wildcard: false, openingGameweek: true },
     { wildcard: true, openingGameweek: false },
@@ -344,7 +351,7 @@ test("opening Gameweek and wildcard transfers bypass the paid-transfer cap", () 
   }
 });
 
-test("opening Gameweek settlement keeps unlimited transfers free", () => {
+test("team-opening Gameweek settlement keeps unlimited transfers free", () => {
   assert.deepEqual(
     settleTransfers({
       freeTransfersBefore: 2,

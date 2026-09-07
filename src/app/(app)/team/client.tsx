@@ -868,11 +868,11 @@ export default function TeamClient({
             freeTransfersBefore: fantasy.team.freeTransfers,
             transferCount,
             wildcard: activeChip === "wildcard",
-            openingGameweek: fantasy.gameweek.number === 1,
+            openingGameweek: fantasy.team.openingGameweek,
           }),
     [
       activeChip,
-      fantasy.gameweek.number,
+      fantasy.team.openingGameweek,
       fantasy.team.freeTransfers,
       hasVacancies,
       transferCount,

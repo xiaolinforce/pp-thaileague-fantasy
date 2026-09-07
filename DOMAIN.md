@@ -198,8 +198,11 @@ team mutation remains closed.
 
 - Each deadline adds two free transfers, capped at four.
 - Net transfers compare player IDs in the previous and next squads.
-- A team's first complete saved squad is free, including when an incomplete
-  draft was carried forward from an earlier Gameweek.
+- A team's opening Gameweek is its first Gameweek without an earlier locked,
+  complete squad. Transfers remain unlimited until that Gameweek's deadline,
+  including revisions after the first complete squad is saved. If an incomplete
+  draft is carried forward, the opening allowance continues until the first
+  Gameweek in which the team locks a complete squad.
 - Transfers beyond the available free balance cost four points each.
 - A manager may confirm at most three chargeable transfers in one Gameweek,
   limiting the transfer deduction to 12 points. A draft may temporarily exceed
@@ -207,9 +210,10 @@ team mutation remains closed.
 - Pre-deadline revisions can be confirmed or cancelled.
 - Wildcard makes that Gameweek's transfers free and preserves the accumulated
   free-transfer balance before adding the normal weekly allowance.
-- Gameweek 1 and Wildcard transfers are free and exempt from the
-  chargeable-transfer limit. Opening-Gameweek settlement uses the same
-  unlimited-transfer rule as the displayed draft allowance and validation.
+- Every team's opening-Gameweek transfers and Wildcard transfers are free and
+  exempt from the chargeable-transfer limit. Opening-Gameweek settlement uses
+  the same unlimited-transfer rule as the displayed draft allowance and
+  validation, including for teams joining after Gameweek 1.
 - League tie-breaking counts locked net transfers, excluding Wildcard weeks.
 
 ## Chips

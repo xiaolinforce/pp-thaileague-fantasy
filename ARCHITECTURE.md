@@ -220,7 +220,9 @@ manager and team, plus an empty selection while a Gameweek can still be
 provisioned. After the last Gameweek closes, a new identity joins the season and
 Overall without receiving a retroactive selection. Selection-player snapshots
 and the opening transfer revision are created together only after the manager
-first saves a valid 15-player squad.
+first saves a valid 15-player squad. A team's opening Gameweek is derived from
+the absence of an earlier locked complete squad, so a later entrant retains
+unlimited transfers through the deadline even after saving its first squad.
 
 Email OTP values are hashed in the verification table, expire after five
 minutes, allow three attempts, and rotate on resend. Turnstile protects every

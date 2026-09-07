@@ -17,6 +17,7 @@ import {
   formatTransferLimitViolation,
   getCountedTransfers,
   isBeforeDeadline,
+  isTeamOpeningGameweek,
   settleTransfers,
   THAI_LEAGUE_FANTASY_RULES,
   validateChipUse,
@@ -163,6 +164,7 @@ export async function saveFantasySelectionInTransaction(
           eq(fantasyTeamSelectionPlayers.selectionId, previousSelection.id),
         )
     : [];
+  const openingGameweek = isTeamOpeningGameweek([previousMembers.length]);
   let transferBaselineIds = previousMembers.map(
     (member) => member.fantasyPlayerId,
   );
@@ -195,13 +197,13 @@ export async function saveFantasySelectionInTransaction(
     freeTransfersBefore: team.freeTransfers,
     transferCount,
     wildcard: input.activeChip === "wildcard",
-    openingGameweek: gameweek.number === 1,
+    openingGameweek,
   });
   const transferViolations = validateTransferLimit({
     freeTransfersBefore: team.freeTransfers,
     transferCount,
     wildcard: input.activeChip === "wildcard",
-    openingGameweek: gameweek.number === 1,
+    openingGameweek,
   });
   if (transferViolations.length > 0) {
     const messages = transferViolations.map(formatTransferLimitViolation);

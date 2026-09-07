@@ -174,7 +174,7 @@ export default function TransfersClient({
     fantasy.selection.baselineSquadIds,
     currentSquadIds,
   );
-  const hasUnlimitedOpeningTransfers = fantasy.gameweek.number === 1;
+  const hasUnlimitedOpeningTransfers = fantasy.team.openingGameweek;
   const hasActiveWildcard = activeChip === "wildcard";
   const transferUsage = getTransferUsage({
     freeTransfersBefore: fantasy.team.freeTransfers,
@@ -187,7 +187,7 @@ export default function TransfersClient({
   const isOverFreeTransferLimit = transferPoints > 0;
   const unlimitedTransfersLabel = hasActiveWildcard
     ? translate("Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้")
-    : translate("Gameweek 1 เปลี่ยนได้ไม่จำกัด");
+    : translate("Gameweek แรกที่เริ่มเล่น เปลี่ยนได้ไม่จำกัด");
   const vacancies = members.filter(
     (member) =>
       member.fantasyPlayerId === null && member.vacancyPosition !== null,

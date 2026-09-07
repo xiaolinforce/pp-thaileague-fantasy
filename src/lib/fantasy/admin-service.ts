@@ -1,5 +1,5 @@
 import "server-only";
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import {
   fantasyAdminAuditLog,
   fantasyGameweeks,
@@ -19,6 +19,7 @@ import {
 import { calculatePlayerPoints } from "./scoring";
 import { recalculateGameweek } from "./scoring-service";
 import {
+  isTeamOpeningGameweek,
   settleTransfers,
   THAI_LEAGUE_FANTASY_RULES,
   validateTransferLimit,
@@ -366,6 +367,37 @@ export async function lockFantasyGameweek(
         .for("update")
     : [];
   const teamsById = new Map(teams.map((team) => [team.id, team]));
+  const previousLockedSquads = selections.length
+    ? await db
+        .select({
+          fantasyTeamId: fantasyTeamSelections.fantasyTeamId,
+          squadSize: count(fantasyTeamSelectionPlayers.fantasyPlayerId),
+        })
+        .from(fantasyTeamSelections)
+        .innerJoin(
+          fantasyGameweeks,
+          eq(fantasyTeamSelections.fantasyGameweekId, fantasyGameweeks.id),
+        )
+        .innerJoin(
+          fantasyTeamSelectionPlayers,
+          eq(fantasyTeamSelectionPlayers.selectionId, fantasyTeamSelections.id),
+        )
+        .where(
+          and(
+            inArray(
+              fantasyTeamSelections.fantasyTeamId,
+              selections.map((selection) => selection.fantasyTeamId),
+            ),
+            eq(fantasyTeamSelections.status, "locked"),
+            lt(fantasyGameweeks.number, gameweek.number),
+          ),
+        )
+        .groupBy(fantasyTeamSelections.id, fantasyTeamSelections.fantasyTeamId)
+    : [];
+  const previousLockedSquadSizesByTeam = Map.groupBy(
+    previousLockedSquads,
+    (item) => item.fantasyTeamId,
+  );
   const settled = selections.map((selection) => {
     const team = teamsById.get(selection.fantasyTeamId);
     if (!team) throw new Error("Fantasy team was not found.");
@@ -378,7 +410,11 @@ export async function lockFantasyGameweek(
       freeTransfersBefore: selection.freeTransfersBefore,
       transferCount: selection.netTransferCount,
       wildcard: activeChip === "wildcard",
-      openingGameweek: gameweek.number === 1,
+      openingGameweek: isTeamOpeningGameweek(
+        (previousLockedSquadSizesByTeam.get(team.id) ?? []).map(
+          (item) => item.squadSize,
+        ),
+      ),
     };
     if (validateTransferLimit(transferInput).length)
       throw new Error("A team exceeds the chargeable transfer limit.");

@@ -144,7 +144,8 @@ proven behaviors unless a deliberate product decision replaces them:
   limits visible with a written over-limit state and an accessible explanation.
 - On Mobile, show the current goalkeeper, defender, midfielder, and forward
   quotas below the free-transfer and foreign-player quota cards.
-- Show unlimited Gameweek 1 transfers with an infinity symbol plus an
+- Show unlimited transfers throughout each team's first playing Gameweek,
+  including teams joining after Gameweek 1, with an infinity symbol plus an
   accessible written label.
 - Player detail opens in the shared dialog so selection context is not lost.
 

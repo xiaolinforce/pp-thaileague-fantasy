@@ -4,6 +4,24 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-07 — Opening transfers follow each team's first playing Gameweek
+
+**Decision:** Give every team unlimited transfers through the deadline of its
+first playing Gameweek, including teams joining after Gameweek 1 and revisions
+made after the first complete squad is saved. Continue the opening allowance
+across incomplete locked drafts until the team first locks a complete squad.
+
+**Context:** The interface and settlement logic previously equated an opening
+Gameweek with season Gameweek 1. A newly provisioned team entering in Gameweek 2
+therefore displayed two free transfers even though its first squad was exempt,
+and later revisions in that same Gameweek could be charged.
+
+**Consequences:** Read, save, validation, and lifecycle-lock paths derive the
+opening state from the absence of an earlier locked complete squad. They use the
+same unlimited-transfer flag without adding mutable team state or rewriting
+historical selections. Once a complete squad locks, the following Gameweek uses
+the normal banked free-transfer balance.
+
 ## 2026-09-04 — Report email availability and notify through Sentry
 
 **Decision:** Await explicit OTP delivery before returning success. Expose a

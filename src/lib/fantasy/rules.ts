@@ -404,6 +404,15 @@ export function getCountedTransfers(
   return getNetTransfers(previousSquadIds, nextSquadIds).count;
 }
 
+export function isTeamOpeningGameweek(
+  previousLockedSquadSizes: readonly number[],
+  rules: Pick<FantasyRules, "squadSize"> = THAI_LEAGUE_FANTASY_RULES,
+) {
+  return !previousLockedSquadSizes.some(
+    (squadSize) => squadSize === rules.squadSize,
+  );
+}
+
 export function getTransferUsage({
   freeTransfersBefore,
   transferCount,
