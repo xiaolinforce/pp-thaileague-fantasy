@@ -253,6 +253,13 @@ identities were added to the player master. The three fixture point totals are
 77, 64, and 65, or 206 player points. `DATA_SOURCES.md` records the source pages,
 events, save counts, and owner-reviewed scoring decisions.
 
+The roster reconciliation also made the three previously unmatched Rasisalai
+entries from fixture `37416` resolvable. A guarded follow-up added their three
+zero-point match rows and four audit entries: Chotika Mueanta and Paripan Wongsa
+were unused, while Piyawat Petra played 22 minutes and received one yellow card.
+An assertion confirmed that none belonged to a GW1 Fantasy selection, so the
+already finalized team scores and standings required no recalculation.
+
 The authenticated Gameweek action then recalculated every locked GW1 selection,
 applied automatic substitutions and captain fallback, rebuilt Overall standings,
 and finalized GW1 at `2026-09-07 09:55:12.65 UTC`. Production verification
@@ -260,7 +267,7 @@ confirmed:
 
 - GW1 is `final` with `score_complete=true`, an average of 34, and a high score
   of 59; GW2 remains `open`;
-- all eight fixtures are finished, with 360 player-stat rows for the Gameweek;
+- all eight fixtures are finished, with 363 player-stat rows for the Gameweek;
 - all 197 team scores are Final;
 - 158 automatic substitutions were applied across 94 teams, and one team used
   its vice-captain because the captain did not play;

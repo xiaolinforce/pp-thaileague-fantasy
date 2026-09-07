@@ -166,6 +166,14 @@ fingerprint is
 `c7ac83fafadd179a022e90816dd8d3c1a7f99cce83f59adf258e87c2a1861444`.
 See `PRODUCTION.md` for branch-level verification.
 
+The 2026-09-07 official roster reconciliation subsequently resolved all three
+identities. Production now also stores reviewed `37416` rows for Chotika
+Mueanta and Paripan Wongsa as unused substitutes, and for Piyawat Petra at 22
+minutes with one yellow card. Each row totals zero points. None of the three
+players appeared in a GW1 Fantasy selection, so this completeness backfill did
+not change team scores, substitutions, captaincy, or standings. The fingerprint
+above remains the historical fingerprint of the original 179-row batch.
+
 ## 2026-09-06 final three-match review and roster sync
 
 The owner authorized a production-only review for the final three GW1
