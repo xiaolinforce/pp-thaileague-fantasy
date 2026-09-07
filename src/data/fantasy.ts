@@ -384,6 +384,22 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
     }
     byPlayer.set(row.stats.fantasyPlayerId, current);
   }
+  if (selectedGameweek.scoreComplete) {
+    const displayedFantasyPlayerIds = new Set(
+      [...squadRows, ...highestScoringSquad].map(
+        (row) => row.member.fantasyPlayerId,
+      ),
+    );
+    for (const fantasyPlayerId of displayedFantasyPlayerIds) {
+      if (byPlayer.has(fantasyPlayerId)) continue;
+      byPlayer.set(fantasyPlayerId, {
+        fantasyPlayerId,
+        minutes: 0,
+        totalPoints: 0,
+        breakdown: { appearance: 0 },
+      });
+    }
+  }
   const members: FantasyPointsSquadMember[] = squadRows
     .map((row) => ({
       fantasyPlayerId: row.member.fantasyPlayerId,

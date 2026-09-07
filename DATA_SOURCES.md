@@ -174,6 +174,13 @@ players appeared in a GW1 Fantasy selection, so this completeness backfill did
 not change team scores, substitutions, captaincy, or standings. The fingerprint
 above remains the historical fingerprint of the original 179-row batch.
 
+A final production completeness pass found 20 players who appeared in at least
+one locked GW1 Fantasy selection but did not appear in the reviewed match stats
+for their club's finished fixture. They are stored as reviewed zero-minute,
+zero-point results. This records the final “did not play” outcome without adding
+an event or changing any team score, automatic substitution, captain fallback,
+or standing.
+
 ## 2026-09-06 final three-match review and roster sync
 
 The owner authorized a production-only review for the final three GW1

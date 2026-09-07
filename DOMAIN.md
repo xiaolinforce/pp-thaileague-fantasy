@@ -187,6 +187,10 @@ Finalization requires `provisional`; score recalculation and the final status
 commit together so a failed calculation cannot leave a partially transitioned
 Gameweek.
 
+On the Points view, a squad member without a match-stat row remains pending
+until scoring is complete. Once the Gameweek is final, that absence is presented
+as a zero-minute, zero-point result so every selected player has a final score.
+
 When the last Gameweek has no `open` or `planned` successor, authenticated
 routes use the latest Gameweek as a read-only display context. Existing teams
 retain access to their final squad, points, fixtures, and standings. A manager

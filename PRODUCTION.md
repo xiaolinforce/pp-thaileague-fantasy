@@ -260,6 +260,13 @@ were unused, while Piyawat Petra played 22 minutes and received one yellow card.
 An assertion confirmed that none belonged to a GW1 Fantasy selection, so the
 already finalized team scores and standings required no recalculation.
 
+A second completeness check covered every locked GW1 selection, rather than
+only the reviewed match sheets. It found 20 selected players without a match
+row, including Airfan Doloh and Jirawat Thongsaengphrao. Production records them
+as reviewed zero-minute, zero-point results. The write added one audit entry per
+player plus a batch entry; zero missing selected-player results remained, and
+team scores, automatic substitutions, captaincy, and standings were unchanged.
+
 The authenticated Gameweek action then recalculated every locked GW1 selection,
 applied automatic substitutions and captain fallback, rebuilt Overall standings,
 and finalized GW1 at `2026-09-07 09:55:12.65 UTC`. Production verification
@@ -267,7 +274,7 @@ confirmed:
 
 - GW1 is `final` with `score_complete=true`, an average of 34, and a high score
   of 59; GW2 remains `open`;
-- all eight fixtures are finished, with 363 player-stat rows for the Gameweek;
+- all eight fixtures are finished, with 383 player-stat rows for the Gameweek;
 - all 197 team scores are Final;
 - 158 automatic substitutions were applied across 94 teams, and one team used
   its vice-captain because the captain did not play;
