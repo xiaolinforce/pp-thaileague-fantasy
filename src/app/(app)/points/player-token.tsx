@@ -64,7 +64,7 @@ export function PointsPlayerToken({
       ? `+${captainPoints}`
       : `${captainPoints}`;
   const detailRows = Object.entries(result?.breakdown ?? {}).filter(
-    ([, value]) => value !== 0,
+    ([key, value]) => value !== 0 || (hasResult && key === "appearance"),
   );
   const token = (
     <>
@@ -183,13 +183,6 @@ export function PointsPlayerToken({
             </div>
           )}
         </div>
-        {hasResult && !hasPlayed && (
-          <p className="points-player-dialog-empty">
-            {language === "th"
-              ? "ไม่ได้ลงสนามใน Gameweek นี้"
-              : "Did not play in this Gameweek."}
-          </p>
-        )}
         {!hasResult && (
           <p className="points-player-dialog-empty">
             {language === "th"
