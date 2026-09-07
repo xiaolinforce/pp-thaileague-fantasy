@@ -240,6 +240,40 @@ development competition and Fantasy database verifiers passed, as did all 100
 Fantasy rule tests. GW1 remains provisional while the remaining three fixtures
 are unplayed, and GW2 remains open for team changes.
 
+## 2026-09-07 GW1 completion and finalization
+
+The owner authorized a production-only roster reconciliation and the final
+three GW1 match imports. The transaction ran through the authenticated Neon SQL
+Editor after asserting production branch `br-tiny-shape-azrvakql`, GW1's
+provisional state, and the absence of existing target stats. It committed 135
+reviewed match-stat rows and matching point breakdowns, 18 official registration
+changes, ten Level 4 assignments effective from GW2, eight guarded shirt-number
+changes, and 172 administrative audit entries. Eight previously absent official
+identities were added to the player master. The three fixture point totals are
+77, 64, and 65, or 206 player points. `DATA_SOURCES.md` records the source pages,
+events, save counts, and owner-reviewed scoring decisions.
+
+The authenticated Gameweek action then recalculated every locked GW1 selection,
+applied automatic substitutions and captain fallback, rebuilt Overall standings,
+and finalized GW1 at `2026-09-07 09:55:12.65 UTC`. Production verification
+confirmed:
+
+- GW1 is `final` with `score_complete=true`, an average of 34, and a high score
+  of 59; GW2 remains `open`;
+- all eight fixtures are finished, with 360 player-stat rows for the Gameweek;
+- all 197 team scores are Final;
+- 158 automatic substitutions were applied across 94 teams, and one team used
+  its vice-captain because the captain did not play;
+- the official active-registration count is 481, and all ten new Level 4 players
+  are available from GW2; and
+- the reviewed edge cases read back as Nuttee -1, Sanrawat -1, Bhumchanok +1,
+  and Atikhun -2. Goalkeeper save totals also matched the official feed.
+
+The development database was not changed. The database operation requires no
+schema migration. A separate source change makes the Points dialog show the
+zero-point appearance row together with card or other scoring rows for a player
+whose recorded minutes are zero; deployment follows the normal release flow.
+
 ## Release checklist
 
 The guarded Actions workflow is active. Use [RELEASE.md](RELEASE.md) for normal

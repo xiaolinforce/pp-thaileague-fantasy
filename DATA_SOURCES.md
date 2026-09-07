@@ -166,6 +166,49 @@ fingerprint is
 `c7ac83fafadd179a022e90816dd8d3c1a7f99cce83f59adf258e87c2a1861444`.
 See `PRODUCTION.md` for branch-level verification.
 
+## 2026-09-06 final three-match review and roster sync
+
+The owner authorized a production-only review for the final three GW1
+fixtures: [Sukhothai 1-3 Buriram (`37412`)](https://thaileague.co.th/fixtures/224/match/37412?selectedTab=match-stat&optaSeasonId=2026),
+[Lamphun 1-4 Uthai Thani (`37413`)](https://thaileague.co.th/fixtures/224/match/37413?selectedTab=match-stat&optaSeasonId=2026),
+and [Ayutthaya 2-1 Ratchaburi (`37414`)](https://thaileague.co.th/fixtures/224/match/37414?selectedTab=match-stat&optaSeasonId=2026).
+The official Thai League Opta feed supplied lineups, substitutions, goals,
+assists, cards, minutes, goals conceded while playing, and goalkeeper saves.
+The review added 135 player-stat and points records: 95 appearances and 40
+unused substitutes. Fixture point totals are `37412`=77, `37413`=64, and
+`37414`=65, for 206 player points.
+
+The recorded goal sequence is Bissoli penalty, Bissoli assisted by Robert Zulj,
+Bissoli assisted by Sasalak, and Nathan Palafoz assisted by Rhuan in `37412`;
+Nuttee Noiwilai own goal, Willian Lira assisted by Benjamin Davis, Benjamin
+Davis assisted by Trent Buhagiar, Rodrigo assisted by Surat Suriyachai, and an
+unassisted Willian Lira goal in `37413`; and Hyun-Soo Hwang assisted by Hirotaka
+Mita, followed by unassisted goals from Thanawat Suengchitthawon and Ewerton in
+`37414`. The feed records nine yellow cards and Atikhun Meethoum's straight red.
+No MOTM, bonus, or BPS points were added.
+
+No goalkeeper was substituted in these fixtures. The reviewed save counts are
+Kittipun Saensuk 6, Neil Etheridge 4, Nont Muangngam 2, Caíque 8, Warut
+Makemusik 5, and Kampon Phatomakkakul 5. Owner-reviewed edge cases are retained:
+Nuttee has 29 minutes and an own goal for -1 point; Sanrawat Dechmitr has zero
+minutes but a yellow card for -1; Bhumchanok Kamkla has five minutes for one
+point; and Atikhun has five minutes and a red card for -2. A confirmed
+appearance still receives at least one Fantasy minute.
+
+The current official tournament roster was reconciled at the same time. The
+production branch now has 481 active registrations, matching the reviewed
+official count. Eighteen official registrations were activated or added, eight
+previously missing official identities were added to the player master, and
+eight shirt numbers were updated with exact old-value guards. Bhumchanok is now
+registered to Ayutthaya and retains Level 3. Seven existing unavailable Fantasy
+players retain Level 4 and become selectable. The following ten newly available
+Fantasy players receive Level 4 effective from GW2: Apison Wanchlam, Ashiravit
+Nutsuntia, Chanasorn Kaewyos, Erik Sviatchenko, Napat Sakunchan, Napat
+Suemanotham, Phattharapong Rawangpai, Phonphithak Rungrueang, Sawich Klaithin,
+and Supanat Mahawai. Published preseason ranking rows and historical selection
+snapshots were not rewritten. See `PRODUCTION.md` for finalization and
+verification results.
+
 ## Fixture schedule review (2026-09-04)
 
 Owner-approved batch `fixtures-acl-schedule-20260904` updated development
