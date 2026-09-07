@@ -17,6 +17,7 @@ import { checkEmailAvailabilityAction } from "@/app/auth-email-actions";
 import { useSetAppIdentity } from "@/components/fantasy/identity";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { authClient } from "@/lib/auth/client";
+import { authCompleteHref } from "@/lib/auth/return-to";
 
 declare global {
   interface Window {
@@ -90,12 +91,14 @@ export default function OnboardingClient({
   googleEnabled,
   turnstileSiteKey,
   upgradeMode = false,
+  returnTo = "/team",
 }: {
   emailEnabled: boolean;
   emailAvailable?: boolean;
   googleEnabled: boolean;
   turnstileSiteKey: string | null;
   upgradeMode?: boolean;
+  returnTo?: string;
 }) {
   const router = useRouter();
   const setIdentity = useSetAppIdentity();
@@ -152,7 +155,7 @@ export default function OnboardingClient({
         otp: otp.trim(),
       });
       if (result.error) throw result.error;
-      const completion = await completeAuthenticationAction();
+      const completion = await completeAuthenticationAction({ returnTo });
       setIdentity(completion.identity);
       router.replace(completion.destination);
     } catch (requestError) {
@@ -167,7 +170,7 @@ export default function OnboardingClient({
     try {
       const result = await authClient.signIn.anonymous();
       if (result.error) throw result.error;
-      const completion = await completeAuthenticationAction();
+      const completion = await completeAuthenticationAction({ returnTo });
       setIdentity(completion.identity);
       router.replace(completion.destination);
     } catch (requestError) {
@@ -182,7 +185,7 @@ export default function OnboardingClient({
     try {
       const result = await authClient.signIn.social({
         provider: "google",
-        callbackURL: "/auth/complete",
+        callbackURL: authCompleteHref(returnTo),
       });
       if (result?.error) throw result.error;
     } catch (requestError) {
@@ -388,7 +391,10 @@ export default function OnboardingClient({
     return (
       <Localized>
         <main id="main-content" className="upgrade-page">
-          <Link href="/profile" className="upgrade-back-link">
+          <Link
+            href={returnTo === "/team" ? "/profile" : returnTo}
+            className="upgrade-back-link"
+          >
             <ArrowLeft aria-hidden="true" /> ย้อนกลับ
           </Link>
 

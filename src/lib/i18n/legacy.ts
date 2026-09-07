@@ -560,6 +560,8 @@ const translations: Record<string, string> = {
   ยังไม่มีลีกส่วนตัว: "No private leagues yet",
   ต้องสมัครสมาชิกเพื่อเข้าร่วมลีกเล่นกับเพื่อน:
     "Sign up to join a league and play with friends",
+  "รหัสเชิญพร้อมแล้ว สมัครสมาชิกเพื่อดูรายละเอียดและยืนยันเข้าร่วมลีกนี้":
+    "Your invite is ready. Sign up to review the league and confirm your membership",
   กรอกรหัสเชิญ: "Enter invite code",
   "คะแนน Gameweek นี้ยังเป็นคะแนนชั่วคราว และอาจเปลี่ยนหลังตรวจแมตช์ตกค้าง":
     "This Gameweek is provisional and may change after postponed matches are reviewed",

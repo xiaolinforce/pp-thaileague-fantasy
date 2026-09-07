@@ -70,25 +70,28 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 
 ## Route model
 
-| Route            | Rendering and data                                                                                 |
-| ---------------- | -------------------------------------------------------------------------------------------------- |
-| `/`              | Dynamic Email OTP, Google, and Guest onboarding; authenticated users redirect to the game.         |
-| `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google.                                           |
-| `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.                 |
-| `/points`        | Server-renders the selected Gameweek score and its breakdown.                                      |
-| `/leagues`       | Server-loads the current team's Overall and Private League summaries.                              |
-| `/leagues/[id]`  | Authorizes membership, then renders paginated standings and role-appropriate controls.             |
-| `/fixtures`      | Server-loads a fixture-only read model, then delegates interactive browsing to a Client Component. |
-| `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                             |
-| `/settings`      | Authenticated language preference; member value persists on the manager row.                       |
-| `/rules`         | Public long-form rules built from shared executable rule and scoring constants.                    |
-| `/help`          | Public support destinations and legal links; no account data is required.                          |
-| `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                      |
+| Route            | Rendering and data                                                                                  |
+| ---------------- | --------------------------------------------------------------------------------------------------- |
+| `/`              | Dynamic Email OTP, Google, and Guest onboarding; validated internal return targets survive sign-in. |
+| `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google, preserving a validated return target.      |
+| `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.                  |
+| `/points`        | Server-renders the selected Gameweek score and its breakdown.                                       |
+| `/leagues`       | Server-loads summaries, opens Overall standings, and links each Private League to its detail route. |
+| `/leagues/[id]`  | Authorizes membership, then renders paginated standings, invite details, and role controls.         |
+| `/fixtures`      | Server-loads a fixture-only read model, then delegates interactive browsing to a Client Component.  |
+| `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                              |
+| `/settings`      | Authenticated language preference; member value persists on the manager row.                        |
+| `/rules`         | Public long-form rules built from shared executable rule and scoring constants.                     |
+| `/help`          | Public support destinations and legal links; no account data is required.                           |
+| `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                       |
 
 The `(app)` root layout resolves identity, language and navigation for game and
 document routes, and provides Mitr, shared tooltips and toast feedback. Guest and
 Email OTP sign-in complete account provisioning through a Server Action before
 client navigation so the application shell receives the new identity immediately.
+Invite links carry a validated app-local return target through Email OTP, Google,
+Guest creation, and Guest upgrade. External, malformed, authentication, and admin
+targets fall back to `/team` before either server or client navigation.
 Pages are dynamically rendered because the shared layout reads PostgreSQL-backed
 session and navigation state; their data modules remain server-only and call the
 current Next.js connection API before querying.

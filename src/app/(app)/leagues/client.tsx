@@ -109,19 +109,26 @@ function CreateLeagueDialog({
   onOpenChange: (open: boolean) => void;
   onLeagueCreated: (leagueId: string) => void;
 }) {
-  const router = useRouter();
   const { translate } = useLanguage();
   const [name, setName] = useState("");
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const errorRef = useRef<HTMLParagraphElement>(null);
 
+  const handleOpenChange = (next: boolean) => {
+    if (!next) {
+      setName("");
+      setError("");
+    }
+    onOpenChange(next);
+  };
+
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (pending) return;
     const validation = validatePrivateLeagueName(name);
     if (!validation.ok) {
-      setError(translate(validation.message));
+      setError(validation.message);
       window.requestAnimationFrame(() => errorRef.current?.focus());
       return;
     }
@@ -130,21 +137,15 @@ function CreateLeagueDialog({
     try {
       const result = await createPrivateLeagueAction({ name });
       if (!result.ok) {
-        setError(translate(result.message));
+        setError(result.message);
         window.requestAnimationFrame(() => errorRef.current?.focus());
         return;
       }
       toast.success(translate(result.message));
-      onOpenChange(false);
-      setName("");
+      handleOpenChange(false);
       if (result.leagueId) onLeagueCreated(result.leagueId);
-      router.refresh();
     } catch {
-      setError(
-        translate(
-          "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
-        ),
-      );
+      setError("ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง");
       window.requestAnimationFrame(() => errorRef.current?.focus());
     } finally {
       setPending(false);
@@ -153,7 +154,7 @@ function CreateLeagueDialog({
 
   return (
     <Localized>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           className="product-dialog league-dialog"
           closeLabel={translate("ปิด")}
@@ -177,7 +178,7 @@ function CreateLeagueDialog({
               />
               <FormMessage
                 id="create-league-error"
-                message={error}
+                message={translate(error)}
                 error
                 messageRef={errorRef}
               />
@@ -186,7 +187,7 @@ function CreateLeagueDialog({
               <button
                 type="button"
                 className="secondary-button"
-                onClick={() => onOpenChange(false)}
+                onClick={() => handleOpenChange(false)}
                 disabled={pending}
               >
                 ยกเลิก
@@ -219,7 +220,6 @@ function JoinLeagueDialog({
   initialCode: string;
   onLeagueOpened: (leagueId: string) => void;
 }) {
-  const router = useRouter();
   const { translate } = useLanguage();
   const [code, setCode] = useState(
     normalizeLeagueInviteCode(initialCode).slice(0, 8),
@@ -230,6 +230,17 @@ function JoinLeagueDialog({
   const [pending, setPending] = useState(false);
   const [error, setError] = useState("");
   const errorRef = useRef<HTMLParagraphElement>(null);
+
+  const reset = () => {
+    setCode(normalizeLeagueInviteCode(initialCode).slice(0, 8));
+    setPreview(undefined);
+    setError("");
+  };
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next) reset();
+    onOpenChange(next);
+  };
 
   const inspect = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -242,17 +253,13 @@ function JoinLeagueDialog({
         inviteCode: code,
       });
       if (!result.ok) {
-        setError(translate(result.message));
+        setError(result.message);
         window.requestAnimationFrame(() => errorRef.current?.focus());
         return;
       }
       setPreview(result);
     } catch {
-      setError(
-        translate(
-          "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
-        ),
-      );
+      setError("ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง");
       window.requestAnimationFrame(() => errorRef.current?.focus());
     } finally {
       setPending(false);
@@ -268,20 +275,15 @@ function JoinLeagueDialog({
         inviteCode: preview.inviteCode,
       });
       if (!result.ok) {
-        setError(translate(result.message));
+        setError(result.message);
         window.requestAnimationFrame(() => errorRef.current?.focus());
         return;
       }
       toast.success(translate(result.message));
-      onOpenChange(false);
+      handleOpenChange(false);
       if (result.leagueId) onLeagueOpened(result.leagueId);
-      router.refresh();
     } catch {
-      setError(
-        translate(
-          "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
-        ),
-      );
+      setError("ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง");
       window.requestAnimationFrame(() => errorRef.current?.focus());
     } finally {
       setPending(false);
@@ -290,16 +292,7 @@ function JoinLeagueDialog({
 
   return (
     <Localized>
-      <Dialog
-        open={open}
-        onOpenChange={(next) => {
-          onOpenChange(next);
-          if (!next) {
-            setPreview(undefined);
-            setError("");
-          }
-        }}
-      >
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent
           className="product-dialog league-dialog"
           closeLabel={translate("ปิด")}
@@ -332,7 +325,7 @@ function JoinLeagueDialog({
               />
               <FormMessage
                 id="join-league-error"
-                message={error}
+                message={translate(error)}
                 error
                 messageRef={errorRef}
               />
@@ -359,7 +352,7 @@ function JoinLeagueDialog({
               <button
                 type="button"
                 className="secondary-button"
-                onClick={() => onOpenChange(false)}
+                onClick={() => handleOpenChange(false)}
                 disabled={pending}
               >
                 ยกเลิก
@@ -382,7 +375,7 @@ function JoinLeagueDialog({
                   type="button"
                   className="primary-button"
                   onClick={() => {
-                    onOpenChange(false);
+                    handleOpenChange(false);
                     onLeagueOpened(preview.league.id);
                   }}
                 >
@@ -457,7 +450,7 @@ function LeagueStandingsDialog({
             </div>
           ) : error ? (
             <div className="league-dialog-state error" role="alert">
-              <span>{error}</span>
+              <span>{translate(error)}</span>
               <button
                 type="button"
                 className="secondary-button"
@@ -559,7 +552,7 @@ export function LeagueOverview({
   overview: LeagueOverviewState;
   initialJoinCode: string;
 }) {
-  const { translate } = useLanguage();
+  const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
   const [joinOpen, setJoinOpen] = useState(
     Boolean(initialJoinCode) && !overview.isGuest,
@@ -567,12 +560,14 @@ export function LeagueOverview({
   const [selectedLeague, setSelectedLeague] = useState<SelectedLeague | null>(
     null,
   );
+  const leagueRequestId = useRef(0);
 
   const openLeague = async (
     leagueId: string,
     isOverallHint: boolean,
     page = 1,
   ) => {
+    const requestId = ++leagueRequestId.current;
     setSelectedLeague({
       id: leagueId,
       isOverallHint,
@@ -582,13 +577,14 @@ export function LeagueOverview({
     });
     try {
       const result = await getLeagueDetailAction({ leagueId, page });
+      if (requestId !== leagueRequestId.current) return;
       if (!result.ok) {
         setSelectedLeague({
           id: leagueId,
           isOverallHint,
           league: null,
           loading: false,
-          error: translate(result.message),
+          error: result.message,
         });
         return;
       }
@@ -600,15 +596,30 @@ export function LeagueOverview({
         error: "",
       });
     } catch {
+      if (requestId !== leagueRequestId.current) return;
       setSelectedLeague({
         id: leagueId,
         isOverallHint,
         league: null,
         loading: false,
-        error: translate("โหลดตารางอันดับไม่สำเร็จ กรุณาลองอีกครั้ง"),
+        error: "โหลดตารางอันดับไม่สำเร็จ กรุณาลองอีกครั้ง",
       });
     }
   };
+
+  const closeLeague = () => {
+    leagueRequestId.current += 1;
+    setSelectedLeague(null);
+  };
+
+  const openPrivateLeague = (leagueId: string) => {
+    router.push(`/leagues/${leagueId}`);
+  };
+
+  const inviteReturnTo = initialJoinCode
+    ? `/leagues?join=${encodeURIComponent(initialJoinCode)}`
+    : "/leagues";
+  const upgradeHref = `/upgrade?returnTo=${encodeURIComponent(inviteReturnTo)}`;
 
   return (
     <Localized>
@@ -683,10 +694,7 @@ export function LeagueOverview({
             <ul className="league-private-list">
               {overview.privateLeagues.map((league) => (
                 <li key={league.id}>
-                  <button
-                    type="button"
-                    onClick={() => void openLeague(league.id, false)}
-                  >
+                  <Link href={`/leagues/${league.id}`}>
                     <span className="league-list-rank">
                       #{league.rank ?? "—"}
                     </span>
@@ -702,10 +710,26 @@ export function LeagueOverview({
                       <strong>{league.totalPoints.toLocaleString()}</strong>
                     </span>
                     <ChevronRight aria-hidden="true" />
-                  </button>
+                  </Link>
                 </li>
               ))}
             </ul>
+          ) : overview.isGuest && initialJoinCode ? (
+            <div className="league-private-empty">
+              <span aria-hidden="true">
+                <KeyRound />
+              </span>
+              <div>
+                <h3>สมัครสมาชิกเพื่อใช้ Private League</h3>
+                <p>
+                  รหัสเชิญพร้อมแล้ว
+                  สมัครสมาชิกเพื่อดูรายละเอียดและยืนยันเข้าร่วมลีกนี้
+                </p>
+              </div>
+              <Link className="secondary-button" href={upgradeHref}>
+                สมัครสมาชิก
+              </Link>
+            </div>
           ) : (
             <p className="league-private-empty-copy">
               {overview.isGuest
@@ -720,13 +744,13 @@ export function LeagueOverview({
             <CreateLeagueDialog
               open={createOpen}
               onOpenChange={setCreateOpen}
-              onLeagueCreated={(leagueId) => void openLeague(leagueId, false)}
+              onLeagueCreated={openPrivateLeague}
             />
             <JoinLeagueDialog
               open={joinOpen}
               onOpenChange={setJoinOpen}
               initialCode={initialJoinCode}
-              onLeagueOpened={(leagueId) => void openLeague(leagueId, false)}
+              onLeagueOpened={openPrivateLeague}
             />
           </>
         ) : null}
@@ -736,7 +760,7 @@ export function LeagueOverview({
           league={selectedLeague?.league ?? null}
           loading={selectedLeague?.loading ?? false}
           error={selectedLeague?.error ?? ""}
-          onOpenChange={(open) => !open && setSelectedLeague(null)}
+          onOpenChange={(open) => !open && closeLeague()}
           onPageChange={(page) => {
             if (selectedLeague) {
               void openLeague(
@@ -812,9 +836,8 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
   const errorRef = useRef<HTMLParagraphElement>(null);
 
   const reportFailure = (message: string) => {
-    const localized = translate(message);
-    setFormError(localized);
-    toast.error(localized);
+    setFormError(message);
+    toast.error(translate(message));
     window.requestAnimationFrame(() => errorRef.current?.focus());
   };
 
@@ -1239,7 +1262,11 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                 </button>
               </section>
             )}
-            <FormMessage message={formError} error messageRef={errorRef} />
+            <FormMessage
+              message={translate(formError)}
+              error
+              messageRef={errorRef}
+            />
           </aside>
         </div>
 

@@ -2,8 +2,11 @@
 
 import { requireFantasyProfile } from "@/lib/auth/context";
 import { createAppIdentity } from "@/lib/auth/types";
+import { normalizeAuthReturnTo } from "@/lib/auth/return-to";
 
-export async function completeAuthenticationAction() {
+export async function completeAuthenticationAction(input?: {
+  returnTo?: string;
+}) {
   const profile = await requireFantasyProfile();
   const role = String(
     (
@@ -21,7 +24,7 @@ export async function completeAuthenticationAction() {
   });
 
   return {
-    destination: "/team",
+    destination: normalizeAuthReturnTo(input?.returnTo),
     identity,
   };
 }

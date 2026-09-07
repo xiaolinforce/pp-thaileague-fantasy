@@ -1,5 +1,8 @@
+import { redirect } from "next/navigation";
+
 import { AppShell } from "@/components/fantasy/app-shell";
 import { getLeagueOverview } from "@/data/leagues";
+import { getCurrentFantasyIdentity } from "@/lib/auth/context";
 import { LeagueOverview } from "./client";
 
 export default async function LeaguesPage({
@@ -7,12 +10,19 @@ export default async function LeaguesPage({
 }: {
   searchParams: Promise<{ join?: string | string[] }>;
 }) {
-  const [overview, query] = await Promise.all([
-    getLeagueOverview(),
+  const [identity, query] = await Promise.all([
+    getCurrentFantasyIdentity(),
     searchParams,
   ]);
   const initialJoinCode =
     typeof query.join === "string" ? query.join.slice(0, 8) : "";
+  if (!identity) {
+    const returnTo = initialJoinCode
+      ? `/leagues?join=${encodeURIComponent(initialJoinCode)}`
+      : "/leagues";
+    redirect(`/?returnTo=${encodeURIComponent(returnTo)}`);
+  }
+  const overview = await getLeagueOverview();
 
   return (
     <AppShell>

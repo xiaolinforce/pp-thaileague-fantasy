@@ -312,6 +312,11 @@ other members, or delete the League, but cannot leave or remove themselves.
 Deletion removes only the League and memberships; teams, selections, scores,
 and historical Fantasy results remain unchanged.
 
+Creating or joining a Private League opens its member-only detail page. Owners
+see the active invite code and management controls there; non-owners see their
+membership controls. An invite URL returns a signed-in or newly upgraded member
+to the same invite preview so they can confirm membership after authentication.
+
 Invite codes contain exactly eight uppercase characters from
 `ABCDEFGHJKMNPQRSTUVWXYZ23456789`, excluding `I`, `L`, `O`, `0`, and `1`.
 Input is case-insensitive and display is uppercase. League names may duplicate,
