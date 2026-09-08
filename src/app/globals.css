@@ -3696,10 +3696,12 @@ textarea:focus-visible {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  pointer-events: none;
 }
 
 .squad-pitch-action {
   justify-content: center;
+  pointer-events: auto;
 }
 
 .squad-pitch-secondary-actions {
