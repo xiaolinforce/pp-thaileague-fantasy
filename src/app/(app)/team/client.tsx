@@ -1467,50 +1467,54 @@ export default function TeamClient({
                 <span>{transferWarningMessage}</span>
               </div>
             ) : null}
-            {canRevertTeam && (
-              <div className="squad-revert-action-row">
-                <button
-                  type="button"
-                  className="secondary-button danger-button squad-revert-button"
-                  disabled={isPending || isAutoFilling || isReverting}
-                  onClick={() => setRevertDialogOpen(true)}
-                >
-                  <RotateCcw size={16} aria-hidden="true" />
-                  {translate(
-                    fantasy.team.openingGameweek
-                      ? "ล้างทีม"
-                      : "คืนทีมต้นเกมวีค",
-                  )}
-                </button>
-              </div>
-            )}
             <div className="squad-pitch">
               <div className="squad-pitch-actions">
                 {saveButton}
-                {vacancies.length > 0 && (
-                  <button
-                    type="button"
-                    className="secondary-button compact-auto-fill-button squad-pitch-action squad-auto-fill-button"
-                    disabled={!isEditable || isAutoFilling || isReverting}
-                    onClick={autoFillVacancies}
-                    aria-busy={isAutoFilling}
-                    title={
-                      !isEditable ? translate("ปิดรับการจัดทีมแล้ว") : undefined
-                    }
-                  >
-                    {isAutoFilling ? (
-                      <LoaderCircle
-                        className="spin"
-                        size={15}
-                        aria-hidden="true"
-                      />
-                    ) : (
-                      <WandSparkles size={15} aria-hidden="true" />
+                {(vacancies.length > 0 || canRevertTeam) && (
+                  <div className="squad-pitch-secondary-actions">
+                    {vacancies.length > 0 && (
+                      <button
+                        type="button"
+                        className="secondary-button compact-auto-fill-button squad-pitch-action squad-auto-fill-button"
+                        disabled={!isEditable || isAutoFilling || isReverting}
+                        onClick={autoFillVacancies}
+                        aria-busy={isAutoFilling}
+                        title={
+                          !isEditable
+                            ? translate("ปิดรับการจัดทีมแล้ว")
+                            : undefined
+                        }
+                      >
+                        {isAutoFilling ? (
+                          <LoaderCircle
+                            className="spin"
+                            size={15}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <WandSparkles size={15} aria-hidden="true" />
+                        )}
+                        {isAutoFilling
+                          ? translate("กำลังเติม…")
+                          : translate("จัดตัวอัตโนมัติ")}
+                      </button>
                     )}
-                    {isAutoFilling
-                      ? translate("กำลังเติม…")
-                      : translate("จัดตัวอัตโนมัติ")}
-                  </button>
+                    {canRevertTeam && (
+                      <button
+                        type="button"
+                        className="secondary-button compact-auto-fill-button danger-button squad-pitch-action squad-revert-button"
+                        disabled={isPending || isAutoFilling || isReverting}
+                        onClick={() => setRevertDialogOpen(true)}
+                      >
+                        <RotateCcw size={15} aria-hidden="true" />
+                        {translate(
+                          fantasy.team.openingGameweek
+                            ? "ล้างทีม"
+                            : "คืนทีมต้นเกมวีค",
+                        )}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               <div className="field-lines">
