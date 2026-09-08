@@ -270,11 +270,6 @@
   gap: 16px;
   margin: 8px 0 18px;
 }
-.optimalWeekHeading > div {
-  display: grid;
-  gap: 3px;
-}
-.optimalWeekHeading span,
 .optimalProvenance {
   color: var(--muted);
   font-size: 13px;

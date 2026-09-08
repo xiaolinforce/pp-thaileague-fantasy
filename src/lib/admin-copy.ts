@@ -171,7 +171,6 @@ export const adminTranslations: Record<string, string> = {
   ทีมคะแนนสูงสุดที่เป็นไปได้: "Best possible scoring team",
   "ดูการจัดทีมที่ถูกกติกาและทำคะแนนได้สูงสุดจากผลจริงของแต่ละ Gameweek":
     "See the highest-scoring legal lineup from each Gameweek's actual results",
-  ผลการคำนวณ: "Calculation result",
   "จะแสดงทีมที่ดีที่สุดหลัง Gameweek นี้ปิดและเริ่มคำนวณคะแนนแล้ว":
     "The best team appears after this Gameweek closes and scoring begins.",
   "ไม่พบ snapshot รายชื่อนักเตะของ Gameweek นี้ จึงยังคำนวณทีมย้อนหลังไม่ได้":

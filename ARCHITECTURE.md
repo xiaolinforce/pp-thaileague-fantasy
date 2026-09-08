@@ -166,6 +166,12 @@ values only to form quality bands before otherwise tied random choices, then
 returns a completed local draft. It does not persist a selection or consume
 transfers; the normal save action remains the only confirmation boundary.
 
+The admin optimal-team read model combines the immutable player-pool snapshot
+captured at Gameweek lock with that Gameweek's current derived player points.
+It runs the pure legal-lineup optimizer on the server and renders a hypothetical
+normal team without persisting a selection. Score corrections therefore appear
+on the next request while historical eligibility remains fixed.
+
 ## Write flow
 
 1. Team, transfer, profile, settings, League, or admin UI invokes its owning Server Action.
@@ -176,8 +182,9 @@ transfers; the normal save action remains the only confirmation boundary.
    per-Gameweek cap of three chargeable transfers before any selection write
    or start-of-Gameweek restore.
 4. Drizzle writes selections, revisions, League memberships, stats,
-   classifications, or Gameweek state. League and administrative operations
-   append application-level audit rows.
+   classifications, or Gameweek state. Gameweek locking first captures the
+   eligible player pool. League and administrative operations append
+   application-level audit rows.
 5. Affected fantasy routes are revalidated.
 
 Ordinary reads and fixed query batches use the Neon HTTP client. Gameweek lock

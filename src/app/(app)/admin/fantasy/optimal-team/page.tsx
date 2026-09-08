@@ -35,10 +35,7 @@ export default async function OptimalTeamPage({
 
       {state.week ? (
         <div className={styles.optimalWeekHeading}>
-          <div>
-            <span>ผลการคำนวณ</span>
-            <strong>GW {state.week.number}</strong>
-          </div>
+          <strong>GW {state.week.number}</strong>
           <Status value={state.week.status} />
         </div>
       ) : null}
