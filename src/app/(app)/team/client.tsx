@@ -1505,13 +1505,18 @@ export default function TeamClient({
                         className="secondary-button compact-auto-fill-button danger-button squad-pitch-action squad-revert-button"
                         disabled={isPending || isAutoFilling || isReverting}
                         onClick={() => setRevertDialogOpen(true)}
-                      >
-                        <RotateCcw size={15} aria-hidden="true" />
-                        {translate(
+                        aria-label={translate(
                           fantasy.team.openingGameweek
                             ? "ล้างทีม"
                             : "คืนทีมต้นเกมวีค",
                         )}
+                        title={translate(
+                          fantasy.team.openingGameweek
+                            ? "ล้างทีม"
+                            : "คืนทีมต้นเกมวีค",
+                        )}
+                      >
+                        <RotateCcw size={15} aria-hidden="true" />
                       </button>
                     )}
                   </div>

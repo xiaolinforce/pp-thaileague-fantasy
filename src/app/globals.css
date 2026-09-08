@@ -3704,11 +3704,8 @@ textarea:focus-visible {
 
 .squad-pitch-secondary-actions {
   display: grid;
+  justify-items: end;
   gap: 8px;
-}
-
-.squad-pitch-secondary-actions > .squad-pitch-action {
-  width: 100%;
 }
 
 .squad-auto-fill-button {
