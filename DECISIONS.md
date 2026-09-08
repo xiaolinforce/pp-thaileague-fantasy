@@ -4,6 +4,25 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-08 — Transfer cancellation restores the Gameweek baseline
+
+**Decision:** Before the deadline, let a manager restore the complete
+start-of-Gameweek selection, including squad, lineup, bench order, captaincy,
+chip, transfer allowance, and pending deduction, while also discarding local
+unsaved edits. For a team's first playing Gameweek, persist an empty 15-slot
+draft because no earlier complete selection exists.
+
+**Context:** Reversing only the latest player swap would not cancel a sequence
+of saved transfer revisions or return the manager to the state they entered the
+Gameweek with. Restoring the first complete save in an opening Gameweek would
+also contradict the product's empty-team onboarding contract.
+
+**Consequences:** The Team workspace exposes a contextual destructive action
+with an explicit confirmation. The server locks and reloads the owned selection,
+checks its revision and deadline, marks superseded confirmed revisions as
+cancelled, and appends a cancellation revision. A successful opening-Gameweek
+restore remains empty after reload and requires a new complete save.
+
 ## 2026-09-07 — Opening transfers follow each team's first playing Gameweek
 
 **Decision:** Give every team unlimited transfers through the deadline of its

@@ -172,8 +172,9 @@ transfers; the normal save action remains the only confirmation boundary.
 2. The action resolves the account-owned team from the session; admin actions
    additionally reload and require the `admin` role.
 3. The server reloads current database snapshots and validates deadlines,
-   squad composition, lineup, chips, transfer settlement, and the per-Gameweek
-   cap of three chargeable transfers before any selection write.
+   revisions, squad composition, lineup, chips, transfer settlement, and the
+   per-Gameweek cap of three chargeable transfers before any selection write
+   or start-of-Gameweek restore.
 4. Drizzle writes selections, revisions, League memberships, stats,
    classifications, or Gameweek state. League and administrative operations
    append application-level audit rows.
@@ -384,14 +385,18 @@ the documented client-display localization boundary without adding route i18n.
 
 ## Transactional Fantasy persistence hardening (2026-09-05)
 
-Squad saves execute through `selection-service.ts`; admin corrections and lifecycle
+Squad saves and start-of-Gameweek restores execute through
+`selection-service.ts`; admin corrections and lifecycle
 operations execute through `admin-service.ts`. Actions retain session/role checks
 and cache invalidation. Every operation acquires the season row first: saves use
 a shared lock, and classification, scoring and lifecycle changes use an exclusive
 lock. Saves then lock their selection and team, validate current eligibility and
 the deadline, and compare the submitted selection ID and revision. Conflicts
 retain the client draft and offer an explicit reload; they never overwrite a newer
-revision. The obsolete, unused cancel Server Action has been removed.
+revision. A restore marks the superseded confirmed revisions as cancelled and
+appends its own cancelled revision so another open browser cannot reapply stale
+state. Normal Gameweeks restore the carried selection snapshot; a team's opening
+Gameweek persists an empty selection because it has no earlier complete baseline.
 
 Stats, override records, player points, team scores, Gameweek summaries and Overall
 standings commit together. Classification, effective tier, draft snapshots and audit

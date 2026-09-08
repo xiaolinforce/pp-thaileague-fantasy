@@ -257,6 +257,31 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-08 — Start-of-Gameweek transfer cancellation
+
+- **Route and task:** `/team`; expose the contextual restore action above the
+  pitch, confirm its full consequences, discard an unsaved draft, and restore
+  persisted selection state through the deadline-safe server flow.
+- **Status:** Team remains Reference.
+- **Data/auth/Gameweek state:** the local Guest rendered a complete editable
+  Gameweek 2 squad with no pending revision. Removing one goalkeeper locally
+  revealed the restore action; Undo restored the untouched draft afterward.
+  No saved selection or historical Fantasy data was changed for evidence.
+- **Language and viewport evidence:** English and Thai labels, descriptions,
+  and confirmation actions rendered at desktop 1280×720 and mobile 360×800.
+  The mobile dialog used stacked full-width actions, stayed within the viewport,
+  and had no document-level horizontal overflow.
+- **Accessibility evidence:** the restore control and both dialog actions had
+  explicit accessible names, dialog focus moved to the non-destructive action,
+  and no Next.js error overlay or browser console error appeared.
+- **Known exclusions:** the destructive confirmation was not submitted against
+  the available user's persisted team. Opening-Gameweek clearing, normal
+  baseline restoration, cancelled-revision filtering, and revision conflicts
+  are covered by deterministic tests and server-flow inspection.
+- **Verification:** `npm run test:rules`, `npm run types`, `npm run lint`, and
+  `npm run build` passed; the first sandboxed build attempt could not download
+  Google Fonts, and the permitted network-enabled retry passed.
+
 ### 2026-09-07 — Private League access and invite continuity
 
 - **Route and task:** `/leagues`, `/leagues/[id]`, `/`, `/upgrade`, and
