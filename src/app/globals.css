@@ -3693,7 +3693,7 @@ textarea:focus-visible {
   inset: 12px 12px auto;
   z-index: 4;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
 }
