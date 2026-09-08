@@ -135,12 +135,13 @@ proven behaviors unless a deliberate product decision replaces them:
 - Keep the save action on the pitch near validation. Disable it while pending,
   after the deadline, when no change exists, or while the draft is invalid, and
   make the reason understandable.
-- Show the destructive start-of-Gameweek restore action immediately above the
-  pitch only while an editable saved or local change can be reverted. Confirm
-  it with explicit squad, lineup, captaincy, chip, transfer-allowance, and
-  unsaved-draft consequences. In a team's opening Gameweek, label and explain
-  the action as clearing all 15 slots, persist the empty state immediately, and
-  require a new complete save before the deadline.
+- Show the destructive start-of-Gameweek restore action in the pitch's
+  secondary-action stack only while an editable saved or local change can be
+  reverted, placing it below Auto-fill when both actions are visible. Run it
+  immediately without confirmation, disable repeat activation, animate the
+  icon while pending, and report only failures. In a team's opening Gameweek,
+  label the action as clearing all 15 slots, persist the empty state
+  immediately, and require a new complete save before the deadline.
 - Auto-fill is secondary, fills vacancies only, preserves selected players,
   ignores visible market filters, leaves the result unsaved, and communicates
   pending and failure states.

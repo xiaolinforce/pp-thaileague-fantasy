@@ -17,11 +17,13 @@ of saved transfer revisions or return the manager to the state they entered the
 Gameweek with. Restoring the first complete save in an opening Gameweek would
 also contradict the product's empty-team onboarding contract.
 
-**Consequences:** The Team workspace exposes a contextual destructive action
-with an explicit confirmation. The server locks and reloads the owned selection,
-checks its revision and deadline, marks superseded confirmed revisions as
-cancelled, and appends a cancellation revision. A successful opening-Gameweek
-restore remains empty after reload and requires a new complete save.
+**Consequences:** The Team workspace exposes a contextual destructive icon
+action that runs immediately without confirmation, prevents repeat activation,
+animates while pending, and reports only failures. The server locks and reloads
+the owned selection, checks its revision and deadline, marks superseded
+confirmed revisions as cancelled, and appends a cancellation revision. A
+successful opening-Gameweek restore remains empty after reload and requires a
+new complete save.
 
 ## 2026-09-07 — Opening transfers follow each team's first playing Gameweek
 

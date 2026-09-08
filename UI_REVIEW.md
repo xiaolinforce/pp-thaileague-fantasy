@@ -257,6 +257,22 @@ Do not promote a route to Reviewed or Reference without stating the exclusions.
 
 ## Current documentation and implementation debt
 
+### 2026-09-09 — Immediate transfer cancellation feedback
+
+- **Route and task:** `/team`; replace the transfer-cancellation confirmation
+  with immediate execution, suppress successful completion toast, and animate
+  the icon-only control while the server action is pending.
+- **Status:** Team remains Reference.
+- **Language and viewport evidence:** existing Thai and English action and
+  pending labels were retained. This localized interaction follow-up was
+  verified by source and diff inspection without a fresh rendered pass.
+- **Accessibility evidence:** the control keeps explicit accessible names in
+  both languages, exposes `aria-busy` while pending, prevents repeat
+  activation, and treats both the restore and loading icons as decorative.
+- **Known exclusions:** the immediate destructive action and its pending state
+  were not submitted against a persisted team in a browser. Error feedback is
+  intentionally retained so a failed restore is not silent.
+
 ### 2026-09-08 — Start-of-Gameweek transfer cancellation
 
 - **Route and task:** `/team`; expose the contextual restore action above the

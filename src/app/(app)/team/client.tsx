@@ -36,16 +36,6 @@ import {
 } from "@/lib/competition-types";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -650,7 +640,6 @@ export default function TeamClient({
   const [isReverting, startRevertTransition] = useTransition();
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
-  const [revertDialogOpen, setRevertDialogOpen] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [workspaceView, setWorkspaceView] =
     useState<TeamWorkspaceView>("squad");
@@ -1087,14 +1076,20 @@ export default function TeamClient({
   };
 
   const revertTeam = () => {
-    if (!canRevertTeam || !fantasy.selection.id) return;
+    if (
+      !canRevertTeam ||
+      !fantasy.selection.id ||
+      isPending ||
+      isAutoFilling ||
+      isReverting
+    ) {
+      return;
+    }
     if (!fantasy.selection.hasPendingChanges) {
       applyRevertedTeam(
         fantasy.selection.members,
         fantasy.selection.activeChip,
       );
-      setRevertDialogOpen(false);
-      toast.success(translate("คืนทีมต้นเกมวีคแล้ว"));
       return;
     }
 
@@ -1107,8 +1102,6 @@ export default function TeamClient({
         if (result.ok) {
           selectionRevision.current = result.revision;
           applyRevertedTeam(result.members, result.activeChip);
-          setRevertDialogOpen(false);
-          toast.success(translate(result.message));
           router.refresh();
         } else {
           toast.error(translate(result.message), {
@@ -1504,19 +1497,36 @@ export default function TeamClient({
                         type="button"
                         className="secondary-button compact-auto-fill-button danger-button squad-pitch-action squad-revert-button"
                         disabled={isPending || isAutoFilling || isReverting}
-                        onClick={() => setRevertDialogOpen(true)}
+                        onClick={revertTeam}
+                        aria-busy={isReverting}
                         aria-label={translate(
-                          fantasy.team.openingGameweek
-                            ? "ล้างทีม"
-                            : "คืนทีมต้นเกมวีค",
+                          isReverting
+                            ? fantasy.team.openingGameweek
+                              ? "กำลังล้างทีม…"
+                              : "กำลังคืนทีม…"
+                            : fantasy.team.openingGameweek
+                              ? "ล้างทีม"
+                              : "คืนทีมต้นเกมวีค",
                         )}
                         title={translate(
-                          fantasy.team.openingGameweek
-                            ? "ล้างทีม"
-                            : "คืนทีมต้นเกมวีค",
+                          isReverting
+                            ? fantasy.team.openingGameweek
+                              ? "กำลังล้างทีม…"
+                              : "กำลังคืนทีม…"
+                            : fantasy.team.openingGameweek
+                              ? "ล้างทีม"
+                              : "คืนทีมต้นเกมวีค",
                         )}
                       >
-                        <RotateCcw size={15} aria-hidden="true" />
+                        {isReverting ? (
+                          <LoaderCircle
+                            className="spin"
+                            size={15}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <RotateCcw size={15} aria-hidden="true" />
+                        )}
                       </button>
                     )}
                   </div>
@@ -1656,58 +1666,6 @@ export default function TeamClient({
           />
         </div>
       </main>
-
-      <AlertDialog
-        open={revertDialogOpen}
-        onOpenChange={(open) => !isReverting && setRevertDialogOpen(open)}
-      >
-        <AlertDialogContent className="product-dialog team-revert-dialog">
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {translate(
-                fantasy.team.openingGameweek
-                  ? "ล้างทีมทั้งหมด?"
-                  : "ยกเลิกการซื้อขายทั้งหมด?",
-              )}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {fantasy.team.openingGameweek
-                ? translate(
-                    "นักเตะทั้ง 15 คน การจัดตัว กัปตัน รองกัปตัน และ Chip จะถูกล้างทันที รวมถึงการเปลี่ยนแปลงที่ยังไม่ได้บันทึก หลังจากนั้นต้องเลือกนักเตะให้ครบและบันทึกทีมใหม่ก่อน Deadline",
-                  )
-                : translate(
-                    "รายชื่อนักเตะ การจัดตัว กัปตัน รองกัปตัน และ Chip จะกลับเป็นสภาพตอนเริ่มเกมวีค รวมถึงการเปลี่ยนแปลงที่ยังไม่ได้บันทึก โควต้า Transfer และคะแนนที่เตรียมหักจะถูกคืน",
-                  )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isReverting}>
-              {translate("กลับไปจัดทีม")}
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={revertTeam}
-              disabled={isReverting}
-              aria-busy={isReverting}
-            >
-              {isReverting ? (
-                <LoaderCircle className="spin" aria-hidden="true" />
-              ) : (
-                <RotateCcw aria-hidden="true" />
-              )}
-              {translate(
-                isReverting
-                  ? fantasy.team.openingGameweek
-                    ? "กำลังล้างทีม…"
-                    : "กำลังคืนทีม…"
-                  : fantasy.team.openingGameweek
-                    ? "ล้างทีม"
-                    : "คืนทีมต้นเกมวีค",
-              )}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <Dialog
         open={selected !== null}
