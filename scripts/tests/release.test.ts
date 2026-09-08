@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   applyMigrationBatch,
@@ -42,6 +43,35 @@ test("LF and CRLF checkouts produce the same committed migration hash", () => {
     migrationFromSource("0001_test", 200, "select 1;\r\n"),
     migrationFromSource("0001_test", 200, "select 1;\n"),
   );
+});
+
+test("every guarded source migration has a current compatibility review", async () => {
+  const journal: {
+    entries: { tag: string; when: number }[];
+  } = JSON.parse(await readFile("drizzle/meta/_journal.json", "utf8"));
+  const policy: Record<
+    string,
+    { sha256: string; compatibility: string } | undefined
+  > = JSON.parse(
+    await readFile("scripts/release/migration-policy.json", "utf8"),
+  );
+  const firstGuardedMigration = journal.entries.findIndex(
+    ({ tag }) => tag === "0017_milky_jamie_braddock",
+  );
+
+  assert.notEqual(firstGuardedMigration, -1);
+  for (const entry of journal.entries.slice(firstGuardedMigration)) {
+    const migration = migrationFromSource(
+      entry.tag,
+      entry.when,
+      await readFile(`drizzle/${entry.tag}.sql`, "utf8"),
+    );
+    const review = policy[entry.tag];
+
+    assert.ok(review, `${entry.tag} is missing a compatibility review`);
+    assert.equal(review.sha256, migration.hash, `${entry.tag} review is stale`);
+    assert.match(review.compatibility, /^(compatible|coordinated)$/);
+  }
 });
 
 test("an up-to-date database is a no-op without reapplying old migrations", () => {
