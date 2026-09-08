@@ -32,6 +32,7 @@ import {
   isFantasySelectionRevisionInput,
   type FantasySelectionInput,
 } from "./selection-input";
+import { normalizeFantasyRevisionMembers } from "./revision-snapshot";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
 import { getTransferRevisionState } from "./transfer-revisions";
 
@@ -509,7 +510,10 @@ function restoreBaselineMembers(
     isThaiSnapshot: boolean;
   }
 > | null {
-  const members = (baseline?.lineup as { members?: unknown } | null)?.members;
+  const members = normalizeFantasyRevisionMembers(
+    (baseline?.lineup as { members?: unknown } | null)?.members,
+  );
+  if (!members) return null;
   const transport = {
     selectionId,
     expectedRevision: baseline?.revision ?? 0,
@@ -524,7 +528,7 @@ function restoreBaselineMembers(
     "midfielder",
     "forward",
   ]);
-  const snapshots = members as Array<Record<string, unknown>>;
+  const snapshots = members;
   const restored: Array<
     FantasySelectionInput["members"][number] & {
       selectionId: string;

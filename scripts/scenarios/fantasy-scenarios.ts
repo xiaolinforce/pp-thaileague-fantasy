@@ -1681,14 +1681,14 @@ async function applyGameweekScenario(
   }
   const revisionPayload = teamSquads.map(({ team, squad }) => {
     const members = squad.map((member) => ({
-      fantasy_player_id: member.fantasyPlayerId,
-      club_id: member.clubId,
-      position: member.position,
-      tier: member.tier,
-      is_thai: member.isThai,
-      lineup_role: member.lineupRole,
-      bench_order: member.benchOrder,
-      captain_role: member.captainRole,
+      fantasyPlayerId: member.fantasyPlayerId,
+      clubIdSnapshot: member.clubId,
+      positionSnapshot: member.position,
+      tierSnapshot: member.tier,
+      isThaiSnapshot: member.isThai,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder,
+      captainRole: member.captainRole,
     }));
     return {
       team_id: team.id,
