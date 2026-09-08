@@ -13,6 +13,7 @@ const actions: Record<string, string> = {
   correct_match_stats: "แก้ไขสถิติ",
   update_player_classification: "ปรับระดับและสถานะ",
   lock_gameweek: "ล็อก Gameweek",
+  backfill_gameweek_player_pool: "สร้าง snapshot รายชื่อนักเตะย้อนหลัง",
   finalize_gameweek: "ยืนยันคะแนน Final",
   create_bot_team: "สร้างทีม Bot",
 };

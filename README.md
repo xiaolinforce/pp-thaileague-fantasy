@@ -61,6 +61,7 @@ open.
 | `/admin/fantasy`              | Admin overview with season-team counts and pending operations.       |
 | `/admin/fantasy/participants` | Filtered, paginated team directory and read-only details at `/[id]`. |
 | `/admin/fantasy/gameweeks`    | Gameweek status, locking, and finalization.                          |
+| `/admin/fantasy/optimal-team` | Best possible legal team from each completed Gameweek's results.     |
 | `/admin/fantasy/matches`      | Fixture-scoped player statistics and corrections.                    |
 | `/admin/fantasy/players`      | Current player search, effective tiers and Thai status.              |
 | `/admin/fantasy/audit`        | Paginated administrative operation history.                          |

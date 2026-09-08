@@ -167,4 +167,29 @@ export const adminTranslations: Record<string, string> = {
   "Gameweek ถัดไป": "Next Gameweek",
   "ข้อมูลที่แก้ไขจะหายไป หากออกจากหน้านี้โดยไม่บันทึก":
     "Your changes will be lost if you leave this page without saving.",
+  ทีมที่ดีที่สุด: "Best possible team",
+  ทีมคะแนนสูงสุดที่เป็นไปได้: "Best possible scoring team",
+  "ดูการจัดทีมที่ถูกกติกาและทำคะแนนได้สูงสุดจากผลจริงของแต่ละ Gameweek":
+    "See the highest-scoring legal lineup from each Gameweek's actual results",
+  ผลการคำนวณ: "Calculation result",
+  "จะแสดงทีมที่ดีที่สุดหลัง Gameweek นี้ปิดและเริ่มคำนวณคะแนนแล้ว":
+    "The best team appears after this Gameweek closes and scoring begins.",
+  "ไม่พบ snapshot รายชื่อนักเตะของ Gameweek นี้ จึงยังคำนวณทีมย้อนหลังไม่ได้":
+    "No player-pool snapshot exists for this Gameweek, so a historical team cannot be calculated.",
+  "ยังไม่มีผลคะแนนนักเตะสำหรับ Gameweek นี้":
+    "No player scores are available for this Gameweek yet.",
+  "ไม่สามารถจัดทีมครบตามกติกาจากรายชื่อนักเตะของ Gameweek นี้":
+    "A complete legal team cannot be built from this Gameweek's player pool.",
+  "ไม่พบ Gameweek สำหรับคำนวณ": "No Gameweek is available to calculate.",
+  สรุปคะแนน: "Score summary",
+  คะแนนสูงสุดที่เป็นไปได้: "Best possible score",
+  คะแนนสูงสุดของทีมจริง: "Highest manager score",
+  ส่วนต่าง: "Difference",
+  "ทีมสมมติ · ไม่ใช้ Chip · ไม่คิดคะแนนหัก Transfer":
+    "Hypothetical team · No chip · No transfer deductions",
+  คำนวณใหม่จากคะแนนปัจจุบัน: "Recalculated from current scores",
+  รายชื่อนักเตะ: "Player pool",
+  คน: "players",
+  แหล่งข้อมูล: "Source",
+  "สร้าง snapshot รายชื่อนักเตะย้อนหลัง": "Backfill player-pool snapshot",
 };

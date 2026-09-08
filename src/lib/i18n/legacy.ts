@@ -6,8 +6,11 @@ const translations: Record<string, string> = {
     "Some players are no longer available. Please review your squad.",
   "ทีมถูกเปลี่ยนจากหน้าต่างอื่นแล้ว กรุณาโหลดทีมล่าสุดก่อนบันทึกอีกครั้ง":
     "Your team changed in another window. Load the latest team before saving again.",
+  "ทีมถูกเปลี่ยนจากหน้าต่างอื่นแล้ว กรุณาโหลดทีมล่าสุดก่อนลองอีกครั้ง":
+    "Your team changed in another window. Load the latest team before trying again.",
   "ข้อมูลทีมตั้งต้นไม่ถูกต้อง กรุณาติดต่อผู้ดูแล":
     "The opening squad data is invalid. Please contact support.",
+  ข้อมูลทีมที่ต้องการคืนไม่ถูกต้อง: "The team restore request is invalid.",
   โหลดทีมล่าสุด: "Load latest team",
   "ขณะนี้ไม่สามารถส่งรหัส OTP ทางอีเมลได้ กรุณาลองใหม่ภายหลัง":
     "Email codes are temporarily unavailable. Please try again later.",
@@ -242,6 +245,25 @@ const translations: Record<string, string> = {
     "This chip can be used twice per season",
   ยกเลิกการเปลี่ยนแปลงและคืนโควต้าแล้ว:
     "Changes cancelled and transfer allowance restored",
+  ล้างทีมและยกเลิกการเปลี่ยนแปลงแล้ว: "Squad cleared and changes cancelled",
+  "คืนทีมต้นเกมวีคและโควต้า Transfer แล้ว":
+    "Start-of-Gameweek squad and transfer allowance restored",
+  คืนทีมต้นเกมวีคแล้ว: "Start-of-Gameweek squad restored",
+  ล้างทีมแล้ว: "Squad cleared",
+  คืนทีมต้นเกมวีคไม่สำเร็จ: "Unable to restore the start-of-Gameweek squad",
+  "ยังไม่ได้คืนทีม กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง":
+    "Your squad was not restored. Check your connection and try again.",
+  คืนทีมต้นเกมวีค: "Restore opening squad",
+  ล้างทีม: "Clear squad",
+  "ล้างทีมทั้งหมด?": "Clear the entire squad?",
+  "ยกเลิกการซื้อขายทั้งหมด?": "Cancel all transfers?",
+  กลับไปจัดทีม: "Keep editing",
+  "กำลังล้างทีม…": "Clearing squad…",
+  "กำลังคืนทีม…": "Restoring squad…",
+  "นักเตะทั้ง 15 คน การจัดตัว กัปตัน รองกัปตัน และ Chip จะถูกล้างทันที รวมถึงการเปลี่ยนแปลงที่ยังไม่ได้บันทึก หลังจากนั้นต้องเลือกนักเตะให้ครบและบันทึกทีมใหม่ก่อน Deadline":
+    "All 15 players, the lineup, captain, vice-captain, and chip will be cleared immediately, including unsaved changes. You must then choose all 15 players and save the squad before the deadline.",
+  "รายชื่อนักเตะ การจัดตัว กัปตัน รองกัปตัน และ Chip จะกลับเป็นสภาพตอนเริ่มเกมวีค รวมถึงการเปลี่ยนแปลงที่ยังไม่ได้บันทึก โควต้า Transfer และคะแนนที่เตรียมหักจะถูกคืน":
+    "Players, lineup, captain, vice-captain, and chip will return to their state at the start of the Gameweek, including discarding unsaved changes. Your transfer allowance and pending point deductions will be restored.",
   ไม่พบทีมตั้งต้นสำหรับยกเลิกการเปลี่ยนแปลง:
     "No baseline squad is available to restore",
   "ข้อมูลทีมตั้งต้นไม่ครบ 15 คน":
@@ -334,6 +356,8 @@ const translations: Record<string, string> = {
   เปลี่ยนฟรีคงเหลือ: "Free transfers remaining",
   เปลี่ยนเกิน: "Transfers over limit",
   "-{points} คะแนน": "-{points} points",
+  "คุณใช้โควต้าเปลี่ยนฟรีเกินจึงทำให้คะแนนติดลบ":
+    "You have exceeded the free transfer quota, so your score is now negative",
   "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)":
     "You can make at most {count} transfers beyond the free allowance (-{points} points)",
   "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด 3 คน (-12 คะแนน)":

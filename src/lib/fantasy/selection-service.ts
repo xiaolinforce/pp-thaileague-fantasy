@@ -1,5 +1,5 @@
 import "server-only";
-import { and, asc, desc, eq, inArray, lt } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
 import { transactionDb } from "@/db/transaction";
 import {
   competitionEntries,
@@ -24,14 +24,30 @@ import {
   validateLineup,
   validateTransferLimit,
   type FantasyPosition,
+  type FantasyChip,
   type LineupPlayer,
 } from "./rules";
-import { isFantasySelectionInput } from "./selection-input";
+import {
+  isFantasySelectionInput,
+  isFantasySelectionRevisionInput,
+  type FantasySelectionInput,
+} from "./selection-input";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
+import { getTransferRevisionState } from "./transfer-revisions";
 
 export type FantasySelectionResult =
-  | { ok: true; message: string }
+  | { ok: true; message: string; revision: number }
   | { ok: false; message: string; violations?: string[]; conflict?: boolean };
+
+export type FantasySelectionRevertResult =
+  | {
+      ok: true;
+      message: string;
+      revision: number;
+      members: FantasySelectionInput["members"];
+      activeChip: FantasyChip | null;
+    }
+  | { ok: false; message: string; conflict?: boolean };
 
 export async function saveFantasySelection(
   owner: { seasonId: string; teamId: string; managerId: string },
@@ -139,31 +155,11 @@ export async function saveFantasySelectionInTransaction(
     };
   }
 
-  const previousSelectionRows = await db
-    .select({ selection: fantasyTeamSelections, gameweek: fantasyGameweeks })
-    .from(fantasyTeamSelections)
-    .innerJoin(
-      fantasyGameweeks,
-      eq(fantasyTeamSelections.fantasyGameweekId, fantasyGameweeks.id),
-    )
-    .where(
-      and(
-        eq(fantasyTeamSelections.fantasyTeamId, team.id),
-        eq(fantasyTeamSelections.status, "locked"),
-        lt(fantasyGameweeks.number, gameweek.number),
-      ),
-    )
-    .orderBy(desc(fantasyGameweeks.number))
-    .limit(1);
-  const previousSelection = previousSelectionRows[0]?.selection;
-  const previousMembers = previousSelection
-    ? await db
-        .select()
-        .from(fantasyTeamSelectionPlayers)
-        .where(
-          eq(fantasyTeamSelectionPlayers.selectionId, previousSelection.id),
-        )
-    : [];
+  const previousMembers = await getPreviousLockedSelectionMembers(
+    team.id,
+    gameweek.number,
+    db,
+  );
   const openingGameweek = isTeamOpeningGameweek([previousMembers.length]);
   let transferBaselineIds = previousMembers.map(
     (member) => member.fantasyPlayerId,
@@ -172,7 +168,12 @@ export async function saveFantasySelectionInTransaction(
     const openingRevisionRows = await db
       .select({ squad: fantasyTransferRevisions.squad })
       .from(fantasyTransferRevisions)
-      .where(eq(fantasyTransferRevisions.selectionId, selection.id))
+      .where(
+        and(
+          eq(fantasyTransferRevisions.selectionId, selection.id),
+          eq(fantasyTransferRevisions.status, "confirmed"),
+        ),
+      )
       .orderBy(asc(fantasyTransferRevisions.revision))
       .limit(1);
     const openingSquad = openingRevisionRows[0]?.squad;
@@ -305,11 +306,302 @@ export async function saveFantasySelectionInTransaction(
   });
   return {
     ok: true,
+    revision,
     message:
       transferCount === 0
         ? "บันทึกการจัดทีมแล้ว"
         : `ยืนยันทีมใหม่แล้ว ${transferCount} Transfer`,
   };
+}
+
+export async function revertFantasySelection(
+  owner: { seasonId: string; teamId: string; managerId: string },
+  input: unknown,
+): Promise<FantasySelectionRevertResult> {
+  if (!isFantasySelectionRevisionInput(input)) {
+    return { ok: false, message: "ข้อมูลทีมที่ต้องการคืนไม่ถูกต้อง" };
+  }
+  return transactionDb.transaction((db) =>
+    revertFantasySelectionInTransaction(owner, input, db),
+  );
+}
+
+export async function revertFantasySelectionInTransaction(
+  owner: { seasonId: string; teamId: string; managerId: string },
+  input: unknown,
+  db: FantasyTransaction,
+): Promise<FantasySelectionRevertResult> {
+  if (!isFantasySelectionRevisionInput(input)) {
+    return { ok: false, message: "ข้อมูลทีมที่ต้องการคืนไม่ถูกต้อง" };
+  }
+  const season = await lockFantasySeason(db, owner.seasonId, "share");
+  const [selection] = await db
+    .select()
+    .from(fantasyTeamSelections)
+    .where(
+      and(
+        eq(fantasyTeamSelections.id, input.selectionId),
+        eq(fantasyTeamSelections.fantasyTeamId, owner.teamId),
+      ),
+    )
+    .for("update");
+  if (!selection) return { ok: false, message: "ไม่พบทีมที่ต้องการแก้ไข" };
+
+  const gameweek = await db.query.fantasyGameweeks.findFirst({
+    where: and(
+      eq(fantasyGameweeks.id, selection.fantasyGameweekId),
+      eq(fantasyGameweeks.fantasySeasonId, season.id),
+    ),
+  });
+  if (
+    !gameweek ||
+    gameweek.status !== "open" ||
+    selection.status !== "draft" ||
+    !isBeforeDeadline(gameweek.deadlineAt)
+  ) {
+    return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
+  }
+
+  const [team] = await db
+    .select()
+    .from(fantasyTeams)
+    .where(
+      and(
+        eq(fantasyTeams.id, owner.teamId),
+        eq(fantasyTeams.managerId, owner.managerId),
+        eq(fantasyTeams.fantasySeasonId, season.id),
+      ),
+    )
+    .for("update");
+  if (!team) return { ok: false, message: "ไม่พบทีมที่ต้องการแก้ไข" };
+
+  const [previousMembers, revisions] = await Promise.all([
+    getPreviousLockedSelectionMembers(team.id, gameweek.number, db),
+    db
+      .select()
+      .from(fantasyTransferRevisions)
+      .where(eq(fantasyTransferRevisions.selectionId, selection.id))
+      .orderBy(asc(fantasyTransferRevisions.revision)),
+  ]);
+  const currentRevision = revisions.at(-1)?.revision ?? 0;
+  if (currentRevision !== input.expectedRevision) {
+    return {
+      ok: false,
+      conflict: true,
+      message:
+        "ทีมถูกเปลี่ยนจากหน้าต่างอื่นแล้ว กรุณาโหลดทีมล่าสุดก่อนลองอีกครั้ง",
+    };
+  }
+
+  const openingGameweek = isTeamOpeningGameweek([previousMembers.length]);
+  const revisionState = getTransferRevisionState(revisions, openingGameweek);
+  if (!revisionState.hasPendingChanges) {
+    return {
+      ok: false,
+      conflict: true,
+      message:
+        "ทีมถูกเปลี่ยนจากหน้าต่างอื่นแล้ว กรุณาโหลดทีมล่าสุดก่อนลองอีกครั้ง",
+    };
+  }
+
+  const baseline = revisionState.baselineRevision
+    ? (revisions.find(
+        (revision) => revision.revision === revisionState.baselineRevision,
+      ) ?? null)
+    : null;
+  const restored = openingGameweek
+    ? []
+    : restoreBaselineMembers(baseline, selection.id, season.id);
+  if (restored === null) {
+    return {
+      ok: false,
+      message: baseline
+        ? "ข้อมูลทีมตั้งต้นไม่ถูกต้อง กรุณาติดต่อผู้ดูแล"
+        : "ไม่พบทีมตั้งต้นสำหรับยกเลิกการเปลี่ยนแปลง",
+    };
+  }
+
+  const activeChip = openingGameweek ? null : (baseline?.activeChip ?? null);
+  const settlement = settleTransfers({
+    freeTransfersBefore: team.freeTransfers,
+    transferCount: 0,
+    wildcard: activeChip === "wildcard",
+    openingGameweek,
+  });
+  const revertedAt = new Date();
+  if (!isBeforeDeadline(gameweek.deadlineAt, revertedAt)) {
+    return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
+  }
+
+  await db
+    .update(fantasyTeamSelections)
+    .set({
+      activeChip,
+      freeTransfersBefore: team.freeTransfers,
+      freeTransfersAfter: settlement.freeTransfersAfter,
+      netTransferCount: 0,
+      transferPoints: 0,
+      confirmedAt: revertedAt,
+      updatedAt: revertedAt,
+    })
+    .where(eq(fantasyTeamSelections.id, selection.id));
+  await db
+    .delete(fantasyTeamSelectionPlayers)
+    .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
+  if (restored.length > 0) {
+    await db.insert(fantasyTeamSelectionPlayers).values(restored);
+  }
+
+  const confirmedRevisionFilter = openingGameweek
+    ? and(
+        eq(fantasyTransferRevisions.selectionId, selection.id),
+        eq(fantasyTransferRevisions.status, "confirmed"),
+      )
+    : and(
+        eq(fantasyTransferRevisions.selectionId, selection.id),
+        eq(fantasyTransferRevisions.status, "confirmed"),
+        gt(fantasyTransferRevisions.revision, revisionState.baselineRevision!),
+      );
+  await db
+    .update(fantasyTransferRevisions)
+    .set({ status: "cancelled", updatedAt: revertedAt })
+    .where(confirmedRevisionFilter);
+
+  const revision = currentRevision + 1;
+  await db.insert(fantasyTransferRevisions).values({
+    selectionId: selection.id,
+    revision,
+    status: "cancelled",
+    squad: restored.map((member) => member.fantasyPlayerId),
+    lineup: { members: restored },
+    activeChip,
+    netTransferCount: 0,
+    transferPoints: 0,
+  });
+
+  return {
+    ok: true,
+    message: openingGameweek
+      ? "ล้างทีมและยกเลิกการเปลี่ยนแปลงแล้ว"
+      : "คืนทีมต้นเกมวีคและโควต้า Transfer แล้ว",
+    revision,
+    members: restored.map((member) => ({
+      fantasyPlayerId: member.fantasyPlayerId,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder,
+      captainRole: member.captainRole,
+    })),
+    activeChip,
+  };
+}
+
+function restoreBaselineMembers(
+  baseline: typeof fantasyTransferRevisions.$inferSelect | null,
+  selectionId: string,
+  fantasySeasonId: string,
+): Array<
+  FantasySelectionInput["members"][number] & {
+    selectionId: string;
+    fantasySeasonId: string;
+    clubIdSnapshot: string;
+    positionSnapshot: FantasyPosition;
+    tierSnapshot: number;
+    isThaiSnapshot: boolean;
+  }
+> | null {
+  const members = (baseline?.lineup as { members?: unknown } | null)?.members;
+  const transport = {
+    selectionId,
+    expectedRevision: baseline?.revision ?? 0,
+    members,
+    activeChip: baseline?.activeChip ?? null,
+  };
+  if (!isFantasySelectionInput(transport)) return null;
+
+  const positions = new Set<FantasyPosition>([
+    "goalkeeper",
+    "defender",
+    "midfielder",
+    "forward",
+  ]);
+  const snapshots = members as Array<Record<string, unknown>>;
+  const restored: Array<
+    FantasySelectionInput["members"][number] & {
+      selectionId: string;
+      fantasySeasonId: string;
+      clubIdSnapshot: string;
+      positionSnapshot: FantasyPosition;
+      tierSnapshot: number;
+      isThaiSnapshot: boolean;
+    }
+  > = [];
+  for (const [index, member] of transport.members.entries()) {
+    const snapshot = snapshots[index];
+    if (
+      typeof snapshot.clubIdSnapshot !== "string" ||
+      !positions.has(snapshot.positionSnapshot as FantasyPosition) ||
+      !Number.isInteger(snapshot.tierSnapshot) ||
+      (snapshot.tierSnapshot as number) < 1 ||
+      typeof snapshot.isThaiSnapshot !== "boolean"
+    ) {
+      return null;
+    }
+    restored.push({
+      ...member,
+      selectionId,
+      fantasySeasonId,
+      clubIdSnapshot: snapshot.clubIdSnapshot,
+      positionSnapshot: snapshot.positionSnapshot as FantasyPosition,
+      tierSnapshot: snapshot.tierSnapshot as number,
+      isThaiSnapshot: snapshot.isThaiSnapshot,
+    });
+  }
+  const violations = validateLineup(
+    restored.map((member) => ({
+      id: member.fantasyPlayerId,
+      clubId: member.clubIdSnapshot,
+      position: member.positionSnapshot,
+      tier: member.tierSnapshot,
+      isThai: member.isThaiSnapshot,
+      isAvailable: true,
+      lineupRole: member.lineupRole,
+      benchOrder: member.benchOrder,
+      captainRole: member.captainRole,
+    })),
+  );
+  return violations.length === 0 ? restored : null;
+}
+
+async function getPreviousLockedSelectionMembers(
+  teamId: string,
+  gameweekNumber: number,
+  db: FantasyTransaction,
+) {
+  const previousSelectionRows = await db
+    .select({ selection: fantasyTeamSelections, gameweek: fantasyGameweeks })
+    .from(fantasyTeamSelections)
+    .innerJoin(
+      fantasyGameweeks,
+      eq(fantasyTeamSelections.fantasyGameweekId, fantasyGameweeks.id),
+    )
+    .where(
+      and(
+        eq(fantasyTeamSelections.fantasyTeamId, teamId),
+        eq(fantasyTeamSelections.status, "locked"),
+        lt(fantasyGameweeks.number, gameweekNumber),
+      ),
+    )
+    .orderBy(desc(fantasyGameweeks.number))
+    .limit(1);
+  const previousSelection = previousSelectionRows[0]?.selection;
+  return previousSelection
+    ? db
+        .select()
+        .from(fantasyTeamSelectionPlayers)
+        .where(
+          eq(fantasyTeamSelectionPlayers.selectionId, previousSelection.id),
+        )
+    : [];
 }
 
 async function getCurrentPlayerSnapshots(

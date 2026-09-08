@@ -263,6 +263,93 @@
   margin: 0;
   font-weight: 500;
 }
+.optimalWeekHeading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 8px 0 18px;
+}
+.optimalWeekHeading > div {
+  display: grid;
+  gap: 3px;
+}
+.optimalWeekHeading span,
+.optimalProvenance {
+  color: var(--muted);
+  font-size: 13px;
+}
+.optimalWeekHeading strong {
+  font-size: 20px;
+  font-weight: 600;
+}
+.optimalScoreStrip {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.85fr) minmax(320px, 1.15fr);
+  overflow: hidden;
+  margin-bottom: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper);
+}
+.optimalPrimaryScore {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: end;
+  gap: 2px 18px;
+  padding: 22px 24px;
+  background: var(--green-dark);
+  color: white;
+}
+.optimalPrimaryScore span {
+  align-self: center;
+  font-size: 14px;
+}
+.optimalPrimaryScore strong {
+  grid-row: span 2;
+  font-size: clamp(42px, 6vw, 64px);
+  font-weight: 600;
+  line-height: 0.95;
+  font-variant-numeric: tabular-nums;
+}
+.optimalPrimaryScore small {
+  font-size: 12px;
+  opacity: 0.72;
+}
+.optimalComparisons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+.optimalComparisons div {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+  padding: 20px 24px;
+  border-left: 1px solid var(--line);
+}
+.optimalComparisons dt {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.optimalComparisons dd {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.optimalPitch {
+  max-width: 980px;
+  margin-inline: auto;
+  overflow: hidden;
+}
+.optimalProvenance {
+  max-width: 980px;
+  margin: 12px auto 0;
+  line-height: 1.6;
+  text-align: right;
+}
 @media (max-width: 1000px) {
   .split {
     grid-template-columns: 1fr;
@@ -295,6 +382,18 @@
   }
   .actions > button {
     flex: 1 1 auto;
+  }
+  .optimalScoreStrip {
+    grid-template-columns: 1fr;
+  }
+  .optimalComparisons div:first-child {
+    border-left: 0;
+  }
+  .optimalPrimaryScore {
+    padding: 18px;
+  }
+  .optimalComparisons div {
+    padding: 16px 18px;
   }
 }
 .changePreview {

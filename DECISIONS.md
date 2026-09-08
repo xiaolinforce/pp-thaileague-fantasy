@@ -819,3 +819,22 @@ state and a visible loading transition to otherwise shared navigation.
 **Consequences:** Document routes render the manager menu consistently from the
 server and follow the same account or device language as the game. They now depend
 on the database-backed layout and may be unavailable during a database outage.
+
+## 2026-09-08 — Historical optimal teams use deadline player-pool snapshots
+
+**Decision:** Capture every eligible Fantasy player's club, position, tier, and
+Thai status when a Gameweek locks. Calculate the admin-only best possible team
+from that immutable pool and the latest derived player points, using a legal
+15-player squad, normal captaincy, and automatic substitutions without chips or
+transfer deductions. Resolve tied solutions deterministically. Reconstruct GW1
+from the immutable published preseason ranking and deadline registration history.
+
+**Context:** Current player records can change after a deadline, while score
+corrections must still update the historical answer. Existing team selection
+snapshots cover only players managers selected and cannot establish the whole
+eligible pool.
+
+**Consequences:** Gameweek locking now writes a pool snapshot before team
+selections lock. The optimal team is computed on read and is never stored as a
+manager team. A scored historical Gameweek without a trustworthy pool reports
+an unavailable state instead of using current eligibility.

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   isFantasySelectionInput,
+  isFantasySelectionRevisionInput,
   type FantasySelectionInput,
 } from "./selection-input.ts";
 
@@ -22,6 +23,24 @@ function input(): FantasySelectionInput {
 
 test("accepts the complete transport contract", () =>
   assert.equal(isFantasySelectionInput(input()), true));
+test("accepts only a valid selection revision contract", () => {
+  assert.equal(
+    isFantasySelectionRevisionInput({
+      selectionId: input().selectionId,
+      expectedRevision: 3,
+    }),
+    true,
+  );
+  for (const value of [
+    null,
+    {},
+    { selectionId: "old-gameweek", expectedRevision: 3 },
+    { selectionId: input().selectionId, expectedRevision: -1 },
+    { selectionId: input().selectionId, expectedRevision: 1.5 },
+  ]) {
+    assert.equal(isFantasySelectionRevisionInput(value), false);
+  }
+});
 test("rejects malformed transport values and a sixteenth unknown player before filtering", () => {
   for (const value of [
     null,

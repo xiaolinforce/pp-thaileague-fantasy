@@ -367,6 +367,8 @@ Also confirm as applicable:
   exhausted chip uses;
 - Gameweek recalculation handles zero-minute starters, captain fallback, Bench
   Boost, Triple Captain, and transfer deductions;
+- optimal-team tests cover a legal 15-player result, normal captain scoring,
+  deterministic ties, and a production-sized player pool;
 - loading, empty, error, pending, and success states remain understandable;
 - Thai and English display modes work after a reload;
 - Mobile below 768px, Tablet at 768–1279px, Desktop from 1280px, and a narrow

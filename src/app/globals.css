@@ -3668,6 +3668,26 @@ textarea:focus-visible {
   margin-top: 8px;
 }
 
+.squad-revert-action-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: 14px 14px 0;
+}
+
+.squad-revert-action-row + .squad-pitch {
+  margin-top: 8px;
+}
+
+.squad-revert-button svg {
+  flex: 0 0 auto;
+}
+
+@media (width < 48rem) {
+  .squad-revert-button {
+    width: 100%;
+  }
+}
+
 .squad-pitch {
   min-height: 560px;
   margin: 14px 14px 0;

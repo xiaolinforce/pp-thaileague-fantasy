@@ -125,6 +125,11 @@ const adminNavigation = [
   { label: "ผู้เล่นและทีม", href: "/admin/fantasy/participants", icon: Users },
   { label: "Gameweek", href: "/admin/fantasy/gameweeks", icon: CalendarDays },
   {
+    label: "ทีมที่ดีที่สุด",
+    href: "/admin/fantasy/optimal-team",
+    icon: Trophy,
+  },
+  {
     label: "ผลการแข่งขันและสถิติ",
     href: "/admin/fantasy/matches",
     icon: ListChecks,

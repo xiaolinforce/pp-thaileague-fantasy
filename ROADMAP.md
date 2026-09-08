@@ -17,6 +17,8 @@
   Later bot team changes require explicit owner instructions; no scheduler is enabled.
 - Pure player-points and team-score engines with automatic substitutions.
 - Provisional and final Gameweek recalculation.
+- Admin-only best possible legal team for scored Gameweeks, backed by deadline
+  player-pool snapshots and a Production GW1 reconstruction.
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,
   stat overrides, transfer revisions, and application-level admin audit entries.
 - Versioned preseason player ranking with contiguous overall/position ranks,

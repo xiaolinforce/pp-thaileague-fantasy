@@ -588,7 +588,6 @@ export default function TransfersClient({
               </span>
             </div>
           </div>
-
           <Dialog>
             <DialogTrigger className="compact-market-filter-dialog-trigger">
               {translate("กรองนักเตะ")}

@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { useLanguage } from "@/components/fantasy/i18n";
+import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import {
   Dialog,
   DialogContent,
@@ -12,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import type { FantasyPointsSquadMember, PlayerPointsRow } from "@/data/fantasy";
 import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
-import { PointsPlayerToken } from "./player-token";
 
 const positionRows = [
   "goalkeeper",

@@ -138,6 +138,13 @@ Overall standings, preserved GW1 player snapshots, and carried squads into open
 GW2. Its deadline is 2026-09-11 16:30 Asia/Bangkok, 90 minutes before that
 Gameweek's first fixture. See `PRODUCTION.md` for execution and verification.
 
+Migration `0017` reconstructs the Production GW1 eligible-player pool from the
+immutable published ranking `preseason-2026-27-v5-manual-tiers`, the registration
+active at the Bangkok deadline, and the earliest audited post-deadline Thai-status
+change when one exists. Future Gameweeks capture the same eligibility fields at
+lock time. This pool is the provenance boundary for the admin best-possible-team
+view; current roster fields must not silently change a historical result.
+
 ## 2026-09-05 four-match review
 
 Owner-approved batch `gw1-sep5-four-matches-20260905` was applied to development

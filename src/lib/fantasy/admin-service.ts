@@ -27,6 +27,7 @@ import {
 } from "./rules";
 import { createGameweekCarryover } from "./gameweek-carryover";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
+import { snapshotFantasyGameweekPlayerPool } from "./player-pool-service";
 
 function formInteger(formData: FormData, key: string) {
   const value = Number(formData.get(key) ?? 0);
@@ -306,7 +307,7 @@ export async function lockFantasyGameweek(
     where: eq(fantasyGameweeks.id, gameweekId),
   });
   if (!target) throw new Error("Gameweek was not found.");
-  await lockFantasySeason(db, target.fantasySeasonId);
+  const season = await lockFantasySeason(db, target.fantasySeasonId);
   const gameweekRows = await db
     .select()
     .from(fantasyGameweeks)
@@ -342,6 +343,8 @@ export async function lockFantasyGameweek(
   if (nextGameweek && nextGameweek.status !== "planned") {
     throw new Error("The next Gameweek is not planned.");
   }
+
+  await snapshotFantasyGameweekPlayerPool({ database: db, season, gameweek });
 
   const selections = await db
     .select()

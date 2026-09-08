@@ -16,7 +16,25 @@ export type FantasySelectionInput = {
   activeChip: FantasyChip | null;
 };
 
+export type FantasySelectionRevisionInput = Pick<
+  FantasySelectionInput,
+  "selectionId" | "expectedRevision"
+>;
+
 const uuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+export function isFantasySelectionRevisionInput(
+  value: unknown,
+): value is FantasySelectionRevisionInput {
+  if (!value || typeof value !== "object") return false;
+  const input = value as Record<string, unknown>;
+  return (
+    typeof input.selectionId === "string" &&
+    uuid.test(input.selectionId) &&
+    Number.isSafeInteger(input.expectedRevision) &&
+    (input.expectedRevision as number) >= 0
+  );
+}
 
 export function isFantasySelectionInput(
   value: unknown,
@@ -24,10 +42,7 @@ export function isFantasySelectionInput(
   if (!value || typeof value !== "object") return false;
   const input = value as Record<string, unknown>;
   if (
-    typeof input.selectionId !== "string" ||
-    !uuid.test(input.selectionId) ||
-    !Number.isSafeInteger(input.expectedRevision) ||
-    (input.expectedRevision as number) < 0 ||
+    !isFantasySelectionRevisionInput(value) ||
     !Array.isArray(input.members) ||
     input.members.length !== THAI_LEAGUE_FANTASY_RULES.squadSize ||
     ![null, "wildcard", "bench_boost", "triple_captain"].includes(

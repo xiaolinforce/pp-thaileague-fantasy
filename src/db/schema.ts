@@ -858,6 +858,48 @@ export const fantasyPlayerTiers = pgTable(
   ],
 );
 
+export const fantasyGameweekPlayerPool = pgTable(
+  "fantasy_gameweek_player_pool",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id").notNull(),
+    fantasyGameweekId: uuid("fantasy_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "cascade" }),
+    fantasyPlayerId: uuid("fantasy_player_id")
+      .notNull()
+      .references(() => fantasyPlayers.id, { onDelete: "restrict" }),
+    clubIdSnapshot: uuid("club_id_snapshot")
+      .notNull()
+      .references(() => clubs.id, { onDelete: "restrict" }),
+    positionSnapshot: playerPositionEnum("position_snapshot").notNull(),
+    tierSnapshot: smallint("tier_snapshot").notNull(),
+    isThaiSnapshot: boolean("is_thai_snapshot").notNull(),
+    sourceName: text("source_name").notNull(),
+    capturedAt: timestamp("captured_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    foreignKey({
+      name: "fantasy_gameweek_pool_gameweek_season_fk",
+      columns: [table.fantasyGameweekId, table.fantasySeasonId],
+      foreignColumns: [fantasyGameweeks.id, fantasyGameweeks.fantasySeasonId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "fantasy_gameweek_pool_player_season_fk",
+      columns: [table.fantasyPlayerId, table.fantasySeasonId],
+      foreignColumns: [fantasyPlayers.id, fantasyPlayers.fantasySeasonId],
+    }).onDelete("restrict"),
+    uniqueIndex("fantasy_gameweek_pool_gameweek_player_unique").on(
+      table.fantasyGameweekId,
+      table.fantasyPlayerId,
+    ),
+    index("fantasy_gameweek_pool_gameweek_idx").on(table.fantasyGameweekId),
+    check("fantasy_gameweek_pool_tier_check", sql`${table.tierSnapshot} > 0`),
+  ],
+);
+
 export const fantasyRankingRuns = pgTable(
   "fantasy_ranking_runs",
   {

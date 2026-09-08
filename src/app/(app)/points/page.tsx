@@ -4,13 +4,13 @@ import { Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
+import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import { getFantasyPointsState } from "@/data/fantasy";
 import { getFantasyNavigationAvailability } from "@/data/navigation";
 import { parsePointsGameweek } from "@/lib/fantasy/points-gameweek";
 import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
 import { HighestScoreDialog } from "./highest-score-dialog";
-import { PointsPlayerToken } from "./player-token";
 
 const positionRows = [
   "goalkeeper",

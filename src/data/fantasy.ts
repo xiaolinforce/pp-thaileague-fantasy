@@ -25,6 +25,7 @@ import {
   THAI_LEAGUE_FANTASY_RULES,
   type FantasyChip,
 } from "@/lib/fantasy/rules";
+import { getTransferRevisionState } from "@/lib/fantasy/transfer-revisions";
 import { hasGameweekDeadlinePassed } from "@/lib/fantasy/points-gameweek";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { logServerTiming } from "@/lib/server/performance";
@@ -118,17 +119,15 @@ export async function getFantasyState(): Promise<FantasyState> {
           .groupBy(fantasyTeamSelections.id),
       ])
     : [[], [], []];
-  const baselineRevision = revisions[0]?.revision ?? 0;
-  const baselineSquadIds = Array.isArray(revisions[0]?.squad)
-    ? revisions[0].squad.filter(
-        (fantasyPlayerId): fantasyPlayerId is string =>
-          typeof fantasyPlayerId === "string",
-      )
-    : members.map((member) => member.fantasyPlayerId);
-  const hasPendingChanges = revisions.some(
-    (revision) =>
-      revision.revision > baselineRevision && revision.status === "confirmed",
+  const openingGameweek = isTeamOpeningGameweek(
+    previousLockedSquads.map((item) => item.squadSize),
+    THAI_LEAGUE_FANTASY_RULES,
   );
+  const revisionState = getTransferRevisionState(revisions, openingGameweek);
+  const baselineSquadIds =
+    revisionState.baselineSquadIds.length > 0
+      ? revisionState.baselineSquadIds
+      : members.map((member) => member.fantasyPlayerId);
 
   const chipRows = await db
     .select({ chip: fantasyTeamSelections.activeChip, uses: count() })
@@ -154,10 +153,7 @@ export async function getFantasyState(): Promise<FantasyState> {
       id: current.team.id,
       name: current.team.name,
       freeTransfers: current.team.freeTransfers,
-      openingGameweek: isTeamOpeningGameweek(
-        previousLockedSquads.map((item) => item.squadSize),
-        THAI_LEAGUE_FANTASY_RULES,
-      ),
+      openingGameweek,
     },
     gameweek: {
       id: gameweek.id,
@@ -172,7 +168,7 @@ export async function getFantasyState(): Promise<FantasyState> {
       status: selection?.status ?? "locked",
       activeChip: selection?.activeChip ?? null,
       baselineSquadIds,
-      hasPendingChanges,
+      hasPendingChanges: revisionState.hasPendingChanges,
       netTransferCount: selection?.netTransferCount ?? 0,
       transferPoints: selection?.transferPoints ?? 0,
       members: members.map((member) => ({

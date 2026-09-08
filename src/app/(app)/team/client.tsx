@@ -8,6 +8,7 @@ import {
   Save,
   Search,
   Shirt,
+  RotateCcw,
   TriangleAlert,
   Trash2,
   Undo2,
@@ -15,7 +16,7 @@ import {
   WandSparkles,
   Zap,
 } from "lucide-react";
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
@@ -35,6 +36,16 @@ import {
 } from "@/lib/competition-types";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -52,11 +63,13 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
 import {
+  revertFantasySelectionAction,
   saveFantasySelectionAction,
   suggestFantasyAutoFillAction,
 } from "@/app/fantasy-actions";
 import {
   getCountedTransfers,
+  getTransferUsage,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
   validateTransferLimit,
@@ -114,6 +127,28 @@ function getShortPositionLabel(position: CompetitionPosition) {
 type PlayerSwapState = "source" | "available" | "unavailable";
 
 type TeamWorkspaceView = "squad" | "market";
+
+type SelectionDraftSource = {
+  fantasyPlayerId: string;
+  lineupRole: "starter" | "bench";
+  benchOrder: number | null;
+  captainRole: "none" | "captain" | "vice_captain";
+};
+
+function createSelectionDraft(
+  selectionMembers: readonly SelectionDraftSource[],
+): DraftLineupMember[] {
+  return selectionMembers.length === 0
+    ? createEmptySquadDraft()
+    : selectionMembers.map((member, index) => ({
+        slotId: `selection-slot-${index}`,
+        fantasyPlayerId: member.fantasyPlayerId,
+        vacancyPosition: null,
+        lineupRole: member.lineupRole,
+        benchOrder: member.benchOrder,
+        captainRole: member.captainRole,
+      }));
+}
 
 type GameweekDetailsProps = {
   deadlineLabels: Record<Language, string>;
@@ -607,26 +642,20 @@ export default function TeamClient({
       : fantasy.selection.activeChip,
   );
   const [members, setMembers] = useState<DraftLineupMember[]>(() =>
-    fantasy.selection.members.length === 0
-      ? createEmptySquadDraft()
-      : fantasy.selection.members.map((member, index) => ({
-          slotId: `selection-slot-${index}`,
-          fantasyPlayerId: member.fantasyPlayerId,
-          vacancyPosition: null,
-          lineupRole: member.lineupRole,
-          benchOrder: member.benchOrder,
-          captainRole: member.captainRole,
-        })),
+    createSelectionDraft(fantasy.selection.members),
   );
   const [removedPlayersBySlot, setRemovedPlayersBySlot] =
     useState<RemovedDraftPlayersBySlot>({});
   const [isPending, startTransition] = useTransition();
+  const [isReverting, startRevertTransition] = useTransition();
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
+  const [revertDialogOpen, setRevertDialogOpen] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [workspaceView, setWorkspaceView] =
     useState<TeamWorkspaceView>("squad");
   const [marketPosition, setMarketPosition] = useState("ALL");
+  const selectionRevision = useRef(fantasy.selection.revision);
   const router = useRouter();
 
   const changeWorkspaceView = (nextView: TeamWorkspaceView) => {
@@ -830,7 +859,7 @@ export default function TeamClient({
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
-  const interactionsDisabled = !isEditable || isAutoFilling;
+  const interactionsDisabled = !isEditable || isAutoFilling || isReverting;
   const remaining = Math.max(0, remainingMs ?? 0);
   const remainingDays = Math.floor(remaining / 86_400_000);
   const remainingHours = Math.floor((remaining % 86_400_000) / 3_600_000);
@@ -875,6 +904,21 @@ export default function TeamClient({
       fantasy.team.openingGameweek,
       fantasy.team.freeTransfers,
       hasVacancies,
+      transferCount,
+    ],
+  );
+  const transferUsage = useMemo(
+    () =>
+      getTransferUsage({
+        freeTransfersBefore: fantasy.team.freeTransfers,
+        transferCount,
+        wildcard: activeChip === "wildcard",
+        openingGameweek: fantasy.team.openingGameweek,
+      }),
+    [
+      activeChip,
+      fantasy.team.freeTransfers,
+      fantasy.team.openingGameweek,
       transferCount,
     ],
   );
@@ -924,6 +968,10 @@ export default function TeamClient({
     [lineupValidationViolations, translate],
   );
   const hasClientValidationErrors = clientValidationMessages.length > 0;
+  const transferWarningMessage = useMemo(() => {
+    if (!transferUsage || transferUsage.transferPoints <= 0) return null;
+    return translate("คุณใช้โควต้าเปลี่ยนฟรีเกินจึงทำให้คะแนนติดลบ");
+  }, [transferUsage, translate]);
   const draftSelectionMembers = useMemo(
     () =>
       members.flatMap((member) =>
@@ -943,6 +991,8 @@ export default function TeamClient({
   const hasUnsavedChanges =
     JSON.stringify(draftSelectionMembers) !== JSON.stringify(savedMembers) ||
     activeChip !== fantasy.selection.activeChip;
+  const canRevertTeam =
+    isEditable && (hasUnsavedChanges || fantasy.selection.hasPendingChanges);
 
   const getSwapState = (slotId: string): PlayerSwapState | undefined => {
     if (!swapFrom) return undefined;
@@ -993,11 +1043,12 @@ export default function TeamClient({
       try {
         const result = await saveFantasySelectionAction({
           selectionId: fantasy.selection.id!,
-          expectedRevision: fantasy.selection.revision,
+          expectedRevision: selectionRevision.current,
           members: completeSelectionMembers,
           activeChip,
         });
         if (result.ok) {
+          selectionRevision.current = result.revision;
           setRemovedPlayersBySlot({});
           toast.success(translate(result.message));
           router.refresh();
@@ -1017,6 +1068,63 @@ export default function TeamClient({
         toast.error(translate("บันทึกทีมไม่สำเร็จ"), {
           description: translate(
             "การเปลี่ยนแปลงยังไม่ถูกบันทึก กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
+          ),
+        });
+      }
+    });
+  };
+
+  const applyRevertedTeam = (
+    restoredMembers: readonly SelectionDraftSource[],
+    restoredChip: FantasyChip | null,
+  ) => {
+    setMembers(createSelectionDraft(restoredMembers));
+    setActiveChip(restoredChip);
+    setRemovedPlayersBySlot({});
+    setSwapFrom(null);
+    setSelected(null);
+    setPreferredVacancySlotId(null);
+  };
+
+  const revertTeam = () => {
+    if (!canRevertTeam || !fantasy.selection.id) return;
+    if (!fantasy.selection.hasPendingChanges) {
+      applyRevertedTeam(
+        fantasy.selection.members,
+        fantasy.selection.activeChip,
+      );
+      setRevertDialogOpen(false);
+      toast.success(translate("คืนทีมต้นเกมวีคแล้ว"));
+      return;
+    }
+
+    startRevertTransition(async () => {
+      try {
+        const result = await revertFantasySelectionAction({
+          selectionId: fantasy.selection.id!,
+          expectedRevision: selectionRevision.current,
+        });
+        if (result.ok) {
+          selectionRevision.current = result.revision;
+          applyRevertedTeam(result.members, result.activeChip);
+          setRevertDialogOpen(false);
+          toast.success(translate(result.message));
+          router.refresh();
+        } else {
+          toast.error(translate(result.message), {
+            duration: result.conflict ? Infinity : undefined,
+            action: result.conflict
+              ? {
+                  label: translate("โหลดทีมล่าสุด"),
+                  onClick: () => window.location.reload(),
+                }
+              : undefined,
+          });
+        }
+      } catch {
+        toast.error(translate("คืนทีมต้นเกมวีคไม่สำเร็จ"), {
+          description: translate(
+            "ยังไม่ได้คืนทีม กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
           ),
         });
       }
@@ -1057,6 +1165,7 @@ export default function TeamClient({
       onClick={saveTeam}
       disabled={
         isPending ||
+        isReverting ||
         isAutoFilling ||
         !isEditable ||
         !hasUnsavedChanges ||
@@ -1352,6 +1461,29 @@ export default function TeamClient({
                 ))}
               </>
             )}
+            {transferWarningMessage ? (
+              <div className="squad-validation-alert" role="alert">
+                <TriangleAlert size={18} aria-hidden="true" />
+                <span>{transferWarningMessage}</span>
+              </div>
+            ) : null}
+            {canRevertTeam && (
+              <div className="squad-revert-action-row">
+                <button
+                  type="button"
+                  className="secondary-button danger-button squad-revert-button"
+                  disabled={isPending || isAutoFilling || isReverting}
+                  onClick={() => setRevertDialogOpen(true)}
+                >
+                  <RotateCcw size={16} aria-hidden="true" />
+                  {translate(
+                    fantasy.team.openingGameweek
+                      ? "ล้างทีม"
+                      : "คืนทีมต้นเกมวีค",
+                  )}
+                </button>
+              </div>
+            )}
             <div className="squad-pitch">
               <div className="squad-pitch-actions">
                 {saveButton}
@@ -1359,7 +1491,7 @@ export default function TeamClient({
                   <button
                     type="button"
                     className="secondary-button compact-auto-fill-button squad-pitch-action squad-auto-fill-button"
-                    disabled={!isEditable || isAutoFilling}
+                    disabled={!isEditable || isAutoFilling || isReverting}
                     onClick={autoFillVacancies}
                     aria-busy={isAutoFilling}
                     title={
@@ -1508,13 +1640,65 @@ export default function TeamClient({
             onMembersChange={replaceDraftMembers}
             onPlayerSelect={setSelected}
             onPlayerRemove={removePlayer}
-            isAutoFilling={isAutoFilling}
+            isAutoFilling={isAutoFilling || isReverting}
             preferredVacancySlotId={preferredVacancySlotId}
             position={marketPosition}
             onPositionChange={setMarketPosition}
           />
         </div>
       </main>
+
+      <AlertDialog
+        open={revertDialogOpen}
+        onOpenChange={(open) => !isReverting && setRevertDialogOpen(open)}
+      >
+        <AlertDialogContent className="product-dialog team-revert-dialog">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {translate(
+                fantasy.team.openingGameweek
+                  ? "ล้างทีมทั้งหมด?"
+                  : "ยกเลิกการซื้อขายทั้งหมด?",
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {fantasy.team.openingGameweek
+                ? translate(
+                    "นักเตะทั้ง 15 คน การจัดตัว กัปตัน รองกัปตัน และ Chip จะถูกล้างทันที รวมถึงการเปลี่ยนแปลงที่ยังไม่ได้บันทึก หลังจากนั้นต้องเลือกนักเตะให้ครบและบันทึกทีมใหม่ก่อน Deadline",
+                  )
+                : translate(
+                    "รายชื่อนักเตะ การจัดตัว กัปตัน รองกัปตัน และ Chip จะกลับเป็นสภาพตอนเริ่มเกมวีค รวมถึงการเปลี่ยนแปลงที่ยังไม่ได้บันทึก โควต้า Transfer และคะแนนที่เตรียมหักจะถูกคืน",
+                  )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isReverting}>
+              {translate("กลับไปจัดทีม")}
+            </AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={revertTeam}
+              disabled={isReverting}
+              aria-busy={isReverting}
+            >
+              {isReverting ? (
+                <LoaderCircle className="spin" aria-hidden="true" />
+              ) : (
+                <RotateCcw aria-hidden="true" />
+              )}
+              {translate(
+                isReverting
+                  ? fantasy.team.openingGameweek
+                    ? "กำลังล้างทีม…"
+                    : "กำลังคืนทีม…"
+                  : fantasy.team.openingGameweek
+                    ? "ล้างทีม"
+                    : "คืนทีมต้นเกมวีค",
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog
         open={selected !== null}

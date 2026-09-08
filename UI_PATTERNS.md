@@ -135,6 +135,12 @@ proven behaviors unless a deliberate product decision replaces them:
 - Keep the save action on the pitch near validation. Disable it while pending,
   after the deadline, when no change exists, or while the draft is invalid, and
   make the reason understandable.
+- Show the destructive start-of-Gameweek restore action immediately above the
+  pitch only while an editable saved or local change can be reverted. Confirm
+  it with explicit squad, lineup, captaincy, chip, transfer-allowance, and
+  unsaved-draft consequences. In a team's opening Gameweek, label and explain
+  the action as clearing all 15 slots, persist the empty state immediately, and
+  require a new complete save before the deadline.
 - Auto-fill is secondary, fills vacancies only, preserves selected players,
   ignores visible market filters, leaves the result unsaved, and communicates
   pending and failure states.
@@ -184,6 +190,12 @@ proven behaviors unless a deliberate product decision replaces them:
 
 The score rail and read-only pitch are Points-specific. Other summary pages may
 reuse their hierarchy without copying their geometry.
+
+The admin best-possible-team view reuses the scored player token, pitch, bench,
+automatic-substitution, and breakdown semantics because it presents the same
+kind of scored lineup. Its comparison strip remains admin-specific: the
+hypothetical score is primary, while the highest real manager score and their
+difference are supporting operational context.
 
 ## Authentication and operational constraints
 
@@ -249,7 +261,7 @@ Record route-level evidence and maturity in `UI_REVIEW.md`.
 ## Administrative operations
 
 The admin workspace separates overview, participant browsing, Gameweek lifecycle,
-match stats, classifications, and audit history. Filters are URL-backed; match
+best-possible-team review, match stats, classifications, and audit history. Filters are URL-backed; match
 and player selectors load their dependent choices and current saved values.
 Form edits use the shared navigation blocker. Confirmation identifies the
 player, match or Gameweek and the effects of the operation; form values remain

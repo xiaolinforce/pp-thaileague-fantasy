@@ -22,8 +22,14 @@ import {
   lockFantasyGameweek,
   finalizeFantasyGameweek,
 } from "@/lib/fantasy/admin-service";
-import { saveFantasySelection } from "@/lib/fantasy/selection-service";
-import type { FantasySelectionInput } from "@/lib/fantasy/selection-input";
+import {
+  revertFantasySelection,
+  saveFantasySelection,
+} from "@/lib/fantasy/selection-service";
+import type {
+  FantasySelectionInput,
+  FantasySelectionRevisionInput,
+} from "@/lib/fantasy/selection-input";
 import type { DraftLineupMember } from "@/lib/fantasy/team-draft";
 
 export type FantasyActionResult =
@@ -294,6 +300,18 @@ function refreshFantasyMutation(
 export async function saveFantasySelectionAction(input: FantasySelectionInput) {
   const { season, team, manager } = await requireFantasyProfile();
   const result = await saveFantasySelection(
+    { seasonId: season.id, teamId: team.id, managerId: manager.id },
+    input,
+  );
+  if (result.ok) refreshFantasyMutation("squad");
+  return result;
+}
+
+export async function revertFantasySelectionAction(
+  input: FantasySelectionRevisionInput,
+) {
+  const { season, team, manager } = await requireFantasyProfile();
+  const result = await revertFantasySelection(
     { seasonId: season.id, teamId: team.id, managerId: manager.id },
     input,
   );

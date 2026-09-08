@@ -212,6 +212,11 @@ team mutation remains closed.
   limiting the transfer deduction to 12 points. A draft may temporarily exceed
   that amount, but it cannot be saved until it returns within the limit.
 - Pre-deadline revisions can be confirmed or cancelled.
+- Cancelling restores the complete start-of-Gameweek squad, lineup, bench
+  order, captaincy, active chip, free-transfer settlement, and pending point
+  deduction. It also discards the current client draft. In a team's opening
+  Gameweek, whose true baseline is empty, cancellation persists an empty
+  15-slot draft instead of restoring the first complete squad that was saved.
 - Wildcard makes that Gameweek's transfers free and preserves the accumulated
   free-transfer balance before adding the normal weekly allowance.
 - Every team's opening-Gameweek transfers and Wildcard transfers are free and
@@ -281,6 +286,18 @@ Each bench player can be used once.
 If the captain records zero minutes, the vice-captain receives the captain
 multiplier. If neither plays, no captain bonus is awarded. Bench Boost counts
 the whole bench directly and therefore skips automatic substitution.
+
+## Best possible Gameweek team
+
+After scoring begins, the admin may inspect one deterministic highest-scoring
+hypothetical team for the Gameweek. The team uses the eligible player pool and
+club, position, tier, and Thai-status classifications captured at its deadline.
+It must contain a legal 15-player squad, starting eleven, ordered bench,
+captain, and vice-captain. Normal scoring and automatic substitutions apply;
+chips and transfer deductions do not. Tied solutions resolve by stable player
+identity and do not imply that the hypothetical team was owned by a manager.
+Corrections recalculate the result from current derived player points without
+rewriting the historical pool.
 
 ## Match corrections and standings
 
