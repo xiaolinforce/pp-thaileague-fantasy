@@ -145,6 +145,11 @@ change when one exists. Future Gameweeks capture the same eligibility fields at
 lock time. This pool is the provenance boundary for the admin best-possible-team
 view; current roster fields must not silently change a historical result.
 
+Migration `0018` adds the persisted optimal-team read model. Run
+`npm run db:backfill:optimal-teams` once after applying it to materialize every
+existing scored Gameweek, including Production GW1. Later scoring and score
+corrections update the saved result transactionally.
+
 ## 2026-09-05 four-match review
 
 Owner-approved batch `gw1-sep5-four-matches-20260905` was applied to development

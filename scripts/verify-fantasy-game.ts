@@ -4,6 +4,9 @@ import { drizzle } from "drizzle-orm/neon-http";
 
 import {
   fantasyGameweeks,
+  fantasyGameweekOptimalTeamPlayers,
+  fantasyGameweekOptimalTeams,
+  fantasyGameweekPlayerPool,
   fantasyLeagueAuditLog,
   fantasyLeagueMembers,
   fantasyLeagues,
@@ -30,6 +33,9 @@ const db = drizzle(databaseUrl);
 const tables = {
   fantasySeasons,
   fantasyGameweeks,
+  fantasyGameweekPlayerPool,
+  fantasyGameweekOptimalTeams,
+  fantasyGameweekOptimalTeamPlayers,
   fantasyPlayers,
   fantasyPlayerTiers,
   fantasyRankingRuns,
@@ -282,6 +288,67 @@ async function verifyFantasyGame() {
       );
     }
   }
+
+  const optimalTeamIntegrity = await db.execute<{
+    scored_gameweeks_missing_result: number;
+    invalid_member_counts: number;
+    mismatched_gameweeks: number;
+    mismatched_statuses: number;
+  }>(sql`
+    select
+      (
+        select count(*)::int
+        from fantasy_gameweeks gameweek
+        where gameweek.status in ('provisional', 'final')
+          and not exists (
+            select 1
+            from fantasy_gameweek_optimal_teams optimal
+            where optimal.fantasy_gameweek_id = gameweek.id
+          )
+      ) as scored_gameweeks_missing_result,
+      (
+        select count(*)::int
+        from (
+          select optimal.id
+          from fantasy_gameweek_optimal_teams optimal
+          left join fantasy_gameweek_optimal_team_players member
+            on member.optimal_team_id = optimal.id
+          group by optimal.id
+          having count(member.id) <> 15
+        ) invalid
+      ) as invalid_member_counts,
+      (
+        select count(*)::int
+        from fantasy_gameweek_optimal_team_players member
+        inner join fantasy_gameweek_optimal_teams optimal
+          on optimal.id = member.optimal_team_id
+        where member.fantasy_gameweek_id <> optimal.fantasy_gameweek_id
+      ) as mismatched_gameweeks,
+      (
+        select count(*)::int
+        from fantasy_gameweek_optimal_teams optimal
+        inner join fantasy_gameweeks gameweek
+          on gameweek.id = optimal.fantasy_gameweek_id
+        where optimal.status::text <> gameweek.status::text
+      ) as mismatched_statuses
+  `);
+  const optimalIssues = optimalTeamIntegrity.rows[0];
+  if (!optimalIssues) {
+    throw new Error("Optimal-team integrity query returned no row.");
+  }
+  const failedOptimalChecks = Object.entries(optimalIssues).filter(
+    ([, value]) => Number(value) !== 0,
+  );
+  if (failedOptimalChecks.length > 0) {
+    throw new Error(
+      `Optimal-team integrity failed: ${failedOptimalChecks
+        .map(([name, value]) => `${name}=${value}`)
+        .join(", ")}.`,
+    );
+  }
+  console.log(
+    "optimalTeamIntegrity: every scored Gameweek has one complete persisted result",
+  );
 
   const tierDefinitions = await db
     .select()

@@ -19,6 +19,7 @@ import {
 import { lockFantasySeason } from "./season-lock";
 import { summarizeGameweekScores } from "./points-presentation.ts";
 import { resolveTeamScore, type GameweekPlayerResult } from "./scoring.ts";
+import { persistGameweekOptimalTeam } from "./optimal-team-service.ts";
 
 type ScoringDatabase = Pick<
   typeof transactionDb,
@@ -78,6 +79,7 @@ async function recalculateGameweekInTransaction(
         .where(inArray(fantasyPlayerMatchStats.fixtureId, fixtureIds))
     : [];
   const resultByPlayer = new Map<string, GameweekPlayerResult>();
+  const breakdownByPlayer = new Map<string, Record<string, number>>();
   for (const row of pointRows) {
     const current = resultByPlayer.get(row.stats.fantasyPlayerId) ?? {
       playerId: row.stats.fantasyPlayerId,
@@ -87,6 +89,11 @@ async function recalculateGameweekInTransaction(
     current.minutes += row.stats.minutes;
     current.points += row.points.totalPoints;
     resultByPlayer.set(row.stats.fantasyPlayerId, current);
+    const breakdown = breakdownByPlayer.get(row.stats.fantasyPlayerId) ?? {};
+    for (const [key, value] of Object.entries(row.points.breakdown)) {
+      breakdown[key] = (breakdown[key] ?? 0) + value;
+    }
+    breakdownByPlayer.set(row.stats.fantasyPlayerId, breakdown);
   }
 
   const selections = await database
@@ -175,6 +182,17 @@ async function recalculateGameweekInTransaction(
       updatedAt: new Date(),
     })
     .where(eq(fantasyGameweeks.id, gameweek.id));
+  const optimalTeam =
+    gameweek.status === "provisional" || gameweek.status === "final"
+      ? await persistGameweekOptimalTeam({
+          database,
+          gameweek,
+          playerResults: [...resultByPlayer.values()].map((result) => ({
+            ...result,
+            breakdown: breakdownByPlayer.get(result.playerId) ?? {},
+          })),
+        })
+      : ({ state: "not_scored" } as const);
   const leagueStandings = await refreshOverallLeagueStandings(
     gameweek.fantasySeasonId,
     database,
@@ -183,6 +201,7 @@ async function recalculateGameweekInTransaction(
   return {
     selections: selections.length,
     players: resultByPlayer.size,
+    optimalTeam,
     leagueStandings,
     ...gameweekSummary,
   };

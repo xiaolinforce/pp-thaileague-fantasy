@@ -900,6 +900,121 @@ export const fantasyGameweekPlayerPool = pgTable(
   ],
 );
 
+export const fantasyGameweekOptimalTeams = pgTable(
+  "fantasy_gameweek_optimal_teams",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id").notNull(),
+    fantasyGameweekId: uuid("fantasy_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "cascade" }),
+    status: fantasyScoreStatusEnum("status").notNull(),
+    lineupPoints: integer("lineup_points").notNull(),
+    benchPoints: integer("bench_points").notNull(),
+    captainBonus: integer("captain_bonus").notNull(),
+    totalPoints: integer("total_points").notNull(),
+    autoSubstitutions: jsonb("auto_substitutions")
+      .$type<Array<{ out: string; in: string }>>()
+      .default([])
+      .notNull(),
+    countedPlayerIds: jsonb("counted_player_ids")
+      .$type<string[]>()
+      .default([])
+      .notNull(),
+    playerPoolSize: integer("player_pool_size").notNull(),
+    playerPoolSource: text("player_pool_source").notNull(),
+    computedAt: timestamp("computed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      name: "fantasy_optimal_team_gameweek_season_fk",
+      columns: [table.fantasyGameweekId, table.fantasySeasonId],
+      foreignColumns: [fantasyGameweeks.id, fantasyGameweeks.fantasySeasonId],
+    }).onDelete("cascade"),
+    uniqueIndex("fantasy_optimal_team_gameweek_unique").on(
+      table.fantasyGameweekId,
+    ),
+    uniqueIndex("fantasy_optimal_team_id_gameweek_unique").on(
+      table.id,
+      table.fantasyGameweekId,
+    ),
+    check(
+      "fantasy_optimal_team_pool_size_check",
+      sql`${table.playerPoolSize} > 0`,
+    ),
+  ],
+);
+
+export const fantasyGameweekOptimalTeamPlayers = pgTable(
+  "fantasy_gameweek_optimal_team_players",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    optimalTeamId: uuid("optimal_team_id")
+      .notNull()
+      .references(() => fantasyGameweekOptimalTeams.id, {
+        onDelete: "cascade",
+      }),
+    fantasyGameweekId: uuid("fantasy_gameweek_id").notNull(),
+    fantasyPlayerId: uuid("fantasy_player_id").notNull(),
+    lineupRole: fantasyLineupRoleEnum("lineup_role").notNull(),
+    benchOrder: smallint("bench_order"),
+    captainRole: fantasyCaptainRoleEnum("captain_role")
+      .default("none")
+      .notNull(),
+    minutes: integer("minutes").default(0).notNull(),
+    totalPoints: integer("total_points").default(0).notNull(),
+    breakdown: jsonb("breakdown")
+      .$type<Record<string, number>>()
+      .default({})
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      name: "fantasy_optimal_member_team_gameweek_fk",
+      columns: [table.optimalTeamId, table.fantasyGameweekId],
+      foreignColumns: [
+        fantasyGameweekOptimalTeams.id,
+        fantasyGameweekOptimalTeams.fantasyGameweekId,
+      ],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "fantasy_optimal_member_pool_fk",
+      columns: [table.fantasyGameweekId, table.fantasyPlayerId],
+      foreignColumns: [
+        fantasyGameweekPlayerPool.fantasyGameweekId,
+        fantasyGameweekPlayerPool.fantasyPlayerId,
+      ],
+    }).onDelete("restrict"),
+    uniqueIndex("fantasy_optimal_member_team_player_unique").on(
+      table.optimalTeamId,
+      table.fantasyPlayerId,
+    ),
+    uniqueIndex("fantasy_optimal_member_bench_unique")
+      .on(table.optimalTeamId, table.benchOrder)
+      .where(sql`${table.lineupRole} = 'bench'`),
+    uniqueIndex("fantasy_optimal_member_captain_unique")
+      .on(table.optimalTeamId, table.captainRole)
+      .where(sql`${table.captainRole} <> 'none'`),
+    index("fantasy_optimal_member_team_role_idx").on(
+      table.optimalTeamId,
+      table.lineupRole,
+    ),
+    check(
+      "fantasy_optimal_member_bench_captain_check",
+      sql`${table.lineupRole} <> 'bench' or ${table.captainRole} = 'none'`,
+    ),
+    check(
+      "fantasy_optimal_member_bench_order_check",
+      sql`(${table.lineupRole} = 'starter' and ${table.benchOrder} is null) or (${table.lineupRole} = 'bench' and ${table.benchOrder} is not null and ${table.benchOrder} between 0 and 3)`,
+    ),
+    check("fantasy_optimal_member_minutes_check", sql`${table.minutes} >= 0`),
+  ],
+);
+
 export const fantasyRankingRuns = pgTable(
   "fantasy_ranking_runs",
   {

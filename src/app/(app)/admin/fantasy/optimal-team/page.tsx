@@ -47,13 +47,9 @@ export default async function OptimalTeamPage({
           <p className={styles.empty}>
             {state.state === "not_scored"
               ? "จะแสดงทีมที่ดีที่สุดหลัง Gameweek นี้ปิดและเริ่มคำนวณคะแนนแล้ว"
-              : state.state === "missing_pool"
-                ? "ไม่พบ snapshot รายชื่อนักเตะของ Gameweek นี้ จึงยังคำนวณทีมย้อนหลังไม่ได้"
-                : state.state === "missing_scores"
-                  ? "ยังไม่มีผลคะแนนนักเตะสำหรับ Gameweek นี้"
-                  : state.state === "no_legal_team"
-                    ? "ไม่สามารถจัดทีมครบตามกติกาจากรายชื่อนักเตะของ Gameweek นี้"
-                    : "ไม่พบ Gameweek สำหรับคำนวณ"}
+              : state.state === "missing_result"
+                ? "ยังไม่มีผลทีมที่ดีที่สุดที่บันทึกไว้สำหรับ Gameweek นี้"
+                : "ไม่พบ Gameweek สำหรับแสดงผล"}
           </p>
         </section>
       )}
@@ -200,8 +196,8 @@ function OptimalTeamResult({
         </div>
       </section>
       <p className={styles.optimalProvenance}>
-        คำนวณใหม่จากคะแนนปัจจุบัน · รายชื่อนักเตะ {state.poolSize} คน ·
-        แหล่งข้อมูล {state.poolSource}
+        อ่านจากผลที่บันทึกไว้ · อัปเดตเมื่อมีการคำนวณคะแนนใหม่ · รายชื่อนักเตะ{" "}
+        {state.poolSize} คน · แหล่งข้อมูล {state.poolSource}
       </p>
     </>
   );

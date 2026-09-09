@@ -311,6 +311,14 @@ production branch. Use `npm run db:verify:fantasy` only when full invariant
 verification is useful; routine scenario switching already performs the narrow
 checks needed for fast UI iteration.
 
+### Optimal-team persistence workflow
+
+Gameweek lock, finalization, and later score corrections persist the current
+best possible legal team in the scoring transaction. After deploying the schema
+that introduces this read model, run `npm run db:backfill:optimal-teams` once
+against the confirmed environment to materialize existing scored Gameweeks.
+The admin page reads only the saved result and never runs the optimizer.
+
 ### League standings workflow
 
 Gameweek lock, finalization, and later score corrections rebuild current

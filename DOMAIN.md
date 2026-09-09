@@ -296,8 +296,10 @@ It must contain a legal 15-player squad, starting eleven, ordered bench,
 captain, and vice-captain. Normal scoring and automatic substitutions apply;
 chips and transfer deductions do not. Tied solutions resolve by stable player
 identity and do not imply that the hypothetical team was owned by a manager.
-Corrections recalculate the result from current derived player points without
-rewriting the historical pool.
+The current result and its player-point breakdown are persisted when Gameweek
+scores are calculated. Corrections replace that saved result from current
+derived player points without rewriting the historical pool. The admin page
+reads the saved result and does not run the optimizer on page load.
 
 ## Match corrections and standings
 

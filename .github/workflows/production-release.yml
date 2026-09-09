@@ -86,6 +86,9 @@ jobs:
       - name: Verify the migration journal
         if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
         run: node scripts/release/migrate.ts verify
+      - name: Backfill missing persisted optimal teams
+        if: github.event_name != 'workflow_dispatch' || !inputs.dry_run
+        run: npm run db:backfill:optimal-teams
       - name: Check candidate liveness, database readiness and public documents
         run: node scripts/release/vercel.ts check
       - name: Promote the exact verified candidate

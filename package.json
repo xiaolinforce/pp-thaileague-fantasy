@@ -20,6 +20,7 @@
     "db:check": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/check-database.ts",
     "db:generate": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs generate",
     "db:migrate": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs migrate",
+    "db:backfill:optimal-teams": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/backfill-optimal-teams.ts",
     "db:rank:leagues": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/backfill-league-standings.ts",
     "db:report:participants": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/report-fantasy-participants.ts",
     "db:scenario": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/run-fantasy-scenario.ts",

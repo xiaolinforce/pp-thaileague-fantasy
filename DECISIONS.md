@@ -843,6 +843,10 @@ on the database-backed layout and may be unavailable during a database outage.
 
 ## 2026-09-08 — Historical optimal teams use deadline player-pool snapshots
 
+**Persistence behavior superseded on 2026-09-09:** The deadline pool remains
+the eligibility boundary, but the calculated optimal team is now stored during
+score recalculation instead of being calculated on read.
+
 **Decision:** Capture every eligible Fantasy player's club, position, tier, and
 Thai status when a Gameweek locks. Calculate the admin-only best possible team
 from that immutable pool and the latest derived player points, using a legal
@@ -859,3 +863,23 @@ eligible pool.
 selections lock. The optimal team is computed on read and is never stored as a
 manager team. A scored historical Gameweek without a trustworthy pool reports
 an unavailable state instead of using current eligibility.
+
+## 2026-09-09 — Optimal Gameweek teams are persisted during scoring
+
+**Decision:** Persist one current best-possible-team result and its 15 player
+rows per scored Gameweek. Build or replace it in the same transaction as normal
+Gameweek score recalculation. The admin page reads the saved result without
+running the optimizer. Backfill existing scored Gameweeks explicitly after the
+schema migration.
+
+**Context:** Optimizing across the full eligible player pool takes materially
+longer than a normal database read and does not need to repeat for every admin
+visit. Score corrections already pass through a controlled recalculation
+boundary.
+
+**Consequences:** The stored result includes lineup, bench order, captaincy,
+automatic substitutions, score totals, and each selected player's point
+breakdown. A correction atomically replaces the current result; correction
+history remains in the existing admin audit and stat-override records rather
+than keeping every optimal-team version. A missing or incomplete stored result
+is shown as unavailable and is never calculated during a page request.

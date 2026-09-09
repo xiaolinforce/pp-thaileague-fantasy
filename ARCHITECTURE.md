@@ -166,11 +166,12 @@ values only to form quality bands before otherwise tied random choices, then
 returns a completed local draft. It does not persist a selection or consume
 transfers; the normal save action remains the only confirmation boundary.
 
-The admin optimal-team read model combines the immutable player-pool snapshot
-captured at Gameweek lock with that Gameweek's current derived player points.
-It runs the pure legal-lineup optimizer on the server and renders a hypothetical
-normal team without persisting a selection. Score corrections therefore appear
-on the next request while historical eligibility remains fixed.
+Gameweek recalculation combines the immutable player-pool snapshot captured at
+lock with current derived player points, runs the pure legal-lineup optimizer,
+and persists one current optimal-team result plus its 15 members. The admin
+read model fetches that result without running the optimizer. Score corrections
+replace the stored result in the same transaction while historical eligibility
+remains fixed; the result is not a manager-owned selection.
 
 ## Write flow
 
@@ -327,7 +328,8 @@ The schema is organized into four related groups:
   managers, teams, selections, selection snapshots, transfer revisions,
   leagues, memberships, latest League standings, and League audit history.
 - Scoring and review: match stats, stat overrides, player match points, team
-  Gameweek scores, and the fantasy admin audit log.
+  Gameweek scores, persisted optimal Gameweek teams, and the fantasy admin audit
+  log.
 
 Selection-player rows intentionally snapshot club, position, tier, and Thai
 status. Historical squads and scores must not silently change when the current

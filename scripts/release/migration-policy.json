@@ -2,5 +2,9 @@
   "0017_milky_jamie_braddock": {
     "sha256": "f46ca76a931651ad73306508b7443b890f6ab5151f4f6d6b103001f4b060a912",
     "compatibility": "compatible"
+  },
+  "0018_oval_raider": {
+    "sha256": "9f749d6fdfc19533f6e6a3f1da5993273abb4a1e0a6c4df3d31a058a6406b4f6",
+    "compatibility": "compatible"
   }
 }
