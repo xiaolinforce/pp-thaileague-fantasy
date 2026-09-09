@@ -43,7 +43,7 @@ full authentication-flow audit; the route maturity labels below remain valid.
 | `/`                           | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                                            |
 | `/upgrade`                    | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                                                 |
 | `/fixtures`                   | Data browser          | In progress | Focused Gameweek browsing implemented; empty, bilingual, and responsive states remain the next review focus.                                                               |
-| `/leagues`                    | Ranking/community     | In progress | Overall close-during-load, bilingual validation reset, and Guest invite return were reviewed; populated authenticated Private operations still need rendered evidence.     |
+| `/leagues`                    | Ranking/community     | In progress | Overall close-during-load and bilingual validation reset were reviewed; populated authenticated Private operations still need rendered evidence.                           |
 | `/profile`                    | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                      |
 | `/settings`                   | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                                 |
 | `/rules`                      | Long-form reading     | Reviewed    | Public Thai/English content is derived from executable rules and reviewed on Desktop/Mobile.                                                                               |
@@ -58,6 +58,18 @@ baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
 ## Recommended audit order
+
+### 2026-09-09 Private League information hierarchy
+
+- Local Chrome on the authenticated development detail page confirmed that the
+  Private League table omits its explanatory/status copy, transfer column,
+  self badge, and footer notes; the owner badge remains visible. The invite
+  panel exposes only the invite code and its copy action.
+- The regenerated-code flow opens in the shared `product-dialog` form pattern
+  with a clear cancel action and an inline error region. The private-league
+  overview exposes rank and member count together rather than total points.
+- This focused Thai/English desktop pass did not re-audit Mobile/Tablet,
+  sparse/dense data, or any successful mutation.
 
 ### 2026-09-05 Shared localization hydration follow-up
 

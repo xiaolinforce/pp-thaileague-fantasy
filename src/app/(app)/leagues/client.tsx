@@ -41,6 +41,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -547,16 +548,12 @@ function LeagueStandingsDialog({
 
 export function LeagueOverview({
   overview,
-  initialJoinCode,
 }: {
   overview: LeagueOverviewState;
-  initialJoinCode: string;
 }) {
   const router = useRouter();
   const [createOpen, setCreateOpen] = useState(false);
-  const [joinOpen, setJoinOpen] = useState(
-    Boolean(initialJoinCode) && !overview.isGuest,
-  );
+  const [joinOpen, setJoinOpen] = useState(false);
   const [selectedLeague, setSelectedLeague] = useState<SelectedLeague | null>(
     null,
   );
@@ -615,11 +612,6 @@ export function LeagueOverview({
   const openPrivateLeague = (leagueId: string) => {
     router.push(`/leagues/${leagueId}`);
   };
-
-  const inviteReturnTo = initialJoinCode
-    ? `/leagues?join=${encodeURIComponent(initialJoinCode)}`
-    : "/leagues";
-  const upgradeHref = `/upgrade?returnTo=${encodeURIComponent(inviteReturnTo)}`;
 
   return (
     <Localized>
@@ -695,9 +687,6 @@ export function LeagueOverview({
               {overview.privateLeagues.map((league) => (
                 <li key={league.id}>
                   <Link href={`/leagues/${league.id}`}>
-                    <span className="league-list-rank">
-                      #{league.rank ?? "—"}
-                    </span>
                     <span className="league-list-identity">
                       <strong data-localize="off">{league.name}</strong>
                       <small>
@@ -705,31 +694,17 @@ export function LeagueOverview({
                         {league.isOwner ? " · คุณเป็นเจ้าของ" : ""}
                       </small>
                     </span>
-                    <span className="league-list-points">
-                      <small>คะแนนรวม</small>
-                      <strong>{league.totalPoints.toLocaleString()}</strong>
+                    <span className="league-list-standing">
+                      <small>อันดับ / สมาชิก</small>
+                      <strong>
+                        <em>{league.rank ?? "—"}</em> / {league.memberCount}
+                      </strong>
                     </span>
                     <ChevronRight aria-hidden="true" />
                   </Link>
                 </li>
               ))}
             </ul>
-          ) : overview.isGuest && initialJoinCode ? (
-            <div className="league-private-empty">
-              <span aria-hidden="true">
-                <KeyRound />
-              </span>
-              <div>
-                <h3>สมัครสมาชิกเพื่อใช้ Private League</h3>
-                <p>
-                  รหัสเชิญพร้อมแล้ว
-                  สมัครสมาชิกเพื่อดูรายละเอียดและยืนยันเข้าร่วมลีกนี้
-                </p>
-              </div>
-              <Link className="secondary-button" href={upgradeHref}>
-                สมัครสมาชิก
-              </Link>
-            </div>
           ) : (
             <p className="league-private-empty-copy">
               {overview.isGuest
@@ -749,7 +724,7 @@ export function LeagueOverview({
             <JoinLeagueDialog
               open={joinOpen}
               onOpenChange={setJoinOpen}
-              initialCode={initialJoinCode}
+              initialCode=""
               onLeagueOpened={openPrivateLeague}
             />
           </>
@@ -823,17 +798,89 @@ function ConfirmationDialog({
   );
 }
 
+function RegenerateInviteDialog({
+  open,
+  onOpenChange,
+  onRegenerate,
+  pending,
+  error,
+  errorRef,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onRegenerate: () => void;
+  pending: boolean;
+  error: string;
+  errorRef: React.RefObject<HTMLParagraphElement | null>;
+}) {
+  const { translate } = useLanguage();
+
+  return (
+    <Localized>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent
+          className="product-dialog league-dialog"
+          closeLabel={translate("ปิด")}
+        >
+          <form
+            onSubmit={(event) => {
+              event.preventDefault();
+              onRegenerate();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>สร้างรหัสเชิญใหม่</DialogTitle>
+              <DialogDescription>
+                รหัสเดิมจะใช้เข้าร่วมลีกไม่ได้ทันที
+                สมาชิกที่อยู่ในลีกแล้วจะไม่ถูกนำออก
+              </DialogDescription>
+            </DialogHeader>
+            <FormMessage
+              message={translate(error)}
+              error
+              messageRef={errorRef}
+            />
+            <DialogFooter className="league-dialog-footer">
+              <button
+                type="button"
+                className="secondary-button"
+                onClick={() => onOpenChange(false)}
+                disabled={pending}
+              >
+                ยกเลิก
+              </button>
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={pending}
+                aria-busy={pending}
+              >
+                {pending ? <PendingIcon /> : <RefreshCw aria-hidden="true" />}
+                {pending ? "กำลังสร้างรหัส…" : "สร้างรหัสใหม่"}
+              </button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </Localized>
+  );
+}
+
 export function LeagueDetail({ league }: { league: LeagueDetailState }) {
   const router = useRouter();
   const { translate } = useLanguage();
+  const isPrivateLeague = league.type === "private";
   const [name, setName] = useState(league.name);
   const [inviteCode, setInviteCode] = useState(league.inviteCode ?? "");
   const [pendingTask, setPendingTask] = useState("");
   const [formError, setFormError] = useState("");
+  const [regenerateOpen, setRegenerateOpen] = useState(false);
+  const [regenerateError, setRegenerateError] = useState("");
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(
     null,
   );
   const errorRef = useRef<HTMLParagraphElement>(null);
+  const regenerateErrorRef = useRef<HTMLParagraphElement>(null);
 
   const reportFailure = (message: string) => {
     setFormError(message);
@@ -866,35 +913,34 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
   const regenerate = async () => {
     if (pendingTask) return;
     setPendingTask("regenerate");
-    setFormError("");
+    setRegenerateError("");
     try {
       const result = await regeneratePrivateLeagueInviteAction({
         leagueId: league.id,
       });
-      if (!result.ok) return reportFailure(result.message);
+      if (!result.ok) {
+        setRegenerateError(result.message);
+        window.requestAnimationFrame(() => regenerateErrorRef.current?.focus());
+        return;
+      }
       setInviteCode(result.inviteCode ?? "");
-      setConfirmAction(null);
+      setRegenerateOpen(false);
       toast.success(translate(result.message));
       router.refresh();
     } catch {
-      reportFailure(
+      setRegenerateError(
         "ทำรายการลีกไม่สำเร็จ กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
       );
+      window.requestAnimationFrame(() => regenerateErrorRef.current?.focus());
     } finally {
       setPendingTask("");
     }
   };
 
-  const copy = async (kind: "code" | "link") => {
-    const value =
-      kind === "code"
-        ? inviteCode
-        : `${window.location.origin}/leagues?join=${inviteCode}`;
+  const copyInviteCode = async () => {
     try {
-      await navigator.clipboard.writeText(value);
-      toast.success(
-        translate(kind === "code" ? "คัดลอกรหัสแล้ว" : "คัดลอกลิงก์เชิญแล้ว"),
-      );
+      await navigator.clipboard.writeText(inviteCode);
+      toast.success(translate("คัดลอกรหัสแล้ว"));
     } catch {
       reportFailure("คัดลอกไม่สำเร็จ กรุณาเลือกรหัสแล้วคัดลอกด้วยตนเอง");
     }
@@ -976,19 +1022,25 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
             <div className="league-standings-heading">
               <div>
                 <h2 id="standings-heading">ตารางอันดับ</h2>
-                <p>
-                  เรียงจากคะแนนรวม แล้วใช้ Transfer ที่น้อยกว่าเป็นตัวตัดสิน
-                </p>
+                {!isPrivateLeague ? (
+                  <p>
+                    เรียงจากคะแนนรวม แล้วใช้ Transfer ที่น้อยกว่าเป็นตัวตัดสิน
+                  </p>
+                ) : null}
               </div>
-              <span>
-                {league.gameweek.scoreComplete
-                  ? "คะแนน Final"
-                  : "คะแนนชั่วคราว"}
-              </span>
+              {!isPrivateLeague ? (
+                <span>
+                  {league.gameweek.scoreComplete
+                    ? "คะแนน Final"
+                    : "คะแนนชั่วคราว"}
+                </span>
+              ) : null}
             </div>
             <div className="league-table-scroll" tabIndex={0}>
               <table
                 className={`league-standings-table${
+                  isPrivateLeague ? " league-private-standings" : ""
+                }${
                   league.isOwner && league.type === "private"
                     ? " league-owner-standings"
                     : ""
@@ -1000,7 +1052,7 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                     <th scope="col">ทีม</th>
                     <th scope="col">GW</th>
                     <th scope="col">รวม</th>
-                    <th scope="col">Transfer</th>
+                    {!isPrivateLeague ? <th scope="col">Transfer</th> : null}
                     {league.isOwner && league.type === "private" ? (
                       <th scope="col">
                         <span className="sr-only">จัดการสมาชิก</span>
@@ -1018,7 +1070,6 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                       <th scope="row">
                         <span className="league-team-name">
                           <span data-localize="off">{standing.teamName}</span>
-                          {standing.mine ? <i>คุณ</i> : null}
                           {standing.owner ? (
                             <i className="owner">เจ้าของ</i>
                           ) : null}
@@ -1028,7 +1079,9 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                       <td className="league-total-cell">
                         {standing.totalPoints.toLocaleString()}
                       </td>
-                      <td>{standing.transferCount.toLocaleString()}</td>
+                      {!isPrivateLeague ? (
+                        <td>{standing.transferCount.toLocaleString()}</td>
+                      ) : null}
                       {league.isOwner && league.type === "private" ? (
                         <td>
                           {!standing.owner ? (
@@ -1095,14 +1148,16 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                 )}
               </nav>
             ) : null}
-            <footer className="league-table-note">
-              <span>Wildcard ไม่นับจำนวน Transfer</span>
-              <span>
-                {league.gameweek.scoreComplete
-                  ? "อันดับนี้สรุปแล้ว"
-                  : "อันดับอาจเปลี่ยนหลังอัปเดตคะแนน"}
-              </span>
-            </footer>
+            {!isPrivateLeague ? (
+              <footer className="league-table-note">
+                <span>Wildcard ไม่นับจำนวน Transfer</span>
+                <span>
+                  {league.gameweek.scoreComplete
+                    ? "อันดับนี้สรุปแล้ว"
+                    : "อันดับอาจเปลี่ยนหลังอัปเดตคะแนน"}
+                </span>
+              </footer>
+            ) : null}
           </section>
 
           <aside
@@ -1126,7 +1181,9 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                     <KeyRound aria-hidden="true" />
                     <h2>เชิญสมาชิก</h2>
                   </div>
-                  <p>แชร์รหัสหรือลิงก์นี้กับสมาชิกที่เข้าสู่ระบบแล้ว</p>
+                  <p className="league-invite-description">
+                    แชร์รหัสนี้กับสมาชิกที่เข้าสู่ระบบแล้ว
+                  </p>
                   <output
                     className="league-invite-code"
                     aria-label={`รหัสเชิญ ${inviteCode}`}
@@ -1137,30 +1194,18 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                     <button
                       type="button"
                       className="secondary-button"
-                      onClick={() => copy("code")}
+                      onClick={copyInviteCode}
                     >
                       <Clipboard aria-hidden="true" /> คัดลอกรหัส
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary-button"
-                      onClick={() => copy("link")}
-                    >
-                      <Clipboard aria-hidden="true" /> คัดลอกลิงก์
                     </button>
                   </div>
                   <button
                     type="button"
                     className="league-text-action"
-                    onClick={() =>
-                      setConfirmAction({
-                        title: "สร้างรหัสเชิญใหม่?",
-                        description:
-                          "รหัสและลิงก์เดิมจะใช้ไม่ได้ทันที สมาชิกที่อยู่ในลีกแล้วจะไม่ถูกนำออก",
-                        label: "สร้างรหัสใหม่",
-                        run: regenerate,
-                      })
-                    }
+                    onClick={() => {
+                      setRegenerateError("");
+                      setRegenerateOpen(true);
+                    }}
                     disabled={Boolean(pendingTask)}
                   >
                     <RefreshCw aria-hidden="true" /> สร้างรหัสใหม่
@@ -1274,6 +1319,14 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
           action={confirmAction}
           pending={Boolean(pendingTask)}
           onClose={() => !pendingTask && setConfirmAction(null)}
+        />
+        <RegenerateInviteDialog
+          open={regenerateOpen}
+          onOpenChange={(open) => !pendingTask && setRegenerateOpen(open)}
+          onRegenerate={regenerate}
+          pending={pendingTask === "regenerate"}
+          error={regenerateError}
+          errorRef={regenerateErrorRef}
         />
       </>
     </Localized>

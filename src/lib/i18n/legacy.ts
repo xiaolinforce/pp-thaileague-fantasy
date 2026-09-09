@@ -576,6 +576,7 @@ const translations: Record<string, string> = {
   ลีกที่คุณเป็นสมาชิกจะปรากฏเฉพาะกับคนในกลุ่ม:
     "Only group members can see leagues you have joined",
   คุณเป็นเจ้าของ: "You are the owner",
+  "อันดับ / สมาชิก": "Rank / members",
   คะแนนรวม: "Total points",
   "Private League สำหรับสมาชิก": "Private Leagues are for members",
   "ยังไม่มี Private League": "No Private Leagues yet",
@@ -618,11 +619,17 @@ const translations: Record<string, string> = {
   "ทุกทีมเข้าร่วม Overall อัตโนมัติและไม่สามารถออกจากลีกนี้ได้":
     "Every team joins Overall automatically and cannot leave it",
   เชิญสมาชิก: "Invite members",
+  แชร์รหัสนี้กับสมาชิกที่เข้าสู่ระบบแล้ว:
+    "Share this code with a signed-in member",
   แชร์รหัสหรือลิงก์นี้กับสมาชิกที่เข้าสู่ระบบแล้ว:
     "Share this code or link with a signed-in member",
   คัดลอกรหัส: "Copy code",
   คัดลอกลิงก์: "Copy link",
   สร้างรหัสใหม่: "Generate new code",
+  สร้างรหัสเชิญใหม่: "Generate a new invite code",
+  "รหัสเดิมจะใช้เข้าร่วมลีกไม่ได้ทันที สมาชิกที่อยู่ในลีกแล้วจะไม่ถูกนำออก":
+    "The old code will stop working immediately. Members already in the league will remain.",
+  "กำลังสร้างรหัส…": "Generating code…",
   ตั้งค่าลีก: "League settings",
   บันทึกชื่อ: "Save name",
   ลบลีก: "Delete league",

@@ -9763,7 +9763,7 @@ body {
 
 .league-private-list a {
   display: grid;
-  grid-template-columns: 76px minmax(190px, 1fr) minmax(95px, auto) auto;
+  grid-template-columns: minmax(190px, 1fr) minmax(95px, auto) auto;
   align-items: center;
   gap: 16px;
   min-height: 84px;
@@ -9777,7 +9777,7 @@ body {
   width: 100%;
   border: 0;
   display: grid;
-  grid-template-columns: 76px minmax(190px, 1fr) minmax(95px, auto) auto;
+  grid-template-columns: minmax(190px, 1fr) minmax(95px, auto) auto;
   align-items: center;
   gap: 16px;
   min-height: 84px;
@@ -9799,15 +9799,8 @@ body {
   background: #fbfaf8;
 }
 
-.league-list-rank {
-  color: var(--orange-deep);
-  font-size: 21px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
 .league-list-identity,
-.league-list-points {
+.league-list-standing {
   display: flex;
   min-width: 0;
   flex-direction: column;
@@ -9823,21 +9816,26 @@ body {
 }
 
 .league-list-identity small,
-.league-list-points small {
+.league-list-standing small {
   margin-top: 3px;
   color: var(--muted);
   font-size: 12px;
 }
 
-.league-list-points {
+.league-list-standing {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-.league-list-points strong {
+.league-list-standing strong {
   color: var(--ink);
   font-size: 17px;
   font-weight: 600;
+}
+
+.league-list-standing em {
+  color: var(--orange-deep);
+  font-style: normal;
 }
 
 .league-private-list a > svg {
@@ -10228,8 +10226,8 @@ body {
 }
 
 .league-team-name i.owner {
-  color: var(--green-dark);
-  background: var(--green-soft);
+  color: #fff;
+  background: var(--orange);
 }
 
 .league-row-action,
@@ -10363,6 +10361,10 @@ body {
   padding-inline: 8px;
 }
 
+.league-management-section .league-invite-description {
+  font-size: 14px;
+}
+
 .league-text-action {
   margin-top: 9px;
 }
@@ -10453,13 +10455,9 @@ body {
 
   .league-private-list a,
   .league-private-list button {
-    grid-template-columns: 58px minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 10px;
     padding-inline: 13px;
-  }
-
-  .league-list-points {
-    display: none;
   }
 
   .league-list-identity strong {
@@ -10539,8 +10537,8 @@ body {
     width: 52px;
   }
 
-  .league-standings-table th:nth-child(5),
-  .league-standings-table td:nth-child(5) {
+  .league-standings-table:not(.league-private-standings) th:nth-child(5),
+  .league-standings-table:not(.league-private-standings) td:nth-child(5) {
     display: none;
   }
 
@@ -10560,8 +10558,8 @@ body {
     display: none;
   }
 
-  .league-owner-standings th:nth-child(6),
-  .league-owner-standings td:nth-child(6) {
+  .league-owner-standings th:nth-child(5),
+  .league-owner-standings td:nth-child(5) {
     width: 44px;
   }
 
