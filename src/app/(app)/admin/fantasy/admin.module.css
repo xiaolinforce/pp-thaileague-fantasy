@@ -282,7 +282,7 @@
   font-weight: 500;
 }
 .optimalPage {
-  width: min(100%, 876px);
+  width: 100%;
   margin-inline: auto;
 }
 .optimalToolbar {
@@ -316,11 +316,17 @@
 }
 .optimalScoreCard span {
   margin-top: 10px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 800;
 }
 .optimalPitch {
   overflow: hidden;
+}
+@media (width >= 80rem) {
+  .optimalPage {
+    width: calc((100% - 20px) * 0.6);
+    max-width: 876px;
+  }
 }
 @media (max-width: 1000px) {
   .split {
