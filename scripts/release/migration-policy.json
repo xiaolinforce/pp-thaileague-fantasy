@@ -10,5 +10,9 @@
   "0019_talented_kitty_pryde": {
     "sha256": "6662101e9226b921fff02a9a75f899a0d13be142d1dd6997ba670bf7452d8673",
     "compatibility": "compatible"
+  },
+  "0020_swift_logan": {
+    "sha256": "796d7f4eb929f8154410c39e0e49a3a5b3c6c0b04da1b004dcc9d7717b20b319",
+    "compatibility": "compatible"
   }
 }
