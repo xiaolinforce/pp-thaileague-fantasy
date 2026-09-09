@@ -2,8 +2,7 @@ import { AdminLocalized } from "./components";
 import { AdminDate } from "./server-components";
 import Link from "next/link";
 import { getAdminParticipants, type AdminParams } from "@/data/admin";
-import { AdminHeading, Status } from "./components";
-import { WeekSelect } from "./server-components";
+import { AdminHeading, AdminUrlSelect, Status } from "./components";
 import styles from "./admin.module.css";
 
 export default async function AdminOverview({
@@ -31,10 +30,17 @@ export default async function AdminOverview({
         title="ภาพรวม"
         description="ติดตามผู้เล่นและงานที่ต้องจัดการในฤดูกาล 2026/27"
       />
-      <form className={styles.toolbar}>
-        <WeekSelect weeks={weeks} selected={week?.number} />
-        <button className="secondary-button">แสดงข้อมูล</button>
-      </form>
+      <div className={styles.toolbar}>
+        <AdminUrlSelect
+          name="gw"
+          label="Gameweek"
+          value={week ? String(week.number) : undefined}
+          options={weeks.map((candidate) => ({
+            value: String(candidate.number),
+            label: `GW ${candidate.number}`,
+          }))}
+        />
+      </div>
       <div className={styles.metrics}>
         {metrics.map(([label, count, filter]) => (
           <Link
