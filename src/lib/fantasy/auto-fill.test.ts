@@ -23,6 +23,8 @@ function createCandidates() {
           tier,
           overallRank: candidates.length + 1,
           projectedPoints: 500 - tier * 50 - index,
+          ownershipPercent: 0,
+          ownershipTeamCount: 0,
           isThai: index % 3 !== 0,
           isLikelyClubStartingGoalkeeper: false,
         });
@@ -118,6 +120,8 @@ test("classifies each club's best-tier goalkeepers and preserves ties", () => {
       tier: 2,
       overallRank: 10,
       projectedPoints: 100,
+      ownershipPercent: 0,
+      ownershipTeamCount: 0,
       isThai: true,
       isLikelyClubStartingGoalkeeper: false,
     },
@@ -128,6 +132,8 @@ test("classifies each club's best-tier goalkeepers and preserves ties", () => {
       tier: 3,
       overallRank: 20,
       projectedPoints: 90,
+      ownershipPercent: 0,
+      ownershipTeamCount: 0,
       isThai: true,
       isLikelyClubStartingGoalkeeper: false,
     },
@@ -138,6 +144,8 @@ test("classifies each club's best-tier goalkeepers and preserves ties", () => {
       tier: 1,
       overallRank: 1,
       projectedPoints: 120,
+      ownershipPercent: 0,
+      ownershipTeamCount: 0,
       isThai: false,
       isLikelyClubStartingGoalkeeper: false,
     },
@@ -148,6 +156,8 @@ test("classifies each club's best-tier goalkeepers and preserves ties", () => {
       tier: 1,
       overallRank: 2,
       projectedPoints: 119,
+      ownershipPercent: 0,
+      ownershipTeamCount: 0,
       isThai: true,
       isLikelyClubStartingGoalkeeper: false,
     },
@@ -365,6 +375,8 @@ test("randomizes only inside the best projected-points quality band", () => {
     tier: fixture.removedCandidate.tier,
     overallRank,
     projectedPoints: index < 4 ? 1_000 : 900,
+    ownershipPercent: 0,
+    ownershipTeamCount: 0,
     isThai: fixture.removedCandidate.isThai,
     isLikelyClubStartingGoalkeeper: false,
   }));
@@ -390,6 +402,34 @@ test("randomizes only inside the best projected-points quality band", () => {
   assert.ok(selectedIds.size > 1);
 });
 
+test("prefers popularity after quality once the sample reaches 30 teams", () => {
+  const fixture = createSingleVacancyFixture(63);
+  const alternatives: AutoFillCandidate[] = Array.from(
+    { length: 3 },
+    (_, index) => ({
+      id: `popular-option-${index}`,
+      clubId: `popular-club-${index}`,
+      position: fixture.removedCandidate.position,
+      tier: fixture.removedCandidate.tier,
+      overallRank: 10_000 + index,
+      projectedPoints: 10_000,
+      ownershipPercent: index === 2 ? 75 : 10,
+      ownershipTeamCount: 30,
+      isThai: fixture.removedCandidate.isThai,
+      isLikelyClubStartingGoalkeeper: false,
+    }),
+  );
+
+  const result = autoFillSquadDraft({
+    members: fixture.members,
+    candidates: [...fixture.candidates, ...alternatives],
+    random: seededRandom(65),
+  });
+
+  assert.ok(result);
+  assert.deepEqual(result.addedPlayerIds, ["popular-option-2"]);
+});
+
 test("falls through to the next quality band when the best band is invalid", () => {
   const fixture = createSingleVacancyFixture(67);
   const occupiedIds = fixture.members.flatMap((member) =>
@@ -411,6 +451,8 @@ test("falls through to the next quality band when the best band is invalid", () 
       tier: fixture.removedCandidate.tier,
       overallRank: 2_000 + index,
       projectedPoints: 1_000 - index,
+      ownershipPercent: 0,
+      ownershipTeamCount: 0,
       isThai: fixture.removedCandidate.isThai,
       isLikelyClubStartingGoalkeeper: false,
     }),
@@ -448,6 +490,8 @@ test("maximizes foreign-player use before applying the quality band", () => {
       tier: fixture.removedCandidate.tier,
       overallRank: 3_000 + index,
       projectedPoints: index === 7 ? 1 : 1_000 - index,
+      ownershipPercent: 0,
+      ownershipTeamCount: 0,
       isThai: index !== 7,
       isLikelyClubStartingGoalkeeper: false,
     }),

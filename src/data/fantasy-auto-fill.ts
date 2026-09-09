@@ -7,6 +7,7 @@ import {
   competitionEntries,
   fantasyGameweeks,
   fantasyPlayerRankings,
+  fantasyPlayerOwnerships,
   fantasyPlayers,
   fantasyPlayerTiers,
   fantasyRankingRuns,
@@ -56,6 +57,8 @@ export async function getFantasyAutoFillCandidates(
       position: fantasyPlayers.lockedPosition,
       overallRank: fantasyPlayerRankings.overallRank,
       projectedPoints: fantasyPlayerRankings.projectedPoints,
+      ownershipPercent: fantasyPlayerOwnerships.selectedPercent,
+      ownershipTeamCount: fantasyPlayerOwnerships.countedTeamCount,
       isThai: fantasyPlayers.isThai,
     })
     .from(fantasyPlayerRankings)
@@ -71,6 +74,13 @@ export async function getFantasyAutoFillCandidates(
     .innerJoin(
       competitionEntries,
       eq(playerRegistrations.competitionEntryId, competitionEntries.id),
+    )
+    .leftJoin(
+      fantasyPlayerOwnerships,
+      and(
+        eq(fantasyPlayerOwnerships.fantasyPlayerId, fantasyPlayers.id),
+        eq(fantasyPlayerOwnerships.fantasyGameweekId, gameweek.id),
+      ),
     )
     .where(
       and(
@@ -120,6 +130,8 @@ export async function getFantasyAutoFillCandidates(
       tier: tierByPlayer.get(row.fantasyPlayerId) ?? 4,
       overallRank: row.overallRank,
       projectedPoints: row.projectedPoints,
+      ownershipPercent: row.ownershipPercent ?? 0,
+      ownershipTeamCount: row.ownershipTeamCount ?? 0,
       isThai: row.isThai,
       isLikelyClubStartingGoalkeeper: false,
     });

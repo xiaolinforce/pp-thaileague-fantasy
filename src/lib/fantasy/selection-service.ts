@@ -4,6 +4,7 @@ import { transactionDb } from "@/db/transaction";
 import {
   competitionEntries,
   fantasyGameweeks,
+  fantasyManagers,
   fantasyPlayers,
   fantasyPlayerTiers,
   fantasySeasons,
@@ -35,6 +36,7 @@ import {
 import { normalizeFantasyRevisionMembers } from "./revision-snapshot";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
 import { getTransferRevisionState } from "./transfer-revisions";
+import { updateFantasyPlayerOwnershipForSelection } from "./ownership-service";
 
 export type FantasySelectionResult =
   | { ok: true; message: string; revision: number }
@@ -101,8 +103,15 @@ export async function saveFantasySelectionInTransaction(
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
   const [team] = await db
-    .select()
+    .select({
+      id: fantasyTeams.id,
+      freeTransfers: fantasyTeams.freeTransfers,
+      isActive: fantasyTeams.isActive,
+      managerStatus: fantasyManagers.status,
+      managerIsBot: fantasyManagers.isBot,
+    })
     .from(fantasyTeams)
+    .innerJoin(fantasyManagers, eq(fantasyTeams.managerId, fantasyManagers.id))
     .where(
       and(
         eq(fantasyTeams.id, owner.teamId),
@@ -279,6 +288,10 @@ export async function saveFantasySelectionInTransaction(
   const savedAt = new Date();
   if (!isBeforeDeadline(gameweek.deadlineAt, savedAt))
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
+  const previousOwnershipPlayerIds = await getSelectionPlayerIds(
+    selection.id,
+    db,
+  );
   await db
     .update(fantasyTeamSelections)
     .set({
@@ -295,6 +308,16 @@ export async function saveFantasySelectionInTransaction(
     .delete(fantasyTeamSelectionPlayers)
     .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
   await db.insert(fantasyTeamSelectionPlayers).values(playerValues);
+  await updateFantasyPlayerOwnershipForSelection({
+    gameweekId: gameweek.id,
+    previousPlayerIds: previousOwnershipPlayerIds,
+    nextPlayerIds: uniqueIds,
+    isCountedTeam:
+      team.isActive &&
+      !team.managerIsBot &&
+      (team.managerStatus === "guest" || team.managerStatus === "member"),
+    database: db,
+  });
   await db.insert(fantasyTransferRevisions).values({
     selectionId: selection.id,
     revision,
@@ -364,8 +387,15 @@ export async function revertFantasySelectionInTransaction(
   }
 
   const [team] = await db
-    .select()
+    .select({
+      id: fantasyTeams.id,
+      freeTransfers: fantasyTeams.freeTransfers,
+      isActive: fantasyTeams.isActive,
+      managerStatus: fantasyManagers.status,
+      managerIsBot: fantasyManagers.isBot,
+    })
     .from(fantasyTeams)
+    .innerJoin(fantasyManagers, eq(fantasyTeams.managerId, fantasyManagers.id))
     .where(
       and(
         eq(fantasyTeams.id, owner.teamId),
@@ -434,6 +464,10 @@ export async function revertFantasySelectionInTransaction(
     return { ok: false, message: "เลย Deadline ของ Gameweek นี้แล้ว" };
   }
 
+  const previousOwnershipPlayerIds = await getSelectionPlayerIds(
+    selection.id,
+    db,
+  );
   await db
     .update(fantasyTeamSelections)
     .set({
@@ -452,6 +486,16 @@ export async function revertFantasySelectionInTransaction(
   if (restored.length > 0) {
     await db.insert(fantasyTeamSelectionPlayers).values(restored);
   }
+  await updateFantasyPlayerOwnershipForSelection({
+    gameweekId: gameweek.id,
+    previousPlayerIds: previousOwnershipPlayerIds,
+    nextPlayerIds: restored.map((member) => member.fantasyPlayerId),
+    isCountedTeam:
+      team.isActive &&
+      !team.managerIsBot &&
+      (team.managerStatus === "guest" || team.managerStatus === "member"),
+    database: db,
+  });
 
   const confirmedRevisionFilter = openingGameweek
     ? and(
@@ -494,6 +538,17 @@ export async function revertFantasySelectionInTransaction(
     })),
     activeChip,
   };
+}
+
+async function getSelectionPlayerIds(
+  selectionId: string,
+  db: Pick<FantasyTransaction, "select">,
+) {
+  const rows = await db
+    .select({ fantasyPlayerId: fantasyTeamSelectionPlayers.fantasyPlayerId })
+    .from(fantasyTeamSelectionPlayers)
+    .where(eq(fantasyTeamSelectionPlayers.selectionId, selectionId));
+  return rows.map((row) => row.fantasyPlayerId);
 }
 
 function restoreBaselineMembers(

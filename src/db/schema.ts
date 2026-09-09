@@ -1326,6 +1326,55 @@ export const fantasyTeamSelectionPlayers = pgTable(
   ],
 );
 
+export const fantasyPlayerOwnerships = pgTable(
+  "fantasy_player_ownerships",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id").notNull(),
+    fantasyGameweekId: uuid("fantasy_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "cascade" }),
+    fantasyPlayerId: uuid("fantasy_player_id")
+      .notNull()
+      .references(() => fantasyPlayers.id, { onDelete: "cascade" }),
+    selectedTeamCount: integer("selected_team_count").default(0).notNull(),
+    countedTeamCount: integer("counted_team_count").default(0).notNull(),
+    selectedPercent: doublePrecision("selected_percent").default(0).notNull(),
+    calculatedAt: timestamp("calculated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    foreignKey({
+      name: "fantasy_ownership_gameweek_season_fk",
+      columns: [table.fantasyGameweekId, table.fantasySeasonId],
+      foreignColumns: [fantasyGameweeks.id, fantasyGameweeks.fantasySeasonId],
+    }).onDelete("cascade"),
+    foreignKey({
+      name: "fantasy_ownership_player_season_fk",
+      columns: [table.fantasyPlayerId, table.fantasySeasonId],
+      foreignColumns: [fantasyPlayers.id, fantasyPlayers.fantasySeasonId],
+    }).onDelete("cascade"),
+    uniqueIndex("fantasy_player_ownerships_gameweek_player_unique").on(
+      table.fantasyGameweekId,
+      table.fantasyPlayerId,
+    ),
+    index("fantasy_player_ownerships_gameweek_percent_idx").on(
+      table.fantasyGameweekId,
+      table.selectedPercent,
+    ),
+    check(
+      "fantasy_player_ownerships_counts_check",
+      sql`${table.selectedTeamCount} >= 0 and ${table.countedTeamCount} >= 0 and ${table.selectedTeamCount} <= ${table.countedTeamCount}`,
+    ),
+    check(
+      "fantasy_player_ownerships_percent_check",
+      sql`${table.selectedPercent} >= 0 and ${table.selectedPercent} <= 100`,
+    ),
+  ],
+);
+
 export const fantasyTransferRevisions = pgTable(
   "fantasy_transfer_revisions",
   {

@@ -212,6 +212,8 @@ export default function TransfersClient({
     )
     .sort((a, b) => {
       if (sort === "tier") return a.tier - b.tier || b.points - a.points;
+      if (sort === "popularity")
+        return b.selected - a.selected || b.points - a.points;
       return sort === "form" ? b.form - a.form : b.points - a.points;
     })
     .slice(0, 50);
@@ -443,6 +445,7 @@ export default function TransfersClient({
             <SelectItem value="points">คะแนนสูงสุด</SelectItem>
             <SelectItem value="form">ฟอร์มดีที่สุด</SelectItem>
             <SelectItem value="tier">ระดับสูงสุด</SelectItem>
+            <SelectItem value="popularity">ความนิยมสูงสุด</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -633,7 +636,9 @@ export default function TransfersClient({
                 ? player.form.toFixed(1)
                 : sort === "tier"
                   ? String(player.tier)
-                  : String(player.points);
+                  : sort === "popularity"
+                    ? `${player.selected.toFixed(1)}%`
+                    : String(player.points);
             const metricLabel =
               sort === "form"
                 ? language === "th"
@@ -643,9 +648,13 @@ export default function TransfersClient({
                   ? language === "th"
                     ? `ระดับ ${metricValue}`
                     : `Tier ${metricValue}`
-                  : language === "th"
-                    ? `${metricValue} คะแนน`
-                    : `${metricValue} points`;
+                  : sort === "popularity"
+                    ? language === "th"
+                      ? `ความนิยม ${metricValue}`
+                      : `Selected by ${metricValue}`
+                    : language === "th"
+                      ? `${metricValue} คะแนน`
+                      : `${metricValue} points`;
             return (
               <article className="compact-market-row" key={player.id}>
                 <button

@@ -124,6 +124,22 @@ ranks. A published run records the model version, cutoff date, sources,
 configuration, confidence, and per-player reasons. It cannot be applied to a
 Gameweek that already has locked selections or scores.
 
+### Player ownership
+
+Player ownership is the percentage of counted teams whose saved Gameweek
+selection contains that player. A counted team must be active, belong to a
+Guest or member manager rather than a bot or abandoned identity, and contain
+exactly 15 selection-player rows. Empty and partial drafts do not enter either
+the numerator or denominator.
+
+Each player stores the selected-team count, common counted-team denominator,
+percentage rounded to one decimal place, and calculation time separately for
+each Gameweek. A save or restore updates the current Gameweek values inside the
+selection transaction. Gameweek carryover creates the next snapshot, locking
+finalizes the current snapshot, and a secret-protected daily reconciliation
+rebuilds the open Gameweek from canonical selections. Runtime market reads use
+the stored rows and never aggregate all teams.
+
 ### Automatic squad completion
 
 Before the deadline, a manager may fill every vacant draft slot automatically.
@@ -139,7 +155,10 @@ band, minimizing first the worst band used and then the total band distance.
 Quality bands are calculated separately within each position and tier from the
 published projected points, with overall rank breaking equal projections. Each
 band contains the larger of three players or 25% of that position-tier group,
-rounded up; randomness breaks ties inside the best feasible band profile. Club,
+rounded up. After 30 counted teams exist, higher stored ownership breaks an
+otherwise equal quality-band profile; before that sample threshold, ownership
+has no effect. Randomness resolves the remaining ties. Ownership does not
+change captaincy assignment. Club,
 foreign-player, cumulative tier, position, duplicate-player, lineup, and bench
 constraints remain hard limits.
 

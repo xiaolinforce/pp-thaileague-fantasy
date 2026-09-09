@@ -342,6 +342,13 @@ and audit row are intentionally preserved. Sentry receives an
 `auth-maintenance` check-in for every authorized execution. Review it weekly and
 investigate any failed or missing run alongside the Vercel runtime log.
 
+Vercel Cron also calls `/api/cron/fantasy-ownership` at 02:43 Asia/Bangkok with
+the same Production-only bearer secret. The route reconciles the open
+Gameweek's persisted player-ownership rows from complete active Guest/member
+teams, excluding bots, abandoned identities, and incomplete drafts. Selection
+saves and restores normally maintain those rows transactionally; this daily run
+repairs drift and reports a separate `fantasy-ownership` Sentry check-in.
+
 ## Monitoring cadence
 
 Sentry monitors `https://fantasy.ppfootball.net/api/health` for application

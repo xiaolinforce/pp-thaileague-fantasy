@@ -4,6 +4,29 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-09 — Player ownership is a persisted Gameweek read model
+
+**Decision:** Store selected-team count, counted-team denominator, percentage,
+and calculation time for every Fantasy player and Gameweek. Count only active
+Guest/member teams with complete 15-player selections; exclude bots, abandoned
+identities, and incomplete drafts. Update ownership transactionally from squad
+save/restore differences, refresh both snapshots at Gameweek lock/carryover,
+and reconcile the open Gameweek once daily through a secret-protected Vercel
+Cron route.
+
+**Context:** The Player Market previously aggregated every current selection on
+a five-minute ownership-cache miss. Ownership is now a sort option and an
+Auto-fill input, so request cost must not grow with the number of participating
+teams. Hourly Vercel Cron is unavailable on the free Hobby schedule and would
+still leave unnecessary staleness after a manager saves.
+
+**Consequences:** Market reads use one indexed persisted lookup and can sort by
+the stored percentage. Auto-fill uses higher ownership only after projected
+quality bands tie and at least 30 human teams are counted, then retains random
+variety; captaincy is unchanged. Advisory transaction locks serialize
+incremental updates with reconciliation, historical Gameweeks retain their
+last snapshot, and migration `0020` backfills all existing Gameweeks.
+
 ## 2026-09-08 — Transfer cancellation restores the Gameweek baseline
 
 **Decision:** Before the deadline, let a manager restore the complete

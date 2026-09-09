@@ -384,6 +384,7 @@ const translations: Record<string, string> = {
   นักเตะไทย: "Thai players",
   นักเตะต่างชาติ: "Foreign players",
   ระดับสูงสุด: "Highest tier",
+  ความนิยมสูงสุด: "Most selected",
   ทีมปัจจุบัน: "Current squad",
   กดบันทึกทีมด้านบนเมื่อพร้อม: "Save your team above when ready",
   เลือกนักเตะจากสนามหรือตลาด: "Choose a player from the pitch or market",

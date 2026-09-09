@@ -28,6 +28,7 @@ import {
 import { createGameweekCarryover } from "./gameweek-carryover";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
 import { snapshotFantasyGameweekPlayerPool } from "./player-pool-service";
+import { refreshFantasyPlayerOwnership } from "./ownership-service";
 
 function formInteger(formData: FormData, key: string) {
   const value = Number(formData.get(key) ?? 0);
@@ -548,6 +549,10 @@ export async function lockFantasyGameweek(
       await db
         .insert(fantasyTransferRevisions)
         .values(revisions.slice(offset, offset + 500));
+  }
+  await refreshFantasyPlayerOwnership(gameweek.id, db);
+  if (nextGameweek) {
+    await refreshFantasyPlayerOwnership(nextGameweek.id, db);
   }
   await db
     .update(fantasyGameweeks)

@@ -27,7 +27,7 @@ Set the pooled Neon connection string for the intended development branch:
 | `AUTH_EMAIL_HASH_SECRET`                                        | Separate salt for privacy-safe recipient hashes in delivery logs.                           |
 | `AUTH_EMAIL_ENABLED`, `AUTH_GOOGLE_ENABLED`                     | Opt each sign-in method into the current environment.                                       |
 | `AUTH_PRODUCTION_READY`                                         | Additional production-only gate; keep false until domain/legal/provider review is complete. |
-| `CRON_SECRET`                                                   | Production-only bearer secret for the daily auth-maintenance Vercel Cron.                   |
+| `CRON_SECRET`                                                   | Production-only bearer secret for both daily Vercel Cron maintenance routes.                |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`                      | Google OAuth web application credentials.                                                   |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY`        | Required pair for every Email OTP request.                                                  |
 | `AUTH_EMAIL_PROVIDERS`, `EMAIL_FROM`, provider keys/limits      | Resend → Mailjet delivery routing and quota headroom.                                       |
@@ -150,6 +150,13 @@ The job deletes only expired sessions and OTP verification rows, rate-limit rows
 older than two days, and privacy-safe email delivery records older than 90
 days. It must never delete accounts, Fantasy managers, teams, selections,
 scores, transfers, league history, or audit records.
+
+The same deployment runs `/api/cron/fantasy-ownership` daily at 02:43
+Asia/Bangkok (19:43 UTC). It uses the same `CRON_SECRET` and Sentry scheduling
+margin, locks the active Fantasy season against concurrent selection writes,
+and rebuilds persisted ownership only for the open Gameweek. Normal selection
+saves and restores update the affected ownership rows transactionally; the
+daily job is reconciliation rather than the primary freshness mechanism.
 
 Database commands use a small Windows Node user-info compatibility shim. Keep
 the wrapper in package scripts unless the underlying Windows issue is confirmed

@@ -775,6 +775,8 @@ async function loadSquadCandidates(tx: ScenarioTransaction, season: SeasonRow) {
     tier: row.tier,
     overallRank: row.overall_rank,
     projectedPoints: row.projected_points,
+    ownershipPercent: 0,
+    ownershipTeamCount: 0,
     isThai: row.is_thai,
     isLikelyClubStartingGoalkeeper: false,
   }));

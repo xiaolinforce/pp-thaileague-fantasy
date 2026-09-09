@@ -45,25 +45,26 @@ create synthetic manager identities.
 
 ## Main boundaries
 
-| Area                 | Location                             | Responsibility                                                                                   |
-| -------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
-| Routes and screens   | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                 |
-| Fantasy UI           | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components. |
-| UI primitives        | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                  |
-| Read models          | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                               |
-| Game rules           | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
-| Squad auto-fill      | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                 |
-| Authentication       | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
-| Observability        | `src/instrumentation*.ts`, Sentry    | Privacy-minimized client/server/edge errors, sampled traces, masked error replays, and releases. |
-| Account provisioning | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
-| League operations    | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
-| Transactional email  | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
-| Auth maintenance     | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
-| Scoring              | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
-| Score persistence    | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
-| Persistence          | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
-| Migrations           | `drizzle`                            | Generated, ordered SQL migrations and Drizzle snapshots.                                         |
-| Database operations  | `scripts`                            | Read-only verification, guarded QA scenarios, transaction checks, and standings maintenance.     |
+| Area                  | Location                             | Responsibility                                                                                   |
+| --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| Routes and screens    | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                 |
+| Fantasy UI            | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components. |
+| UI primitives         | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                  |
+| Read models           | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                               |
+| Game rules            | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
+| Squad auto-fill       | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                 |
+| Authentication        | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
+| Observability         | `src/instrumentation*.ts`, Sentry    | Privacy-minimized client/server/edge errors, sampled traces, masked error replays, and releases. |
+| Account provisioning  | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
+| League operations     | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
+| Transactional email   | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
+| Auth maintenance      | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
+| Ownership maintenance | `/api/cron/fantasy-ownership`        | Daily reconciliation of persisted open-Gameweek player ownership.                                |
+| Scoring               | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
+| Score persistence     | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
+| Persistence           | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
+| Migrations            | `drizzle`                            | Generated, ordered SQL migrations and Drizzle snapshots.                                         |
+| Database operations   | `scripts`                            | Read-only verification, guarded QA scenarios, transaction checks, and standings maintenance.     |
 
 Runtime routes read from `src/data` and PostgreSQL. The legacy static Fantasy
 dataset has been removed and must not be reintroduced as a runtime fallback.
@@ -161,10 +162,18 @@ other public sources are enrichment only.
 The Team client may request an auto-fill suggestion through a read-only Server
 Action. The action authenticates the current manager, reloads the published
 ranking—including its projected-points and overall-rank snapshot—and current
-player eligibility from PostgreSQL. The pure rule layer uses those ranking
-values only to form quality bands before otherwise tied random choices, then
-returns a completed local draft. It does not persist a selection or consume
-transfers; the normal save action remains the only confirmation boundary.
+player eligibility and persisted Gameweek ownership from PostgreSQL. The pure
+rule layer forms quality bands from the ranking, then uses ownership only after
+the sample reaches 30 counted human teams and only before otherwise tied random
+choices. It returns a completed local draft without persisting a selection or
+consuming transfers; the normal save action remains the only confirmation
+boundary.
+
+The competition read model fetches persisted per-player ownership separately
+from the larger five-minute competition dataset. Market reads therefore perform
+an indexed Gameweek lookup rather than aggregating selection rows. Only active
+Guest/member teams with complete 15-player selections contribute; bots,
+abandoned identities, and empty or partial drafts are excluded.
 
 Gameweek recalculation combines the immutable player-pool snapshot captured at
 lock with current derived player points, then uses an exact mixed-integer model
@@ -195,7 +204,10 @@ selection.
    classifications, or Gameweek state. Gameweek locking first captures the
    eligible player pool. League and administrative operations append
    application-level audit rows.
-5. Affected fantasy routes are revalidated.
+5. A successful save or restore updates the affected persisted ownership counts
+   and percentages in the same transaction. Gameweek locking refreshes the
+   final current snapshot and initializes ownership for the carried selection.
+6. Affected fantasy routes are revalidated.
 
 Ordinary reads and fixed query batches use the Neon HTTP client. Gameweek lock
 and finalization use the transaction-capable Neon serverless client. Private

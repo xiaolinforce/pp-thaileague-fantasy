@@ -22,8 +22,11 @@ provisional/final Gameweek scores, and presents Classic league standings.
 - Tier-guided squad auto-fill that completes vacant slots without changing the
   current formation or lineup roles, targets the full tier allocation, prefers
   likely first-choice goalkeepers and foreign players, then randomizes among
-  high-quality players from the published projection while preserving
-  captaincy and keeping the result editable until the manager saves.
+  high-quality players from the published projection, using persisted player
+  popularity as a final preference after 30 human teams are counted, while
+  preserving captaincy and keeping the result editable until the manager saves.
+- Persisted per-Gameweek player popularity for direct Player Market reads,
+  transactional save/restore updates, and daily reconciliation on Vercel.
 - Real Overall and invite-only Private Classic leagues with owner controls,
   membership limits, audit history, and persisted latest Overall ranks.
 - Internally marked bot managers with saved auto-filled squads, normal Overall

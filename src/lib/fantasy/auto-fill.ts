@@ -1,4 +1,5 @@
 import type { DraftLineupMember } from "./team-draft.ts";
+import { getAutoFillOwnershipScore } from "./ownership.ts";
 import {
   getCumulativeTierLimits,
   THAI_LEAGUE_FANTASY_RULES,
@@ -14,6 +15,8 @@ export type AutoFillCandidate = {
   tier: number;
   overallRank: number;
   projectedPoints: number;
+  ownershipPercent: number;
+  ownershipTeamCount: number;
   isThai: boolean;
   isLikelyClubStartingGoalkeeper: boolean;
 };
@@ -55,6 +58,7 @@ type SearchState = {
   likelyStartingGoalkeeperCount: number;
   largestQualityBand: number;
   qualityBandTotal: number;
+  ownershipScoreTotal: number;
   lastIndexByPosition: Map<FantasyPosition, number>;
   randomScore: number;
 };
@@ -214,6 +218,7 @@ function compareSearchStates(
     rightObjective.foreignCount - leftObjective.foreignCount ||
     left.state.largestQualityBand - right.state.largestQualityBand ||
     left.state.qualityBandTotal - right.state.qualityBandTotal ||
+    right.state.ownershipScoreTotal - left.state.ownershipScoreTotal ||
     right.state.randomScore - left.state.randomScore ||
     left.state.picked
       .map((candidate) => candidate.id)
@@ -447,6 +452,7 @@ export function autoFillSquadDraft({
       ).length,
       largestQualityBand: 0,
       qualityBandTotal: 0,
+      ownershipScoreTotal: 0,
       lastIndexByPosition: new Map(),
       randomScore: 0,
     },
@@ -484,6 +490,12 @@ export function autoFillSquadDraft({
             (candidate.isLikelyClubStartingGoalkeeper ? 1 : 0),
           largestQualityBand: Math.max(state.largestQualityBand, qualityBand),
           qualityBandTotal: state.qualityBandTotal + qualityBand,
+          ownershipScoreTotal:
+            state.ownershipScoreTotal +
+            getAutoFillOwnershipScore({
+              selectedPercent: candidate.ownershipPercent,
+              countedTeamCount: candidate.ownershipTeamCount,
+            }),
           lastIndexByPosition: nextIndexes,
           randomScore:
             state.randomScore +
@@ -532,6 +544,14 @@ export function autoFillSquadDraft({
             (qualityBandByCandidate.get(left.id) ?? Number.POSITIVE_INFINITY) -
               (qualityBandByCandidate.get(right.id) ??
                 Number.POSITIVE_INFINITY) ||
+            getAutoFillOwnershipScore({
+              selectedPercent: right.ownershipPercent,
+              countedTeamCount: right.ownershipTeamCount,
+            }) -
+              getAutoFillOwnershipScore({
+                selectedPercent: left.ownershipPercent,
+                countedTeamCount: left.ownershipTeamCount,
+              }) ||
             (randomPriorityByCandidate.get(right.id) ?? 0) -
               (randomPriorityByCandidate.get(left.id) ?? 0) ||
             left.id.localeCompare(right.id)
