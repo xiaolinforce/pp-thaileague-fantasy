@@ -1,12 +1,14 @@
-import { Zap } from "lucide-react";
-
 import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import { getAdminOptimalTeam } from "@/data/admin-optimal-team";
 import type { AdminParams } from "@/data/admin";
 import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
-import { AdminHeading, AdminLocalized, Status } from "../components";
+import {
+  AdminHeading,
+  AdminLocalized,
+  AdminUrlSelect,
+  Status,
+} from "../components";
 import styles from "../admin.module.css";
-import { WeekSelect } from "../server-components";
 
 const positionRows = [
   "goalkeeper",
@@ -24,35 +26,36 @@ export default async function OptimalTeamPage({
 
   return (
     <AdminLocalized>
-      <AdminHeading
-        title="ทีมคะแนนสูงสุดที่เป็นไปได้"
-        description="ดูการจัดทีมที่ถูกกติกาและทำคะแนนได้สูงสุดจากผลจริงของแต่ละ Gameweek"
-      />
-      <form className={styles.toolbar}>
-        <WeekSelect weeks={state.weeks} selected={state.week?.number} />
-        <button className="secondary-button">แสดงข้อมูล</button>
-      </form>
-
-      {state.week ? (
-        <div className={styles.optimalWeekHeading}>
-          <strong>GW {state.week.number}</strong>
-          <Status value={state.week.status} />
+      <div className={styles.optimalPage}>
+        <AdminHeading title="ทีมคะแนนสูงสุดที่เป็นไปได้" />
+        <div className={styles.optimalToolbar}>
+          <AdminUrlSelect
+            name="gw"
+            label="Gameweek"
+            value={state.week ? String(state.week.number) : undefined}
+            options={state.weeks.map((week) => ({
+              value: String(week.number),
+              label: `GW ${week.number}`,
+            }))}
+            hideLabel
+          />
+          {state.week ? <Status value={state.week.status} /> : null}
         </div>
-      ) : null}
 
-      {state.state === "ready" ? (
-        <OptimalTeamResult state={state} />
-      ) : (
-        <section className={styles.panel}>
-          <p className={styles.empty}>
-            {state.state === "not_scored"
-              ? "จะแสดงทีมที่ดีที่สุดหลัง Gameweek นี้ปิดและเริ่มคำนวณคะแนนแล้ว"
-              : state.state === "missing_result"
-                ? "ยังไม่มีผลทีมที่ดีที่สุดที่บันทึกไว้สำหรับ Gameweek นี้"
-                : "ไม่พบ Gameweek สำหรับแสดงผล"}
-          </p>
-        </section>
-      )}
+        {state.state === "ready" ? (
+          <OptimalTeamResult state={state} />
+        ) : (
+          <section className={styles.panel}>
+            <p className={styles.empty}>
+              {state.state === "not_scored"
+                ? "จะแสดงทีมที่ดีที่สุดหลัง Gameweek นี้ปิดและเริ่มคำนวณคะแนนแล้ว"
+                : state.state === "missing_result"
+                  ? "ยังไม่มีผลทีมที่ดีที่สุดที่บันทึกไว้สำหรับ Gameweek นี้"
+                  : "ไม่พบ Gameweek สำหรับแสดงผล"}
+            </p>
+          </section>
+        )}
+      </div>
     </AdminLocalized>
   );
 }
@@ -106,39 +109,16 @@ function OptimalTeamResult({
       isScoringCaptain: scoringCaptain?.fantasyPlayerId === fantasyPlayerId,
       captainMultiplier: 2,
     });
-  const gap = state.score.totalPoints - state.actualHighest;
-
   return (
     <>
-      <section className={styles.optimalScoreStrip} aria-label="สรุปคะแนน">
-        <div className={styles.optimalPrimaryScore}>
-          <span>คะแนนสูงสุดที่เป็นไปได้</span>
-          <strong>{state.score.totalPoints}</strong>
-          <small>คะแนน</small>
-        </div>
-        <dl className={styles.optimalComparisons}>
-          <div>
-            <dt>คะแนนสูงสุดของทีมจริง</dt>
-            <dd>{state.actualHighest}</dd>
-          </div>
-          <div>
-            <dt>ส่วนต่าง</dt>
-            <dd>{gap > 0 ? `+${gap}` : gap}</dd>
-          </div>
-        </dl>
+      <section className={styles.optimalScoreCard} aria-label="สรุปคะแนน">
+        <strong>{state.score.totalPoints}</strong>
+        <span>คะแนน</span>
       </section>
 
       <section
         className={`product-card points-pitch-card ${styles.optimalPitch}`}
       >
-        <div className="points-chip-banner">
-          <span className="points-chip-banner__icon" aria-hidden="true">
-            <Zap size={15} fill="currentColor" />
-          </span>
-          <span className="points-chip-banner__label">
-            ทีมสมมติ · ไม่ใช้ Chip · ไม่คิดคะแนนหัก Transfer
-          </span>
-        </div>
         <div className="points-pitch">
           <div className="field-lines" aria-hidden="true">
             <span />
@@ -195,10 +175,6 @@ function OptimalTeamResult({
           </div>
         </div>
       </section>
-      <p className={styles.optimalProvenance}>
-        อ่านจากผลที่บันทึกไว้ · อัปเดตเมื่อมีการคำนวณคะแนนใหม่ · รายชื่อนักเตะ{" "}
-        {state.poolSize} คน · แหล่งข้อมูล {state.poolSource}
-      </p>
     </>
   );
 }

@@ -1183,15 +1183,15 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
 
 ### 2026-09-08 — Admin best possible Gameweek team
 
-- **Change:** Added the admin-only `/admin/fantasy/optimal-team` route with a
-  URL-backed Gameweek selector, a primary hypothetical score, comparison to the
-  highest real manager score, and the shared scored pitch/bench player details.
+- **Change:** Added the admin-only `/admin/fantasy/optimal-team` route, then
+  distilled it to a compact shadcn Gameweek selector that loads immediately, one
+  primary-orange total, and the shared scored pitch/bench player details.
 - **Data/auth/Gameweek state:** Authorized local Chrome session on the confirmed
   development Neon branch. GW1 rendered from its 462-player reconstructed pool
   with a 91-point optimal team; open GW2 rendered the explicit unavailable state.
 - **Viewport and language:** Checked the populated GW1 route in Thai and English
-  at Desktop width. At 390px, the compact navigation and single-column score
-  strip applied with `scrollWidth` equal to the viewport.
+  at Desktop width. At 390px, the compact navigation and single-column selector,
+  score, and pitch applied with `scrollWidth` equal to the viewport.
 - **Accessibility and runtime:** Heading hierarchy, labelled Gameweek control,
   score-summary label, player-detail names, captain/vice labels, and status text
   were present in the accessibility tree. No application console errors were

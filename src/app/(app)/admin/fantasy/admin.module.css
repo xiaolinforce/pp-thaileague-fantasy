@@ -84,6 +84,24 @@
   flex: 1 1 155px;
   max-width: 360px;
 }
+.urlSelect {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 360px);
+  font-size: 14px;
+}
+.urlSelectLabel {
+  line-height: 1.4;
+}
+.urlSelectTrigger {
+  width: 100%;
+  min-height: 44px;
+  padding-inline: 12px;
+  border-color: var(--line);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
 .workspace input,
 .workspace select,
 .workspace textarea {
@@ -263,87 +281,46 @@
   margin: 0;
   font-weight: 500;
 }
-.optimalWeekHeading {
+.optimalPage {
+  width: min(100%, 876px);
+  margin-inline: auto;
+}
+.optimalToolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 8px 0 18px;
+  margin: 0 0 18px;
 }
-.optimalProvenance {
-  color: var(--muted);
-  font-size: 13px;
+.optimalToolbar .urlSelect {
+  width: min(100%, 280px);
 }
-.optimalWeekHeading strong {
-  font-size: 20px;
-  font-weight: 600;
-}
-.optimalScoreStrip {
-  display: grid;
-  grid-template-columns: minmax(220px, 0.85fr) minmax(320px, 1.15fr);
-  overflow: hidden;
+.optimalScoreCard {
+  min-height: 148px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 18px;
-  border: 1px solid var(--line);
   border-radius: 16px;
-  background: var(--paper);
-}
-.optimalPrimaryScore {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 2px 18px;
-  padding: 22px 24px;
-  background: var(--green-dark);
+  background: var(--orange);
   color: white;
+  box-shadow: 0 12px 28px rgba(160, 73, 19, 0.2);
 }
-.optimalPrimaryScore span {
-  align-self: center;
-  font-size: 14px;
-}
-.optimalPrimaryScore strong {
-  grid-row: span 2;
-  font-size: clamp(42px, 6vw, 64px);
-  font-weight: 600;
-  line-height: 0.95;
+.optimalScoreCard strong {
+  font-size: clamp(52px, 7vw, 76px);
+  font-weight: 800;
+  line-height: 0.92;
   font-variant-numeric: tabular-nums;
 }
-.optimalPrimaryScore small {
+.optimalScoreCard span {
+  margin-top: 10px;
   font-size: 12px;
-  opacity: 0.72;
-}
-.optimalComparisons {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  margin: 0;
-}
-.optimalComparisons div {
-  display: grid;
-  align-content: center;
-  gap: 8px;
-  padding: 20px 24px;
-  border-left: 1px solid var(--line);
-}
-.optimalComparisons dt {
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-.optimalComparisons dd {
-  margin: 0;
-  font-size: 28px;
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 .optimalPitch {
-  max-width: 980px;
-  margin-inline: auto;
   overflow: hidden;
-}
-.optimalProvenance {
-  max-width: 980px;
-  margin: 12px auto 0;
-  line-height: 1.6;
-  text-align: right;
 }
 @media (max-width: 1000px) {
   .split {
@@ -378,17 +355,11 @@
   .actions > button {
     flex: 1 1 auto;
   }
-  .optimalScoreStrip {
-    grid-template-columns: 1fr;
+  .optimalToolbar {
+    align-items: stretch;
   }
-  .optimalComparisons div:first-child {
-    border-left: 0;
-  }
-  .optimalPrimaryScore {
-    padding: 18px;
-  }
-  .optimalComparisons div {
-    padding: 16px 18px;
+  .optimalToolbar .urlSelect {
+    flex: 1 1 auto;
   }
 }
 .changePreview {

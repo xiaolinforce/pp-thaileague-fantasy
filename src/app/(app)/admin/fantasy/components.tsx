@@ -20,6 +20,13 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import styles from "./admin.module.css";
 import { adminFieldLabels } from "@/lib/admin-copy";
 
@@ -32,16 +39,96 @@ export function AdminHeading({
   description,
 }: {
   title: string;
-  description: string;
+  description?: string;
 }) {
   const { translate: t } = useLanguage();
   return (
     <header className={styles.heading}>
       <div>
         <h1>{t(title)}</h1>
-        <p>{t(description)}</p>
+        {description ? <p>{t(description)}</p> : null}
       </div>
     </header>
+  );
+}
+
+export function AdminUrlSelect({
+  name,
+  label,
+  value,
+  options,
+  hideLabel = false,
+  reset = [],
+}: {
+  name: string;
+  label: string;
+  value?: string;
+  options: Array<{ value: string; label: string }>;
+  hideLabel?: boolean;
+  reset?: string[];
+}) {
+  const emptyValue = "__admin_empty__";
+  const router = useRouter();
+  const { translate: t } = useLanguage();
+  const { requestNavigation } = useNavigationBlocker();
+  const labelId = useId();
+  const [pending, startTransition] = useTransition();
+  const selectedValue = value ?? options[0]?.value ?? "";
+
+  const navigate = (nextValue: string) => {
+    if (pending || nextValue === selectedValue) return;
+    const params = new URLSearchParams(window.location.search);
+    if (nextValue) params.set(name, nextValue);
+    else params.delete(name);
+    reset.forEach((key) => params.delete(key));
+    const query = params.toString();
+    const href = `${window.location.pathname}${query ? `?${query}` : ""}`;
+    if (
+      requestNavigation(
+        {
+          preventDefault() {},
+        },
+        href,
+      )
+    ) {
+      startTransition(() => router.push(href));
+    }
+  };
+
+  return (
+    <div className={styles.urlSelect} aria-busy={pending}>
+      {hideLabel ? null : (
+        <span id={labelId} className={styles.urlSelectLabel}>
+          {t(label)}
+        </span>
+      )}
+      <Select
+        value={selectedValue || emptyValue}
+        onValueChange={(nextValue) =>
+          nextValue !== null &&
+          navigate(String(nextValue) === emptyValue ? "" : String(nextValue))
+        }
+      >
+        <SelectTrigger
+          className={styles.urlSelectTrigger}
+          aria-label={hideLabel ? t(label) : undefined}
+          aria-labelledby={hideLabel ? undefined : labelId}
+          disabled={pending || options.length === 0}
+        >
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent align="start">
+          {options.map((option) => (
+            <SelectItem
+              key={option.value || "all"}
+              value={option.value || emptyValue}
+            >
+              {t(option.label)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
   );
 }
 export function AdminDateLabel({
