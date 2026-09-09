@@ -167,11 +167,15 @@ returns a completed local draft. It does not persist a selection or consume
 transfers; the normal save action remains the only confirmation boundary.
 
 Gameweek recalculation combines the immutable player-pool snapshot captured at
-lock with current derived player points, runs the pure legal-lineup optimizer,
-and persists one current optimal-team result plus its 15 members. The admin
-read model fetches that result without running the optimizer. Score corrections
-replace the stored result in the same transaction while historical eligibility
-remains fixed; the result is not a manager-owned selection.
+lock with current derived player points, then uses an exact mixed-integer model
+to select legal candidate squads. Each candidate squad is scored through the
+canonical lineup, captaincy, and automatic-substitution rules; the solver's
+upper bound and explicit squad exclusions establish when the best result is
+proven. Recalculation persists one current optimal-team result plus its 15
+members. The admin read model fetches that result without running the optimizer.
+Score corrections replace the stored result in the same transaction while
+historical eligibility remains fixed; the result is not a manager-owned
+selection.
 
 ## Write flow
 

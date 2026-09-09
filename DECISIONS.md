@@ -883,3 +883,25 @@ breakdown. A correction atomically replaces the current result; correction
 history remains in the existing admin audit and stat-override records rather
 than keeping every optimal-team version. A missing or incomplete stored result
 is shown as unavailable and is never calculated during a page request.
+
+## 2026-09-09 — Optimal-team search uses an exact constraint solver
+
+**Decision:** Model squad eligibility, formation, club, nationality, tier, and
+captain constraints as a binary mixed-integer problem. Treat its objective as a
+safe score upper bound, score each selected 15-player squad with the canonical
+Fantasy rules, and exclude evaluated squads until the bound proves the best
+result. Apply a bounded timeout to every solve attempt and fail the maintenance
+operation instead of allowing a release to hang indefinitely.
+
+**Context:** The original depth-first search was exact on small fixtures but its
+loose global score bound required exploring an impractical number of legal
+combinations across the 462-player production pool. The database transaction
+therefore remained idle while the Node process consumed CPU, and the production
+release timed out before promotion.
+
+**Consequences:** Production-sized pools finish predictably while the persisted
+answer still comes from the existing lineup, automatic-substitution, and
+captaincy implementation. The optimizer now depends on the YALPS solver. Small
+test fixtures retain the legacy exact search as a fallback; a large pool that
+cannot be proven optimal fails visibly and leaves the previous persisted result
+unchanged.

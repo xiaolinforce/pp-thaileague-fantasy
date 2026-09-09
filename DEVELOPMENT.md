@@ -317,7 +317,10 @@ Gameweek lock, finalization, and later score corrections persist the current
 best possible legal team in the scoring transaction. After deploying the schema
 that introduces this read model, run `npm run db:backfill:optimal-teams` once
 against the confirmed environment to materialize existing scored Gameweeks.
-The admin page reads only the saved result and never runs the optimizer.
+The command logs each Gameweek before optimization. Solver attempts are bounded,
+so an unexpectedly difficult pool fails the maintenance step instead of leaving
+the release waiting indefinitely. The admin page reads only the saved result and
+never runs the optimizer.
 
 ### League standings workflow
 
@@ -376,7 +379,8 @@ Also confirm as applicable:
 - Gameweek recalculation handles zero-minute starters, captain fallback, Bench
   Boost, Triple Captain, and transfer deductions;
 - optimal-team tests cover a legal 15-player result, normal captain scoring,
-  deterministic ties, and a production-sized player pool;
+  deterministic ties, upper-bound verification, and production-shaped sparse
+  scoring across a full-sized player pool;
 - loading, empty, error, pending, and success states remain understandable;
 - Thai and English display modes work after a reload;
 - Mobile below 768px, Tablet at 768–1279px, Desktop from 1280px, and a narrow

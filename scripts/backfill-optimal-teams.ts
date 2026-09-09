@@ -47,6 +47,9 @@ async function backfillOptimalTeams() {
   }
 
   for (const gameweek of gameweeks) {
+    console.log(
+      `GW ${gameweek.number} (${gameweek.status}): computing persisted optimal team...`,
+    );
     const result = await optimalTeamService.recalculateGameweekOptimalTeam(
       gameweek.id,
     );

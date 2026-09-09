@@ -1,3 +1,5 @@
+import { solve, type Coefficients, type Constraint, type Model } from "yalps";
+
 import {
   getCumulativeTierLimits,
   THAI_LEAGUE_FANTASY_RULES,
@@ -162,7 +164,225 @@ function hasReachedUpperBound(team: OptimalTeam | null, upperBound: number) {
   return team !== null && team.score.totalPoints === upperBound;
 }
 
+function findBestLineupForSquad(
+  squad: OptimalTeamCandidate[],
+): OptimalTeam | null {
+  let best: OptimalTeam | null = null;
+
+  for (const formation of validFormations()) {
+    const starterIds = new Set<string>();
+    const byPosition = new Map(
+      positions.map((position) => [
+        position,
+        squad.filter((candidate) => candidate.position === position),
+      ]),
+    );
+    const selectStarters = (
+      groupIndex: number,
+      startIndex: number,
+      remaining: number,
+    ) => {
+      if (groupIndex >= positions.length) {
+        const evaluated = evaluateSquad(
+          squad.map((member) => ({
+            ...member,
+            lineupRole: starterIds.has(member.id)
+              ? ("starter" as const)
+              : ("bench" as const),
+          })),
+        );
+        if (
+          evaluated &&
+          (!best || evaluated.score.totalPoints > best.score.totalPoints)
+        ) {
+          best = evaluated;
+        }
+        return;
+      }
+      if (remaining === 0) {
+        selectStarters(
+          groupIndex + 1,
+          0,
+          formation[positions[groupIndex + 1]] ?? 0,
+        );
+        return;
+      }
+
+      const pool = byPosition.get(positions[groupIndex]) ?? [];
+      for (let index = startIndex; index < pool.length; index += 1) {
+        if (pool.length - index < remaining) break;
+        const candidate = pool[index];
+        starterIds.add(candidate.id);
+        selectStarters(groupIndex, index + 1, remaining - 1);
+        starterIds.delete(candidate.id);
+      }
+    };
+
+    selectStarters(0, 0, formation[positions[0]]);
+  }
+
+  return best;
+}
+
+function solveSquadUpperBound(
+  candidates: OptimalTeamCandidate[],
+  excludedSquads: ReadonlyArray<ReadonlySet<number>>,
+) {
+  const constraints = new Map<string, Constraint>([
+    ["squad:size", { equal: THAI_LEAGUE_FANTASY_RULES.squadSize }],
+    ["starter:size", { equal: 11 }],
+    ["starter:goalkeeper", { equal: 1 }],
+    ["starter:defender", { min: 3 }],
+    ["starter:midfielder", { min: 2 }],
+    ["starter:forward", { min: 1 }],
+    ["squad:foreign", { max: THAI_LEAGUE_FANTASY_RULES.foreignPlayerLimit }],
+    ["captain:size", { equal: 1 }],
+  ]);
+  for (const position of positions) {
+    constraints.set(`squad:${position}`, {
+      equal: THAI_LEAGUE_FANTASY_RULES.positionLimits[position],
+    });
+  }
+  for (const { level, limit } of getCumulativeTierLimits()) {
+    constraints.set(`squad:tier:${level}`, { max: limit });
+  }
+  for (const clubId of new Set(
+    candidates.map((candidate) => candidate.clubId),
+  )) {
+    constraints.set(`squad:club:${clubId}`, {
+      max: THAI_LEAGUE_FANTASY_RULES.sameClubLimit,
+    });
+  }
+  for (let index = 0; index < candidates.length; index += 1) {
+    constraints.set(`link:starter:${index}`, { max: 0 });
+    constraints.set(`link:captain:${index}`, { max: 0 });
+  }
+  for (let index = 0; index < excludedSquads.length; index += 1) {
+    constraints.set(`exclude:${index}`, {
+      max: THAI_LEAGUE_FANTASY_RULES.squadSize - 1,
+    });
+  }
+
+  const variables = new Map<string, Coefficients<string>>();
+  for (let index = 0; index < candidates.length; index += 1) {
+    const candidate = candidates[index];
+    const squad = new Map<string, number>([
+      ["score", 0],
+      ["squad:size", 1],
+      [`squad:${candidate.position}`, 1],
+      [`squad:club:${candidate.clubId}`, 1],
+      [`link:starter:${index}`, -1],
+    ]);
+    if (!candidate.isThai) squad.set("squad:foreign", 1);
+    for (const { level } of getCumulativeTierLimits()) {
+      if (candidate.tier <= level) squad.set(`squad:tier:${level}`, 1);
+    }
+    if (
+      !THAI_LEAGUE_FANTASY_RULES.tierSlots.some(
+        ({ level }) => level === candidate.tier,
+      )
+    ) {
+      constraints.set(`valid:tier:${index}`, { max: 0 });
+      squad.set(`valid:tier:${index}`, 1);
+    }
+    for (let excluded = 0; excluded < excludedSquads.length; excluded += 1) {
+      if (excludedSquads[excluded].has(index)) {
+        squad.set(`exclude:${excluded}`, 1);
+      }
+    }
+    variables.set(`squad:${index}`, squad);
+
+    variables.set(
+      `starter:${index}`,
+      new Map<string, number>([
+        ["score", Math.max(0, candidate.points)],
+        ["starter:size", 1],
+        [`starter:${candidate.position}`, 1],
+        [`link:starter:${index}`, 1],
+        [`link:captain:${index}`, -1],
+      ]),
+    );
+    variables.set(
+      `captain:${index}`,
+      new Map<string, number>([
+        ["score", Math.max(0, candidate.points)],
+        ["captain:size", 1],
+        [`link:captain:${index}`, 1],
+      ]),
+    );
+  }
+
+  const model: Model<string, string> = {
+    direction: "maximize",
+    objective: "score",
+    constraints,
+    variables,
+    binaries: true,
+  };
+  return solve(model, { timeout: 5_000, maxIterations: 100_000 });
+}
+
 export function findOptimalTeam(
+  candidates: OptimalTeamCandidate[],
+): OptimalTeam | null {
+  const orderedCandidates = [...candidates].sort((left, right) =>
+    left.id.localeCompare(right.id),
+  );
+  if (
+    new Set(orderedCandidates.map((candidate) => candidate.id)).size !==
+    orderedCandidates.length
+  ) {
+    return null;
+  }
+
+  const excludedSquads: Array<ReadonlySet<number>> = [];
+  let best: OptimalTeam | null = null;
+  let bestScore = Number.NEGATIVE_INFINITY;
+
+  // The mixed-integer objective is a safe upper bound for a legal scoring XI,
+  // while evaluateSquad remains the source of truth for substitutions and
+  // captaincy. Excluding any squad whose bound is not tight lets the next solve
+  // either find a better candidate or prove that the current best is global.
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const solution = solveSquadUpperBound(orderedCandidates, excludedSquads);
+    if (solution.status === "infeasible") return best;
+    if (solution.status !== "optimal") {
+      if (orderedCandidates.length <= 60) {
+        return findOptimalTeamLegacy(orderedCandidates);
+      }
+      throw new Error(
+        `Optimal-team solver stopped with status ${solution.status}.`,
+      );
+    }
+    if (best && solution.result <= bestScore) return best;
+
+    const selectedIndexes = new Set<number>();
+    for (const [variable, value] of solution.variables) {
+      if (value < 0.5 || !variable.startsWith("squad:")) continue;
+      selectedIndexes.add(Number(variable.slice("squad:".length)));
+    }
+    if (selectedIndexes.size !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
+      return findOptimalTeamLegacy(orderedCandidates);
+    }
+
+    const evaluated = findBestLineupForSquad(
+      [...selectedIndexes].map((index) => orderedCandidates[index]),
+    );
+    if (evaluated && evaluated.score.totalPoints > bestScore) {
+      best = evaluated;
+      bestScore = evaluated.score.totalPoints;
+    }
+    if (best && bestScore >= solution.result) return best;
+    excludedSquads.push(selectedIndexes);
+  }
+
+  if (orderedCandidates.length <= 60) {
+    return findOptimalTeamLegacy(orderedCandidates);
+  }
+  throw new Error("Optimal-team solver exceeded the exact-solution attempts.");
+}
+
+function findOptimalTeamLegacy(
   candidates: OptimalTeamCandidate[],
 ): OptimalTeam | null {
   const uniqueCandidates = new Map<string, OptimalTeamCandidate>();
@@ -199,7 +419,6 @@ export function findOptimalTeam(
       .slice(0, 11);
     return points.reduce((sum, value) => sum + value, 0) + (points[0] ?? 0);
   })();
-
   for (const formation of validFormations()) {
     if (hasReachedUpperBound(best, rootUpperBound)) break;
     const groups: RoleGroup[] = [
@@ -318,6 +537,61 @@ export function findOptimalTeam(
       remaining: number,
     ) => {
       if (best && upperBound() <= best.score.totalPoints) return;
+
+      // When every starter played, bench order and bench points cannot change
+      // the total. Find one legal completion instead of enumerating every
+      // equivalent four-player bench combination from the full player pool.
+      if (
+        groupIndex === positions.length &&
+        assigned.every((member) => member.minutes > 0)
+      ) {
+        const selectFirstBench = (
+          benchGroupIndex: number,
+          benchStartIndex: number,
+          benchRemaining: number,
+        ): boolean => {
+          if (benchGroupIndex >= groups.length) {
+            const evaluated = evaluateSquad(assigned);
+            if (!evaluated) return false;
+            if (!best || evaluated.score.totalPoints > best.score.totalPoints) {
+              best = evaluated;
+            }
+            return true;
+          }
+          if (benchRemaining === 0) {
+            return selectFirstBench(
+              benchGroupIndex + 1,
+              0,
+              groups[benchGroupIndex + 1]?.count ?? 0,
+            );
+          }
+
+          const benchPool =
+            byPosition.get(groups[benchGroupIndex].position) ?? [];
+          for (
+            let index = benchStartIndex;
+            index < benchPool.length;
+            index += 1
+          ) {
+            if (benchPool.length - index < benchRemaining) break;
+            const candidate = benchPool[index];
+            if (!canAdd(candidate)) continue;
+            add(candidate, "bench");
+            const completed = selectFirstBench(
+              benchGroupIndex,
+              index + 1,
+              benchRemaining - 1,
+            );
+            remove(candidate);
+            if (completed) return true;
+          }
+          return false;
+        };
+
+        selectFirstBench(groupIndex, 0, groups[groupIndex]?.count ?? 0);
+        return;
+      }
+
       if (groupIndex >= groups.length) {
         const lineup: LineupPlayer[] = assigned.map((member) => ({
           id: member.id,

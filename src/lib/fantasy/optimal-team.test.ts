@@ -65,9 +65,41 @@ test("returns a deterministic result when scores tie", () => {
   assert.deepEqual(findOptimalTeam(pool), findOptimalTeam([...pool].reverse()));
 });
 
+test("certifies the exact result when the linear upper bound is loose", () => {
+  const pool = legalPool().map((candidate) => ({ ...candidate, points: -1 }));
+  const result = findOptimalTeam(pool);
+
+  assert.ok(result);
+  assert.equal(result.score.lineupPoints, -11);
+  assert.equal(result.score.captainBonus, -1);
+  assert.equal(result.score.totalPoints, -12);
+});
+
 test("handles a production-sized player pool", { timeout: 5_000 }, () => {
   const pool = legalPool(31).slice(0, 462);
   const result = findOptimalTeam(pool);
   assert.ok(result);
   assert.equal(result.members.length, 15);
 });
+
+test(
+  "handles a production-shaped sparse score distribution",
+  { timeout: 5_000 },
+  () => {
+    const scoreBand = [14, 12, 10, 10, 8, 8, 8, 7, 7, 7, 7, 7, 6, 6, 6];
+    const pool = legalPool(31)
+      .slice(0, 462)
+      .map((candidate, index) => ({
+        ...candidate,
+        clubId: `club-${index % 16}`,
+        tier: (index % 4) + 1,
+        isThai: index % 3 !== 0,
+        minutes: index < 249 ? 90 : 0,
+        points: index < 231 ? (scoreBand[index] ?? 2) : 0,
+      }));
+
+    const result = findOptimalTeam(pool);
+    assert.ok(result);
+    assert.equal(result.members.length, 15);
+  },
+);
