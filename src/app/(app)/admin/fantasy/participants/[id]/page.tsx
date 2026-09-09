@@ -2,8 +2,13 @@ import { AdminLocalized } from "../../components";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminTeam, param, type AdminParams } from "@/data/admin";
-import { AdminHeading, AdminName, Status } from "../../components";
-import { Empty, TeamSummary, WeekSelect } from "../../server-components";
+import {
+  AdminHeading,
+  AdminName,
+  AdminUrlSelect,
+  Status,
+} from "../../components";
+import { Empty, TeamSummary } from "../../server-components";
 import styles from "../../admin.module.css";
 
 export default async function TeamDetail({
@@ -38,10 +43,17 @@ export default async function TeamDetail({
           <Status value={team.kind} />
         </div>
         <TeamSummary team={team} />
-        <form className={styles.toolbar}>
-          <WeekSelect weeks={weeks} selected={week?.number} />
-          <button className="secondary-button">แสดงข้อมูล</button>
-        </form>
+        <div className={styles.toolbar}>
+          <AdminUrlSelect
+            name="gw"
+            label="Gameweek"
+            value={week ? String(week.number) : undefined}
+            options={weeks.map((candidate) => ({
+              value: String(candidate.number),
+              label: `GW ${candidate.number}`,
+            }))}
+          />
+        </div>
         {squad.length ? (
           <div
             className={styles.scroll}
