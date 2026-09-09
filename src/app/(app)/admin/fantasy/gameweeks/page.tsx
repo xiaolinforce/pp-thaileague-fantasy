@@ -5,8 +5,7 @@ import {
   lockFantasyGameweekAction,
 } from "@/app/fantasy-actions";
 import { getAdminContext, param, type AdminParams } from "@/data/admin";
-import { AdminForm, AdminHeading, Status } from "../components";
-import { WeekSelect } from "../server-components";
+import { AdminForm, AdminHeading, AdminUrlSelect, Status } from "../components";
 import styles from "../admin.module.css";
 
 export default async function Gameweeks({
@@ -28,10 +27,17 @@ export default async function Gameweeks({
         title="Gameweek"
         description="ตรวจสถานะและ Deadline ก่อนล็อกทีม หรือยืนยันคะแนน Final"
       />
-      <form className={styles.toolbar}>
-        <WeekSelect weeks={weeks} selected={week?.number} />
-        <button className="secondary-button">แสดงข้อมูล</button>
-      </form>
+      <div className={styles.toolbar}>
+        <AdminUrlSelect
+          name="gw"
+          label="Gameweek"
+          value={week ? String(week.number) : undefined}
+          options={weeks.map((candidate) => ({
+            value: String(candidate.number),
+            label: `GW ${candidate.number}`,
+          }))}
+        />
+      </div>
       {week && (
         <section className={styles.panel}>
           <div className={styles.row}>
