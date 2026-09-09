@@ -10139,8 +10139,9 @@ body {
 }
 
 .league-table-scroll {
+  min-width: 0;
   max-width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   outline: none;
   scrollbar-color: #aaa39c transparent;
 }
@@ -10151,10 +10152,11 @@ body {
 
 .league-standings-table {
   width: 100%;
-  min-width: 690px;
+  max-width: 100%;
   border-collapse: collapse;
   font-size: 13px;
   font-variant-numeric: tabular-nums;
+  table-layout: fixed;
 }
 
 .league-standings-table th,
@@ -10181,9 +10183,29 @@ body {
 }
 
 .league-standings-table tbody th {
-  min-width: 245px;
   color: var(--ink);
   font-weight: 500;
+}
+
+.league-standings-table th:nth-child(2),
+.league-standings-table td:nth-child(2) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.league-private-standings th:nth-child(1),
+.league-private-standings td:nth-child(1) {
+  width: 40px;
+}
+
+.league-private-standings th:nth-child(3),
+.league-private-standings td:nth-child(3) {
+  width: 60px;
+}
+
+.league-private-standings th:nth-child(4),
+.league-private-standings td:nth-child(4) {
+  width: 70px;
 }
 
 .league-standings-table tbody th small {
@@ -10208,7 +10230,18 @@ body {
   display: flex;
   align-items: center;
   gap: 5px;
+  width: 100%;
   max-width: 320px;
+  min-width: 0;
+}
+
+.league-team-name > span {
+  display: block;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .league-team-name i {
@@ -10488,8 +10521,7 @@ body {
   }
 
   .league-standings-table {
-    min-width: 100%;
-    table-layout: fixed;
+    width: 100%;
   }
 
   .league-standings-table th,
@@ -10499,14 +10531,22 @@ body {
 
   .league-standings-table th:nth-child(1),
   .league-standings-table td:nth-child(1) {
-    width: 44px;
+    width: 4rem;
   }
 
+.league-private-standings th:nth-child(1),
+.league-private-standings td:nth-child(1) {
+  width: 40px;
+}
+
   .league-standings-table th:nth-child(3),
-  .league-standings-table td:nth-child(3),
+  .league-standings-table td:nth-child(3) {
+    width: 60px;
+  }
+
   .league-standings-table th:nth-child(4),
   .league-standings-table td:nth-child(4) {
-    width: 52px;
+    width: 70px;
   }
 
   .league-standings-table:not(.league-private-standings) th:nth-child(5),
@@ -10516,18 +10556,6 @@ body {
 
   .league-standings-table tbody th {
     min-width: 0;
-  }
-
-  .league-team-name {
-    overflow: hidden;
-    display: block;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .league-owner-standings th:nth-child(3),
-  .league-owner-standings td:nth-child(3) {
-    display: none;
   }
 
   .league-owner-standings th:nth-child(5),

@@ -467,9 +467,11 @@ function LeagueStandingsDialog({
                   <table className="league-standings-table">
                     <thead>
                       <tr>
-                        <th scope="col">อันดับ</th>
+                        <th scope="col">#</th>
                         <th scope="col">ทีม</th>
-                        {!isOverallHint ? <th scope="col">GW</th> : null}
+                        {!isOverallHint ? (
+                          <th scope="col">GW{league.gameweek.number}</th>
+                        ) : null}
                         <th scope="col">รวม</th>
                         {!isOverallHint ? <th scope="col">Transfer</th> : null}
                       </tr>
@@ -477,7 +479,11 @@ function LeagueStandingsDialog({
                     <tbody>
                       {league.standings.map((standing) => (
                         <tr
-                          className={standing.mine ? "mine" : undefined}
+                          className={
+                            standing.mine && !standing.owner
+                              ? "mine"
+                              : undefined
+                          }
                           key={standing.teamId}
                         >
                           <td className="league-rank-cell">{standing.rank}</td>
@@ -487,9 +493,6 @@ function LeagueStandingsDialog({
                                 {standing.teamName}
                               </span>
                               {standing.mine ? <i>คุณ</i> : null}
-                              {standing.owner ? (
-                                <i className="owner">เจ้าของ</i>
-                              ) : null}
                             </span>
                           </th>
                           {!isOverallHint ? (
@@ -869,6 +872,10 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
   const router = useRouter();
   const { translate } = useLanguage();
   const isPrivateLeague = league.type === "private";
+  const showMemberManagement =
+    isPrivateLeague &&
+    league.isOwner &&
+    league.standings.some((standing) => !standing.owner);
   const [name, setName] = useState(league.name);
   const [inviteCode, setInviteCode] = useState(league.inviteCode ?? "");
   const [pendingTask, setPendingTask] = useState("");
@@ -1033,14 +1040,14 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
               >
                 <thead>
                   <tr>
-                    <th scope="col">อันดับ</th>
+                    <th scope="col">#</th>
                     <th scope="col">ทีม</th>
-                    <th scope="col">GW</th>
+                    <th scope="col">GW{league.gameweek.number}</th>
                     <th scope="col">รวม</th>
                     {!isPrivateLeague ? <th scope="col">Transfer</th> : null}
-                    {league.isOwner && league.type === "private" ? (
+                    {showMemberManagement ? (
                       <th scope="col">
-                        <span className="sr-only">จัดการสมาชิก</span>
+                        <span>จัดการสมาชิก</span>
                       </th>
                     ) : null}
                   </tr>
@@ -1048,16 +1055,15 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                 <tbody>
                   {league.standings.map((standing) => (
                     <tr
-                      className={standing.mine ? "mine" : undefined}
+                      className={
+                        standing.mine && !standing.owner ? "mine" : undefined
+                      }
                       key={standing.teamId}
                     >
                       <td className="league-rank-cell">{standing.rank}</td>
                       <th scope="row">
                         <span className="league-team-name">
                           <span data-localize="off">{standing.teamName}</span>
-                          {standing.owner ? (
-                            <i className="owner">เจ้าของ</i>
-                          ) : null}
                         </span>
                       </th>
                       <td>{standing.gameweekPoints.toLocaleString()}</td>
@@ -1067,9 +1073,16 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                       {!isPrivateLeague ? (
                         <td>{standing.transferCount.toLocaleString()}</td>
                       ) : null}
-                      {league.isOwner && league.type === "private" ? (
+                      {showMemberManagement ? (
                         <td>
-                          {!standing.owner ? (
+                          {standing.owner ? (
+                            <span
+                              className="league-row-action"
+                              aria-hidden="true"
+                            >
+                              —
+                            </span>
+                          ) : (
                             <button
                               type="button"
                               className="league-row-action"
@@ -1100,7 +1113,7 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                             >
                               <UserMinus aria-hidden="true" /> นำออก
                             </button>
-                          ) : null}
+                          )}
                         </td>
                       ) : null}
                     </tr>
