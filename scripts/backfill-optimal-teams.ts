@@ -1,5 +1,5 @@
 import { loadEnvConfig } from "@next/env";
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, ne, or, sql } from "drizzle-orm";
 
 loadEnvConfig(process.cwd());
 
@@ -8,10 +8,12 @@ async function backfillOptimalTeams() {
     { db },
     { fantasyGameweeks, fantasyGameweekOptimalTeams },
     optimalTeamService,
+    { OPTIMAL_TEAM_ALGORITHM_VERSION },
   ] = await Promise.all([
     import("../src/db/index.ts"),
     import("../src/db/schema.ts"),
     import("../src/lib/fantasy/optimal-team-service.ts"),
+    import("../src/lib/fantasy/optimal-team.ts"),
   ]);
   const expectedBranch = process.env.NEON_PRODUCTION_BRANCH_ID;
   if (expectedBranch) {
@@ -36,13 +38,21 @@ async function backfillOptimalTeams() {
     .where(
       and(
         inArray(fantasyGameweeks.status, ["provisional", "final"]),
-        isNull(fantasyGameweekOptimalTeams.id),
+        or(
+          isNull(fantasyGameweekOptimalTeams.id),
+          ne(
+            fantasyGameweekOptimalTeams.algorithmVersion,
+            OPTIMAL_TEAM_ALGORITHM_VERSION,
+          ),
+        ),
       ),
     )
     .orderBy(asc(fantasyGameweeks.number));
 
   if (gameweeks.length === 0) {
-    console.log("Every scored Gameweek already has a persisted optimal team.");
+    console.log(
+      "Every scored Gameweek has a persisted optimal team from the current algorithm.",
+    );
     return;
   }
 

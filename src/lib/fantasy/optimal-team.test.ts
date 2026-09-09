@@ -65,6 +65,117 @@ test("returns a deterministic result when scores tie", () => {
   assert.deepEqual(findOptimalTeam(pool), findOptimalTeam([...pool].reverse()));
 });
 
+test("uses score-ordered captaincy and the strongest legal bench", () => {
+  const starterScores = new Map([
+    ["goalkeeper-0", 30],
+    ["defender-0", 29],
+    ["defender-1", 28],
+    ["defender-2", 27],
+    ["midfielder-0", 26],
+    ["midfielder-1", 25],
+    ["midfielder-2", 24],
+    ["midfielder-3", 23],
+    ["forward-0", 22],
+    ["forward-1", 21],
+    ["forward-2", 20],
+  ]);
+  const pool = legalPool().map((candidate) => ({
+    ...candidate,
+    points: starterScores.get(candidate.id) ?? 0,
+  }));
+  const clone = (
+    sourceId: string,
+    replacementId: string,
+    points: number,
+  ): OptimalTeamCandidate => {
+    const source = pool.find((candidate) => candidate.id === sourceId);
+    assert.ok(source);
+    return {
+      ...source,
+      id: replacementId,
+      clubId: `club-${replacementId}`,
+      tier: 4,
+      points,
+    };
+  };
+
+  const result = findOptimalTeam([
+    ...pool,
+    clone("goalkeeper-1", "bench-goalkeeper", 6),
+    clone("defender-3", "bench-defender-1", 8),
+    clone("defender-4", "bench-defender-2", 7),
+    clone("midfielder-4", "bench-midfielder", 9),
+  ]);
+
+  assert.ok(result);
+  assert.equal(result.score.autoSubstitutions.length, 0);
+  assert.equal(
+    result.members.find((member) => member.captainRole === "captain")?.id,
+    "goalkeeper-0",
+  );
+  assert.equal(
+    result.members.find((member) => member.captainRole === "vice_captain")?.id,
+    "defender-0",
+  );
+
+  const countedIds = new Set(result.score.countedPlayerIds);
+  assert.deepEqual(
+    result.members
+      .filter((member) => !countedIds.has(member.id))
+      .map((member) => member.points)
+      .sort((left, right) => right - left),
+    [9, 8, 7, 6],
+  );
+  assert.deepEqual(
+    result.members
+      .filter(
+        (member) =>
+          member.lineupRole === "bench" && member.position !== "goalkeeper",
+      )
+      .sort((left, right) => (left.benchOrder ?? 99) - (right.benchOrder ?? 99))
+      .map((member) => member.points),
+    [9, 8, 7],
+  );
+});
+
+test("does not put the captain badge on a zero-minute starter", () => {
+  const scores = new Map([
+    ["goalkeeper-0", 30],
+    ["defender-0", 29],
+    ["defender-1", 28],
+    ["midfielder-0", 27],
+    ["midfielder-1", 26],
+    ["midfielder-2", 25],
+    ["midfielder-3", 24],
+    ["midfielder-4", 23],
+    ["forward-0", 22],
+    ["forward-1", 21],
+    ["forward-2", 20],
+  ]);
+  const pool = legalPool().map((candidate) => ({
+    ...candidate,
+    minutes:
+      candidate.position === "defender" &&
+      candidate.id !== "defender-0" &&
+      candidate.id !== "defender-1"
+        ? 0
+        : candidate.minutes,
+    points: scores.get(candidate.id) ?? 0,
+  }));
+
+  const result = findOptimalTeam(pool);
+
+  assert.ok(result);
+  assert.equal(
+    result.members.find((member) => member.captainRole === "captain")?.id,
+    "goalkeeper-0",
+  );
+  assert.equal(
+    result.members.find((member) => member.captainRole === "vice_captain")?.id,
+    "defender-0",
+  );
+});
+
 test("certifies the exact result when the linear upper bound is loose", () => {
   const pool = legalPool().map((candidate) => ({ ...candidate, points: -1 }));
   const result = findOptimalTeam(pool);

@@ -12,7 +12,10 @@ import {
   fixtures,
 } from "@/db/schema";
 import { transactionDb } from "@/db/transaction";
-import { findOptimalTeam } from "./optimal-team";
+import {
+  findOptimalTeam,
+  OPTIMAL_TEAM_ALGORITHM_VERSION,
+} from "./optimal-team";
 import type { FantasyPosition } from "./rules";
 import { lockFantasySeason } from "./season-lock";
 
@@ -172,6 +175,7 @@ export async function persistGameweekOptimalTeam({
       countedPlayerIds: optimal.score.countedPlayerIds,
       playerPoolSize: pool.length,
       playerPoolSource: pool[0].sourceName,
+      algorithmVersion: OPTIMAL_TEAM_ALGORITHM_VERSION,
       computedAt,
     })
     .onConflictDoUpdate({
@@ -186,6 +190,7 @@ export async function persistGameweekOptimalTeam({
         countedPlayerIds: sql`excluded.counted_player_ids`,
         playerPoolSize: sql`excluded.player_pool_size`,
         playerPoolSource: sql`excluded.player_pool_source`,
+        algorithmVersion: sql`excluded.algorithm_version`,
         computedAt: sql`excluded.computed_at`,
         updatedAt: computedAt,
       },

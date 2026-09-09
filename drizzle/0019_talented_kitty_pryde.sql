@@ -1,0 +1,1 @@
+ALTER TABLE "fantasy_gameweek_optimal_teams" ADD COLUMN "algorithm_version" text DEFAULT 'score-only-v1' NOT NULL;

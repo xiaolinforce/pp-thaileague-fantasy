@@ -196,7 +196,11 @@ The admin best-possible-team view reuses the scored player token, pitch, bench,
 automatic-substitution, and breakdown semantics because it presents the same
 kind of scored lineup. Its comparison strip remains admin-specific: the
 hypothetical score is primary, while the highest real manager score and their
-difference are supporting operational context.
+difference are supporting operational context. The captain and vice-captain
+badges identify the two highest-scoring starters in that order when consistent
+with the optimal score. The four uncounted bench players are the strongest legal
+remainder after the starting eleven, with outfield substitutes ordered by
+points; their points do not contribute to the headline total.
 
 ## Authentication and operational constraints
 

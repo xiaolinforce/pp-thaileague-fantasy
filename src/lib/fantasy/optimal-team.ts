@@ -30,11 +30,22 @@ export type OptimalTeam = {
   score: TeamScore;
 };
 
+export const OPTIMAL_TEAM_ALGORITHM_VERSION = "canonical-full-squad-v2";
+
 type Formation = Record<FantasyPosition, number>;
 type RoleGroup = {
   position: FantasyPosition;
   lineupRole: "starter" | "bench";
   count: number;
+};
+type CaptaincyChoice = {
+  captainId: string;
+  viceCaptainId: string;
+  bonus: number;
+  captainPlayed: boolean;
+  captainPoints: number;
+  viceCaptainPlayed: boolean;
+  viceCaptainPoints: number;
 };
 
 const positions: FantasyPosition[] = [
@@ -71,9 +82,33 @@ function permutations<T>(values: T[]): T[][] {
   );
 }
 
+function isBetterCaptaincy(
+  candidate: CaptaincyChoice,
+  best: CaptaincyChoice | undefined,
+) {
+  if (!best) return true;
+  if (candidate.bonus !== best.bonus) return candidate.bonus > best.bonus;
+  if (candidate.captainPlayed !== best.captainPlayed) {
+    return candidate.captainPlayed;
+  }
+  if (candidate.captainPoints !== best.captainPoints) {
+    return candidate.captainPoints > best.captainPoints;
+  }
+  if (candidate.viceCaptainPlayed !== best.viceCaptainPlayed) {
+    return candidate.viceCaptainPlayed;
+  }
+  if (candidate.viceCaptainPoints !== best.viceCaptainPoints) {
+    return candidate.viceCaptainPoints > best.viceCaptainPoints;
+  }
+  return (
+    `${candidate.captainId}\u0000${candidate.viceCaptainId}`.localeCompare(
+      `${best.captainId}\u0000${best.viceCaptainId}`,
+    ) < 0
+  );
+}
+
 function captaincyFor(starters: OptimalTeamCandidate[]) {
-  let best:
-    { captainId: string; viceCaptainId: string; bonus: number } | undefined;
+  let best: CaptaincyChoice | undefined;
   for (const captain of starters) {
     for (const viceCaptain of starters) {
       if (captain.id === viceCaptain.id) continue;
@@ -83,24 +118,85 @@ function captaincyFor(starters: OptimalTeamCandidate[]) {
           : viceCaptain.minutes > 0
             ? viceCaptain.points
             : 0;
-      const key = `${captain.id}\u0000${viceCaptain.id}`;
-      const bestKey = best
-        ? `${best.captainId}\u0000${best.viceCaptainId}`
-        : "";
-      if (
-        !best ||
-        bonus > best.bonus ||
-        (bonus === best.bonus && key.localeCompare(bestKey) < 0)
-      ) {
-        best = {
-          captainId: captain.id,
-          viceCaptainId: viceCaptain.id,
-          bonus,
-        };
-      }
+      const candidate: CaptaincyChoice = {
+        captainId: captain.id,
+        viceCaptainId: viceCaptain.id,
+        bonus,
+        captainPlayed: captain.minutes > 0,
+        captainPoints: captain.points,
+        viceCaptainPlayed: viceCaptain.minutes > 0,
+        viceCaptainPoints: viceCaptain.points,
+      };
+      if (isBetterCaptaincy(candidate, best)) best = candidate;
     }
   }
   return best;
+}
+
+function uncountedMembers(team: OptimalTeam) {
+  const countedIds = new Set(team.score.countedPlayerIds);
+  return team.members.filter((member) => !countedIds.has(member.id));
+}
+
+function benchPoints(team: OptimalTeam) {
+  return uncountedMembers(team).reduce(
+    (total, member) => total + member.points,
+    0,
+  );
+}
+
+function orderedOutfieldBenchPoints(team: OptimalTeam) {
+  return team.members
+    .filter(
+      (member) =>
+        member.lineupRole === "bench" && member.position !== "goalkeeper",
+    )
+    .sort((left, right) => (left.benchOrder ?? 99) - (right.benchOrder ?? 99))
+    .map((member) => member.points);
+}
+
+function deterministicTeamKey(team: OptimalTeam) {
+  return [...team.members]
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .map(
+      (member) =>
+        `${member.id}:${member.lineupRole}:${member.benchOrder ?? "-"}:${member.captainRole}`,
+    )
+    .join("\u0000");
+}
+
+function isBetterTeam(candidate: OptimalTeam, best: OptimalTeam | null) {
+  if (!best) return true;
+  if (candidate.score.totalPoints !== best.score.totalPoints) {
+    return candidate.score.totalPoints > best.score.totalPoints;
+  }
+
+  const candidateBenchPoints = benchPoints(candidate);
+  const bestBenchPoints = benchPoints(best);
+  if (candidateBenchPoints !== bestBenchPoints) {
+    return candidateBenchPoints > bestBenchPoints;
+  }
+  if (
+    candidate.score.autoSubstitutions.length !==
+    best.score.autoSubstitutions.length
+  ) {
+    return (
+      candidate.score.autoSubstitutions.length <
+      best.score.autoSubstitutions.length
+    );
+  }
+
+  const candidateBenchOrder = orderedOutfieldBenchPoints(candidate);
+  const bestBenchOrder = orderedOutfieldBenchPoints(best);
+  for (let index = 0; index < candidateBenchOrder.length; index += 1) {
+    if (candidateBenchOrder[index] !== bestBenchOrder[index]) {
+      return candidateBenchOrder[index] > bestBenchOrder[index];
+    }
+  }
+  return (
+    deterministicTeamKey(candidate).localeCompare(deterministicTeamKey(best)) <
+    0
+  );
 }
 
 function evaluateSquad(
@@ -153,15 +249,10 @@ function evaluateSquad(
       activeChip: null,
       transferPoints: 0,
     });
-    if (!best || score.totalPoints > best.score.totalPoints) {
-      best = { members, score };
-    }
+    const evaluated = { members, score };
+    if (isBetterTeam(evaluated, best)) best = evaluated;
   }
   return best;
-}
-
-function hasReachedUpperBound(team: OptimalTeam | null, upperBound: number) {
-  return team !== null && team.score.totalPoints === upperBound;
 }
 
 function findBestLineupForSquad(
@@ -191,12 +282,7 @@ function findBestLineupForSquad(
               : ("bench" as const),
           })),
         );
-        if (
-          evaluated &&
-          (!best || evaluated.score.totalPoints > best.score.totalPoints)
-        ) {
-          best = evaluated;
-        }
+        if (evaluated && isBetterTeam(evaluated, best)) best = evaluated;
         return;
       }
       if (remaining === 0) {
@@ -228,6 +314,15 @@ function solveSquadUpperBound(
   candidates: OptimalTeamCandidate[],
   excludedSquads: ReadonlyArray<ReadonlySet<number>>,
 ) {
+  const benchBaseline = Math.min(
+    0,
+    ...candidates.map((candidate) => candidate.points),
+  );
+  const benchValue = (candidate: OptimalTeamCandidate) =>
+    candidate.points - benchBaseline;
+  const primaryWeight =
+    candidates.reduce((total, candidate) => total + benchValue(candidate), 0) +
+    1;
   const constraints = new Map<string, Constraint>([
     ["squad:size", { equal: THAI_LEAGUE_FANTASY_RULES.squadSize }],
     ["starter:size", { equal: 11 }],
@@ -266,8 +361,9 @@ function solveSquadUpperBound(
   const variables = new Map<string, Coefficients<string>>();
   for (let index = 0; index < candidates.length; index += 1) {
     const candidate = candidates[index];
+    const candidateBenchValue = benchValue(candidate);
     const squad = new Map<string, number>([
-      ["score", 0],
+      ["score", candidateBenchValue],
       ["squad:size", 1],
       [`squad:${candidate.position}`, 1],
       [`squad:club:${candidate.clubId}`, 1],
@@ -295,7 +391,10 @@ function solveSquadUpperBound(
     variables.set(
       `starter:${index}`,
       new Map<string, number>([
-        ["score", Math.max(0, candidate.points)],
+        [
+          "score",
+          Math.max(0, candidate.points) * primaryWeight - candidateBenchValue,
+        ],
         ["starter:size", 1],
         [`starter:${candidate.position}`, 1],
         [`link:starter:${index}`, 1],
@@ -305,7 +404,7 @@ function solveSquadUpperBound(
     variables.set(
       `captain:${index}`,
       new Map<string, number>([
-        ["score", Math.max(0, candidate.points)],
+        ["score", Math.max(0, candidate.points) * primaryWeight],
         ["captain:size", 1],
         [`link:captain:${index}`, 1],
       ]),
@@ -319,7 +418,10 @@ function solveSquadUpperBound(
     variables,
     binaries: true,
   };
-  return solve(model, { timeout: 5_000, maxIterations: 100_000 });
+  return {
+    solution: solve(model, { timeout: 5_000, maxIterations: 100_000 }),
+    benchBaseline,
+  };
 }
 
 export function findOptimalTeam(
@@ -337,14 +439,15 @@ export function findOptimalTeam(
 
   const excludedSquads: Array<ReadonlySet<number>> = [];
   let best: OptimalTeam | null = null;
-  let bestScore = Number.NEGATIVE_INFINITY;
 
-  // The mixed-integer objective is a safe upper bound for a legal scoring XI,
-  // while evaluateSquad remains the source of truth for substitutions and
-  // captaincy. Excluding any squad whose bound is not tight lets the next solve
-  // either find a better candidate or prove that the current best is global.
+  // One point in the primary objective outweighs the complete bench objective.
+  // evaluateSquad remains the source of truth for substitutions and captaincy;
+  // squads whose solver bounds are not tight are excluded before solving again.
   for (let attempt = 0; attempt < 20; attempt += 1) {
-    const solution = solveSquadUpperBound(orderedCandidates, excludedSquads);
+    const { solution, benchBaseline } = solveSquadUpperBound(
+      orderedCandidates,
+      excludedSquads,
+    );
     if (solution.status === "infeasible") return best;
     if (solution.status !== "optimal") {
       if (orderedCandidates.length <= 60) {
@@ -354,25 +457,65 @@ export function findOptimalTeam(
         `Optimal-team solver stopped with status ${solution.status}.`,
       );
     }
-    if (best && solution.result <= bestScore) return best;
-
     const selectedIndexes = new Set<number>();
+    const starterIndexes = new Set<number>();
+    let captainIndex: number | null = null;
     for (const [variable, value] of solution.variables) {
-      if (value < 0.5 || !variable.startsWith("squad:")) continue;
-      selectedIndexes.add(Number(variable.slice("squad:".length)));
+      if (value < 0.5) continue;
+      if (variable.startsWith("squad:")) {
+        selectedIndexes.add(Number(variable.slice("squad:".length)));
+      } else if (variable.startsWith("starter:")) {
+        starterIndexes.add(Number(variable.slice("starter:".length)));
+      } else if (variable.startsWith("captain:")) {
+        captainIndex = Number(variable.slice("captain:".length));
+      }
     }
-    if (selectedIndexes.size !== THAI_LEAGUE_FANTASY_RULES.squadSize) {
+    if (
+      selectedIndexes.size !== THAI_LEAGUE_FANTASY_RULES.squadSize ||
+      starterIndexes.size !== 11 ||
+      captainIndex === null
+    ) {
       return findOptimalTeamLegacy(orderedCandidates);
+    }
+
+    const primaryUpperBound =
+      [...starterIndexes].reduce(
+        (total, index) => total + Math.max(0, orderedCandidates[index].points),
+        0,
+      ) + Math.max(0, orderedCandidates[captainIndex].points);
+    const benchUpperBound =
+      [...selectedIndexes].reduce(
+        (total, index) =>
+          total + (orderedCandidates[index].points - benchBaseline),
+        0,
+      ) -
+      [...starterIndexes].reduce(
+        (total, index) =>
+          total + (orderedCandidates[index].points - benchBaseline),
+        0,
+      ) +
+      benchBaseline * 4;
+    if (
+      best &&
+      (primaryUpperBound < best.score.totalPoints ||
+        (primaryUpperBound === best.score.totalPoints &&
+          benchUpperBound < benchPoints(best)))
+    ) {
+      return best;
     }
 
     const evaluated = findBestLineupForSquad(
       [...selectedIndexes].map((index) => orderedCandidates[index]),
     );
-    if (evaluated && evaluated.score.totalPoints > bestScore) {
-      best = evaluated;
-      bestScore = evaluated.score.totalPoints;
+    if (evaluated && isBetterTeam(evaluated, best)) best = evaluated;
+    if (
+      best &&
+      best.score.totalPoints === primaryUpperBound &&
+      benchPoints(best) === benchUpperBound &&
+      best.score.autoSubstitutions.length === 0
+    ) {
+      return best;
     }
-    if (best && bestScore >= solution.result) return best;
     excludedSquads.push(selectedIndexes);
   }
 
@@ -413,14 +556,7 @@ function findOptimalTeamLegacy(
   }
 
   let best: OptimalTeam | null = null;
-  const rootUpperBound = (() => {
-    const points = orderedCandidates
-      .map((candidate) => Math.max(0, candidate.points))
-      .slice(0, 11);
-    return points.reduce((sum, value) => sum + value, 0) + (points[0] ?? 0);
-  })();
   for (const formation of validFormations()) {
-    if (hasReachedUpperBound(best, rootUpperBound)) break;
     const groups: RoleGroup[] = [
       ...positions.map((position) => ({
         position,
@@ -536,61 +672,7 @@ function findOptimalTeamLegacy(
       startIndex: number,
       remaining: number,
     ) => {
-      if (best && upperBound() <= best.score.totalPoints) return;
-
-      // When every starter played, bench order and bench points cannot change
-      // the total. Find one legal completion instead of enumerating every
-      // equivalent four-player bench combination from the full player pool.
-      if (
-        groupIndex === positions.length &&
-        assigned.every((member) => member.minutes > 0)
-      ) {
-        const selectFirstBench = (
-          benchGroupIndex: number,
-          benchStartIndex: number,
-          benchRemaining: number,
-        ): boolean => {
-          if (benchGroupIndex >= groups.length) {
-            const evaluated = evaluateSquad(assigned);
-            if (!evaluated) return false;
-            if (!best || evaluated.score.totalPoints > best.score.totalPoints) {
-              best = evaluated;
-            }
-            return true;
-          }
-          if (benchRemaining === 0) {
-            return selectFirstBench(
-              benchGroupIndex + 1,
-              0,
-              groups[benchGroupIndex + 1]?.count ?? 0,
-            );
-          }
-
-          const benchPool =
-            byPosition.get(groups[benchGroupIndex].position) ?? [];
-          for (
-            let index = benchStartIndex;
-            index < benchPool.length;
-            index += 1
-          ) {
-            if (benchPool.length - index < benchRemaining) break;
-            const candidate = benchPool[index];
-            if (!canAdd(candidate)) continue;
-            add(candidate, "bench");
-            const completed = selectFirstBench(
-              benchGroupIndex,
-              index + 1,
-              benchRemaining - 1,
-            );
-            remove(candidate);
-            if (completed) return true;
-          }
-          return false;
-        };
-
-        selectFirstBench(groupIndex, 0, groups[groupIndex]?.count ?? 0);
-        return;
-      }
+      if (best && upperBound() < best.score.totalPoints) return;
 
       if (groupIndex >= groups.length) {
         const lineup: LineupPlayer[] = assigned.map((member) => ({
@@ -620,12 +702,7 @@ function findOptimalTeamLegacy(
           return;
         }
         const evaluated = evaluateSquad(assigned);
-        if (
-          evaluated &&
-          (!best || evaluated.score.totalPoints > best.score.totalPoints)
-        ) {
-          best = evaluated;
-        }
+        if (evaluated && isBetterTeam(evaluated, best)) best = evaluated;
         return;
       }
 
@@ -642,7 +719,6 @@ function findOptimalTeamLegacy(
         add(candidate, group.lineupRole);
         selectGroup(groupIndex, index + 1, remaining - 1);
         remove(candidate);
-        if (hasReachedUpperBound(best, rootUpperBound)) return;
       }
     };
 

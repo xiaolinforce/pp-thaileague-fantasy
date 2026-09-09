@@ -905,3 +905,24 @@ captaincy implementation. The optimizer now depends on the YALPS solver. Small
 test fixtures retain the legacy exact search as a fallback; a large pool that
 cannot be proven optimal fails visibly and leaves the previous persisted result
 unchanged.
+
+## 2026-09-09 — Optimal-team ties preserve the strongest full squad
+
+**Decision:** Rank optimal-team results lexicographically: maximize the counted
+Gameweek score first, then maximize the points of the four uncounted bench
+players. Prefer a direct starting eleven over an equivalent result that depends
+on unnecessary automatic substitutions, order outfield substitutes by points,
+and use the highest- and second-highest-scoring eligible starters as captain and
+vice-captain when their captaincy yields the same optimal score. Resolve only
+the remaining tie by stable player identity.
+
+**Context:** Maximizing only the counted score allowed an arbitrary legal bench
+and an equivalent zero-minute captain with the top scorer as vice-captain. The
+saved GW1 result therefore had the correct total but did not communicate the
+strongest possible full squad or intuitive captaincy.
+
+**Consequences:** The headline score and normal substitution rules remain
+unchanged. Recalculation produces a canonical 15-player result whose badges and
+bench match the admin view's meaning, and future Gameweeks inherit the same
+ranking rule. An algorithm-version marker lets the release recalculate stale
+historical results once after this change, then skip them on later deployments.

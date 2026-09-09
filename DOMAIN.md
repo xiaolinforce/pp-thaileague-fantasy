@@ -294,8 +294,13 @@ hypothetical team for the Gameweek. The team uses the eligible player pool and
 club, position, tier, and Thai-status classifications captured at its deadline.
 It must contain a legal 15-player squad, starting eleven, ordered bench,
 captain, and vice-captain. Normal scoring and automatic substitutions apply;
-chips and transfer deductions do not. Tied solutions resolve by stable player
-identity and do not imply that the hypothetical team was owned by a manager.
+chips and transfer deductions do not. Among teams tied for the highest score,
+the canonical result maximizes the four uncounted bench players' points, avoids
+unnecessary automatic substitutions, assigns captain and vice-captain to the
+highest- and second-highest-scoring starters whose captaincy produces that
+score, and resolves any remaining tie by stable player identity. The bench
+points remain supporting information and never add to the Gameweek total. The
+hypothetical team does not imply that it was owned by a manager.
 The current result and its player-point breakdown are persisted when Gameweek
 scores are calculated. Corrections replace that saved result from current
 derived player points without rewriting the historical pool. The admin page

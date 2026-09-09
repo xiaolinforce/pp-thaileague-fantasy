@@ -923,6 +923,9 @@ export const fantasyGameweekOptimalTeams = pgTable(
       .notNull(),
     playerPoolSize: integer("player_pool_size").notNull(),
     playerPoolSource: text("player_pool_source").notNull(),
+    algorithmVersion: text("algorithm_version")
+      .default("score-only-v1")
+      .notNull(),
     computedAt: timestamp("computed_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

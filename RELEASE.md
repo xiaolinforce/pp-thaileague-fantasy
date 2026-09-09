@@ -122,8 +122,9 @@ The runner rejects empty or divergent databases, checks the complete journal
 prefix and hashes, and locks both the release and journal during each transaction.
 All pending SQL and journal inserts commit atomically; failure rolls them back.
 After journal verification, the release runs the idempotent optimal-team
-backfill for scored Gameweeks that do not yet have a saved result. The command
-rechecks the configured Production branch before writing.
+backfill for scored Gameweeks that do not yet have a saved result or whose
+algorithm-version marker is stale. The command rechecks the configured
+Production branch before writing.
 `CREATE INDEX CONCURRENTLY` and other non-transactional maintenance require a
 separate reviewed procedure. Keep imports and source-data maintenance outside
 this schema-only workflow.

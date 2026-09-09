@@ -319,8 +319,10 @@ that introduces this read model, run `npm run db:backfill:optimal-teams` once
 against the confirmed environment to materialize existing scored Gameweeks.
 The command logs each Gameweek before optimization. Solver attempts are bounded,
 so an unexpectedly difficult pool fails the maintenance step instead of leaving
-the release waiting indefinitely. The admin page reads only the saved result and
-never runs the optimizer.
+the release waiting indefinitely. It also refreshes saved results whose
+algorithm-version marker is stale; bump `OPTIMAL_TEAM_ALGORITHM_VERSION`
+whenever persisted output can change. The admin page reads only the saved result
+and never runs the optimizer.
 
 ### League standings workflow
 
@@ -379,6 +381,7 @@ Also confirm as applicable:
 - Gameweek recalculation handles zero-minute starters, captain fallback, Bench
   Boost, Triple Captain, and transfer deductions;
 - optimal-team tests cover a legal 15-player result, normal captain scoring,
+  score-ordered captain and vice-captain roles, the strongest legal bench,
   deterministic ties, upper-bound verification, and production-shaped sparse
   scoring across a full-sized player pool;
 - loading, empty, error, pending, and success states remain understandable;
