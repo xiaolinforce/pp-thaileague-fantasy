@@ -1,7 +1,12 @@
 import { AdminLocalized } from "../components";
 import { AdminDate } from "../server-components";
 import { getAdminAudit, type AdminParams } from "@/data/admin";
-import { AdminHeading, AdminName, Pagination } from "../components";
+import {
+  AdminHeading,
+  AdminName,
+  AdminUrlSelect,
+  Pagination,
+} from "../components";
 import { AuditChanges, Empty } from "../server-components";
 import styles from "../admin.module.css";
 
@@ -30,20 +35,21 @@ export default async function Audit({
         description="ตรวจรายการที่บันทึกไว้ ผู้ดำเนินการ เหตุผล และค่าก่อน–หลัง"
       />
       <section className={styles.panel}>
-        <form className={styles.toolbar}>
-          <label>
-            <span>การดำเนินการ</span>
-            <select name="action" defaultValue={action}>
-              <option value="">ทั้งหมด</option>
-              {Object.entries(actions).map(([key, label]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button className="secondary-button">แสดงข้อมูล</button>
-        </form>
+        <div className={styles.toolbar}>
+          <AdminUrlSelect
+            name="action"
+            label="การดำเนินการ"
+            value={action}
+            options={[
+              { value: "", label: "ทั้งหมด" },
+              ...Object.entries(actions).map(([value, label]) => ({
+                value,
+                label,
+              })),
+            ]}
+            reset={["page"]}
+          />
+        </div>
         <p className={styles.hint}>
           แสดงเฉพาะประวัติที่ระบบบันทึกไว้ การล็อกและ Final
           ก่อนเริ่มเก็บประวัติจะไม่ปรากฏ
