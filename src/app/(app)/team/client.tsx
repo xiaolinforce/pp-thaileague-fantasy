@@ -1515,7 +1515,7 @@ export default function TeamClient({
                               : "กำลังคืนทีม…"
                             : fantasy.team.openingGameweek
                               ? "ล้างทีม"
-                              : "คืนทีมต้นเกมวีค",
+                              : "ย้อนคืนนักเตะเป็นตอนเริ่มเกมวีค",
                         )}
                       >
                         {isReverting ? (

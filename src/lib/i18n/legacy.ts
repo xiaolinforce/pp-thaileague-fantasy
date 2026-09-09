@@ -254,6 +254,8 @@ const translations: Record<string, string> = {
   "ยังไม่ได้คืนทีม กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง":
     "Your squad was not restored. Check your connection and try again.",
   คืนทีมต้นเกมวีค: "Restore opening squad",
+  ย้อนคืนนักเตะเป็นตอนเริ่มเกมวีค:
+    "Restore players to their start-of-Gameweek state",
   ล้างทีม: "Clear squad",
   "ล้างทีมทั้งหมด?": "Clear the entire squad?",
   "ยกเลิกการซื้อขายทั้งหมด?": "Cancel all transfers?",
@@ -356,7 +358,7 @@ const translations: Record<string, string> = {
   เปลี่ยนฟรีคงเหลือ: "Free transfers remaining",
   เปลี่ยนเกิน: "Transfers over limit",
   "-{points} คะแนน": "-{points} points",
-  "คุณใช้โควต้าเปลี่ยนฟรีเกินจึงทำให้คะแนนติดลบ":
+  คุณใช้โควต้าเปลี่ยนฟรีเกินจึงทำให้คะแนนติดลบ:
     "You have exceeded the free transfer quota, so your score is now negative",
   "เปลี่ยนนักเตะเกินโควต้าติดลบได้สูงสุด {count} คน (-{points} คะแนน)":
     "You can make at most {count} transfers beyond the free allowance (-{points} points)",
