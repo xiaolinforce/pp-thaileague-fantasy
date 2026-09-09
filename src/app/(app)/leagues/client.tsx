@@ -695,7 +695,6 @@ export function LeagueOverview({
                       </small>
                     </span>
                     <span className="league-list-standing">
-                      <small>อันดับ / สมาชิก</small>
                       <strong>
                         <em>{league.rank ?? "—"}</em> / {league.memberCount}
                       </strong>
@@ -985,38 +984,24 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
 
         <header className="league-detail-heading">
           <div>
-            <span className="league-type-label">
-              {league.type === "overall"
-                ? "Overall Classic"
-                : "Private Classic"}
-            </span>
+            {!isPrivateLeague ? (
+              <span className="league-type-label">Overall Classic</span>
+            ) : null}
             <h2 data-localize="off">{league.name}</h2>
-            <p>
-              {league.memberCount} ผู้จัดการ · Gameweek{" "}
-              {String(league.gameweek.number).padStart(2, "0")}
-            </p>
+            {!isPrivateLeague ? (
+              <p>
+                {league.memberCount} ผู้จัดการ · Gameweek{" "}
+                {String(league.gameweek.number).padStart(2, "0")}
+              </p>
+            ) : null}
           </div>
-          <dl className="league-detail-result">
-            <div>
-              <dt>อันดับของคุณ</dt>
-              <dd>#{league.myStanding?.rank ?? "—"}</dd>
-            </div>
-            <div>
-              <dt>คะแนน GW</dt>
-              <dd>
-                {league.myStanding?.gameweekPoints.toLocaleString() ?? "0"}
-              </dd>
-            </div>
-            <div>
-              <dt>คะแนนรวม</dt>
-              <dd>{league.myStanding?.totalPoints.toLocaleString() ?? "0"}</dd>
-            </div>
-          </dl>
         </header>
 
         <div className="league-detail-layout">
           <section
-            className="league-standings-surface"
+            className={`league-standings-surface${
+              isPrivateLeague ? " league-private-standings-surface" : ""
+            }`}
             aria-labelledby="standings-heading"
           >
             <div className="league-standings-heading">
@@ -1193,23 +1178,23 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                   <div className="league-invite-actions">
                     <button
                       type="button"
-                      className="secondary-button"
+                      className="primary-button"
                       onClick={copyInviteCode}
                     >
                       <Clipboard aria-hidden="true" /> คัดลอกรหัส
                     </button>
+                    <button
+                      type="button"
+                      className="secondary-button"
+                      onClick={() => {
+                        setRegenerateError("");
+                        setRegenerateOpen(true);
+                      }}
+                      disabled={Boolean(pendingTask)}
+                    >
+                      <RefreshCw aria-hidden="true" /> สร้างรหัสใหม่
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    className="league-text-action"
-                    onClick={() => {
-                      setRegenerateError("");
-                      setRegenerateOpen(true);
-                    }}
-                    disabled={Boolean(pendingTask)}
-                  >
-                    <RefreshCw aria-hidden="true" /> สร้างรหัสใหม่
-                  </button>
                 </section>
 
                 <section className="league-management-section">
@@ -1229,48 +1214,51 @@ export function LeagueDetail({ league }: { league: LeagueDetailState }) {
                         required
                       />
                     </label>
-                    <button
-                      type="submit"
-                      className="secondary-button"
-                      disabled={
-                        Boolean(pendingTask) || name.trim() === league.name
-                      }
-                    >
-                      {pendingTask === "rename" ? (
-                        <PendingIcon />
-                      ) : (
-                        <Check aria-hidden="true" />
-                      )}
-                      บันทึกชื่อ
-                    </button>
+                    <div className="league-settings-actions">
+                      <button
+                        type="submit"
+                        className="secondary-button"
+                        disabled={
+                          Boolean(pendingTask) || name.trim() === league.name
+                        }
+                      >
+                        {pendingTask === "rename" ? (
+                          <PendingIcon />
+                        ) : (
+                          <Check aria-hidden="true" />
+                        )}
+                        บันทึกชื่อ
+                      </button>
+                      <button
+                        type="button"
+                        className="league-danger-action"
+                        onClick={() =>
+                          setConfirmAction({
+                            title: (
+                              <>
+                                ลบ{" "}
+                                <span data-localize="off">{league.name}</span>?
+                              </>
+                            ),
+                            description:
+                              "ลีกและสมาชิกภาพจะถูกลบถาวร แต่ทีม คะแนน และประวัติ Fantasy ของทุกคนจะไม่เปลี่ยนแปลง",
+                            label: "ลบลีกถาวร",
+                            run: () =>
+                              runConfirmed(
+                                "delete",
+                                () =>
+                                  deletePrivateLeagueAction({
+                                    leagueId: league.id,
+                                  }),
+                                "/leagues",
+                              ),
+                          })
+                        }
+                      >
+                        <Trash2 aria-hidden="true" /> ลบลีก
+                      </button>
+                    </div>
                   </form>
-                  <button
-                    type="button"
-                    className="league-danger-action"
-                    onClick={() =>
-                      setConfirmAction({
-                        title: (
-                          <>
-                            ลบ <span data-localize="off">{league.name}</span>?
-                          </>
-                        ),
-                        description:
-                          "ลีกและสมาชิกภาพจะถูกลบถาวร แต่ทีม คะแนน และประวัติ Fantasy ของทุกคนจะไม่เปลี่ยนแปลง",
-                        label: "ลบลีกถาวร",
-                        run: () =>
-                          runConfirmed(
-                            "delete",
-                            () =>
-                              deletePrivateLeagueAction({
-                                leagueId: league.id,
-                              }),
-                            "/leagues",
-                          ),
-                      })
-                    }
-                  >
-                    <Trash2 aria-hidden="true" /> ลบลีก
-                  </button>
                 </section>
               </>
             ) : (

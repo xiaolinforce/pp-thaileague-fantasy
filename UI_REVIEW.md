@@ -68,6 +68,10 @@ change does not claim that every state has fresh screenshot evidence.
 - The regenerated-code flow opens in the shared `product-dialog` form pattern
   with a clear cancel action and an inline error region. The private-league
   overview exposes rank and member count together rather than total points.
+- Private League detail now keeps only the league name in its header, uses a
+  compact standings heading, and separates invite and league-setting actions
+  into adjacent cards. Invite and setting actions remain paired within their
+  owning card.
 - This focused Thai/English desktop pass did not re-audit Mobile/Tablet,
   sparse/dense data, or any successful mutation.
 

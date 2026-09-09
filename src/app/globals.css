@@ -9622,8 +9622,7 @@ body {
   height: 27px;
 }
 
-.league-overall-result,
-.league-detail-result {
+.league-overall-result {
   display: grid;
   grid-template-columns: repeat(3, minmax(88px, 1fr));
   gap: 1px;
@@ -9635,23 +9634,20 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.league-overall-result div,
-.league-detail-result div {
+.league-overall-result div {
   min-width: 0;
   padding: 13px 17px;
   background: rgba(255, 255, 255, 0.04);
 }
 
-.league-overall-result dt,
-.league-detail-result dt {
+.league-overall-result dt {
   color: #b9c2c8;
   font-size: 12px;
   font-weight: 400;
   white-space: nowrap;
 }
 
-.league-overall-result dd,
-.league-detail-result dd {
+.league-overall-result dd {
   margin: 3px 0 0;
   color: #fff;
   font-size: 22px;
@@ -10110,10 +10106,6 @@ body {
   color: #bdc5ca;
 }
 
-.league-detail-result {
-  flex: 0 0 min(470px, 48%);
-}
-
 .league-detail-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(270px, 320px);
@@ -10122,7 +10114,7 @@ body {
 }
 
 .league-standings-surface,
-.league-management {
+.league-management-section {
   min-width: 0;
   border: 1px solid var(--line);
   border-radius: 15px;
@@ -10139,6 +10131,11 @@ body {
 .league-standings-heading p {
   margin-top: 2px;
   font-size: 13px;
+}
+
+.league-private-standings-surface .league-standings-heading {
+  min-height: 0;
+  padding-block: 17px;
 }
 
 .league-table-scroll {
@@ -10308,15 +10305,12 @@ body {
 }
 
 .league-management {
-  overflow: hidden;
+  display: grid;
+  gap: 20px;
 }
 
 .league-management-section {
   padding: 18px;
-}
-
-.league-management-section + .league-management-section {
-  border-top: 1px solid var(--line);
 }
 
 .league-management-title {
@@ -10355,7 +10349,7 @@ body {
   user-select: all;
 }
 
-.league-invite-actions .secondary-button {
+.league-invite-actions > button {
   min-width: 0;
   flex: 1;
   padding-inline: 8px;
@@ -10365,22 +10359,20 @@ body {
   font-size: 14px;
 }
 
-.league-text-action {
-  margin-top: 9px;
-}
-
 .league-field.compact {
   margin-top: 12px;
 }
 
-.league-management-section form > .secondary-button {
-  width: 100%;
+.league-settings-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
   margin-top: 10px;
 }
 
 .league-danger-action {
   width: 100%;
-  margin-top: 16px;
+  margin-top: 0;
   color: #a82a20;
   background: #fff3f1;
 }
@@ -10396,13 +10388,7 @@ body {
   }
 
   .league-management {
-    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .league-management-section + .league-management-section {
-    border-top: 0;
-    border-left: 1px solid var(--line);
   }
 }
 
@@ -10483,22 +10469,8 @@ body {
     padding: 19px;
   }
 
-  .league-detail-result {
-    width: 100%;
-    flex: none;
-  }
-
-  .league-detail-result div {
-    padding: 11px 9px;
-  }
-
   .league-management {
-    display: block;
-  }
-
-  .league-management-section + .league-management-section {
-    border-top: 1px solid var(--line);
-    border-left: 0;
+    grid-template-columns: 1fr;
   }
 
   .league-standings-heading,

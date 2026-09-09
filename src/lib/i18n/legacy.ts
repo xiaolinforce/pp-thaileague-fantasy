@@ -576,7 +576,6 @@ const translations: Record<string, string> = {
   ลีกที่คุณเป็นสมาชิกจะปรากฏเฉพาะกับคนในกลุ่ม:
     "Only group members can see leagues you have joined",
   คุณเป็นเจ้าของ: "You are the owner",
-  "อันดับ / สมาชิก": "Rank / members",
   คะแนนรวม: "Total points",
   "Private League สำหรับสมาชิก": "Private Leagues are for members",
   "ยังไม่มี Private League": "No Private Leagues yet",
