@@ -59,6 +59,25 @@ change does not claim that every state has fresh screenshot evidence.
 
 ## Recommended audit order
 
+### 2026-09-10 Team mobile player actions
+
+- Local Chromium review on `/team`, using an existing populated open-GW squad,
+  covered Thai and English at 390×844, narrow 360×800, landscape 667×375,
+  and breakpoint checks at 767/768px and 1279/1280px. Mobile opens the spotlight;
+  Tablet/Desktop still open player details directly, without horizontal overflow.
+- Pitch and bench screenshots confirmed an undimmed selected token, a vertical
+  icon-only action column, left placement for a right-edge token, and viewport
+  clamping near the bench. Bench players expose no captaincy actions.
+- Verified token/overlay cancellation, Escape, contained keyboard focus, scroll
+  lock, details handoff and focus return, captain/vice-captain exchange, legal
+  starter/bench swapping, removal/Undo, and focus on the resulting vacancy.
+  Resizing an open spotlight into Tablet dismisses it and restores scrolling.
+- Changes during verification stayed in the local unsaved draft; no team save
+  or database maintenance was performed. Browser console review found no errors
+  or warnings. Native iOS/Android, screen-reader speech, and deadline/pending
+  simulations were not exercised; editability continues to use the existing
+  Team guards.
+
 ### 2026-09-09 Private League information hierarchy
 
 - Local Chrome on the authenticated development detail page confirmed that the

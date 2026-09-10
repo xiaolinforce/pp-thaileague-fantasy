@@ -155,6 +155,18 @@ proven behaviors unless a deliberate product decision replaces them:
   including teams joining after Gameweek 1, with an infinity symbol plus an
   accessible written label.
 - Player detail opens in the shared dialog so selection context is not lost.
+- On Mobile (below 768px), tapping an occupied pitch or bench token first
+  opens a modal spotlight around that token with a vertical column of 44px
+  icon buttons: Remove, Swap, Captain, Vice-captain, and More information.
+  Bench players omit captaincy; non-editable states expose information only.
+  Swap retains its existing eligibility constraints. The column chooses the
+  available side and stays within the visible viewport. The rest of the page
+  is dimmed and inert, with scrolling locked and focus contained. Tapping the
+  selected token or overlay, or pressing Escape, dismisses it. More information
+  replaces the spotlight with the shared player dialog. Other commands close
+  the spotlight before entering their existing flow; removal focuses the new
+  vacancy. Active swap-target selection, market details, Tablet, and Desktop
+  retain their existing interactions.
 
 The exact pitch geometry, player-token placement, tier meter, and market-row
 layout are Team-specific patterns. Reuse their underlying identity and

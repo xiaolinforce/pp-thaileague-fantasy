@@ -3823,6 +3823,53 @@ textarea:focus-visible {
   transform: translateY(-4px);
 }
 
+.mobile-player-actions-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  overflow: hidden;
+  outline: none;
+}
+
+.mobile-player-spotlight {
+  position: absolute;
+  border: 0;
+  border-radius: 12px;
+  padding: 0;
+  background: transparent;
+  box-shadow: 0 0 0 200vmax rgb(0 0 0 / 65%);
+  cursor: pointer;
+}
+
+.mobile-player-actions {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mobile-player-actions .secondary-button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border-radius: 12px;
+  background: var(--paper);
+}
+
+.mobile-player-actions .secondary-button:focus-visible {
+  outline-offset: -4px;
+}
+
+@media (width < 48rem) {
+  .squad-token-shell:not(.vacant-squad-token-shell):hover {
+    transform: none;
+  }
+}
+
 .squad-token-shell.swap-source .squad-token,
 .squad-token-shell.swap-available .squad-token {
   border-radius: 12px;
@@ -10534,10 +10581,10 @@ body {
     width: 4rem;
   }
 
-.league-private-standings th:nth-child(1),
-.league-private-standings td:nth-child(1) {
-  width: 40px;
-}
+  .league-private-standings th:nth-child(1),
+  .league-private-standings td:nth-child(1) {
+    width: 40px;
+  }
 
   .league-standings-table th:nth-child(3),
   .league-standings-table td:nth-child(3) {

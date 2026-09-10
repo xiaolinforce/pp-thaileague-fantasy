@@ -16,7 +16,14 @@ import {
   WandSparkles,
   Zap,
 } from "lucide-react";
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
@@ -81,6 +88,10 @@ import {
   type RemovedDraftPlayersBySlot,
 } from "@/lib/fantasy/team-draft";
 import TransfersClient from "./transfers-client";
+import {
+  MobilePlayerActions,
+  type MobilePlayerSelection,
+} from "./mobile-player-actions";
 
 const rows = ["GK", "DEF", "MID", "FWD"] as const;
 const fantasyPositions: Record<
@@ -397,7 +408,10 @@ function SquadPlayer({
   showPositionBadgeOnShirt,
 }: {
   player: CompetitionPlayerView;
-  onSelect: (player: CompetitionPlayerView) => void;
+  onSelect: (
+    player: CompetitionPlayerView,
+    trigger?: HTMLButtonElement,
+  ) => void;
   onSwap: (player: CompetitionPlayerView) => void;
   onRemove: (player: CompetitionPlayerView) => void;
   actionsDisabled: boolean;
@@ -435,7 +449,7 @@ function SquadPlayer({
           className="squad-token"
           onClick={(event) => {
             event.stopPropagation();
-            onSelect(player);
+            onSelect(player, event.currentTarget);
           }}
           aria-label={ariaLabel}
           aria-pressed={swapState === "source" ? true : undefined}
@@ -501,6 +515,7 @@ function translateAction(language: "th" | "en", thai: string, english: string) {
 }
 
 function VacantSquadSlot({
+  slotId,
   position,
   onSelect,
   onSwap,
@@ -512,6 +527,7 @@ function VacantSquadSlot({
   undoPlayerName,
   onUndo,
 }: {
+  slotId: string;
   position: CompetitionPosition;
   onSelect: () => void;
   onSwap: () => void;
@@ -549,6 +565,7 @@ function VacantSquadSlot({
         <button
           type="button"
           className="vacant-squad-slot"
+          id={`squad-vacancy-${slotId}`}
           onClick={onSelect}
           aria-label={
             language === "th"
@@ -621,6 +638,10 @@ export default function TeamClient({
   const { language, translate } = useLanguage();
   const { setNavigationBlocked } = useNavigationBlocker();
   const [selected, setSelected] = useState<CompetitionPlayerView | null>(null);
+  const [mobileSelection, setMobileSelection] =
+    useState<MobilePlayerSelection | null>(null);
+  const playerDetailsTrigger = useRef<HTMLButtonElement | null>(null);
+  const closeMobileActions = useCallback(() => setMobileSelection(null), []);
   const [swapFrom, setSwapFrom] = useState<string | null>(null);
   const [preferredVacancySlotId, setPreferredVacancySlotId] = useState<
     string | null
@@ -800,6 +821,12 @@ export default function TeamClient({
   const selectedMember = selected?.fantasyPlayerId
     ? members.find(
         (member) => member.fantasyPlayerId === selected.fantasyPlayerId,
+      )
+    : null;
+  const mobileMember = mobileSelection
+    ? members.find(
+        (member) =>
+          member.fantasyPlayerId === mobileSelection.player.fantasyPlayerId,
       )
     : null;
   const selectedFixtures = useMemo(() => {
@@ -1267,11 +1294,47 @@ export default function TeamClient({
     return player ? localize(player.name, language) : undefined;
   };
 
-  const selectPlayer = (player: CompetitionPlayerView) => {
+  const assignCaptain = (
+    player: CompetitionPlayerView,
+    role: "captain" | "vice_captain",
+  ) => {
+    if (interactionsDisabled || !player.fantasyPlayerId) return;
+    const oppositeRole = role === "captain" ? "vice_captain" : "captain";
+    setMembers((current) => {
+      const target = current.find(
+        (member) => member.fantasyPlayerId === player.fantasyPlayerId,
+      );
+      if (!target || target.lineupRole !== "starter") return current;
+      const previous = current.find((member) => member.captainRole === role);
+      return current.map((member) => ({
+        ...member,
+        captainRole:
+          member.slotId === target.slotId
+            ? role
+            : target.captainRole === oppositeRole &&
+                member.slotId === previous?.slotId
+              ? oppositeRole
+              : member.captainRole === role
+                ? "none"
+                : member.captainRole,
+      }));
+    });
+    setSelected(null);
+  };
+
+  const selectPlayer = (
+    player: CompetitionPlayerView,
+    trigger?: HTMLButtonElement,
+  ) => {
     if (!player.fantasyPlayerId) return;
     if (!swapFrom) {
       setPreferredVacancySlotId(null);
-      setSelected(player);
+      playerDetailsTrigger.current = trigger ?? null;
+      if (trigger && window.matchMedia("(width < 48rem)").matches) {
+        setMobileSelection({ player, trigger });
+      } else {
+        setSelected(player);
+      }
       return;
     }
     const target = members.find(
@@ -1571,6 +1634,7 @@ export default function TeamClient({
                         ) : (
                           <VacantSquadSlot
                             key={slot.member.slotId}
+                            slotId={slot.member.slotId}
                             position={slot.position}
                             onSelect={() =>
                               selectVacancy(slot.member.slotId, slot.position)
@@ -1624,6 +1688,7 @@ export default function TeamClient({
                       />
                     ) : (
                       <VacantSquadSlot
+                        slotId={slot.member.slotId}
                         position={slot.position}
                         onSelect={() =>
                           selectVacancy(slot.member.slotId, slot.position)
@@ -1657,7 +1722,10 @@ export default function TeamClient({
             isEditable={isEditable}
             members={members}
             onMembersChange={replaceDraftMembers}
-            onPlayerSelect={setSelected}
+            onPlayerSelect={(player) => {
+              playerDetailsTrigger.current = null;
+              setSelected(player);
+            }}
             onPlayerRemove={removePlayer}
             isAutoFilling={isAutoFilling || isReverting}
             preferredVacancySlotId={preferredVacancySlotId}
@@ -1667,6 +1735,24 @@ export default function TeamClient({
         </div>
       </main>
 
+      {mobileSelection && mobileMember && (
+        <MobilePlayerActions
+          selection={mobileSelection}
+          slotId={mobileMember.slotId}
+          editable={!interactionsDisabled}
+          canSwap={swappableSlotIds.has(mobileMember.slotId)}
+          canCaptain={mobileMember.lineupRole === "starter"}
+          onClose={closeMobileActions}
+          onRemove={() => removePlayer(mobileSelection.player)}
+          onSwap={() => startSwap(mobileSelection.player)}
+          onCaptain={() => assignCaptain(mobileSelection.player, "captain")}
+          onViceCaptain={() =>
+            assignCaptain(mobileSelection.player, "vice_captain")
+          }
+          onDetails={() => setSelected(mobileSelection.player)}
+        />
+      )}
+
       <Dialog
         open={selected !== null}
         onOpenChange={(open) => !open && setSelected(null)}
@@ -1674,6 +1760,7 @@ export default function TeamClient({
         {selected && (
           <DialogContent
             className="product-dialog accessible-player-modal"
+            finalFocus={() => playerDetailsTrigger.current ?? true}
             closeLabel={translate("ปิด")}
           >
             <div className="modal-player-top">
@@ -1805,32 +1892,7 @@ export default function TeamClient({
                       interactionsDisabled ||
                       selectedMember.lineupRole !== "starter"
                     }
-                    onClick={() => {
-                      if (!selected.fantasyPlayerId) return;
-                      setMembers((current) => {
-                        const oldCaptain = current.find(
-                          (member) => member.captainRole === "captain",
-                        );
-                        const wasVice =
-                          current.find(
-                            (member) => member.captainRole === "vice_captain",
-                          )?.fantasyPlayerId === selected.fantasyPlayerId;
-                        return current.map((member) => ({
-                          ...member,
-                          captainRole:
-                            member.fantasyPlayerId === selected.fantasyPlayerId
-                              ? "captain"
-                              : wasVice &&
-                                  member.fantasyPlayerId ===
-                                    oldCaptain?.fantasyPlayerId
-                                ? "vice_captain"
-                                : member.captainRole === "captain"
-                                  ? "none"
-                                  : member.captainRole,
-                        }));
-                      });
-                      setSelected(null);
-                    }}
+                    onClick={() => assignCaptain(selected, "captain")}
                   >
                     <i
                       className="captain-badge captain-badge--captain dialog-captain-icon"
@@ -1847,32 +1909,7 @@ export default function TeamClient({
                       interactionsDisabled ||
                       selectedMember.lineupRole !== "starter"
                     }
-                    onClick={() => {
-                      if (!selected.fantasyPlayerId) return;
-                      setMembers((current) => {
-                        const oldVice = current.find(
-                          (member) => member.captainRole === "vice_captain",
-                        );
-                        const wasCaptain =
-                          current.find(
-                            (member) => member.captainRole === "captain",
-                          )?.fantasyPlayerId === selected.fantasyPlayerId;
-                        return current.map((member) => ({
-                          ...member,
-                          captainRole:
-                            member.fantasyPlayerId === selected.fantasyPlayerId
-                              ? "vice_captain"
-                              : wasCaptain &&
-                                  member.fantasyPlayerId ===
-                                    oldVice?.fantasyPlayerId
-                                ? "captain"
-                                : member.captainRole === "vice_captain"
-                                  ? "none"
-                                  : member.captainRole,
-                        }));
-                      });
-                      setSelected(null);
-                    }}
+                    onClick={() => assignCaptain(selected, "vice_captain")}
                   >
                     <i
                       className="captain-badge captain-badge--vice-captain dialog-captain-icon"
