@@ -3864,9 +3864,13 @@ textarea:focus-visible {
   outline-offset: -4px;
 }
 
-@media (width < 48rem) {
+@media (width < 80rem) {
   .squad-token-shell:not(.vacant-squad-token-shell):hover {
     transform: none;
+  }
+
+  .squad-token-shell:not(.vacant-squad-token-shell) .squad-token-action {
+    display: none;
   }
 }
 
@@ -3921,6 +3925,45 @@ textarea:focus-visible {
 
 .squad-captain-role {
   left: calc(50% - 34px);
+}
+
+.squad-captain-actions {
+  position: absolute;
+  z-index: 5;
+  bottom: 74px;
+  left: calc(50% - 34px);
+  display: none;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.squad-captain-actions--with-role {
+  left: calc(50% - 12px);
+}
+
+.squad-captain-actions .squad-token-action {
+  position: static;
+  flex: 0 0 18px;
+}
+
+.squad-captain-action .captain-badge {
+  position: static;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  box-shadow: none;
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.squad-captain-action .captain-badge--captain {
+  background: var(--orange);
+}
+
+.squad-captain-action .captain-badge--vice-captain {
+  background: color-mix(in srgb, var(--orange) 38%, var(--paper));
 }
 
 .squad-player-tier {
@@ -3981,7 +4024,8 @@ textarea:focus-visible {
     color 150ms ease,
     border-color 150ms ease,
     background-color 150ms ease,
-    transform 150ms ease;
+    transform 150ms ease,
+    opacity 120ms ease;
 }
 
 .squad-token-action:hover:not(:disabled) {
@@ -4017,6 +4061,28 @@ textarea:focus-visible {
   border-color: #e39c95;
   background: #fff1ef;
   transform: scale(1.08);
+}
+
+@media (width >= 80rem) {
+  .squad-captain-actions {
+    display: flex;
+  }
+
+  .squad-token-shell:not(.vacant-squad-token-shell) .squad-token-action {
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.92);
+  }
+
+  .squad-token-shell:not(.vacant-squad-token-shell):hover .squad-token-action,
+  .squad-token-shell:not(.vacant-squad-token-shell):focus-within
+    .squad-token-action {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
 }
 
 .vacant-squad-slot {

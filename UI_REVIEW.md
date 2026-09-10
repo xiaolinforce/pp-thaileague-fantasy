@@ -1237,3 +1237,26 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
   Guest browser session was correctly redirected away from the protected admin
   namespace, so populated Thai/English and responsive rendered evidence remains
   pending rather than weakening authentication or manufacturing admin data.
+
+### 2026-09-11 — Team player actions across Tablet and Desktop
+
+- **Route and task:** `/team`; extend the modal player-action spotlight through
+  Tablet while keeping the established Tablet token geometry, and expose compact
+  captaincy controls on Desktop starter tokens.
+- **Responsive evidence:** verified the spotlight at 767px Mobile and 1279px
+  Tablet, including the dark page overlay, selected-token cutout, vertical icon
+  actions, dismissal from both the token and backdrop, and the handoff from More
+  information to the shared player dialog. At the 1280px boundary, selecting a
+  player continued to open the shared detail dialog directly.
+- **Desktop interactions:** verified that captain, vice-captain, swap, and remove
+  controls remain hidden until their token is hovered or contains keyboard
+  focus. An unassigned starter exposed both captaincy controls; the current
+  captain and vice-captain each exposed only the opposite role beside their
+  persistent badge. Bench tokens exposed no captaincy controls.
+- **Language and state:** verified the Mobile action names in Thai and the
+  Tablet/Desktop flows in English. Captain and vice-captain changes were invoked
+  through the new Desktop controls, then restored to the original draft; Save
+  Team returned to its disabled state. No team save or database write was made.
+  The language preference and viewport override were restored after review.
+- **Runtime:** no console warning, error, or runtime exception was observed while
+  exercising the responsive and captaincy flows.

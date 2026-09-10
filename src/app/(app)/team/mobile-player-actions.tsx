@@ -60,7 +60,7 @@ export function MobilePlayerActions({
     const viewport = window.visualViewport;
     const update = () => {
       if (
-        !window.matchMedia("(width < 48rem)").matches ||
+        !window.matchMedia("(width < 80rem)").matches ||
         !anchor.isConnected
       ) {
         onClose();

@@ -400,11 +400,13 @@ function SquadPlayer({
   onSelect,
   onSwap,
   onRemove,
+  onCaptainRoleChange,
   actionsDisabled,
   hideActions,
   swapDisabled,
   captain,
   swapState,
+  showCaptainActions,
   showPositionBadgeOnShirt,
 }: {
   player: CompetitionPlayerView;
@@ -414,11 +416,16 @@ function SquadPlayer({
   ) => void;
   onSwap: (player: CompetitionPlayerView) => void;
   onRemove: (player: CompetitionPlayerView) => void;
+  onCaptainRoleChange: (
+    player: CompetitionPlayerView,
+    role: "captain" | "vice_captain",
+  ) => void;
   actionsDisabled: boolean;
   hideActions: boolean;
   swapDisabled: boolean;
   captain?: "C" | "V";
   swapState?: PlayerSwapState;
+  showCaptainActions?: boolean;
   showPositionBadgeOnShirt?: boolean;
 }) {
   const { language } = useLanguage();
@@ -483,6 +490,52 @@ function SquadPlayer({
         </button>
         {!hideActions && (
           <>
+            {showCaptainActions && (
+              <span
+                className={`squad-captain-actions${captain ? " squad-captain-actions--with-role" : ""}`}
+              >
+                {captain !== "C" && (
+                  <button
+                    type="button"
+                    className="squad-token-action squad-captain-action"
+                    onClick={() => onCaptainRoleChange(player, "captain")}
+                    disabled={actionsDisabled}
+                    aria-label={`${translateAction(language, "ตั้งเป็นกัปตัน", "Make captain")} ${playerName}`}
+                    title={
+                      language === "th" ? "ตั้งเป็นกัปตัน" : "Make captain"
+                    }
+                  >
+                    <i
+                      className="captain-badge captain-badge--captain"
+                      aria-hidden="true"
+                    >
+                      C
+                    </i>
+                  </button>
+                )}
+                {captain !== "V" && (
+                  <button
+                    type="button"
+                    className="squad-token-action squad-captain-action"
+                    onClick={() => onCaptainRoleChange(player, "vice_captain")}
+                    disabled={actionsDisabled}
+                    aria-label={`${translateAction(language, "ตั้งเป็นรองกัปตัน", "Make vice-captain")} ${playerName}`}
+                    title={
+                      language === "th"
+                        ? "ตั้งเป็นรองกัปตัน"
+                        : "Make vice-captain"
+                    }
+                  >
+                    <i
+                      className="captain-badge captain-badge--vice-captain"
+                      aria-hidden="true"
+                    >
+                      V
+                    </i>
+                  </button>
+                )}
+              </span>
+            )}
             <button
               type="button"
               className="squad-token-action squad-swap-action"
@@ -1330,7 +1383,7 @@ export default function TeamClient({
     if (!swapFrom) {
       setPreferredVacancySlotId(null);
       playerDetailsTrigger.current = trigger ?? null;
-      if (trigger && window.matchMedia("(width < 48rem)").matches) {
+      if (trigger && window.matchMedia("(width < 80rem)").matches) {
         setMobileSelection({ player, trigger });
       } else {
         setSelected(player);
@@ -1616,12 +1669,14 @@ export default function TeamClient({
                             onSelect={selectPlayer}
                             onSwap={startSwap}
                             onRemove={removePlayer}
+                            onCaptainRoleChange={assignCaptain}
                             actionsDisabled={interactionsDisabled}
                             hideActions={Boolean(swapFrom)}
                             swapDisabled={
                               !swappableSlotIds.has(slot.member.slotId)
                             }
                             swapState={getSwapState(slot.member.slotId)}
+                            showCaptainActions
                             captain={
                               slot.player.fantasyPlayerId === captainId
                                 ? "C"
@@ -1680,6 +1735,7 @@ export default function TeamClient({
                         onSelect={selectPlayer}
                         onSwap={startSwap}
                         onRemove={removePlayer}
+                        onCaptainRoleChange={assignCaptain}
                         actionsDisabled={interactionsDisabled}
                         hideActions={Boolean(swapFrom)}
                         swapDisabled={!swappableSlotIds.has(slot.member.slotId)}
