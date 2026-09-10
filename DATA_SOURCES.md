@@ -13,6 +13,12 @@ task-scoped operations against an explicitly confirmed Neon branch. Temporary
 tools, source payloads, CSV files, spreadsheets, screenshots, and database
 exports must not be committed.
 
+The current player master intentionally does not retain player-photo URLs, and
+current registrations intentionally do not retain shirt numbers. Do not add
+either display-oriented field during roster maintenance. Historical source
+payloads and audit context may retain source facts, including shirt numbers,
+when they are needed to explain a reviewed match or maintenance decision.
+
 Do not silently combine or infer source facts in UI code. Resolve them during
 the maintenance task, preserve provenance and audit context in PostgreSQL, and
 run the relevant database verification before handoff.

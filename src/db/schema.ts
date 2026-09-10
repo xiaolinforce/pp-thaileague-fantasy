@@ -508,7 +508,6 @@ export const players = pgTable(
       .default("unknown")
       .notNull(),
     positionDetail: text("position_detail"),
-    photoUrl: text("photo_url"),
     isActive: boolean("is_active").default(true).notNull(),
     sourceName: text("source_name").notNull(),
     sourceUrl: text("source_url").notNull(),
@@ -535,7 +534,6 @@ export const playerRegistrations = pgTable(
     playerId: uuid("player_id")
       .notNull()
       .references(() => players.id, { onDelete: "cascade" }),
-    shirtNumber: smallint("shirt_number"),
     registeredPosition: playerPositionEnum("registered_position")
       .default("unknown")
       .notNull(),
@@ -562,10 +560,6 @@ export const playerRegistrations = pgTable(
       table.status,
     ),
     index("player_registrations_player_idx").on(table.playerId),
-    check(
-      "player_registrations_shirt_number_check",
-      sql`${table.shirtNumber} is null or (${table.shirtNumber} >= 0 and ${table.shirtNumber} <= 999)`,
-    ),
     check(
       "player_registrations_date_order_check",
       sql`${table.registeredUntil} is null or ${table.registeredUntil} >= ${table.registeredFrom}`,

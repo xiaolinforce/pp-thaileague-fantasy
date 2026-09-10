@@ -13,7 +13,6 @@ export type CompetitionPlayerView = {
   id: string;
   fantasyPlayerId: string | null;
   clubId: string;
-  photoUrl: string | null;
   name: LocalizedText;
   shortName: LocalizedText;
   club: LocalizedText;

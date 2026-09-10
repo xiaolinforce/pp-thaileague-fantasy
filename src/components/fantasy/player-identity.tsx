@@ -4,7 +4,6 @@ import { useLanguage } from "@/components/fantasy/i18n";
 import { PlayerKit } from "@/components/fantasy/player-kit";
 import { PlayerMetaBadges } from "@/components/fantasy/player-meta-badges";
 import { localize, type CompetitionPlayerView } from "@/lib/competition-types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export function PlayerIdentity({
   player,
@@ -35,18 +34,9 @@ export function PlayerIdentity({
       {showMarketCompact ? (
         <PlayerKit color={player.color} accent={player.accent} />
       ) : (
-        <Avatar className="player-photo" size="lg">
-          {player.photoUrl && (
-            <AvatarImage src={player.photoUrl} alt={playerName} />
-          )}
-          <AvatarFallback>
-            <PlayerKit
-              color={player.color}
-              accent={player.accent}
-              size="small"
-            />
-          </AvatarFallback>
-        </Avatar>
+        <span className="player-identity-kit" aria-hidden="true">
+          <PlayerKit color={player.color} accent={player.accent} size="small" />
+        </span>
       )}
       <div>
         <strong>{playerName}</strong>

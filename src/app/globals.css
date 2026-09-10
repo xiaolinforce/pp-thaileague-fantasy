@@ -4576,7 +4576,9 @@ button.vacant-squad-slot {
   gap: 10px;
 }
 
-.player-photo {
+.player-identity-kit {
+  display: grid;
+  place-items: center;
   width: 42px;
   height: 42px;
   border: 1px solid var(--line);

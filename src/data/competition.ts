@@ -349,7 +349,6 @@ async function loadCompetitionDataset() {
           id: player.id,
           fantasyPlayerId: fantasyPlayer?.id ?? null,
           clubId: clubRow.club.id,
-          photoUrl: player.photoUrl,
           name: localized(
             player.fullNameTh,
             player.fullNameEn,
