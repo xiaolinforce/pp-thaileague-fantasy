@@ -3945,6 +3945,9 @@ textarea:focus-visible {
 .squad-captain-actions .squad-token-action {
   position: static;
   flex: 0 0 18px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .squad-captain-action .captain-badge {
@@ -3959,11 +3962,13 @@ textarea:focus-visible {
 }
 
 .squad-captain-action .captain-badge--captain {
-  background: var(--orange);
+  background: transparent;
+  color: var(--orange);
 }
 
 .squad-captain-action .captain-badge--vice-captain {
-  background: color-mix(in srgb, var(--orange) 38%, var(--paper));
+  background: transparent;
+  color: color-mix(in srgb, var(--orange) 38%, var(--paper));
 }
 
 .squad-player-tier {
