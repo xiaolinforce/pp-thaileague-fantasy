@@ -3945,9 +3945,6 @@ textarea:focus-visible {
 .squad-captain-actions .squad-token-action {
   position: static;
   flex: 0 0 18px;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
 }
 
 .squad-captain-action .captain-badge {
