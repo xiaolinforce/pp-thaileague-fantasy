@@ -367,9 +367,13 @@ never rewritten.
 
 Release tooling under `scripts/release` runs outside the application runtime.
 The active GitHub Actions workflow owns production build/migrate/check/promote;
-its Neon Pool exists only for the guarded migration transaction. Application
-access continues through the shared Drizzle client. See `RELEASE.md` for
-activation status, environment boundaries and recovery procedures.
+its Neon Pool exists only for the guarded migration transaction. Compatible
+expansions run database-first. Reviewed contractions whose candidate tolerates
+the old schema run application-first: the exact candidate is checked, promoted,
+and verified on the production alias before SQL can run. Mixed orders and
+coordinated migrations stop automatically. Application access continues through
+the shared Drizzle client. See `RELEASE.md` for activation status, environment
+boundaries and recovery procedures.
 
 - Keep database access and external-source fetching server-only.
 - Use the shared Drizzle client; do not create route-local clients.

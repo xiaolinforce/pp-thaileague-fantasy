@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
   applyMigrationBatch,
+  assertApplicationFirstReady,
   assertDeployment,
   migrationFromSource,
   planMigrations,
@@ -70,7 +71,7 @@ test("every guarded source migration has a current compatibility review", async 
 
     assert.ok(review, `${entry.tag} is missing a compatibility review`);
     assert.equal(review.sha256, migration.hash, `${entry.tag} review is stale`);
-    assert.match(review.compatibility, /^(compatible|coordinated)$/);
+    assert.match(review.compatibility, /^(compatible|app-first|coordinated)$/);
   }
 });
 
@@ -81,13 +82,14 @@ test("an up-to-date database is a no-op without reapplying old migrations", () =
       [...applied, { created_at: "200", hash: "b" }],
       {},
     ),
-    [],
+    { pending: [], order: "database-first" },
   );
 });
 test("only a reviewed pending migration is selected", () => {
-  assert.deepEqual(planMigrations(migrations, applied, policy), [
-    migrations[1],
-  ]);
+  assert.deepEqual(planMigrations(migrations, applied, policy), {
+    pending: [migrations[1]],
+    order: "database-first",
+  });
 });
 test("empty, future, duplicated and incomplete database journals stop release", () => {
   for (const rows of [
@@ -141,6 +143,79 @@ test("a coordinated migration never enters the automatic SQL batch", () => {
         "0001_expand": { sha256: "b", compatibility: "coordinated" },
       }),
     /write pause/,
+  );
+});
+test("an app-first migration is planned after application promotion", () => {
+  assert.deepEqual(
+    planMigrations(migrations, applied, {
+      "0001_expand": { sha256: "b", compatibility: "app-first" },
+    }),
+    { pending: [migrations[1]], order: "application-first" },
+  );
+});
+test("mixed automatic migration orders require separate releases", () => {
+  const mixedMigrations = [
+    ...migrations,
+    {
+      tag: "0002_contract",
+      timestamp: 300,
+      hash: "c",
+      statements: ["alter table baseline drop column label"],
+    },
+  ];
+  assert.throws(
+    () =>
+      planMigrations(mixedMigrations, applied, {
+        "0001_expand": { sha256: "b", compatibility: "compatible" },
+        "0002_contract": { sha256: "c", compatibility: "app-first" },
+      }),
+    /cannot share one automatic release/,
+  );
+});
+test("application-first SQL requires the exact verified production candidate", () => {
+  const sha = "a".repeat(40);
+  const ready = {
+    id: "dpl_test",
+    sha,
+    productionVerifiedSha: sha,
+    productionVerifiedDeploymentId: "dpl_test",
+  };
+  assert.doesNotThrow(() => assertApplicationFirstReady(ready, sha));
+  for (const state of [
+    { ...ready, sha: "b".repeat(40) },
+    { ...ready, productionVerifiedSha: undefined },
+    { ...ready, productionVerifiedDeploymentId: "dpl_old" },
+  ]) {
+    assert.throws(
+      () => assertApplicationFirstReady(state, sha),
+      /exact candidate is verified in production/,
+    );
+  }
+});
+test("workflow promotes and verifies before application-first SQL", async () => {
+  const workflow = await readFile(
+    ".github/workflows/production-release.yml",
+    "utf8",
+  );
+  const candidateCheck = workflow.indexOf(
+    "Check candidate liveness, database readiness and public documents",
+  );
+  const promote = workflow.indexOf("Promote the exact verified candidate");
+  const productionCheck = workflow.indexOf(
+    "Verify the promoted application before application-first migrations",
+  );
+  const applyAfter = workflow.indexOf(
+    "Apply reviewed application-first migrations atomically",
+  );
+  const finalCheck = workflow.indexOf(
+    "Verify the final production alias and application",
+  );
+  assert.ok(
+    candidateCheck >= 0 &&
+      candidateCheck < promote &&
+      promote < productionCheck &&
+      productionCheck < applyAfter &&
+      applyAfter < finalCheck,
   );
 });
 test("a failed SQL statement stops subsequent migrations and journal writes", async () => {

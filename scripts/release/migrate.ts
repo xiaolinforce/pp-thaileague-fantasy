@@ -3,6 +3,7 @@ import nextEnv from "@next/env";
 import { Pool } from "@neondatabase/serverless";
 import {
   applyMigrationBatch,
+  assertApplicationFirstReady,
   migrationFromSource,
   planMigrations,
   ReleaseError,
@@ -13,15 +14,17 @@ nextEnv.loadEnvConfig(process.cwd());
 
 async function run() {
   const mode = process.argv[2];
-  if (!["check", "apply", "verify"].includes(mode))
-    throw new ReleaseError("Expected check, apply or verify.");
+  if (!["check", "apply-before", "apply-after", "verify"].includes(mode))
+    throw new ReleaseError(
+      "Expected check, apply-before, apply-after or verify.",
+    );
   const expected = process.env.NEON_PRODUCTION_BRANCH_ID;
   if (!expected || !process.env.DATABASE_URL)
     throw new ReleaseError(
       "Database connection and explicit expected branch are required.",
     );
   if (
-    mode === "apply" &&
+    mode.startsWith("apply-") &&
     (process.env.GITHUB_REF !== "refs/heads/main" ||
       process.env.GITHUB_ACTIONS !== "true")
   ) {
@@ -72,30 +75,61 @@ async function run() {
       const applied = await client.query<AppliedMigration>(
         "select hash, created_at from drizzle.__drizzle_migrations order by created_at",
       );
-      const pending = planMigrations(migrations, applied.rows, policy);
+      const plan = planMigrations(migrations, applied.rows, policy);
       console.log(
-        `Confirmed branch ${expected}; ${applied.rows.length} applied, ${pending.length} pending migrations.`,
+        `Confirmed branch ${expected}; ${applied.rows.length} applied, ${plan.pending.length} pending migrations; order=${plan.order}.`,
       );
-      if (mode === "verify" && pending.length)
+      if (mode === "check" && process.env.GITHUB_ENV)
+        await appendFile(
+          process.env.GITHUB_ENV,
+          `RELEASE_MIGRATION_ORDER=${plan.order}\n`,
+        );
+      if (mode === "verify" && plan.pending.length)
         throw new ReleaseError("Database still has pending migrations.");
-      if (mode === "apply" && pending.length) {
+      const expectedOrder =
+        mode === "apply-after"
+          ? "application-first"
+          : mode === "apply-before"
+            ? "database-first"
+            : undefined;
+      if (
+        expectedOrder &&
+        plan.pending.length &&
+        plan.order !== expectedOrder
+      ) {
+        throw new ReleaseError(
+          `Migration order is ${plan.order}; ${mode} is not permitted.`,
+        );
+      }
+      if (mode === "apply-after" && plan.pending.length) {
+        const statePath = process.env.RELEASE_STATE_PATH;
+        if (!statePath)
+          throw new ReleaseError(
+            "Application-first migration requires verified production state.",
+          );
+        assertApplicationFirstReady(
+          JSON.parse(await readFile(statePath, "utf8")),
+          process.env.GITHUB_SHA,
+        );
+      }
+      if (mode.startsWith("apply-") && plan.pending.length) {
         const reference = `Pre-migration recovery reference: ${new Date(rows[0].restore_at).toISOString()} (subject to Neon history retention; not a backup).`;
         console.log(reference);
         if (process.env.GITHUB_STEP_SUMMARY)
           await appendFile(process.env.GITHUB_STEP_SUMMARY, `${reference}\n\n`);
         await applyMigrationBatch(
           (statement, parameters) => client.query(statement, parameters),
-          pending,
+          plan.pending,
         );
         const after = await client.query<AppliedMigration>(
           "select hash, created_at from drizzle.__drizzle_migrations order by created_at",
         );
-        if (planMigrations(migrations, after.rows, policy).length)
+        if (planMigrations(migrations, after.rows, policy).pending.length)
           throw new ReleaseError("Migration journal verification failed.");
       }
       await client.query("commit");
       console.log(
-        mode === "apply"
+        mode.startsWith("apply-")
           ? "Migration transaction completed."
           : "Migration verification passed.",
       );

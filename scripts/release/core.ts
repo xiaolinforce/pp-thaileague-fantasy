@@ -34,14 +34,48 @@ export function migrationFromSource(
 }
 export type MigrationPolicy = Record<
   string,
-  { sha256: string; compatibility: "compatible" | "coordinated" }
+  {
+    sha256: string;
+    compatibility: "compatible" | "app-first" | "coordinated";
+  }
 >;
+
+export type MigrationOrder = "database-first" | "application-first";
+
+export type MigrationPlan = {
+  pending: Migration[];
+  order: MigrationOrder;
+};
+
+export type ReleaseState = {
+  id?: string;
+  origin?: string;
+  sha?: string;
+  productionVerifiedSha?: string;
+  productionVerifiedDeploymentId?: string;
+};
+
+export function assertApplicationFirstReady(
+  state: ReleaseState,
+  sha: string | undefined,
+) {
+  if (
+    !sha ||
+    state.sha !== sha ||
+    state.productionVerifiedSha !== sha ||
+    state.productionVerifiedDeploymentId !== state.id
+  ) {
+    throw new ReleaseError(
+      "Application-first migration cannot run before the exact candidate is verified in production.",
+    );
+  }
+}
 
 export function planMigrations(
   migrations: Migration[],
   applied: AppliedMigration[],
   policy: MigrationPolicy,
-) {
+): MigrationPlan {
   const tags = new Set<string>();
   for (const [index, migration] of migrations.entries()) {
     if (
@@ -76,6 +110,7 @@ export function planMigrations(
     }
   }
   const pending = migrations.slice(ordered.length);
+  let order: MigrationOrder | undefined;
   for (const migration of pending) {
     const review = policy[migration.tag];
     if (!review || review.sha256 !== migration.hash) {
@@ -83,13 +118,23 @@ export function planMigrations(
         `Migration ${migration.tag} needs a matching SHA-256 compatibility review in scripts/release/migration-policy.json.`,
       );
     }
-    if (review.compatibility !== "compatible") {
+    if (review.compatibility === "coordinated") {
       throw new ReleaseError(
         `Migration ${migration.tag} needs a coordinated release with a write pause; automatic release stopped before SQL changes.`,
       );
     }
+    const migrationOrder =
+      review.compatibility === "app-first"
+        ? "application-first"
+        : "database-first";
+    if (order && order !== migrationOrder) {
+      throw new ReleaseError(
+        "Pending database-first and application-first migrations cannot share one automatic release. Split them into separate releases.",
+      );
+    }
+    order = migrationOrder;
   }
-  return pending;
+  return { pending, order: order ?? "database-first" };
 }
 
 export type Query = (

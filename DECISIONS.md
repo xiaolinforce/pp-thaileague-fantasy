@@ -4,6 +4,31 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-10 — Schema contractions use an application-first release order
+
+**Decision:** Classify every reviewed migration as `compatible`, `app-first`,
+or `coordinated`. Keep compatible expansion releases database-first. For an
+`app-first` contraction, verify and promote the exact candidate against the old
+schema before applying SQL; require persisted runner evidence that the same
+commit and deployment are live. Reject mixed automatic orders and coordinated
+migrations. Generate the canonical migration hash through `npm run db:review`
+and require the release test in the schema-change workflow.
+
+**Context:** Migration `0021` removed player photo and shirt-number columns in
+the same commit that stopped reading them. The existing pipeline correctly
+rejected its missing compatibility review, but its database-first ordering
+could not safely drop those columns while the previous production application
+still selected one of them. Earlier migrations had also reached GitHub before
+their review manifest entry was committed.
+
+**Consequences:** Safe contractions can release without a write pause because
+the new application proves compatibility with the old schema before the schema
+changes. If post-promotion SQL fails, the promoted application remains usable
+and the transaction can be retried. Changes that require both sides to move
+together still use a coordinated maintenance procedure. A migration and its
+review entry are one change, and local release tests catch omissions before a
+push.
+
 ## 2026-09-09 — Player ownership is a persisted Gameweek read model
 
 **Decision:** Store selected-team count, counted-team denominator, percentage,

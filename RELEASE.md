@@ -66,18 +66,24 @@ checks are ready. No browser needs to remain open after activation.
 `.github/workflows/production-release.yml` runs checks on `dev` and `main`.
 Only `main` can enter the production environment. Its release job:
 
-1. Verifies the current main commit, configuration and migration history.
+1. Verifies the current main commit, configuration and migration history, and
+   selects one reviewed migration order for the release.
 2. Uses the pinned Vercel CLI to build remotely with production configuration.
 3. Creates a production candidate with `--prod --skip-domain`. Sensitive build
    credentials, including Sentry upload credentials, stay available inside
    Vercel; they are not pulled as redacted values into a local prebuilt build.
 4. Confirms the candidate's project, target, exact commit and Ready state.
-5. Applies reviewed compatible migrations in one transaction, then verifies
-   that the migration journal is current.
+5. For `compatible` migrations, applies SQL in one transaction and verifies the
+   journal before checking the candidate.
 6. Checks candidate liveness, authorized database readiness, and public Thai
    and English rules/privacy pages, using the protection bypass header.
-7. Promotes that candidate, restores the staging setting, checks the production
-   domain points to its deployment ID, and repeats the health checks.
+7. Promotes that candidate and verifies the production domain points to its
+   deployment ID.
+8. For `app-first` migrations, only then applies SQL in one transaction and
+   verifies the journal. The exact production verification is persisted in the
+   runner state and is required by the migration command.
+9. Runs final production health checks. Coordinated or mixed-order migration
+   batches stop before deployment.
 
 Runs are serialized per branch and stale main commits cannot promote. No build
 command runs migrations by itself. An up-to-date database performs no migration
@@ -93,8 +99,18 @@ of the current main release. Do not rerun an older commit after main has moved.
 ## New migrations
 
 Generate a new forward migration from `src/db/schema.ts`, review it, and test it
-on the confirmed development branch first. Never rewrite applied history.
-Add each pending migration to `scripts/release/migration-policy.json`:
+on the confirmed development branch first. Never rewrite applied history. Then
+register its canonical hash and explicit rollout mode:
+
+```bash
+npm run db:review -- compatible
+npm run db:review -- app-first
+npm run db:review -- coordinated
+npm run test:release
+```
+
+The optional second argument selects an older migration tag. The helper updates
+`scripts/release/migration-policy.json` in this form:
 
 ```json
 {
@@ -106,12 +122,17 @@ Add each pending migration to `scripts/release/migration-policy.json`:
 ```
 
 `compatible` means the currently deployed application can still read and write
-throughout the transition. This declaration needs human/code review; the runner
-does not infer SQL compatibility. Missing entries or modified SQL hashes block
-release. Already applied migrations need no policy entry.
+after the migration, so SQL runs before promotion. `app-first` means the new
+candidate can run against the old schema and must be verified in production
+before SQL runs; this is the normal contraction path for removing an unused
+column. This declaration needs human/code review; the helper computes the hash
+but does not infer compatibility. Missing entries or modified SQL hashes block
+release. Pending migrations with different automatic orders must be split into
+separate releases. Already applied migrations need no new policy entry.
 
-Use `coordinated` for incompatible required columns, removals, constraints or
-other changes requiring a write pause. Automatic release stops before SQL.
+Use `coordinated` when neither database-first nor application-first is safe, such
+as a required cross-version invariant or another change requiring a write pause.
+Automatic release stops before SQL.
 Prepare the replacement build, confirm recovery options, pause affected writes,
 apply and verify the reviewed migration on the confirmed production branch,
 then rerun the guarded release and resume writes after verification. Never label
@@ -139,8 +160,10 @@ node scripts/release/migrate.ts check
 node scripts/release/migrate.ts verify
 ```
 
-`verify` requires zero pending migrations. `apply` is restricted to the main
-GitHub Actions job. Never print connection strings or secret values in logs.
+`verify` requires zero pending migrations. `apply-before` and `apply-after` are
+restricted to the main GitHub Actions job; `apply-after` additionally requires
+runner evidence that the exact candidate is already live and healthy. Never
+print connection strings or secret values in logs.
 
 If the build, migration or candidate checks fail, promotion does not run. A
 committed migration is not automatically reversed if a later step fails. Inspect

@@ -129,6 +129,7 @@ mobile browser; a clean desktop reload alone does not establish recovery.
 | `npm run format`                 | Rewrite formatting across the repository; use intentionally.                      |
 | `npm run db:check`               | Verify that the configured database can be reached.                               |
 | `npm run db:generate`            | Generate a new Drizzle migration from schema changes.                             |
+| `npm run db:review -- <mode>`    | Hash and register the latest migration with an explicit rollout mode.             |
 | `npm run db:migrate`             | Apply committed Drizzle migrations.                                               |
 | `npm run db:studio`              | Open Drizzle Studio for the configured database.                                  |
 | `npm run db:rank:leagues`        | Backfill the latest persisted Overall standings after scoring exists.             |
@@ -173,10 +174,17 @@ format-check failures.
 1. Change `src/db/schema.ts`.
 2. Run `npm run db:generate`.
 3. Review the generated SQL and snapshot under `drizzle`.
-4. Apply the migration to the Neon development branch with
+4. Register the reviewed migration with
+   `npm run db:review -- <compatible|app-first|coordinated>`. Use `compatible`
+   when the deployed application tolerates the new schema, `app-first` when the
+   candidate tolerates the old schema and must be promoted before SQL, and
+   `coordinated` when neither ordering is safe.
+5. Run `npm run test:release`; a migration and its compatibility review belong
+   in the same commit.
+6. Apply the migration to the Neon development branch with
    `npm run db:migrate`.
-5. Run both structural verification and the affected application checks.
-6. Test development before applying the same committed migration to production.
+7. Run both structural verification and the affected application checks.
+8. Test development before applying the same committed migration to production.
 
 Do not edit or replace a migration that may already have been applied. Create a
 new migration for follow-up changes. Do not use production as a schema or data
@@ -188,9 +196,10 @@ Confirm the target before any migration or direct data-maintenance operation.
 
 The guarded production Actions workflow, migration compatibility policy and
 activation status are documented in [RELEASE.md](RELEASE.md). Run
-`npm run test:release` when modifying its guards. Building the application alone
-does not migrate the database; production automation requires the documented
-GitHub and Vercel configuration before activation.
+`npm run test:release` for every migration and whenever modifying release guards.
+Building the application alone does not migrate the database; production
+automation requires the documented GitHub and Vercel configuration before
+activation.
 
 `READINESS_SECRET` optionally authorizes `/api/health/ready` for CI and monitors.
 Store it server-only in Vercel Production and GitHub's Production environment.

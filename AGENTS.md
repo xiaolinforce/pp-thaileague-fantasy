@@ -32,6 +32,7 @@ that own the affected concern:
   the shared Drizzle client from `src/db/index.ts`.
 - Treat `src/db/schema.ts` as the schema source of truth. Generate and review a
   new forward migration; never rewrite migration history that may be applied.
+- Register every new migration with `npm run db:review -- <compatible|app-first|coordinated>`, then run `npm run test:release` before committing. Use `app-first` for a contraction only when the candidate can run against the old schema; never mislabel a migration to unblock CI.
 - Confirm the target Neon branch before migrations or direct data maintenance.
   Keep task-scoped data tools and source payloads out of the repository.
 - Keep deterministic rules and scoring in `src/lib/fantasy`. Update

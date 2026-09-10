@@ -205,6 +205,14 @@ async function run() {
       );
     await health(productionOrigin, false);
     await assertStagingConfiguration();
+    await writeFile(
+      statePath,
+      JSON.stringify({
+        ...state,
+        productionVerifiedSha: sha,
+        productionVerifiedDeploymentId: state.id,
+      }),
+    );
     if (process.env.GITHUB_STEP_SUMMARY)
       await appendFile(
         process.env.GITHUB_STEP_SUMMARY,

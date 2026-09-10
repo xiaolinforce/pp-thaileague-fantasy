@@ -14,5 +14,9 @@
   "0020_swift_logan": {
     "sha256": "796d7f4eb929f8154410c39e0e49a3a5b3c6c0b04da1b004dcc9d7717b20b319",
     "compatibility": "compatible"
+  },
+  "0021_needy_black_tom": {
+    "sha256": "6d63e27f9295c71662d284d5dd088b5f5b22438553aebc8b29d47812d68d162d",
+    "compatibility": "app-first"
   }
 }
