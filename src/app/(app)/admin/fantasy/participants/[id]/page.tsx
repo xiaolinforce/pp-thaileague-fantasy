@@ -53,6 +53,13 @@ export default async function TeamDetail({
               label: `GW ${candidate.number}`,
             }))}
           />
+          <Link
+            className="secondary-button"
+            href={`/admin/fantasy/participants/${team.id}/points`}
+            prefetch={false}
+          >
+            ดูคะแนนนักเตะ
+          </Link>
         </div>
         {squad.length ? (
           <div

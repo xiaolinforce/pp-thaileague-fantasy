@@ -386,12 +386,13 @@ activation status, environment boundaries and recovery procedures.
 
 ## Admin workspace
 
-The six operational pages under `/admin/fantasy` share a role-protected layout
-and route-aware `AppShell`. Each entry point in `src/data/admin.ts` also checks
-the admin session before querying the shared Drizzle client. Admin readers do
-not provision a personal team. Gameweek controls depend on the Gameweek itself,
-not the administrator's selection. Date labels are formatted on the server in
-both languages to avoid Node/browser locale differences during hydration.
+The seven primary pages under `/admin/fantasy`, plus contextual participant
+detail and player-points pages, share a role-protected layout and route-aware
+`AppShell`. Admin read models check the admin session before querying the shared
+Drizzle client and do not provision a personal team. Gameweek controls depend
+on the Gameweek itself, not the administrator's selection. Date labels are
+formatted on the server in both languages to avoid Node/browser locale
+differences during hydration.
 
 The participant directory and audit log use 30-row pages. Team counts use the
 season's managers and teams. Seven-day activity uses selection `confirmed_at`,
@@ -401,6 +402,10 @@ carryover on active teams; they do not imply validation against every current
 squad rule. Audit display allowlists correction fields rather than serializing
 arbitrary source or bot provisioning payloads. Lock and finalize append their
 audit entry inside the lifecycle transaction. Mutations invalidate admin pages.
+Participant player-points pages read the selected team's immutable selection
+snapshots and aggregate the persisted match points for the chosen Gameweek.
+They default to the latest provisional or final Gameweek, while planned and
+open Gameweeks retain the saved squad with pending point labels.
 
 Player filters use current active registrations and available Fantasy players.
 Match editors use registrations for the chosen fixture's clubs, including

@@ -1217,3 +1217,23 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
   observed; listed warnings originated from a browser extension.
 - **Known exclusions:** Missing-pool, missing-score, and impossible-pool states
   were not manufactured. Production migration/deployment was not performed.
+
+### 2026-09-10 — Admin participant Gameweek points
+
+- **Change:** Added the contextual
+  `/admin/fantasy/participants/[id]/points` route and a link from participant
+  detail. It reuses the optimal-team score card, pitch, bench and player-detail
+  tokens while reading the selected team's historical selection snapshot.
+- **Gameweek states:** The route defaults to the latest provisional or final
+  Gameweek. An explicitly selected planned, open or locked Gameweek retains the
+  saved squad, shows pending point labels and explains that scoring has not
+  started. Empty selections and seasons without Gameweeks have written states.
+- **Scoring behavior:** Persisted match points are aggregated across the chosen
+  competition matchweek. Final missing appearances become zero; provisional
+  missing results remain pending. Captain fallback, Triple Captain, Bench Boost
+  and automatic substitutions use the same presentation behavior as Points.
+- **Verification:** TypeScript, Fantasy rule tests, lint, formatting and the
+  production build passed. The build emitted the new dynamic route. A local
+  Guest browser session was correctly redirected away from the protected admin
+  namespace, so populated Thai/English and responsive rendered evidence remains
+  pending rather than weakening authentication or manufacturing admin data.

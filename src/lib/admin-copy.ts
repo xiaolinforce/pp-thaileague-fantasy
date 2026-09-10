@@ -101,6 +101,11 @@ export const adminTranslations: Record<string, string> = {
   "ตรวจทีมที่บันทึกไว้และคะแนนใน Gameweek ที่เลือก":
     "Inspect saved squads and scores for the selected Gameweek",
   กลับรายชื่อทีม: "Back to teams",
+  ดูคะแนนนักเตะ: "View player points",
+  คะแนนนักเตะในทีม: "Team player points",
+  กลับรายละเอียดทีม: "Back to team details",
+  "Gameweek นี้ยังไม่เริ่มคำนวณคะแนน":
+    "Scoring has not started for this Gameweek yet.",
   คะแนนรวมฤดูกาล: "Season points",
   ระดับที่บันทึก: "Saved tier",
   บทบาทในทีม: "Squad role",
