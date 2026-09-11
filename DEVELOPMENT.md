@@ -119,9 +119,12 @@ mobile browser; a clean desktop reload alone does not establish recovery.
 | `npm run dev`                    | Start the development server on port 3006.                                        |
 | `npm run build`                  | Create a production Next.js build.                                                |
 | `npm run start`                  | Serve an existing production build.                                               |
+| `npm run email:dev`              | Preview React Email templates locally on port 3007.                               |
+| `npm run email:preview`          | Render the sample deadline email to ignored HTML, text, and metadata artifacts.   |
 | `npm run lint`                   | Run ESLint.                                                                       |
 | `npm run types`                  | Run TypeScript without emitting files.                                            |
 | `npm run test:email`             | Run transactional email routing and fallback tests.                               |
+| `npm run test:email-template`    | Check bilingual reminder content, links, escaping, and preview text.              |
 | `npm run test:email:integration` | Exercise real delivery orchestration with fake provider/database HTTP transports. |
 | `npm run test:auth`              | Run authentication preference parsing tests.                                      |
 | `npm run test:rules`             | Run squad, transfer, deadline, scoring, and substitution tests.                   |
@@ -380,6 +383,7 @@ checks before handoff:
 ```bash
 npm run test:rules
 npm run test:email
+npm run test:email-template
 npm run test:auth
 npm run test:maintenance
 npm run test:observability

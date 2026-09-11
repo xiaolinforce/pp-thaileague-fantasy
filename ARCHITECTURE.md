@@ -57,6 +57,7 @@ create synthetic manager identities.
 | Observability         | `src/instrumentation*.ts`, Sentry    | Privacy-minimized client/server/edge errors, sampled traces, masked error replays, and releases. |
 | Account provisioning  | `src/lib/fantasy/provisioning.ts`    | Manager/team creation, empty opening draft, Overall membership, and Guest upgrade behavior.      |
 | League operations     | `src/lib/fantasy/league-service.ts`  | Transactional Private League limits, ownership, membership, invite rotation, and audit writes.   |
+| Email presentation    | `src/emails`                         | Provider-neutral React Email templates, preview props, subjects, HTML, and plain-text rendering. |
 | Transactional email   | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
 | Auth maintenance      | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
 | Ownership maintenance | `/api/cron/fantasy-ownership`        | Daily reconciliation of persisted open-Gameweek player ownership.                                |
@@ -68,6 +69,12 @@ create synthetic manager identities.
 
 Runtime routes read from `src/data` and PostgreSQL. The legacy static Fantasy
 dataset has been removed and must not be reintroduced as a runtime fallback.
+
+Deadline-reminder presentation is deliberately separate from delivery. Templates
+under `src/emails` receive explicit values, perform no database or provider access,
+and can be inspected through React Email or rendered to ignored local artifacts.
+Campaign audience selection, Production reads, unsubscribe persistence, and sending
+remain future server-only/admin responsibilities.
 
 ## Route model
 

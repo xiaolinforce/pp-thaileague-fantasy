@@ -146,11 +146,20 @@ Keep `AUTH_PRODUCTION_READY=false` until the public domain, OAuth verification,
 privacy policy, and terms have been reviewed. The production gate disables
 both Email OTP and Google even if their individual flags are set.
 
+## Deadline email preview
+
+Run `npm run email:dev` and open `http://localhost:3007` to inspect the
+Thai-first/English deadline-reminder template with editable sample props. Run
+`npm run email:preview` to write HTML, plain text, and metadata to the ignored
+`outputs/email-preview` directory. These Phase 1 commands use sample values only;
+they do not read the database or send email.
+
 ## Quality checks
 
 ```bash
 npm run test:rules
 npm run test:email
+npm run test:email-template
 npm run test:auth
 npm run types
 npm run lint

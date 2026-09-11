@@ -4,6 +4,25 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-11 — Deadline email presentation precedes campaign delivery
+
+**Decision:** Build deadline reminders as provider-neutral React Email templates
+with Thai content first and English content below. Keep subject, preview text,
+sample props, HTML rendering, and plain-text rendering deterministic and locally
+reviewable. Phase 1 must not query Production, select recipients, persist
+preferences, or call an email provider.
+
+**Context:** Manual weekly reminders will later need admin-selectable audiences
+and occasional custom criteria supplied by the owner. Establishing and reviewing
+the message contract first avoids coupling copy and layout decisions to Production
+access or irreversible delivery.
+
+**Consequences:** `src/emails` owns presentation and accepts explicit team,
+Gameweek, deadline, destination, and unsubscribe values. Local commands provide a
+live React Email view and ignored review artifacts. A later phase must add the
+authenticated admin workflow, Production-backed recipient preview, unsubscribe
+state, idempotent delivery/audit, and a separate confirmation before any send.
+
 ## 2026-09-10 — Schema contractions use an application-first release order
 
 **Decision:** Classify every reviewed migration as `compatible`, `app-first`,

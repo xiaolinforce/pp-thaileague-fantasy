@@ -8,6 +8,8 @@
 - Client-side Thai/English display preference persisted per member manager and
   stored on the current device for Guests.
 - Email OTP, Google, and device-bound Guest identities with 30-day sliding sessions.
+- Provider-neutral Thai-first/English deadline-reminder email presentation with
+  local React Email preview and deterministic HTML/plain-text rendering.
 - Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.
@@ -84,7 +86,9 @@ substitute for those authorization checks.
 
 ## Later capabilities
 
-- Notifications for deadlines, player availability, and reviewed score changes.
+- Admin-selected audiences, Production-backed manual delivery, unsubscribe
+  persistence, and delivery audit for deadline reminders; notifications for player
+  availability and reviewed score changes.
 - Managed player news, availability, suspension, and injury data.
 - Approved live or scheduled match-stat ingestion and score review workflows.
 - Historical seasons and season rollover without rewriting prior records.
