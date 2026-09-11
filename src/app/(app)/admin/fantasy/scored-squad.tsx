@@ -1,3 +1,5 @@
+import { Zap } from "lucide-react";
+
 import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import type { FantasyPointsSquadMember, PlayerPointsRow } from "@/data/fantasy";
 import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
@@ -88,6 +90,14 @@ export function AdminScoredSquad({
       isScoringCaptain: scoringCaptain?.fantasyPlayerId === fantasyPlayerId,
       captainMultiplier,
     });
+  const activeChipLabel =
+    activeChip === "triple_captain"
+      ? "กัปตัน ×3"
+      : activeChip === "bench_boost"
+        ? "นับตัวสำรอง"
+        : activeChip === "wildcard"
+          ? "ซื้อขายตัวอิสระ"
+          : null;
 
   return (
     <>
@@ -99,6 +109,16 @@ export function AdminScoredSquad({
       <section
         className={`product-card points-pitch-card ${styles.optimalPitch}`}
       >
+        {activeChipLabel ? (
+          <div className="points-chip-banner">
+            <span className="points-chip-banner__icon" aria-hidden="true">
+              <Zap size={16} fill="currentColor" />
+            </span>
+            <strong className="points-chip-banner__label">
+              {activeChipLabel}
+            </strong>
+          </div>
+        ) : null}
         <div className="points-pitch">
           <div className="field-lines" aria-hidden="true">
             <span />
