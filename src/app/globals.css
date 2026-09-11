@@ -4915,7 +4915,7 @@ button.vacant-squad-slot {
 }
 
 .points-chip-banner--dialog {
-  margin: 0;
+  margin: 0 14px;
 }
 
 .points-highest-team-field {
