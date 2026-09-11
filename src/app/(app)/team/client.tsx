@@ -488,7 +488,7 @@ function SquadPlayer({
             {localize(player.clubShort, language)}
           </span>
         </button>
-        {!hideActions && (
+        {!hideActions && !actionsDisabled && (
           <>
             {showCaptainActions && (
               <span
