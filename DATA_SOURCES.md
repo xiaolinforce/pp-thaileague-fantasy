@@ -109,6 +109,38 @@ and Elias (`เอเลียส`). Piphob and Adisak remain inactive. All othe
 fields, including English names and source identities, were verified unchanged.
 The review's unresolved-name group was not part of the approved change set.
 
+## 2026-09-12 production roster reconciliation
+
+The production branch `br-tiny-shape-azrvakql` was reconciled to the complete
+[Thai League tournament 224 player roster](https://competition.tl.prod.c0d1um.io/thaileague/api/player-public/all_players_search/?tournament=224).
+The paginated source contained 645 unique registration IDs and 645 unique
+person IDs; its reviewed SHA-256 fingerprint is
+`a449a03a6bc51224263f4e3e081b19bfe6cc388ae29fcd042480030fe5770e8a`.
+This was a production-only maintenance operation; development was not changed.
+
+The atomic reconciliation created 154 player-master records, reused 13 exact or
+owner-reviewed identities, created 164 official registrations, and normalized
+the temporary registration keys for Kakana Khamyok, Arnold Suew, and Rafael
+Bilu to official IDs `2026:17086`, `2026:15421`, and `2026:62414`. Chonlachart
+Tongjinda is now classified as a midfielder and Shunta Hasegawa as a forward,
+matching their current official registrations. Rafael Bilu retains his reviewed
+Fantasy forward position while his official registration records midfielder.
+
+Three registrations absent from the new official roster were closed on
+2026-09-11 and their Fantasy players made unavailable: Tissanu Khuptanawin at
+Chonburi, Soffan Sanron at PT Prachuap, and Jordan Gele at Ratchaburi. Existing
+GW3 selection snapshots were not rewritten; Soffan remains in two current GW3
+drafts, whose managers can replace him before the deadline. Nine previously
+unavailable Fantasy identities were reactivated. The 155 players without an
+effective Fantasy classification receive Level 4 from GW3. The open-GW3 player
+pool remains unsnapshotted and will be captured by the normal lock lifecycle.
+
+Post-transaction reconciliation found exactly 645 active registrations, all
+with Thai League official provenance, with no missing, stale, or non-official
+active registration IDs. Competition and Fantasy database verification passed.
+Published ranking runs, GW1/GW2 player pools, match statistics, points, team
+selections, and standings were not rewritten.
+
 ## Opening-match review (2026-09-04)
 
 Owner-approved batch `gw1-pattani-bg-20260904` was applied to development and

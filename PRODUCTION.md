@@ -17,6 +17,29 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-09-12 official roster reconciliation
+
+Production `br-tiny-shape-azrvakql` was reconciled in one transaction to the
+645-player Thai League tournament 224 roster. The operation created 154 player
+masters and 164 registrations, reused 13 reviewed identities, normalized three
+temporary registration source IDs, and closed three registrations absent from
+the latest official roster. It added 155 Fantasy players, reactivated nine, and
+assigned Level 4 from GW3 to the 155 players without an effective tier.
+
+GW3 remains open. Its player-pool snapshot was intentionally left empty so the
+normal lock operation captures the final eligible roster at the deadline.
+Historical player pools, rankings, selections, scores, and standings were not
+changed. One removed player, Soffan Sanron, remains in two current GW3 drafts;
+the maintenance operation marks him unavailable without editing either team.
+
+Post-transaction checks found 645 active registrations and 645 available
+Fantasy players, with every active registration using the official Thai League
+source and no missing or stale official ID. `db:verify:competition` and
+`db:verify:fantasy` passed against production. The operation wrote 662
+administrative audit rows. No application deployment is required; the cached
+competition dataset refreshes within five minutes. The source snapshot and
+identity decisions are documented in `DATA_SOURCES.md`.
+
 ## 2026-09-04 ACL fixture schedule maintenance
 
 The owner authorized `fixtures-acl-schedule-20260904` on both environments.
