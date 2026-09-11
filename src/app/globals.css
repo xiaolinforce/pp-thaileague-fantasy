@@ -4918,6 +4918,20 @@ button.vacant-squad-slot {
   margin: 0;
 }
 
+.points-highest-team-field {
+  padding-top: 14px;
+}
+
+.points-highest-team-field.has-active-chip {
+  padding-top: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.points-highest-team-field .points-pitch {
+  margin-top: 0;
+}
+
 .points-pitch-card:has(.points-chip-banner) .points-pitch {
   margin-top: 10px;
 }

@@ -141,54 +141,58 @@ export function HighestScoreDialog({
         <DialogHeader>
           <DialogTitle>{team.name}</DialogTitle>
         </DialogHeader>
-        {activeChipLabel ? (
-          <div className="points-chip-banner points-chip-banner--dialog">
-            <span className="points-chip-banner__icon" aria-hidden="true">
-              <Zap size={16} fill="currentColor" />
-            </span>
-            <strong className="points-chip-banner__label">
-              {activeChipLabel}
-            </strong>
-          </div>
-        ) : null}
-        <div className="points-pitch">
-          <div className="field-lines" aria-hidden="true">
-            <span />
-            <i />
-            <b />
-          </div>
-          <div className="points-pitch-rows">
-            {positionRows.map((position) => (
-              <div className="points-pitch-row" key={position}>
-                {teamView.fieldMembers
-                  .filter((member) => member.position === position)
-                  .map((member) => (
-                    <PointsPlayerToken
-                      key={member.fantasyPlayerId}
-                      member={member}
-                      points={teamView.playerContribution(
-                        member.fantasyPlayerId,
-                      )}
-                      counted
-                      substitution={
-                        teamView.autoSubIn.has(member.fantasyPlayerId)
-                          ? "in"
-                          : undefined
-                      }
-                      result={teamView.resultsByPlayer.get(
-                        member.fantasyPlayerId,
-                      )}
-                      multiplier={
-                        teamView.scoringCaptain?.fantasyPlayerId ===
-                        member.fantasyPlayerId
-                          ? teamView.captainMultiplier
-                          : 1
-                      }
-                      readOnly
-                    />
-                  ))}
-              </div>
-            ))}
+        <div
+          className={`points-highest-team-field${activeChipLabel ? " has-active-chip" : ""}`}
+        >
+          {activeChipLabel ? (
+            <div className="points-chip-banner points-chip-banner--dialog">
+              <span className="points-chip-banner__icon" aria-hidden="true">
+                <Zap size={16} fill="currentColor" />
+              </span>
+              <strong className="points-chip-banner__label">
+                {activeChipLabel}
+              </strong>
+            </div>
+          ) : null}
+          <div className="points-pitch">
+            <div className="field-lines" aria-hidden="true">
+              <span />
+              <i />
+              <b />
+            </div>
+            <div className="points-pitch-rows">
+              {positionRows.map((position) => (
+                <div className="points-pitch-row" key={position}>
+                  {teamView.fieldMembers
+                    .filter((member) => member.position === position)
+                    .map((member) => (
+                      <PointsPlayerToken
+                        key={member.fantasyPlayerId}
+                        member={member}
+                        points={teamView.playerContribution(
+                          member.fantasyPlayerId,
+                        )}
+                        counted
+                        substitution={
+                          teamView.autoSubIn.has(member.fantasyPlayerId)
+                            ? "in"
+                            : undefined
+                        }
+                        result={teamView.resultsByPlayer.get(
+                          member.fantasyPlayerId,
+                        )}
+                        multiplier={
+                          teamView.scoringCaptain?.fantasyPlayerId ===
+                          member.fantasyPlayerId
+                            ? teamView.captainMultiplier
+                            : 1
+                        }
+                        readOnly
+                      />
+                    ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
         <div className="points-bench-panel">
