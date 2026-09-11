@@ -436,6 +436,15 @@ counts with `npm run db:report:participants`. Full mutation/scoring scenarios
 still require a confirmed disposable development branch; do not lock a real
 Gameweek or change player stats merely to capture UI evidence.
 
+The `/admin/fantasy/reminders` page is a read-only exception to the mutation
+workflow. It reads the current deployment's `DATABASE_URL`, lets an admin choose
+the target Gameweek and one of the allowlisted audiences, and renders at most 50
+masked recipient candidates plus a personalized email preview. Verify the
+environment badge before treating its totals as Production counts. The route
+must not expose full email addresses to the browser or gain a send action until
+unsubscribe state, provider suppression filtering, a frozen recipient snapshot,
+idempotency, and delivery audit are implemented.
+
 ## Fantasy persistence verification
 
 After confirming the development branch, run:

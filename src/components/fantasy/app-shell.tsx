@@ -21,6 +21,7 @@ import {
   History,
   ArrowLeft,
   Database,
+  MailCheck,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -124,6 +125,11 @@ const adminNavigation = [
   { label: "ภาพรวม", href: "/admin/fantasy", icon: LayoutDashboard },
   { label: "ผู้เล่นและทีม", href: "/admin/fantasy/participants", icon: Users },
   { label: "Gameweek", href: "/admin/fantasy/gameweeks", icon: CalendarDays },
+  {
+    label: "อีเมลเตือนจัดทีม",
+    href: "/admin/fantasy/reminders",
+    icon: MailCheck,
+  },
   {
     label: "ทีมที่ดีที่สุด",
     href: "/admin/fantasy/optimal-team",

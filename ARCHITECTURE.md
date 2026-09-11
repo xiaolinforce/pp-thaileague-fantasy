@@ -50,7 +50,7 @@ create synthetic manager identities.
 | Routes and screens    | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                 |
 | Fantasy UI            | `src/components/fantasy`             | Shared shell, player identity, kit, position, gameweek, localization, and data-state components. |
 | UI primitives         | `src/components/ui`                  | Reusable Base UI/shadcn interaction primitives.                                                  |
-| Read models           | `src/data`                           | Server-only competition, squad, points, league, and admin queries.                               |
+| Read models           | `src/data`                           | Server-only competition, squad, points, league, admin, and reminder-audience queries.            |
 | Game rules            | `src/lib/fantasy/rules.ts`           | Squad, lineup, transfer, chip, and deadline validation.                                          |
 | Squad auto-fill       | `src/lib/fantasy/auto-fill.ts`       | Pure constrained, ranking-weighted, randomized completion of vacant draft slots.                 |
 | Authentication        | `src/lib/auth`                       | Better Auth configuration, session identity, account linking, and name policy.                   |
@@ -73,25 +73,30 @@ dataset has been removed and must not be reintroduced as a runtime fallback.
 Deadline-reminder presentation is deliberately separate from delivery. Templates
 under `src/emails` receive explicit values, perform no database or provider access,
 and can be inspected through React Email or rendered to ignored local artifacts.
-Campaign audience selection, Production reads, unsubscribe persistence, and sending
-remain future server-only/admin responsibilities.
+The role-protected `/admin/fantasy/reminders` route reads audience candidates
+server-side from the deployment's configured database, sends only masked addresses
+to the rendered page, and combines one sample team with the same deterministic
+template. It does not persist a recipient snapshot or call an email provider.
+Unsubscribe persistence, provider suppression filtering, idempotent sending, and
+delivery audit remain future server-only/admin responsibilities.
 
 ## Route model
 
-| Route            | Rendering and data                                                                                  |
-| ---------------- | --------------------------------------------------------------------------------------------------- |
-| `/`              | Dynamic Email OTP, Google, and Guest onboarding; validated internal return targets survive sign-in. |
-| `/upgrade`       | Authenticated Guest upgrade through Email OTP or Google, preserving a validated return target.      |
-| `/team`          | Server-loads data, then hands lineup and transfer management to Client Components.                  |
-| `/points`        | Server-renders the selected Gameweek score and its breakdown.                                       |
-| `/leagues`       | Server-loads summaries, opens Overall standings, and links each Private League to its detail route. |
-| `/leagues/[id]`  | Authorizes membership, then renders paginated standings, invite details, and role controls.         |
-| `/fixtures`      | Server-loads a fixture-only read model, then delegates interactive browsing to a Client Component.  |
-| `/profile`       | Authenticated account/team identity, member naming, and Guest upgrade.                              |
-| `/settings`      | Authenticated language preference; member value persists on the manager row.                        |
-| `/rules`         | Public long-form rules built from shared executable rule and scoring constants.                     |
-| `/help`          | Public support destinations and legal links; no account data is required.                           |
-| `/admin/fantasy` | Role-protected controls for stats, classification, locking, and finalization.                       |
+| Route                      | Rendering and data                                                                                  |
+| -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/`                        | Dynamic Email OTP, Google, and Guest onboarding; validated internal return targets survive sign-in. |
+| `/upgrade`                 | Authenticated Guest upgrade through Email OTP or Google, preserving a validated return target.      |
+| `/team`                    | Server-loads data, then hands lineup and transfer management to Client Components.                  |
+| `/points`                  | Server-renders the selected Gameweek score and its breakdown.                                       |
+| `/leagues`                 | Server-loads summaries, opens Overall standings, and links each Private League to its detail route. |
+| `/leagues/[id]`            | Authorizes membership, then renders paginated standings, invite details, and role controls.         |
+| `/fixtures`                | Server-loads a fixture-only read model, then delegates interactive browsing to a Client Component.  |
+| `/profile`                 | Authenticated account/team identity, member naming, and Guest upgrade.                              |
+| `/settings`                | Authenticated language preference; member value persists on the manager row.                        |
+| `/rules`                   | Public long-form rules built from shared executable rule and scoring constants.                     |
+| `/help`                    | Public support destinations and legal links; no account data is required.                           |
+| `/admin/fantasy`           | Role-protected controls for stats, classification, locking, and finalization.                       |
+| `/admin/fantasy/reminders` | Role-protected, read-only recipient counts, masked candidates, and email preview.                   |
 
 The `(app)` root layout resolves identity, language and navigation for game and
 document routes, and provides Mitr, shared tooltips and toast feedback. Guest and

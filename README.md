@@ -64,6 +64,7 @@ open.
 | `/admin/fantasy`              | Admin overview with season-team counts and pending operations.                              |
 | `/admin/fantasy/participants` | Team directory, read-only details at `/[id]`, and Gameweek player points at `/[id]/points`. |
 | `/admin/fantasy/gameweeks`    | Gameweek status, locking, and finalization.                                                 |
+| `/admin/fantasy/reminders`    | Read-only recipient selection and bilingual deadline-email preview.                         |
 | `/admin/fantasy/optimal-team` | Best possible legal team from each completed Gameweek's results.                            |
 | `/admin/fantasy/matches`      | Fixture-scoped player statistics and corrections.                                           |
 | `/admin/fantasy/players`      | Current player search, effective tiers and Thai status.                                     |
@@ -153,6 +154,13 @@ Thai-first/English deadline-reminder template with editable sample props. Run
 `npm run email:preview` to write HTML, plain text, and metadata to the ignored
 `outputs/email-preview` directory. These Phase 1 commands use sample values only;
 they do not read the database or send email.
+
+Authorized admins can also open `/admin/fantasy/reminders` to choose a
+Gameweek and a built-in audience, inspect privacy-masked candidates from that
+deployment's database, and preview the personalized bilingual message. This
+Phase 2 screen is read-only: it does not persist a recipient snapshot or send
+email. Use the Production deployment for Production counts; local and Preview
+deployments read their own configured `DATABASE_URL`.
 
 ## Quality checks
 

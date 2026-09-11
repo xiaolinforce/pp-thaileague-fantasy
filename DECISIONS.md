@@ -4,6 +4,29 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-11 — Reminder audiences are server-owned and previewed read-only
+
+**Decision:** Give authorized admins three allowlisted deadline-reminder
+audiences: members who explicitly saved a complete squad in the previous
+Gameweek (the default), members who explicitly saved a complete squad at least
+once this season, and all members with an active team. Require a verified,
+non-anonymous account email and exclude Guests and bots from every audience.
+Compute counts and candidates server-side, expose only masked addresses, and
+keep the workflow read-only until delivery safeguards exist.
+
+**Context:** Weekly sends are owner-triggered rather than scheduled, but the
+owner needs a repeatable way to inspect Production-derived recipients and the
+personalized bilingual message before sending. Ad hoc criteria may still be
+requested in chat and must be turned into a separately reviewed snapshot.
+
+**Consequences:** `/admin/fantasy/reminders` reads the database configured for
+its deployment and labels whether that deployment is Production. An explicit
+save is represented by `confirmed_at`; automatic Gameweek carryover does not
+qualify as a previous-Gameweek save. Full addresses stay server-side and the UI
+shows at most 50 masked candidates. A later phase must persist unsubscribe state,
+apply provider suppressions, freeze the complete recipient snapshot, add
+idempotency and delivery audit, and require confirmation before provider calls.
+
 ## 2026-09-11 — Deadline email presentation precedes campaign delivery
 
 **Decision:** Build deadline reminders as provider-neutral React Email templates

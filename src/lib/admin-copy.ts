@@ -59,6 +59,59 @@ export const adminTranslations: Record<string, string> = {
   ภาพรวม: "Overview",
   ผู้ดูแลระบบ: "Administrator",
   ผู้เล่นและทีม: "Participants & teams",
+  อีเมลเตือนจัดทีม: "Lineup reminder email",
+  "เลือกกลุ่มผู้รับจากข้อมูลสมาชิก แล้วตรวจรายชื่อและเนื้อหาก่อนเปิดการส่งจริง":
+    "Select an audience from member data, then review recipients and content before delivery is enabled",
+  "Phase 2 · ตรวจสอบเท่านั้น": "Phase 2 · Review only",
+  "หน้านี้ไม่มีคำสั่งส่งอีเมลและไม่บันทึกการเปลี่ยนแปลง สถานะยกเลิกการแจ้งเตือนและ suppression ของผู้ให้บริการต้องนำมาคัดออกก่อนเปิดส่งใน Phase 3":
+    "This page cannot send email or save changes. Unsubscribe state and provider suppressions must be excluded before delivery is enabled in Phase 3.",
+  กำหนดผู้รับ: "Define audience",
+  "ข้อมูลอัปเดตเมื่อเปิดหน้าหรือเปลี่ยนตัวเลือก · ตรวจล่าสุด":
+    "Data refreshes when the page opens or a selection changes · Last checked",
+  "อ่านจาก DATABASE_URL ของ deployment นี้ ให้ตรวจป้าย environment ก่อนใช้จำนวนผู้รับจริง":
+    "Reads from this deployment's DATABASE_URL. Check the environment label before using the recipient count.",
+  "Gameweek ที่จะเตือน": "Reminder Gameweek",
+  กลุ่มผู้รับ: "Audience",
+  "บันทึกทีมครบใน GW ก่อนหน้า": "Saved a complete squad in the previous GW",
+  "เคยบันทึกทีมครบอย่างน้อยหนึ่ง GW":
+    "Saved a complete squad in at least one GW",
+  สมาชิกทุกคนที่มีทีม: "All members with a team",
+  "เฉพาะสมาชิกที่กดบันทึกทีมครบ 15 คนใน Gameweek ก่อนหน้า เหมาะสำหรับการเตือนผู้เล่นที่เพิ่งมีส่วนร่วม":
+    "Only members who explicitly saved a complete 15-player squad in the previous Gameweek; suited to recently engaged players.",
+  "สมาชิกที่เคยกดบันทึกทีมครบ 15 คนในฤดูกาลนี้ แม้ไม่ได้บันทึกซ้ำใน Gameweek ก่อนหน้า":
+    "Members who saved a complete 15-player squad this season, even if they did not save again in the previous Gameweek.",
+  "สมาชิกที่มีทีมใช้งานอยู่ทั้งหมด รวมทีมที่ยังจัดไม่ครบ แต่ไม่รวม Guest, Bot และอีเมลที่ยังไม่ยืนยัน":
+    "All members with an active team, including incomplete squads, excluding Guests, bots and unverified email addresses.",
+  "เงื่อนไขเฉพาะที่สั่งผ่านแชทต้องสร้างเป็น recipient snapshot แยก และกลับมาตรวจจำนวนอีกครั้งก่อนส่ง":
+    "Custom criteria requested in chat must produce a separate recipient snapshot and be reviewed again before sending.",
+  สมาชิกที่มีทีมใช้งาน: "Members with an active team",
+  อีเมลสมาชิกที่ยืนยันแล้ว: "Verified member email",
+  อยู่ในกลุ่มที่เลือก: "Matches selected audience",
+  อีเมลยังไม่พร้อม: "Email unavailable",
+  ไม่ตรงเงื่อนไขกลุ่ม: "Outside selected audience",
+  "กลุ่ม “GW ก่อนหน้า” อ้างอิง": "The “previous GW” audience uses",
+  และนับเฉพาะการกดบันทึกทีมครบ: "and only counts an explicitly saved",
+  "คน ไม่รวมการยกทีมอัตโนมัติ": "player squad, excluding automatic carryover",
+  "Gameweek ที่เลือกยังไม่มี Gameweek ก่อนหน้า กลุ่มที่อ้างอิง GW ก่อนหน้าจึงไม่มีผู้รับ":
+    "The selected Gameweek has no previous Gameweek, so previous-GW audiences have no recipients.",
+  "รายชื่อที่จะเข้า recipient snapshot": "Recipient snapshot candidates",
+  "แสดงสูงสุด 50 ทีม อีเมลถูก mask และไม่มีอีเมลเต็มส่งมาที่ browser":
+    "Shows up to 50 teams. Addresses are masked and full email addresses are never sent to the browser.",
+  รายชื่อผู้รับอีเมลเตือน: "Lineup reminder recipients",
+  อีเมล: "Email",
+  "GW ก่อนหน้า": "Previous GW",
+  กดบันทึกแล้ว: "Explicitly saved",
+  ไม่ได้กดบันทึก: "Not explicitly saved",
+  ไม่พบสมาชิกที่ตรงเงื่อนไขกลุ่มนี้: "No members match this audience.",
+  "Preview เนื้อหาอีเมล": "Email content preview",
+  "ใช้ทีมแรกในรายชื่อเป็นตัวอย่าง โดยไม่เปิดเผยอีเมลเต็ม":
+    "Uses the first team in the list as the example without exposing a full email address.",
+  ทีมตัวอย่าง: "Example team",
+  ตัวอย่างอีเมลเตือนจัดทีมสองภาษา: "Bilingual lineup reminder email preview",
+  "ลิงก์ยกเลิกใน preview เป็น placeholder และจะสร้างแยกสำหรับผู้รับแต่ละคนก่อนเปิดส่งจริง":
+    "The preview unsubscribe link is a placeholder and will be generated per recipient before delivery is enabled.",
+  "ยังไม่มี Gameweek สำหรับสร้าง preview":
+    "No Gameweek is available for an email preview.",
   ผลการแข่งขันและสถิติ: "Matches & stats",
   ข้อมูลนักเตะ: "Player data",
   ประวัติการแก้ไข: "Audit history",
