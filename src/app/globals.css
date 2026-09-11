@@ -4914,6 +4914,10 @@ button.vacant-squad-slot {
   font-weight: 900;
 }
 
+.points-chip-banner--dialog {
+  margin: 0;
+}
+
 .points-pitch-card:has(.points-chip-banner) .points-pitch {
   margin-top: 10px;
 }

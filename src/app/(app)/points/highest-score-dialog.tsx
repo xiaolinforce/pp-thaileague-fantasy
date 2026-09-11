@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { Zap } from "lucide-react";
 
 import { useLanguage } from "@/components/fantasy/i18n";
 import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
@@ -108,6 +109,15 @@ export function HighestScoreDialog({
     );
   }
 
+  const activeChipLabel =
+    team.activeChip === "triple_captain"
+      ? translate("กัปตัน ×3")
+      : team.activeChip === "bench_boost"
+        ? translate("นับตัวสำรอง")
+        : team.activeChip === "wildcard"
+          ? translate("ซื้อขายตัวอิสระ")
+          : null;
+
   return (
     <Dialog>
       <DialogTrigger
@@ -131,6 +141,16 @@ export function HighestScoreDialog({
         <DialogHeader>
           <DialogTitle>{team.name}</DialogTitle>
         </DialogHeader>
+        {activeChipLabel ? (
+          <div className="points-chip-banner points-chip-banner--dialog">
+            <span className="points-chip-banner__icon" aria-hidden="true">
+              <Zap size={16} fill="currentColor" />
+            </span>
+            <strong className="points-chip-banner__label">
+              {activeChipLabel}
+            </strong>
+          </div>
+        ) : null}
         <div className="points-pitch">
           <div className="field-lines" aria-hidden="true">
             <span />
