@@ -150,6 +150,9 @@ proven behaviors unless a deliberate product decision replaces them:
   disclosed in compact modes. Wildcard remains unavailable in Gameweek 1.
 - Order market filters by the user's narrowing task. Keep cumulative tier
   limits visible with a written over-limit state and an accessible explanation.
+- On Mobile and Tablet, keep the market quota and filter-action group sticky
+  below the compact workspace tabs. Open filters in the shared dialog from the
+  `กรองนักเตะ` action, preserving the current filter selections.
 - Present market quotas as a navy scoreboard with a narrow orange edge, muted
   light labels, white counts, and an orange free-transfer count. Preserve the
   red points-deduction badge when free transfers are exceeded.

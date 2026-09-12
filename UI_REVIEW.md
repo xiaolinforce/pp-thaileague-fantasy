@@ -1282,3 +1282,16 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
 - **Checks/exclusions:** targeted formatting and diff checks passed. Unlimited
   transfers, points deductions, incomplete squads, and closed Gameweeks were
   not manufactured or browser-tested in this focused visual review.
+
+### 2026-09-13 — Team market filters on Tablet
+
+- **Change:** Tablet now uses the same `กรองนักเตะ` dialog entry point as
+  Mobile. The quota scoreboard and filter action stay fixed beneath the compact
+  workspace tabs while the market results scroll below them.
+- **Rendered evidence:** checked local Chrome in Thai at 768px wide. The inline
+  controls were replaced by the filter action, which opened the shared dialog
+  with every filter available. After scrolling the market, the quota and action
+  group remained anchored below the Top bar and workspace tabs.
+- **Boundaries/runtime:** Mobile retains its existing dialog flow; Desktop keeps
+  its inline filter controls. No player selection, filter save, or team save
+  was performed during review.
