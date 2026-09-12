@@ -4,6 +4,26 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-12 — Suppress verified Facebook native-bridge noise
+
+**Decision:** Discard a browser error before Sentry ingestion only when its
+Facebook in-app-browser user agent, every exception message, and every stack
+frame identify the verified native navigation bridge. Keep and classify events
+with a missing stack, a mixed exception chain, or any application frame.
+
+**Context:** Nine days of production evidence across multiple application
+releases showed the recurring `postMessage` and `messageHandlers` groups only
+in Facebook browsers with `app://` native navigation-logger frames. The groups
+continued to consume the error quota without identifying an application code
+path or a user-visible failure.
+
+**Consequences:** Pure injected Android and iOS bridge failures no longer create
+or reopen Sentry issues. The filter uses an explicit message allowlist and a
+bridge-only stack requirement; new variants and any event connected to
+application code remain visible for investigation. This narrows the retention
+choice in the 2026-09-03 monitoring decision using subsequent production
+evidence.
+
 ## 2026-09-11 — Reminder audiences are server-owned and previewed read-only
 
 **Decision:** Give authorized admins three allowlisted deadline-reminder

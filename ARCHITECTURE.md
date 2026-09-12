@@ -133,9 +133,11 @@ messages, breadcrumbs, structured logs, and transaction events. In particular,
 Drizzle's `Failed query` message contains bound values independently of SDK
 database instrumentation, so its query text and parameters are replaced while
 the chained database cause and stack locations remain available. Recognized
-Facebook native-bridge errors receive `error_origin=facebook_browser_bridge`;
-they retain their severity and are not dropped because their user impact is
-not yet established.
+Facebook native-bridge errors receive `error_origin=facebook_browser_bridge`.
+An event is discarded only when every exception matches a verified bridge
+message and every stack frame belongs to Facebook's injected `app://`
+navigation logger. Missing stacks, mixed errors, and any application frame
+remain observable.
 
 Team deadline labels are formatted once on the server in both supported
 languages and serialized into the Client Component. This avoids depending on

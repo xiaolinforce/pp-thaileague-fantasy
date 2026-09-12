@@ -96,10 +96,31 @@ const facebookBridgeMessages = new Set([
   "undefined is not an object (evaluating 'window.webkit.messageHandlers[e].postMessage')",
 ]);
 
+const facebookBridgeFrame =
+  /^app:\/\/(?:\/|navigation_performance_logger_android(?:$|[/?#]))/;
+
+function hasOnlyFacebookBridgeFrames(event: Event): boolean {
+  const exceptions = event.exception?.values ?? [];
+  return (
+    exceptions.length > 0 &&
+    exceptions.every((exception) => {
+      const frames = exception.stacktrace?.frames ?? [];
+      return (
+        frames.length > 0 &&
+        frames.every(
+          (frame) =>
+            frame.in_app !== true &&
+            facebookBridgeFrame.test(frame.filename ?? ""),
+        )
+      );
+    })
+  );
+}
+
 export function prepareBrowserSentryEvent<T extends Event>(
   event: T,
   userAgent: string,
-): T {
+): T | null {
   const exceptions = event.exception?.values ?? [];
   const isFacebookBridge =
     /\b(?:FBAN|FBAV|FB_IAB)\//.test(userAgent) &&
@@ -107,13 +128,16 @@ export function prepareBrowserSentryEvent<T extends Event>(
     exceptions.every((exception) =>
       facebookBridgeMessages.has(exception.value ?? ""),
     );
-  // Classification, not suppression: missing stack frames do not prove the
-  // error is harmless. Keep the event, severity, replay and app frames intact.
   const classified = isFacebookBridge
     ? {
         ...event,
         tags: { ...event.tags, error_origin: "facebook_browser_bridge" },
       }
     : event;
-  return scrubSentryEvent(classified);
+  const clean = scrubSentryEvent(classified);
+
+  // Production evidence shows these exact errors are injected by Facebook's
+  // native navigation logger. Require a complete bridge-only stack before
+  // dropping one so missing or mixed application frames remain observable.
+  return isFacebookBridge && hasOnlyFacebookBridgeFrames(clean) ? null : clean;
 }

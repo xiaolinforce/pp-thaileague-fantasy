@@ -86,7 +86,7 @@ test("scrubs breadcrumbs and structured logs before buffering", () => {
   assert.equal(log.attributes?.job, "auth-maintenance");
 });
 
-test("classifies known Facebook bridge errors without suppressing failures", () => {
+test("keeps a known Facebook bridge error when its stack is missing", () => {
   const event: Event = {
     level: "error",
     event_id: "event",
@@ -98,18 +98,18 @@ test("classifies known Facebook bridge errors without suppressing failures", () 
     event,
     "Mozilla/5.0 [FB_IAB/FB4A;FBAV/576.0.0;]",
   );
-  assert.equal(clean.tags?.error_origin, "facebook_browser_bridge");
-  assert.equal(clean.level, "error");
-  assert.equal(clean.event_id, "event");
+  assert.equal(clean?.tags?.error_origin, "facebook_browser_bridge");
+  assert.equal(clean?.level, "error");
+  assert.equal(clean?.event_id, "event");
   assert.equal(
-    prepareBrowserSentryEvent(event, "Chrome/152.0.0").tags?.error_origin,
+    prepareBrowserSentryEvent(event, "Chrome/152.0.0")?.tags?.error_origin,
     undefined,
   );
   assert.equal(
     prepareBrowserSentryEvent<Event>(
       { exception: { values: [{ value: "Hydration failed" }] } },
       "[FBAN/FBIOS;]",
-    ).tags?.error_origin,
+    )?.tags?.error_origin,
     undefined,
   );
 });
@@ -126,11 +126,12 @@ test("retains real app failures chained to a bridge error without classifying th
     },
     "[FB_IAB/FB4A;]",
   );
+  assert.ok(clean);
   assert.equal(clean.tags?.error_origin, undefined);
   assert.equal(clean.exception?.values?.length, 2);
 });
 
-test("classifies the iOS postMessage variant only in Facebook and keeps its stack", () => {
+test("drops a verified iOS bridge-only failure only in Facebook", () => {
   const event: Event = {
     level: "error",
     exception: {
@@ -147,12 +148,57 @@ test("classifies the iOS postMessage variant only in Facebook and keeps its stac
     event,
     "Mozilla/5.0 [FBAN/FBIOS;FBAV/576.0.0;]",
   );
-  assert.equal(clean.tags?.error_origin, "facebook_browser_bridge");
-  assert.deepEqual(clean.exception, event.exception);
-  assert.equal(clean.level, "error");
+  assert.equal(clean, null);
   assert.equal(
-    prepareBrowserSentryEvent(event, "Mobile Safari/605.1.15").tags
+    prepareBrowserSentryEvent(event, "Mobile Safari/605.1.15")?.tags
       ?.error_origin,
     undefined,
   );
+});
+
+test("drops a verified Android bridge-only failure", () => {
+  const clean = prepareBrowserSentryEvent<Event>(
+    {
+      exception: {
+        values: [
+          {
+            value: "Error invoking postMessage: Java object is gone",
+            stacktrace: {
+              frames: [
+                {
+                  filename:
+                    "app://navigation_performance_logger_android/index.js",
+                },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "Mozilla/5.0 [FB_IAB/FB4A;FBAV/576.0.0;]",
+  );
+  assert.equal(clean, null);
+});
+
+test("keeps bridge errors with any application frame", () => {
+  const clean = prepareBrowserSentryEvent<Event>(
+    {
+      exception: {
+        values: [
+          {
+            value: "Error invoking postMessage: Java object is gone",
+            stacktrace: {
+              frames: [
+                { filename: "app://navigation_performance_logger_android" },
+                { filename: "/_next/static/chunks/app.js", in_app: true },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "Mozilla/5.0 [FB_IAB/FB4A;]",
+  );
+  assert.equal(clean?.tags?.error_origin, "facebook_browser_bridge");
+  assert.equal(clean?.exception?.values?.[0]?.stacktrace?.frames?.length, 2);
 });
