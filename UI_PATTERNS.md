@@ -150,8 +150,12 @@ proven behaviors unless a deliberate product decision replaces them:
   disclosed in compact modes. Wildcard remains unavailable in Gameweek 1.
 - Order market filters by the user's narrowing task. Keep cumulative tier
   limits visible with a written over-limit state and an accessible explanation.
-- On Mobile, show the current goalkeeper, defender, midfielder, and forward
-  quotas below the free-transfer and foreign-player quota cards.
+- Present market quotas as a navy scoreboard with a narrow orange edge, muted
+  light labels, white counts, and an orange free-transfer count. Preserve the
+  red points-deduction badge when free transfers are exceeded.
+- On Mobile, join the current goalkeeper, defender, midfielder, and forward
+  quotas beneath the free-transfer and foreign-player row in the same scoreboard.
+  Use fine light dividers and rounded outer corners rather than separate cells.
 - Show unlimited transfers throughout each team's first playing Gameweek,
   including teams joining after Gameweek 1, with an infinity symbol plus an
   accessible written label.
