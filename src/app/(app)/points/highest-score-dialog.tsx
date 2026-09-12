@@ -13,7 +13,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import type { FantasyPointsSquadMember, PlayerPointsRow } from "@/data/fantasy";
-import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
+import {
+  getDisplayedPlayerPoints,
+  sortBenchMembersForDisplay,
+} from "@/lib/fantasy/points-presentation";
 
 const positionRows = [
   "goalkeeper",
@@ -51,14 +54,16 @@ export function HighestScoreDialog({
           !autoSubOut.has(member.fantasyPlayerId)) ||
         autoSubIn.has(member.fantasyPlayerId),
     );
-    const benchMembers = team.squad
-      .filter(
+    const benchMembers = sortBenchMembersForDisplay(
+      team.squad.filter(
         (member) =>
           (member.lineupRole === "bench" &&
             !autoSubIn.has(member.fantasyPlayerId)) ||
           autoSubOut.has(member.fantasyPlayerId),
-      )
-      .sort((a, b) => (a.benchOrder ?? 99) - (b.benchOrder ?? 99));
+      ),
+      team.squad,
+      team.autoSubstitutions,
+    );
     const countedIds = new Set(
       team.activeChip === "bench_boost"
         ? team.squad.map((member) => member.fantasyPlayerId)

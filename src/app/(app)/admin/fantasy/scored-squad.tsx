@@ -2,7 +2,10 @@ import { Zap } from "lucide-react";
 
 import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import type { FantasyPointsSquadMember, PlayerPointsRow } from "@/data/fantasy";
-import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
+import {
+  getDisplayedPlayerPoints,
+  sortBenchMembersForDisplay,
+} from "@/lib/fantasy/points-presentation";
 import type { FantasyChip } from "@/lib/fantasy/rules";
 import styles from "./admin.module.css";
 
@@ -42,29 +45,16 @@ export function AdminScoredSquad({
         !autoSubOut.has(member.fantasyPlayerId)) ||
       autoSubIn.has(member.fantasyPlayerId),
   );
-  const benchMembers = squad
-    .filter(
+  const benchMembers = sortBenchMembersForDisplay(
+    squad.filter(
       (member) =>
         (member.lineupRole === "bench" &&
           !autoSubIn.has(member.fantasyPlayerId)) ||
         autoSubOut.has(member.fantasyPlayerId),
-    )
-    .sort((left, right) => {
-      const benchOrder = (fantasyPlayerId: string, ownOrder: number | null) => {
-        if (ownOrder !== null) return ownOrder;
-        const substitution = autoSubstitutions.find(
-          (item) => item.out === fantasyPlayerId,
-        );
-        return (
-          squad.find((member) => member.fantasyPlayerId === substitution?.in)
-            ?.benchOrder ?? 99
-        );
-      };
-      return (
-        benchOrder(left.fantasyPlayerId, left.benchOrder) -
-        benchOrder(right.fantasyPlayerId, right.benchOrder)
-      );
-    });
+    ),
+    squad,
+    autoSubstitutions,
+  );
   const countedIds = new Set(
     score?.countedPlayerIds ??
       (activeChip === "bench_boost"

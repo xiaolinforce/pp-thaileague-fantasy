@@ -8,7 +8,10 @@ import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import { getFantasyPointsState } from "@/data/fantasy";
 import { getFantasyNavigationAvailability } from "@/data/navigation";
 import { parsePointsGameweek } from "@/lib/fantasy/points-gameweek";
-import { getDisplayedPlayerPoints } from "@/lib/fantasy/points-presentation";
+import {
+  getDisplayedPlayerPoints,
+  sortBenchMembersForDisplay,
+} from "@/lib/fantasy/points-presentation";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
 import { HighestScoreDialog } from "./highest-score-dialog";
 
@@ -52,30 +55,16 @@ export default async function PointsPage({
         !autoSubOut.has(member.fantasyPlayerId)) ||
       autoSubIn.has(member.fantasyPlayerId),
   );
-  const benchMembers = points.squad
-    .filter(
+  const benchMembers = sortBenchMembersForDisplay(
+    points.squad.filter(
       (member) =>
         (member.lineupRole === "bench" &&
           !autoSubIn.has(member.fantasyPlayerId)) ||
         autoSubOut.has(member.fantasyPlayerId),
-    )
-    .sort((a, b) => {
-      const benchOrder = (fantasyPlayerId: string, ownOrder: number | null) => {
-        if (ownOrder !== null) return ownOrder;
-        const substitution = autoSubstitutions.find(
-          (item) => item.out === fantasyPlayerId,
-        );
-        return (
-          points.squad.find(
-            (member) => member.fantasyPlayerId === substitution?.in,
-          )?.benchOrder ?? 99
-        );
-      };
-      return (
-        benchOrder(a.fantasyPlayerId, a.benchOrder) -
-        benchOrder(b.fantasyPlayerId, b.benchOrder)
-      );
-    });
+    ),
+    points.squad,
+    autoSubstitutions,
+  );
   const countedIds = new Set(
     points.fantasy.selection.activeChip === "bench_boost"
       ? points.squad.map((member) => member.fantasyPlayerId)

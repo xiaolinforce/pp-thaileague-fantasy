@@ -44,6 +44,43 @@ export function getDisplayedPlayerPoints({
     : rawPoints;
 }
 
+type BenchDisplayMember = {
+  fantasyPlayerId: string;
+  benchOrder: number | null;
+};
+
+type AutoSubstitution = {
+  out: string;
+  in: string;
+};
+
+export function sortBenchMembersForDisplay<T extends BenchDisplayMember>(
+  benchMembers: readonly T[],
+  squad: readonly BenchDisplayMember[],
+  autoSubstitutions: readonly AutoSubstitution[],
+) {
+  const membersById = new Map(
+    squad.map((member) => [member.fantasyPlayerId, member]),
+  );
+  const replacementByStarter = new Map(
+    autoSubstitutions.map((substitution) => [
+      substitution.out,
+      substitution.in,
+    ]),
+  );
+  const displayedBenchOrder = (member: BenchDisplayMember) => {
+    if (member.benchOrder !== null) return member.benchOrder;
+    const replacementId = replacementByStarter.get(member.fantasyPlayerId);
+    return replacementId
+      ? (membersById.get(replacementId)?.benchOrder ?? 99)
+      : 99;
+  };
+
+  return [...benchMembers].sort(
+    (left, right) => displayedBenchOrder(left) - displayedBenchOrder(right),
+  );
+}
+
 export function summarizeGameweekScores(
   teams: Array<{ playerCount: number; totalPoints: number }>,
 ) {

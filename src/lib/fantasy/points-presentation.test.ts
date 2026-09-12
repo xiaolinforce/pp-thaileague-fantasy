@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   getDisplayedPlayerPoints,
   getBreakdownLabel,
+  sortBenchMembersForDisplay,
   summarizeGameweekScores,
 } from "./points-presentation.ts";
 
@@ -45,6 +46,24 @@ test("shows the scoring captain's already-multiplied contribution", () => {
       captainMultiplier: 3,
     }),
     6,
+  );
+});
+
+test("keeps an auto-subbed goalkeeper in the goalkeeper bench slot", () => {
+  const squad = [
+    { fantasyPlayerId: "starting-goalkeeper", benchOrder: null },
+    { fantasyPlayerId: "bench-goalkeeper", benchOrder: 0 },
+    { fantasyPlayerId: "defender", benchOrder: 1 },
+    { fantasyPlayerId: "midfielder", benchOrder: 2 },
+    { fantasyPlayerId: "forward", benchOrder: 3 },
+  ];
+  const displayedBench = [squad[2], squad[3], squad[4], squad[0]];
+
+  assert.deepEqual(
+    sortBenchMembersForDisplay(displayedBench, squad, [
+      { out: "starting-goalkeeper", in: "bench-goalkeeper" },
+    ]).map((member) => member.fantasyPlayerId),
+    ["starting-goalkeeper", "defender", "midfielder", "forward"],
   );
 });
 
