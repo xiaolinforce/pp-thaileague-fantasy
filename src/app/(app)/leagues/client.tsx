@@ -429,7 +429,9 @@ function LeagueStandingsDialog({
     <Localized>
       <Dialog open={Boolean(leagueId)} onOpenChange={onOpenChange}>
         <DialogContent
-          className="product-dialog league-standings-dialog"
+          className={`product-dialog league-standings-dialog${
+            isOverallHint ? " league-overall-standings-dialog" : ""
+          }`}
           closeLabel={translate("ปิด")}
         >
           <DialogHeader>
