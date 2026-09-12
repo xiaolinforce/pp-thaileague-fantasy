@@ -3174,9 +3174,12 @@ textarea:focus-visible {
 }
 
 @media (width < 48rem) {
+  .compact-position-quota-stats > div {
+    padding-inline: 2px;
+  }
+
   .compact-position-quota-stats span {
     font-size: 11px;
-    overflow-wrap: anywhere;
   }
 
   .compact-transfer-stats strong {

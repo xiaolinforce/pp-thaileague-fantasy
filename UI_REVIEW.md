@@ -1260,3 +1260,25 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
   The language preference and viewport override were restored after review.
 - **Runtime:** no console warning, error, or runtime exception was observed while
   exercising the responsive and captaincy flows.
+
+### 2026-09-13 — Team market quota scoreboard
+
+- **Scope:** Chrome review of the navy quota scoreboard on local `/team`, using
+  the existing Guest session in open GW3: four free transfers, seven foreign
+  players, and a complete 2/5/5/3 positional allocation.
+- **Visual evidence:** inspected Thai and English at 360px Mobile and 1440px
+  Desktop. Checked layout geometry at 767/768px and 1279/1280px; no horizontal
+  page overflow occurred, and positional quotas retained their Mobile-only
+  visibility. The navy surface, orange accent, white counts, and separators
+  follow the selected mockup while preserving existing responsive behavior.
+- **Fix:** the English Goalkeeper label broke before its final letter at 360px.
+  Reduced positional-cell inline padding and removed arbitrary word breaking.
+  Reloaded Chrome to verify the updated CSS; all four English labels then fit
+  on one line, with Thai labels and numbers remaining readable.
+- **Interaction/runtime:** verified keyboard market-tab selection and opening
+  and dismissing the filter dialog. No app console errors were observed;
+  warnings came from a browser extension. Restored Thai and the original
+  viewport sizing. No squad mutations or team saves were made.
+- **Checks/exclusions:** targeted formatting and diff checks passed. Unlimited
+  transfers, points deductions, incomplete squads, and closed Gameweeks were
+  not manufactured or browser-tested in this focused visual review.
