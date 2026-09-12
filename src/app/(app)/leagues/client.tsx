@@ -622,30 +622,45 @@ export function LeagueOverview({
     <Localized>
       <>
         {overview.overall ? (
-          <button
-            type="button"
-            className="league-overall-surface"
-            onClick={() => {
-              if (overview.overall) void openLeague(overview.overall.id, true);
-            }}
-          >
-            <span className="league-overall-mark" aria-hidden="true">
-              <Trophy />
-            </span>
-            <div className="league-overall-copy">
-              <span>อันดับทั้งหมด</span>
-              <strong
-                className={
-                  overview.overall.rank === null ? "waiting" : undefined
-                }
-              >
-                {overview.overall.rank?.toLocaleString() ?? "รออัปเดตอันดับ"}
-              </strong>
-            </div>
-            <span className="league-open-caret" aria-hidden="true">
-              <ChevronRight />
-            </span>
-          </button>
+          <>
+            <button
+              type="button"
+              className="league-overall-surface"
+              onClick={() => {
+                if (overview.overall)
+                  void openLeague(overview.overall.id, true);
+              }}
+            >
+              <span className="league-overall-mark" aria-hidden="true">
+                <Trophy />
+              </span>
+              <div className="league-overall-copy">
+                <span>อันดับทั้งหมด</span>
+                <strong
+                  className={
+                    overview.overall.rank === null ? "waiting" : undefined
+                  }
+                >
+                  {overview.overall.rank?.toLocaleString() ?? "รออัปเดตอันดับ"}
+                </strong>
+              </div>
+              <span className="league-open-caret" aria-hidden="true">
+                <ChevronRight />
+              </span>
+            </button>
+            <section
+              className="league-total-score"
+              aria-labelledby="league-total-score-heading"
+            >
+              <div className="league-total-score-copy">
+                <h2 id="league-total-score-heading">คะแนนรวมของคุณ</h2>
+              </div>
+              <div className="league-total-score-value">
+                <strong>{overview.overall.totalPoints.toLocaleString()}</strong>
+                <span>คะแนน</span>
+              </div>
+            </section>
+          </>
         ) : (
           <section className="league-system-state" role="alert">
             <Trophy aria-hidden="true" />
