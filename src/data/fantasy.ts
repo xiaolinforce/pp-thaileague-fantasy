@@ -29,6 +29,8 @@ import { getTransferRevisionState } from "@/lib/fantasy/transfer-revisions";
 import { hasGameweekDeadlinePassed } from "@/lib/fantasy/points-gameweek";
 import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { logServerTiming } from "@/lib/server/performance";
+import { isFantasySelectionInput } from "@/lib/fantasy/selection-input";
+import { normalizeFantasyRevisionMembers } from "@/lib/fantasy/revision-snapshot";
 
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
 
@@ -42,6 +44,11 @@ export type FantasySquadMember = {
   benchOrder: number | null;
   captainRole: "none" | "captain" | "vice_captain";
 };
+
+export type FantasySelectionDraftMember = Pick<
+  FantasySquadMember,
+  "fantasyPlayerId" | "lineupRole" | "benchOrder" | "captainRole"
+>;
 
 export type FantasyState = {
   seasonId: string;
@@ -65,6 +72,8 @@ export type FantasyState = {
     status: "draft" | "locked";
     activeChip: FantasyChip | null;
     baselineSquadIds: string[];
+    baselineMembers: FantasySelectionDraftMember[] | null;
+    baselineActiveChip: FantasyChip | null;
     hasPendingChanges: boolean;
     netTransferCount: number;
     transferPoints: number;
@@ -128,6 +137,27 @@ export async function getFantasyState(): Promise<FantasyState> {
     revisionState.baselineSquadIds.length > 0
       ? revisionState.baselineSquadIds
       : members.map((member) => member.fantasyPlayerId);
+  const baselineRevision = revisionState.baselineRevision
+    ? (revisions.find(
+        (revision) => revision.revision === revisionState.baselineRevision,
+      ) ?? null)
+    : null;
+  const baselineSnapshot = normalizeFantasyRevisionMembers(
+    (baselineRevision?.lineup as { members?: unknown } | null)?.members,
+  );
+  const baselineInput = selection
+    ? {
+        selectionId: selection.id,
+        expectedRevision: baselineRevision?.revision ?? 0,
+        members: baselineSnapshot ?? [],
+        activeChip: baselineRevision?.activeChip ?? null,
+      }
+    : null;
+  const baselineMembers = openingGameweek
+    ? []
+    : baselineInput && isFantasySelectionInput(baselineInput)
+      ? baselineInput.members
+      : null;
 
   const chipRows = await db
     .select({ chip: fantasyTeamSelections.activeChip, uses: count() })
@@ -168,6 +198,10 @@ export async function getFantasyState(): Promise<FantasyState> {
       status: selection?.status ?? "locked",
       activeChip: selection?.activeChip ?? null,
       baselineSquadIds,
+      baselineMembers,
+      baselineActiveChip: openingGameweek
+        ? null
+        : (baselineRevision?.activeChip ?? null),
       hasPendingChanges: revisionState.hasPendingChanges,
       netTransferCount: selection?.netTransferCount ?? 0,
       transferPoints: selection?.transferPoints ?? 0,
@@ -481,6 +515,8 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       status: selectedSelection?.status ?? "locked",
       activeChip: selectedSelection?.activeChip ?? null,
       baselineSquadIds: members.map((member) => member.fantasyPlayerId),
+      baselineMembers: members,
+      baselineActiveChip: selectedSelection?.activeChip ?? null,
       hasPendingChanges: false,
       netTransferCount: selectedSelection?.netTransferCount ?? 0,
       transferPoints: selectedSelection?.transferPoints ?? 0,

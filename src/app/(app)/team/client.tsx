@@ -60,7 +60,6 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
 import {
-  revertFantasySelectionAction,
   saveFantasySelectionAction,
   suggestFantasyAutoFillAction,
 } from "@/app/fantasy-actions";
@@ -711,7 +710,6 @@ export default function TeamClient({
   const [removedPlayersBySlot, setRemovedPlayersBySlot] =
     useState<RemovedDraftPlayersBySlot>({});
   const [isPending, startTransition] = useTransition();
-  const [isReverting, startRevertTransition] = useTransition();
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
@@ -928,7 +926,7 @@ export default function TeamClient({
   const isEditable =
     fantasy.gameweek.status === "open" &&
     (remainingMs === null || remainingMs > 0);
-  const interactionsDisabled = !isEditable || isAutoFilling || isReverting;
+  const interactionsDisabled = !isEditable || isAutoFilling;
   const remaining = Math.max(0, remainingMs ?? 0);
   const remainingDays = Math.floor(remaining / 86_400_000);
   const remainingHours = Math.floor((remaining % 86_400_000) / 3_600_000);
@@ -1060,8 +1058,15 @@ export default function TeamClient({
   const hasUnsavedChanges =
     JSON.stringify(draftSelectionMembers) !== JSON.stringify(savedMembers) ||
     activeChip !== fantasy.selection.activeChip;
+  const hasSavedChanges =
+    fantasy.selection.baselineMembers !== null &&
+    (JSON.stringify(savedMembers) !==
+      JSON.stringify(fantasy.selection.baselineMembers) ||
+      fantasy.selection.activeChip !== fantasy.selection.baselineActiveChip);
   const canRevertTeam =
-    isEditable && (hasUnsavedChanges || fantasy.selection.hasPendingChanges);
+    isEditable &&
+    (hasUnsavedChanges || hasSavedChanges) &&
+    fantasy.selection.baselineMembers !== null;
 
   const getSwapState = (slotId: string): PlayerSwapState | undefined => {
     if (!swapFrom) return undefined;
@@ -1156,52 +1161,11 @@ export default function TeamClient({
   };
 
   const revertTeam = () => {
-    if (
-      !canRevertTeam ||
-      !fantasy.selection.id ||
-      isPending ||
-      isAutoFilling ||
-      isReverting
-    ) {
+    const baselineMembers = fantasy.selection.baselineMembers;
+    if (!canRevertTeam || !baselineMembers || isPending || isAutoFilling) {
       return;
     }
-    if (!fantasy.selection.hasPendingChanges) {
-      applyRevertedTeam(
-        fantasy.selection.members,
-        fantasy.selection.activeChip,
-      );
-      return;
-    }
-
-    startRevertTransition(async () => {
-      try {
-        const result = await revertFantasySelectionAction({
-          selectionId: fantasy.selection.id!,
-          expectedRevision: selectionRevision.current,
-        });
-        if (result.ok) {
-          selectionRevision.current = result.revision;
-          applyRevertedTeam(result.members, result.activeChip);
-          router.refresh();
-        } else {
-          toast.error(translate(result.message), {
-            duration: result.conflict ? Infinity : undefined,
-            action: result.conflict
-              ? {
-                  label: translate("โหลดทีมล่าสุด"),
-                  onClick: () => window.location.reload(),
-                }
-              : undefined,
-          });
-        }
-      } catch {
-        toast.error(translate("คืนทีมต้นเกมวีคไม่สำเร็จ"), {
-          description: translate(
-            "ยังไม่ได้คืนทีม กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง",
-          ),
-        });
-      }
-    });
+    applyRevertedTeam(baselineMembers, fantasy.selection.baselineActiveChip);
   };
 
   const autoFillVacancies = () => {
@@ -1238,7 +1202,6 @@ export default function TeamClient({
       onClick={saveTeam}
       disabled={
         isPending ||
-        isReverting ||
         isAutoFilling ||
         !isEditable ||
         !hasUnsavedChanges ||
@@ -1585,7 +1548,7 @@ export default function TeamClient({
                       <button
                         type="button"
                         className="secondary-button compact-auto-fill-button squad-pitch-action squad-auto-fill-button"
-                        disabled={!isEditable || isAutoFilling || isReverting}
+                        disabled={!isEditable || isAutoFilling}
                         onClick={autoFillVacancies}
                         aria-busy={isAutoFilling}
                         title={
@@ -1612,37 +1575,20 @@ export default function TeamClient({
                       <button
                         type="button"
                         className="secondary-button compact-auto-fill-button danger-button squad-pitch-action squad-revert-button"
-                        disabled={isPending || isAutoFilling || isReverting}
+                        disabled={isPending || isAutoFilling}
                         onClick={revertTeam}
-                        aria-busy={isReverting}
                         aria-label={translate(
-                          isReverting
-                            ? fantasy.team.openingGameweek
-                              ? "กำลังล้างทีม…"
-                              : "กำลังคืนทีม…"
-                            : fantasy.team.openingGameweek
-                              ? "ล้างทีม"
-                              : "คืนทีมต้นเกมวีค",
+                          fantasy.team.openingGameweek
+                            ? "ล้างทีม"
+                            : "คืนทีมต้นเกมวีค",
                         )}
                         title={translate(
-                          isReverting
-                            ? fantasy.team.openingGameweek
-                              ? "กำลังล้างทีม…"
-                              : "กำลังคืนทีม…"
-                            : fantasy.team.openingGameweek
-                              ? "ล้างทีม"
-                              : "ย้อนคืนนักเตะเป็นตอนเริ่มเกมวีค",
+                          fantasy.team.openingGameweek
+                            ? "ล้างทีม"
+                            : "ย้อนคืนนักเตะเป็นตอนเริ่มเกมวีค",
                         )}
                       >
-                        {isReverting ? (
-                          <LoaderCircle
-                            className="spin"
-                            size={15}
-                            aria-hidden="true"
-                          />
-                        ) : (
-                          <RotateCcw size={15} aria-hidden="true" />
-                        )}
+                        <RotateCcw size={15} aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -1783,7 +1729,7 @@ export default function TeamClient({
               setSelected(player);
             }}
             onPlayerRemove={removePlayer}
-            isAutoFilling={isAutoFilling || isReverting}
+            isAutoFilling={isAutoFilling}
             preferredVacancySlotId={preferredVacancySlotId}
             position={marketPosition}
             onPositionChange={setMarketPosition}

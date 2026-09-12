@@ -230,12 +230,12 @@ team mutation remains closed.
 - A manager may confirm at most three chargeable transfers in one Gameweek,
   limiting the transfer deduction to 12 points. A draft may temporarily exceed
   that amount, but it cannot be saved until it returns within the limit.
-- Pre-deadline revisions can be confirmed or cancelled.
-- Cancelling restores the complete start-of-Gameweek squad, lineup, bench
-  order, captaincy, active chip, free-transfer settlement, and pending point
-  deduction. It also discards the current client draft. In a team's opening
-  Gameweek, whose true baseline is empty, cancellation persists an empty
-  15-slot draft instead of restoring the first complete squad that was saved.
+- Before the deadline, Reset prepares the complete start-of-Gameweek squad,
+  lineup, bench order, captaincy, and chip as an unsaved client draft. In a
+  team's opening Gameweek, whose true baseline is empty, it prepares an empty
+  15-slot draft. Reset never changes the persisted selection, transfer
+  revisions, transfer settlement, pending point deduction, or player
+  ownership; those change only after an explicit valid Save.
 - Wildcard makes that Gameweek's transfers free and preserves the accumulated
   free-transfer balance before adding the normal weekly allowance.
 - Every team's opening-Gameweek transfers and Wildcard transfers are free and

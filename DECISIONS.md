@@ -115,6 +115,24 @@ confirmed revisions as cancelled, and appends a cancellation revision. A
 successful opening-Gameweek restore remains empty after reload and requires a
 new complete save.
 
+## 2026-09-12 — Resetting a team is an unsaved draft operation
+
+**Decision:** Supersede the persistence behavior of the 2026-09-08 transfer
+cancellation decision. The Team workspace Reset action replaces only the
+client-side draft with the Gameweek baseline; it never saves, cancels a
+revision, updates ownership, or changes transfer settlement. The manager must
+use the existing Save action to persist the displayed reset draft.
+
+**Context:** A reset control is an exploration and recovery action. Saving it
+immediately can commit a destructive squad change before the manager has
+reviewed the pitch or deliberately confirmed it.
+
+**Consequences:** The opening-Gameweek Reset action shows 15 empty slots but
+does not clear the stored team. A normal-Gameweek Reset shows the carried
+baseline, including its lineup and chip, as an unsaved draft. Reloading before
+Save restores the last persisted team. All database writes, revisions,
+ownership updates, and deadline validation remain exclusively on Save.
+
 ## 2026-09-07 — Opening transfers follow each team's first playing Gameweek
 
 **Decision:** Give every team unlimited transfers through the deadline of its
