@@ -3645,6 +3645,30 @@ textarea:focus-visible {
   flex: 0 0 auto;
 }
 
+.squad-display-control {
+  margin: 14px 14px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  color: var(--ink);
+  background: #faf9f7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.squad-display-control > span {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.squad-display-control [data-slot="select-trigger"] {
+  min-width: 168px;
+  border-color: #d9d5ce;
+  background: var(--paper);
+}
+
 .squad-validation-alert {
   margin: 14px 14px 0;
   padding: 11px 12px;
@@ -4298,6 +4322,43 @@ button.vacant-squad-slot {
   border-radius: 0 0 6px 6px;
   padding: 3px 5px 2px;
   font-size: 12px;
+}
+
+.squad-fixture--opponent {
+  padding: 3px 4px 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+}
+
+.squad-fixture-venue {
+  width: 15px;
+  height: 15px;
+  flex: 0 0 15px;
+  border-radius: 50%;
+  color: white;
+  display: grid;
+  place-items: center;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.squad-fixture-venue--h {
+  background: var(--orange);
+}
+
+.squad-fixture-venue--a {
+  background: #2478c3;
+}
+
+.squad-fixture-opponent-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
 }
 
 .bench-panel {
@@ -7756,6 +7817,10 @@ button.vacant-squad-slot {
     font-size: 12px;
   }
 
+  .squad-fixture-opponent-name {
+    font-size: 10px;
+  }
+
   .squad-name {
     min-height: 18px;
     max-height: 18px;
@@ -9161,6 +9226,10 @@ body {
     margin-inline: 0;
   }
 
+  .squad-display-control {
+    margin-inline: 0;
+  }
+
   .squad-pitch {
     margin-inline: 0;
   }
@@ -9237,6 +9306,22 @@ body {
     padding-top: 0;
     padding-bottom: 0;
     line-height: 18px;
+    font-size: 9px;
+  }
+
+  .squad-fixture--opponent {
+    gap: 2px;
+    padding: 2px 3px;
+  }
+
+  .squad-fixture-venue {
+    width: 12px;
+    height: 12px;
+    flex-basis: 12px;
+    font-size: 7px;
+  }
+
+  .squad-fixture-opponent-name {
     font-size: 9px;
   }
 
@@ -9563,6 +9648,14 @@ body {
   .squad-chip-toolbar__content {
     height: auto !important;
     padding: 10px 12px 12px !important;
+  }
+
+  .squad-display-control {
+    margin-top: 10px;
+  }
+
+  .squad-display-control [data-slot="select-trigger"] {
+    min-width: 154px;
   }
 }
 

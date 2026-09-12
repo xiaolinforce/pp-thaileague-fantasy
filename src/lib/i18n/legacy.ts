@@ -326,6 +326,12 @@ const translations: Record<string, string> = {
   กรองสัญชาติ: "Filter nationality",
   เรียงลำดับ: "Sort players",
   ตัวช่วยพิเศษ: "Chips",
+  แสดงใต้ชื่อนักเตะ: "Show below player names",
+  สโมสรนักเตะ: "Player club",
+  คู่แข่งนัดถัดไป: "Next opponent",
+  "คะแนน GW ล่าสุด": "Latest GW points",
+  สโมสร: "Club",
+  ยังไม่มีโปรแกรม: "No fixture yet",
 
   // Transfers
   จัดตัวอัตโนมัติ: "Auto-fill",

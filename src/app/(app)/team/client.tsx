@@ -57,6 +57,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
 import {
@@ -127,6 +134,28 @@ function getShortPositionLabel(position: CompetitionPosition) {
 type PlayerSwapState = "source" | "available" | "unavailable";
 
 type TeamWorkspaceView = "squad" | "market";
+
+type SquadSecondaryDisplay = "club" | "opponent" | "latest_points" | "form";
+
+const SQUAD_SECONDARY_DISPLAY_STORAGE_KEY =
+  "thai-fantasy-squad-secondary-display";
+
+function isSquadSecondaryDisplay(
+  value: string | null,
+): value is SquadSecondaryDisplay {
+  return (
+    value === "club" ||
+    value === "opponent" ||
+    value === "latest_points" ||
+    value === "form"
+  );
+}
+
+type SquadSecondaryInfo = {
+  value: string;
+  title: string;
+  venue?: "H" | "A";
+};
 
 type SelectionDraftSource = {
   fantasyPlayerId: string;
@@ -407,6 +436,7 @@ function SquadPlayer({
   swapState,
   showCaptainActions,
   showPositionBadgeOnShirt,
+  secondaryInfo,
 }: {
   player: CompetitionPlayerView;
   onSelect: (
@@ -426,6 +456,7 @@ function SquadPlayer({
   swapState?: PlayerSwapState;
   showCaptainActions?: boolean;
   showPositionBadgeOnShirt?: boolean;
+  secondaryInfo: SquadSecondaryInfo;
 }) {
   const { language } = useLanguage();
   const playerName = localize(player.name, language);
@@ -483,8 +514,25 @@ function SquadPlayer({
           >
             {localize(player.shortName, language)}
           </span>
-          <span className="squad-fixture">
-            {localize(player.clubShort, language)}
+          <span
+            className={`squad-fixture${secondaryInfo.venue ? " squad-fixture--opponent" : ""}`}
+            title={secondaryInfo.title}
+          >
+            {secondaryInfo.venue ? (
+              <>
+                <span
+                  className={`squad-fixture-venue squad-fixture-venue--${secondaryInfo.venue.toLowerCase()}`}
+                  aria-hidden="true"
+                >
+                  {secondaryInfo.venue}
+                </span>
+                <span className="squad-fixture-opponent-name">
+                  {secondaryInfo.value}
+                </span>
+              </>
+            ) : (
+              secondaryInfo.value
+            )}
           </span>
         </button>
         {!hideActions && !actionsDisabled && (
@@ -715,9 +763,23 @@ export default function TeamClient({
   const [remainingMs, setRemainingMs] = useState<number | null>(null);
   const [workspaceView, setWorkspaceView] =
     useState<TeamWorkspaceView>("squad");
+  const [squadSecondaryDisplay, setSquadSecondaryDisplay] =
+    useState<SquadSecondaryDisplay>("club");
   const [marketPosition, setMarketPosition] = useState("ALL");
   const selectionRevision = useRef(fantasy.selection.revision);
   const router = useRouter();
+
+  const changeSquadSecondaryDisplay = (nextDisplay: SquadSecondaryDisplay) => {
+    setSquadSecondaryDisplay(nextDisplay);
+    try {
+      window.localStorage.setItem(
+        SQUAD_SECONDARY_DISPLAY_STORAGE_KEY,
+        nextDisplay,
+      );
+    } catch {
+      /* Keep the selection for this visit when storage is unavailable. */
+    }
+  };
 
   const changeWorkspaceView = (nextView: TeamWorkspaceView) => {
     if (nextView === workspaceView) {
@@ -782,6 +844,88 @@ export default function TeamClient({
       ),
     [data.players, language, translate],
   );
+  const squadSecondaryInfoByFantasyId = useMemo(() => {
+    const upcomingFixturesByClubId = new Map<
+      string,
+      CompetitionDataset["fixtures"]
+    >();
+    for (const fixture of data.fixtures) {
+      if (fixture.status === "finished" || fixture.status === "cancelled") {
+        continue;
+      }
+      for (const clubId of [fixture.home.id, fixture.away.id]) {
+        const fixtures = upcomingFixturesByClubId.get(clubId) ?? [];
+        fixtures.push(fixture);
+        upcomingFixturesByClubId.set(clubId, fixtures);
+      }
+    }
+    for (const fixtures of upcomingFixturesByClubId.values()) {
+      fixtures.sort((fixtureA, fixtureB) => {
+        const kickoffA = fixtureA.kickoffAt
+          ? new Date(fixtureA.kickoffAt).getTime()
+          : Number.POSITIVE_INFINITY;
+        const kickoffB = fixtureB.kickoffAt
+          ? new Date(fixtureB.kickoffAt).getTime()
+          : Number.POSITIVE_INFINITY;
+        return kickoffA - kickoffB || fixtureA.matchweek - fixtureB.matchweek;
+      });
+    }
+
+    return new Map(
+      data.players.flatMap((player) => {
+        if (!player.fantasyPlayerId) return [];
+
+        const nextFixture = upcomingFixturesByClubId.get(player.clubId)?.[0];
+        const opponent = nextFixture
+          ? nextFixture.home.id === player.clubId
+            ? nextFixture.away
+            : nextFixture.home
+          : null;
+        const venue =
+          nextFixture?.home.id === player.clubId
+            ? ("H" as const)
+            : ("A" as const);
+        const latestMatch = player.recentMatches[0];
+        const secondaryInfo: SquadSecondaryInfo =
+          squadSecondaryDisplay === "club"
+            ? {
+                value: localize(player.clubShort, language),
+                title: `${translate("สโมสร")}: ${localize(player.club, language)}`,
+              }
+            : squadSecondaryDisplay === "opponent"
+              ? {
+                  value: opponent
+                    ? localize(opponent.shortName, language)
+                    : "—",
+                  title: opponent
+                    ? `${translate("คู่แข่งนัดถัดไป")}: ${localize(opponent.name, language)}`
+                    : translate("ยังไม่มีโปรแกรม"),
+                  venue: opponent ? venue : undefined,
+                }
+              : squadSecondaryDisplay === "latest_points"
+                ? {
+                    value: latestMatch ? String(latestMatch.points) : "—",
+                    title: latestMatch
+                      ? `GW${latestMatch.matchweek}: ${latestMatch.points} ${translate("คะแนน")}`
+                      : translate("ยังไม่มีผลการแข่งขัน"),
+                  }
+                : {
+                    value: Number.isFinite(player.form)
+                      ? player.form.toFixed(1)
+                      : "—",
+                    title: `${translate("ฟอร์ม")}: ${Number.isFinite(player.form) ? player.form.toFixed(1) : "—"}`,
+                  };
+        return [[player.fantasyPlayerId, secondaryInfo] as const];
+      }),
+    );
+  }, [data.fixtures, data.players, language, squadSecondaryDisplay, translate]);
+  const getSquadSecondaryInfo = (player: CompetitionPlayerView) =>
+    player.fantasyPlayerId
+      ? (squadSecondaryInfoByFantasyId.get(player.fantasyPlayerId) ?? {
+          value: "—",
+          title: "—",
+        })
+      : { value: "—", title: "—" };
   const lineupAssignments = useMemo<LineupPlayer[]>(
     () =>
       members.flatMap((member) => {
@@ -1076,6 +1220,26 @@ export default function TeamClient({
 
   const getVacancySwapState = (slotId: string): PlayerSwapState | undefined =>
     getSwapState(slotId);
+
+  useEffect(() => {
+    let storedDisplay: string | null = null;
+    try {
+      storedDisplay = window.localStorage.getItem(
+        SQUAD_SECONDARY_DISPLAY_STORAGE_KEY,
+      );
+    } catch {
+      /* Keep the default when storage is unavailable. */
+    }
+
+    if (!isSquadSecondaryDisplay(storedDisplay)) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() =>
+      setSquadSecondaryDisplay(storedDisplay),
+    );
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
 
   useEffect(() => {
     const deadline = new Date(fantasy.gameweek.deadlineAt).getTime();
@@ -1519,6 +1683,36 @@ export default function TeamClient({
                 </AccordionItem>
               </Accordion>
             </section>
+            <div className="squad-display-control">
+              <span id="squad-secondary-display-label">
+                {translate("แสดงใต้ชื่อนักเตะ")}
+              </span>
+              <Select<SquadSecondaryDisplay>
+                value={squadSecondaryDisplay}
+                onValueChange={(value) => {
+                  if (value) changeSquadSecondaryDisplay(value);
+                }}
+              >
+                <SelectTrigger
+                  aria-labelledby="squad-secondary-display-label"
+                  size="sm"
+                >
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent align="end">
+                  <SelectItem value="club">
+                    {translate("สโมสรนักเตะ")}
+                  </SelectItem>
+                  <SelectItem value="opponent">
+                    {translate("คู่แข่งนัดถัดไป")}
+                  </SelectItem>
+                  <SelectItem value="latest_points">
+                    {translate("คะแนน GW ล่าสุด")}
+                  </SelectItem>
+                  <SelectItem value="form">{translate("ฟอร์ม")}</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             {hasClientValidationErrors && (
               <>
                 {clientValidationMessages.map((message) => (
@@ -1631,6 +1825,7 @@ export default function TeamClient({
                                   : undefined
                             }
                             showPositionBadgeOnShirt={false}
+                            secondaryInfo={getSquadSecondaryInfo(slot.player)}
                           />
                         ) : (
                           <VacantSquadSlot
@@ -1687,6 +1882,7 @@ export default function TeamClient({
                         swapDisabled={!swappableSlotIds.has(slot.member.slotId)}
                         swapState={getSwapState(slot.member.slotId)}
                         showPositionBadgeOnShirt
+                        secondaryInfo={getSquadSecondaryInfo(slot.player)}
                       />
                     ) : (
                       <VacantSquadSlot
