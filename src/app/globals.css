@@ -3112,9 +3112,20 @@ textarea:focus-visible {
 }
 
 .compact-position-quota-stats {
+  position: relative;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  border-top: 1px solid color-mix(in srgb, var(--paper) 20%, var(--navy));
   border-radius: 0 0 14px 14px;
+}
+
+.compact-position-quota-stats::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 4px;
+  height: 1px;
+  background: color-mix(in srgb, var(--paper) 20%, var(--navy));
+  content: "";
+  pointer-events: none;
 }
 
 @media (width >= 48rem) {
