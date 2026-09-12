@@ -3100,7 +3100,7 @@ textarea:focus-visible {
 .compact-position-quota-stats {
   display: grid;
   margin-inline: 10px;
-  padding: 12px 6px;
+  padding: 8px 6px;
   border-left: 4px solid var(--orange);
   color: var(--paper);
   background: var(--navy);
@@ -3145,8 +3145,8 @@ textarea:focus-visible {
   border-left: 1px solid color-mix(in srgb, var(--paper) 20%, var(--navy));
 }
 
-.compact-transfer-stats span,
-.compact-position-quota-stats span {
+.compact-transfer-stats > div > span,
+.compact-position-quota-stats > div > span {
   color: color-mix(in srgb, var(--paper) 78%, var(--navy));
   font-size: 12px;
   line-height: 1.5;
@@ -3160,6 +3160,10 @@ textarea:focus-visible {
   font-weight: 500;
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
+}
+
+.quota-count-current {
+  color: var(--orange);
 }
 
 .compact-transfer-stats
@@ -3178,16 +3182,8 @@ textarea:focus-visible {
     padding-inline: 2px;
   }
 
-  .compact-position-quota-stats span {
+  .compact-position-quota-stats > div > span {
     font-size: 11px;
-  }
-
-  .compact-transfer-stats strong {
-    font-size: 28px;
-  }
-
-  .compact-position-quota-stats strong {
-    font-size: 20px;
   }
 }
 
@@ -3203,6 +3199,21 @@ textarea:focus-visible {
   font-size: 11px;
   font-weight: 400;
   line-height: 1.2;
+}
+
+@media (width < 80rem) {
+  .compact-transfer-stats > div > span,
+  .compact-position-quota-stats > div > span {
+    font-size: 10px;
+  }
+
+  .compact-transfer-stats strong,
+  .compact-transfer-stats strong.compact-transfer-unlimited,
+  .compact-transfer-stats strong.compact-transfer-overage,
+  .compact-position-quota-stats strong {
+    margin-top: 2px;
+    font-size: 14px;
+  }
 }
 
 .team-squad-guidance {
@@ -3270,7 +3281,6 @@ textarea:focus-visible {
   margin-bottom: 14px;
   display: grid;
   gap: 3px;
-  border-top: 1px solid rgba(189, 67, 6, 0.24);
   color: var(--orange-deep);
 }
 

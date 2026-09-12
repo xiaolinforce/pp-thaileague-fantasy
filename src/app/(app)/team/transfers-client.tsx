@@ -507,7 +507,9 @@ export default function TransfersClient({
             </div>
             <div>
               <span>ต่างชาติ</span>
-              <strong>{foreignPlayers}/7</strong>
+              <strong>
+                <span className="quota-count-current">{foreignPlayers}</span>/7
+              </strong>
             </div>
           </div>
           <div
@@ -516,9 +518,9 @@ export default function TransfersClient({
           >
             {positionQuotaStats.map(({ position, used, limit }) => (
               <div key={position}>
-                <span>{getLocalizedPositionLabel(position, language)}</span>
+                <span>{position}</span>
                 <strong>
-                  {used}/{limit}
+                  <span className="quota-count-current">{used}</span>/{limit}
                 </strong>
               </div>
             ))}
