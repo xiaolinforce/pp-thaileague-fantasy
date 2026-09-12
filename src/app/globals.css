@@ -3955,7 +3955,8 @@ textarea:focus-visible {
   position: absolute;
   z-index: 5;
   top: 50%;
-  left: calc(50% + 42px);
+  left: calc(50% + 38px);
+  padding-inline-start: 4px;
   display: none;
   flex-direction: column;
   align-items: center;
@@ -4106,6 +4107,12 @@ textarea:focus-visible {
     opacity: 1;
     pointer-events: auto;
     transform: none;
+  }
+
+  .squad-token-shell:not(.vacant-squad-token-shell):hover .squad-token-actions,
+  .squad-token-shell:not(.vacant-squad-token-shell):focus-within
+    .squad-token-actions {
+    pointer-events: auto;
   }
 }
 
