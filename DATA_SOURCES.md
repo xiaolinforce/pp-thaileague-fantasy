@@ -141,6 +141,33 @@ active registration IDs. Competition and Fantasy database verification passed.
 Published ranking runs, GW1/GW2 player pools, match statistics, points, team
 selections, and standings were not rewritten.
 
+## 2026-09-12 three-match GW2 review
+
+Owner-approved batch `gw2-sep12-three-matches-20260912` was applied to
+production only for official fixtures `37422`–`37424`: BG Pathum United 3-2
+Rasisalai United, Uthai Thani 1-2 Pattani, and Sisaket United 0-1 Ayutthaya
+United. The atomic import confirmed production branch
+`br-tiny-shape-azrvakql`, stored 224 reviewed player results for the six clubs,
+and recorded 94 confirmed appearances. Players who were registered for a club
+or present in a locked GW2 selection but had no confirmed appearance received
+an explicit zero-minute, zero-point result.
+
+The official Thai League match feeds supplied lineups, substitutions, goals,
+assists, cards, and player identities. AiScore was used to corroborate match
+events and goalkeeper saves. The reviewed save totals are 2-3 in fixture
+`37422`, 3-6 in `37423`, and 2-8 in `37424`; no goalkeeper was substituted.
+Warut Makemusik receives five penalty-save points for stopping Deyvison
+Fernandes, while Deyvison receives minus two penalty-miss points. The official
+identities resolve Vitinho Souza to Julio Vitor Souza Ferreira
+(`2026:62422`), Gue to Ricardo Gue Rosa Cardoso (`2026:62506`), and the Sisaket
+goalkeeper to Steven Van Dijk (`2026:62667`).
+
+Fantasy points use each player's locked Fantasy position. Fixture totals are
+`37422`=64, `37423`=67, and `37424`=75, for 206 player points. No MOTM, bonus,
+or BPS points were added. After the import, the authenticated admin scoring
+action recalculated all 279 locked GW2 team selections. Production verification
+found no selected player from the six clubs without a stored match result.
+
 ## Opening-match review (2026-09-04)
 
 Owner-approved batch `gw1-pattani-bg-20260904` was applied to development and

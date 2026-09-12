@@ -17,6 +17,28 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-09-12 GW2 match scoring
+
+The owner authorized a production-only import for fixtures `37422`, `37423`,
+and `37424`. The transaction asserted Neon production branch
+`br-tiny-shape-azrvakql`, database `neondb`, the expected unplayed fixture
+state, provisional GW2 state, and absence of existing target match statistics.
+A complete rehearsal passed and rolled back before the identical transaction
+was committed.
+
+Production now records the three final scores, 224 reviewed player-stat and
+point rows, 94 confirmed appearances, and explicit zero-minute results for the
+remaining registered or selected players from the six clubs. The three fixture
+point totals are 64, 67, and 75. The batch wrote 224 row-level audit entries and
+one batch audit entry under `gw2-sep12-three-matches-20260912`.
+
+The authenticated admin scoring action then recalculated all 279 locked GW2
+team selections. All scores remain provisional because GW2 is still in
+progress. The resulting Gameweek summary is average 27 and highest 49; the
+stored team totals range from 0 to 49. Post-write SQL verification found no
+selected player from the six clubs without a match result. Development was not
+changed and no application deployment is required.
+
 ## 2026-09-12 official roster reconciliation
 
 Production `br-tiny-shape-azrvakql` was reconciled in one transaction to the
