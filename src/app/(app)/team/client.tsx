@@ -536,11 +536,9 @@ function SquadPlayer({
           </span>
         </button>
         {!hideActions && !actionsDisabled && (
-          <>
+          <span className="squad-token-actions">
             {showCaptainActions && (
-              <span
-                className={`squad-captain-actions${captain ? " squad-captain-actions--with-role" : ""}`}
-              >
+              <>
                 {captain !== "C" && (
                   <button
                     type="button"
@@ -581,7 +579,7 @@ function SquadPlayer({
                     </i>
                   </button>
                 )}
-              </span>
+              </>
             )}
             <button
               type="button"
@@ -603,7 +601,7 @@ function SquadPlayer({
             >
               <Trash2 size={13} aria-hidden="true" />
             </button>
-          </>
+          </span>
         )}
       </div>
     </Localized>

@@ -169,9 +169,10 @@ proven behaviors unless a deliberate product decision replaces them:
   vacancy. Active swap-target selection and market details retain their
   existing interactions. Tablet keeps its established token geometry while
   adopting this compact action behavior.
-- On Desktop (1280px and above), editable occupied-token actions appear only
-  while the token is hovered or contains keyboard focus. Starter tokens add
-  compact captain and vice-captain controls beside the persistent role badge:
+- On Desktop (1280px and above), editable occupied-token actions appear in a
+  vertical column to the right of the player while the token is hovered or
+  contains keyboard focus. Starter tokens add compact captain and vice-captain
+  controls alongside the persistent role badge:
   an unassigned starter exposes both controls, the captain exposes only the
   vice-captain control, and the vice-captain exposes only the captain control.
   Bench tokens never expose captaincy controls. Once the deadline closes, the
