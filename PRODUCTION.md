@@ -37,12 +37,13 @@ forward position, and receives one point for seven minutes. No goalkeeper was
 substituted; the recorded save counts are Kevin Ray Mendoza 1, Wichaya
 Ganthong 2, Wattanachai Srathongjan 1, and Kittipun Saensuk 3.
 
-The authenticated admin scoring action recalculated all 279 locked GW2 team
-selections. Scores remain provisional pending explicit Gameweek finalization.
-The resulting Gameweek summary is average 31 and highest 49; stored team totals
-range from 0 to 49. Post-write verification found no missing result among the
-49 distinct selected player/fixture combinations from the four clubs.
-Development was not changed and no application deployment is required.
+The authenticated admin finalization action recalculated all 279 locked GW2
+team selections and marked every score row final at 2026-09-13 23:06
+Asia/Bangkok. The resulting Gameweek summary is average 31 and highest 49;
+stored team totals range from 0 to 49. GW3 remains open. Post-write verification
+found no missing result among the 49 distinct selected player/fixture
+combinations from the four clubs. Development was not changed and no
+application deployment is required.
 
 ## 2026-09-12 GW2 match scoring
 

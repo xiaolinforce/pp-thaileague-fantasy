@@ -195,10 +195,11 @@ identity `เวโรจน์ ป้อมบุบผา` and receives one po
 Fantasy forward.
 
 Fixture point totals are `37420`=63 and `37421`=69, for 132 player points. No
-MOTM, bonus, or BPS points were added. The authenticated admin scoring action
-recalculated all 279 locked GW2 team selections. Production verification found
-no missing result among the selected player/fixture combinations from the four
-clubs. Development was not changed.
+MOTM, bonus, or BPS points were added. The authenticated admin finalization
+action recalculated all 279 locked GW2 team selections and marked every score
+row final. Production verification found no missing result among the selected
+player/fixture combinations from the four clubs. GW3 remains open and
+development was not changed.
 
 ## Opening-match review (2026-09-04)
 
