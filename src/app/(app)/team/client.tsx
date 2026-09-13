@@ -150,7 +150,8 @@ type PlayerSwapState = "source" | "available" | "unavailable";
 
 type TeamWorkspaceView = "squad" | "market";
 
-type SquadSecondaryDisplay = "club" | "opponent" | "latest_points" | "form";
+type SquadSecondaryDisplay =
+  "club" | "opponent" | "latest_points" | "form" | "popularity";
 
 const SQUAD_SECONDARY_DISPLAY_STORAGE_KEY =
   "thai-fantasy-squad-secondary-display";
@@ -162,7 +163,8 @@ function isSquadSecondaryDisplay(
     value === "club" ||
     value === "opponent" ||
     value === "latest_points" ||
-    value === "form"
+    value === "form" ||
+    value === "popularity"
   );
 }
 
@@ -922,12 +924,17 @@ export default function TeamClient({
                       ? `GW${latestMatch.matchweek}: ${latestMatch.points} ${translate("คะแนน")}`
                       : translate("ยังไม่มีผลการแข่งขัน"),
                   }
-                : {
-                    value: Number.isFinite(player.form)
-                      ? player.form.toFixed(1)
-                      : "—",
-                    title: `${translate("ฟอร์ม")}: ${Number.isFinite(player.form) ? player.form.toFixed(1) : "—"}`,
-                  };
+                : squadSecondaryDisplay === "form"
+                  ? {
+                      value: Number.isFinite(player.form)
+                        ? player.form.toFixed(1)
+                        : "—",
+                      title: `${translate("ฟอร์ม")}: ${Number.isFinite(player.form) ? player.form.toFixed(1) : "—"}`,
+                    }
+                  : {
+                      value: `${player.selected.toFixed(1)}%`,
+                      title: `${translate("ความนิยม")}: ${player.selected.toFixed(1)}%`,
+                    };
         return [[player.fantasyPlayerId, secondaryInfo] as const];
       }),
     );
@@ -1880,6 +1887,9 @@ export default function TeamClient({
                     {translate("คะแนน GW ล่าสุด")}
                   </SelectItem>
                   <SelectItem value="form">{translate("ฟอร์ม")}</SelectItem>
+                  <SelectItem value="popularity">
+                    {translate("ความนิยม")}
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>

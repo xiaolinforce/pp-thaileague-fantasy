@@ -330,6 +330,7 @@ const translations: Record<string, string> = {
   สโมสรนักเตะ: "Player club",
   คู่แข่งนัดถัดไป: "Next opponent",
   "คะแนน GW ล่าสุด": "Latest GW points",
+  ความนิยม: "Popularity",
   สโมสร: "Club",
   ยังไม่มีโปรแกรม: "No fixture yet",
 
