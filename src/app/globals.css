@@ -3646,6 +3646,10 @@ textarea:focus-visible {
   overflow: hidden;
 }
 
+.squad-quota-summary {
+  display: none;
+}
+
 .squad-chip-toolbar {
   margin: 14px 14px 0;
   padding: 12px;
@@ -9179,6 +9183,28 @@ body {
     overflow: visible;
   }
 
+  .team-workspace--squad .squad-card {
+    overflow: visible;
+  }
+
+  .squad-quota-summary {
+    position: sticky;
+    top: calc(var(--compact-topbar-height) + 56px);
+    z-index: 18;
+    display: block;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .squad-quota-summary .compact-transfer-stats {
+    margin: 0 10px;
+  }
+
+  .squad-quota-summary .compact-tier-quota-strip {
+    margin-bottom: 0;
+  }
+
   .compact-market-sticky-controls {
     position: sticky;
     top: calc(var(--compact-topbar-height) + 56px);
@@ -9252,6 +9278,29 @@ body {
 
   .compact-transfer-market {
     overflow: visible;
+  }
+
+  .team-workspace--squad .squad-card {
+    overflow: visible;
+  }
+
+  .squad-quota-summary {
+    position: sticky;
+    top: calc(var(--compact-topbar-height) + 56px);
+    z-index: 18;
+    display: block;
+    padding-block: 8px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+  }
+
+  .squad-quota-summary .compact-transfer-stats {
+    margin: 0 10px;
+    border-radius: 14px;
+  }
+
+  .squad-quota-summary .compact-tier-quota-strip {
+    margin-bottom: 0;
   }
 
   .compact-market-sticky-controls {

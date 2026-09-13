@@ -3,6 +3,7 @@
 import {
   ArrowLeftRight,
   CalendarDays,
+  CircleHelp,
   LoaderCircle,
   History,
   Save,
@@ -64,6 +65,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { toast } from "@/components/ui/sonner";
 import type { FantasyState } from "@/data/fantasy";
 import {
@@ -72,6 +81,7 @@ import {
 } from "@/app/fantasy-actions";
 import {
   getCountedTransfers,
+  getCumulativeTierLimits,
   getTransferUsage,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
@@ -81,6 +91,7 @@ import {
   type LineupPlayer,
   type RuleViolation,
 } from "@/lib/fantasy/rules";
+import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import { getChipOptionState } from "@/lib/fantasy/chip-state";
 import {
   createEmptySquadDraft,
@@ -116,6 +127,9 @@ const competitionPositions: Record<FantasyPosition, CompetitionPosition> = {
   midfielder: "MID",
   forward: "FWD",
 };
+const cumulativeTierLimits = new Map(
+  getCumulativeTierLimits().map(({ level, limit }) => [level, limit]),
+);
 
 function getShortPositionLabel(position: CompetitionPosition) {
   switch (position) {
@@ -1132,6 +1146,39 @@ export default function TeamClient({
       transferCount,
     ],
   );
+  const squadPlayers = squadSlots.flatMap((slot) =>
+    slot.player ? [slot.player] : [],
+  );
+  const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
+  const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
+  const levelTwo = squadPlayers.filter((player) => player.tier === 2).length;
+  const levelThree = squadPlayers.filter((player) => player.tier === 3).length;
+  const topTwoLevels = squadPlayers.filter((player) => player.tier <= 2).length;
+  const topThreeLevels = squadPlayers.filter(
+    (player) => player.tier <= 3,
+  ).length;
+  const tierQuotaDots = buildTierQuotaMeter({
+    1: levelOne,
+    2: levelTwo,
+    3: levelThree,
+  });
+  const isTierQuotaOver =
+    levelOne > (cumulativeTierLimits.get(1) ?? 0) ||
+    topTwoLevels > (cumulativeTierLimits.get(2) ?? 0) ||
+    topThreeLevels > (cumulativeTierLimits.get(3) ?? 0);
+  const tierQuotaSummary = translate(
+    "ใช้ระดับ 1 {level1} คน ระดับ 2 {level2} คน และระดับ 3 {level3} คน",
+  )
+    .replace("{level1}", String(levelOne))
+    .replace("{level2}", String(levelTwo))
+    .replace("{level3}", String(levelThree));
+  const { freeTransfersRemaining, hasUnlimitedTransfers, transferPoints } =
+    transferUsage;
+  const isOverFreeTransferLimit = transferPoints > 0;
+  const unlimitedTransfersLabel =
+    activeChip === "wildcard"
+      ? translate("Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้")
+      : translate("Gameweek แรกที่เริ่มเล่น เปลี่ยนได้ไม่จำกัด");
   const lineupValidationViolations = useMemo(() => {
     const violations = validateLineup(lineupAssignments);
     return hasVacancies
@@ -1642,6 +1689,128 @@ export default function TeamClient({
           className={`unified-team-workspace team-workspace--${workspaceView}`}
         >
           <div className="product-card squad-card">
+            <section
+              className="squad-quota-summary"
+              aria-label={translate("โควต้านักเตะ")}
+            >
+              <div className="compact-transfer-stats">
+                <div>
+                  <span>
+                    {isOverFreeTransferLimit
+                      ? translate("เปลี่ยนเกิน")
+                      : translate("เปลี่ยนฟรีคงเหลือ")}
+                  </span>
+                  <strong
+                    className={
+                      hasUnlimitedTransfers
+                        ? "compact-transfer-unlimited"
+                        : isOverFreeTransferLimit
+                          ? "compact-transfer-overage"
+                          : undefined
+                    }
+                    aria-label={
+                      hasUnlimitedTransfers
+                        ? unlimitedTransfersLabel
+                        : undefined
+                    }
+                    title={
+                      hasUnlimitedTransfers
+                        ? unlimitedTransfersLabel
+                        : undefined
+                    }
+                  >
+                    {hasUnlimitedTransfers
+                      ? "∞"
+                      : isOverFreeTransferLimit
+                        ? translate("-{points} คะแนน").replace(
+                            "{points}",
+                            String(transferPoints),
+                          )
+                        : freeTransfersRemaining}
+                  </strong>
+                </div>
+                <div>
+                  <span>{translate("ต่างชาติ")}</span>
+                  <strong>
+                    <span className="quota-count-current">
+                      {foreignPlayers}
+                    </span>
+                    /{THAI_LEAGUE_FANTASY_RULES.foreignPlayerLimit}
+                  </strong>
+                </div>
+              </div>
+              <div
+                className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
+              >
+                <div className="compact-tier-quota-heading">
+                  <span>{translate("โควต้านักเตะระดับ 1-3")}</span>
+                  <Popover>
+                    <PopoverTrigger
+                      className="compact-tier-quota-info"
+                      aria-label={translate("ดูวิธีนับโควต้าระดับ")}
+                    >
+                      <CircleHelp size={16} aria-hidden="true" />
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="compact-tier-quota-popover"
+                      align="start"
+                      side="bottom"
+                      sideOffset={7}
+                    >
+                      <PopoverHeader>
+                        <PopoverTitle>
+                          {translate("โควต้านักเตะระดับ 1-3")}
+                        </PopoverTitle>
+                        <PopoverDescription>
+                          {[1, 2, 3].map((level) => (
+                            <span key={level}>
+                              {translate(
+                                level === 1
+                                  ? "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน"
+                                  : "ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน",
+                              )
+                                .replace("{level}", String(level))
+                                .replace(
+                                  "{count}",
+                                  String(cumulativeTierLimits.get(level) ?? 0),
+                                )}
+                              {level < 3 && <br />}
+                            </span>
+                          ))}
+                        </PopoverDescription>
+                      </PopoverHeader>
+                    </PopoverContent>
+                  </Popover>
+                  {isTierQuotaOver && (
+                    <strong className="compact-tier-quota-warning">
+                      {translate("เกินโควต้า")}
+                    </strong>
+                  )}
+                </div>
+                <div
+                  className="compact-tier-quota-dots"
+                  role="status"
+                  aria-live="polite"
+                  aria-atomic="true"
+                >
+                  <span className="sr-only">
+                    {tierQuotaSummary}
+                    {isTierQuotaOver ? `, ${translate("เกินโควต้า")}` : ""}
+                  </span>
+                  <span
+                    className="compact-tier-quota-dot-track"
+                    aria-hidden="true"
+                  >
+                    {tierQuotaDots.map((tierLevel, index) => (
+                      <span
+                        className={`compact-tier-quota-dot${tierLevel ? ` compact-tier-quota-dot--${tierLevel}` : ""}`}
+                        key={index}
+                      />
+                    ))}
+                  </span>
+                </div>
+              </div>
+            </section>
             <section
               className="squad-chip-toolbar"
               aria-label={translate("ตัวช่วยพิเศษ")}
