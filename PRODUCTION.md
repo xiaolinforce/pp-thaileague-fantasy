@@ -17,6 +17,33 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-09-13 GW2 match scoring
+
+The owner authorized a production-only import for fixtures `37420` and
+`37421`: Chonburi 2-3 Rayong and PT Prachuap 1-0 Sukhothai. The transaction
+asserted Neon production branch `br-tiny-shape-azrvakql`, database `neondb`,
+the expected unplayed fixture state, provisional GW2 state, and absence of
+existing target match statistics. A complete rehearsal passed and rolled back
+before the identical transaction was committed.
+
+Production now records 184 reviewed player-stat and point rows, 63 confirmed
+appearances, and explicit zero-minute results for every other registered or
+locked-selection player from the four clubs. Fixture point totals are 63 and 69. The batch wrote 184 row-level audit entries and one batch audit entry under
+`gw2-sep13-two-matches-20260913`.
+
+The import retained every existing Fantasy position. Official registration
+`2026:3627` remains displayed as `เวโรจน์ ป้อมบุบผา`, retains his Fantasy
+forward position, and receives one point for seven minutes. No goalkeeper was
+substituted; the recorded save counts are Kevin Ray Mendoza 1, Wichaya
+Ganthong 2, Wattanachai Srathongjan 1, and Kittipun Saensuk 3.
+
+The authenticated admin scoring action recalculated all 279 locked GW2 team
+selections. Scores remain provisional pending explicit Gameweek finalization.
+The resulting Gameweek summary is average 31 and highest 49; stored team totals
+range from 0 to 49. Post-write verification found no missing result among the
+49 distinct selected player/fixture combinations from the four clubs.
+Development was not changed and no application deployment is required.
+
 ## 2026-09-12 GW2 match scoring
 
 The owner authorized a production-only import for fixtures `37422`, `37423`,

@@ -168,6 +168,38 @@ or BPS points were added. After the import, the authenticated admin scoring
 action recalculated all 279 locked GW2 team selections. Production verification
 found no selected player from the six clubs without a stored match result.
 
+## 2026-09-13 two-match GW2 review
+
+Owner-approved batch `gw2-sep13-two-matches-20260913` was applied to
+production only for [Chonburi 2-3 Rayong (`37420`)](https://thaileague.co.th/fixtures/224/match/37420?selectedTab=live&optaSeasonId=2026)
+and [PT Prachuap 1-0 Sukhothai (`37421`)](https://thaileague.co.th/fixtures/224/match/37421?selectedTab=live&optaSeasonId=2026).
+The official Thai League match feeds supplied lineups, substitutions, goals,
+assists, cards, player identities, and goalkeeper saves. FotMob corroborated
+the event sequence and player-level save totals. No goalkeeper was substituted.
+
+The goal sequence in `37420` is Renan Gorne assisted by Joao Felipe, Anon
+Amornlerdsak assisted by Bruno Leite, Stenio Junior assisted by Jorge Fellipe,
+an unassisted Dennis Murillo goal, and an unassisted Hong-Gyu Yeo goal. Renan
+also received a straight red card. In `37421`, Edgar Mendez scored the only
+goal from a penalty with no assist; the earlier VAR penalty review for Taua was
+cancelled and produces no Fantasy event. The reviewed goalkeeper saves are
+Kevin Ray Mendoza 1, Wichaya Ganthong 2, Wattanachai Srathongjan 1, and
+Kittipun Saensuk 3.
+
+The import stored 184 player results and 63 appearances. Players registered
+for a participating club or present in a locked GW2 selection but without a
+confirmed appearance received an explicit zero-minute, zero-point result.
+Fantasy points use the existing locked Fantasy positions; no player position
+was changed. Official registration `2026:3627` remains the approved site
+identity `เวโรจน์ ป้อมบุบผา` and receives one point for seven minutes as a
+Fantasy forward.
+
+Fixture point totals are `37420`=63 and `37421`=69, for 132 player points. No
+MOTM, bonus, or BPS points were added. The authenticated admin scoring action
+recalculated all 279 locked GW2 team selections. Production verification found
+no missing result among the selected player/fixture combinations from the four
+clubs. Development was not changed.
+
 ## Opening-match review (2026-09-04)
 
 Owner-approved batch `gw1-pattani-bg-20260904` was applied to development and
