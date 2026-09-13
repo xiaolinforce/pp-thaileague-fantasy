@@ -156,7 +156,12 @@ export async function getFantasyState(): Promise<FantasyState> {
   const baselineMembers = openingGameweek
     ? []
     : baselineInput && isFantasySelectionInput(baselineInput)
-      ? baselineInput.members
+      ? baselineInput.members.map((member) => ({
+          fantasyPlayerId: member.fantasyPlayerId,
+          lineupRole: member.lineupRole,
+          benchOrder: member.benchOrder,
+          captainRole: member.captainRole,
+        }))
       : null;
 
   const chipRows = await db

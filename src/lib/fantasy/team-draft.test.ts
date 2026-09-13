@@ -10,12 +10,46 @@ import {
   fillPreferredOrFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
   getValidDraftSwapTargetSlotIds,
+  haveSameSelectionMembers,
   pruneRemovedDraftPlayers,
   removePlayerFromDraft,
   restoreRemovedPlayerToDraft,
   swapDraftLineupMembers,
   type DraftLineupMember,
 } from "./team-draft.ts";
+
+test("compares only editable selection fields regardless of snapshot metadata or order", () => {
+  const current = [
+    {
+      fantasyPlayerId: "player-1",
+      lineupRole: "starter" as const,
+      benchOrder: null,
+      captainRole: "captain" as const,
+    },
+    {
+      fantasyPlayerId: "player-2",
+      lineupRole: "bench" as const,
+      benchOrder: 0,
+      captainRole: "none" as const,
+    },
+  ];
+  const openingSnapshot = current.toReversed().map((member) => ({
+    ...member,
+    clubIdSnapshot: "club-1",
+    positionSnapshot: "goalkeeper",
+    tierSnapshot: 2,
+    isThaiSnapshot: true,
+  }));
+
+  assert.equal(haveSameSelectionMembers(current, openingSnapshot), true);
+  assert.equal(
+    haveSameSelectionMembers(current, [
+      { ...current[0], captainRole: "none" },
+      current[1],
+    ]),
+    false,
+  );
+});
 
 test("creates an empty 15-slot opening draft with a valid 4-4-2 shape", () => {
   const draft = createEmptySquadDraft();

@@ -21,6 +21,27 @@ export type CompleteSelectionMember = Omit<
   fantasyPlayerId: string;
 };
 
+export function haveSameSelectionMembers(
+  left: readonly CompleteSelectionMember[],
+  right: readonly CompleteSelectionMember[],
+) {
+  if (left.length !== right.length) return false;
+
+  const rightByPlayerId = new Map(
+    right.map((member) => [member.fantasyPlayerId, member]),
+  );
+  if (rightByPlayerId.size !== right.length) return false;
+
+  return left.every((member) => {
+    const matchingMember = rightByPlayerId.get(member.fantasyPlayerId);
+    return (
+      matchingMember?.lineupRole === member.lineupRole &&
+      matchingMember.benchOrder === member.benchOrder &&
+      matchingMember.captainRole === member.captainRole
+    );
+  });
+}
+
 export type RemovedDraftPlayer = {
   fantasyPlayerId: string;
   captainRole: CaptainRole;

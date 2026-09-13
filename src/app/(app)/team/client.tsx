@@ -86,6 +86,7 @@ import {
   createEmptySquadDraft,
   getCompleteSelectionMembers,
   getValidDraftSwapTargetSlotIds,
+  haveSameSelectionMembers,
   pruneRemovedDraftPlayers,
   removePlayerFromDraft,
   restoreRemovedPlayerToDraft,
@@ -1198,12 +1199,14 @@ export default function TeamClient({
     [members],
   );
   const hasUnsavedChanges =
-    JSON.stringify(draftSelectionMembers) !== JSON.stringify(savedMembers) ||
+    !haveSameSelectionMembers(draftSelectionMembers, savedMembers) ||
     activeChip !== fantasy.selection.activeChip;
   const hasSavedChanges =
     fantasy.selection.baselineMembers !== null &&
-    (JSON.stringify(savedMembers) !==
-      JSON.stringify(fantasy.selection.baselineMembers) ||
+    (!haveSameSelectionMembers(
+      savedMembers,
+      fantasy.selection.baselineMembers,
+    ) ||
       fantasy.selection.activeChip !== fantasy.selection.baselineActiveChip);
   const canRevertTeam =
     isEditable &&
