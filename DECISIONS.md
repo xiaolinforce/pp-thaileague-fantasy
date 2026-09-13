@@ -7,9 +7,10 @@ not a changelog or a place for short-lived implementation notes.
 ## 2026-09-12 — Suppress verified Facebook native-bridge noise
 
 **Decision:** Discard a browser error before Sentry ingestion only when its
-Facebook in-app-browser user agent, every exception message, and every stack
-frame identify the verified native navigation bridge. Keep and classify events
-with a missing stack, a mixed exception chain, or any application frame.
+Facebook in-app-browser user agent and every exception message match the
+verified native navigation bridge, and every exception includes an injected
+`app://` bridge frame. Keep and classify events with no verified bridge frame
+or a mixed exception chain.
 
 **Context:** Nine days of production evidence across multiple application
 releases showed the recurring `postMessage` and `messageHandlers` groups only
@@ -19,10 +20,11 @@ path or a user-visible failure.
 
 **Consequences:** Pure injected Android and iOS bridge failures no longer create
 or reopen Sentry issues. The filter uses an explicit message allowlist and a
-bridge-only stack requirement; new variants and any event connected to
-application code remain visible for investigation. This narrows the retention
-choice in the 2026-09-03 monitoring decision using subsequent production
-evidence.
+verified source-frame requirement; it does not trust Sentry's `in_app` flag,
+which also marks Facebook's injected frames, and it permits caller frames below
+that source. New variants and mixed application exceptions remain visible for
+investigation. This narrows the retention choice in the 2026-09-03 monitoring
+decision using subsequent production evidence.
 
 ## 2026-09-11 — Reminder audiences are server-owned and previewed read-only
 

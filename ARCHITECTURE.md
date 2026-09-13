@@ -135,9 +135,9 @@ database instrumentation, so its query text and parameters are replaced while
 the chained database cause and stack locations remain available. Recognized
 Facebook native-bridge errors receive `error_origin=facebook_browser_bridge`.
 An event is discarded only when every exception matches a verified bridge
-message and every stack frame belongs to Facebook's injected `app://`
-navigation logger. Missing stacks, mixed errors, and any application frame
-remain observable.
+message and includes a frame from Facebook's injected `app://` navigation
+logger. Sentry's `in_app` classification and caller frames do not determine the
+exception source. Missing bridge frames and mixed errors remain observable.
 
 Team deadline labels are formatted once on the server in both supported
 languages and serialized into the Client Component. This avoids depending on

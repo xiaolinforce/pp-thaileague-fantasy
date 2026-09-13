@@ -96,9 +96,10 @@ for the same privacy rule.
 Keep the shared Sentry privacy hooks enabled in Browser, Node and Edge configs.
 SDK data-collection switches alone do not scrub SQL parameters embedded in
 exception messages. `test:observability` checks redaction and the strict
-Facebook bridge-noise boundary: only verified bridge messages whose complete
-stack contains injected `app://` frames are dropped. Missing stacks, mixed
-exceptions, and application frames remain reportable.
+Facebook bridge-noise boundary: only verified bridge messages whose exception
+stacks each contain an injected `app://` frame are dropped. Sentry may mark
+those injected frames as `in_app` and may retain application callers below the
+error source. Missing bridge frames and mixed exceptions remain reportable.
 `test:maintenance` exercises the actual Drizzle HTTP batch through a fake
 transport (including failure propagation), without loading `.env.local` or
 contacting Neon.

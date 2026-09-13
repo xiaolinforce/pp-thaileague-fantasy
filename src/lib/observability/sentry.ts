@@ -99,19 +99,14 @@ const facebookBridgeMessages = new Set([
 const facebookBridgeFrame =
   /^app:\/\/(?:\/|navigation_performance_logger_android(?:$|[/?#]))/;
 
-function hasOnlyFacebookBridgeFrames(event: Event): boolean {
+function hasFacebookBridgeFramePerException(event: Event): boolean {
   const exceptions = event.exception?.values ?? [];
   return (
     exceptions.length > 0 &&
     exceptions.every((exception) => {
       const frames = exception.stacktrace?.frames ?? [];
-      return (
-        frames.length > 0 &&
-        frames.every(
-          (frame) =>
-            frame.in_app !== true &&
-            facebookBridgeFrame.test(frame.filename ?? ""),
-        )
+      return frames.some((frame) =>
+        facebookBridgeFrame.test(frame.filename ?? ""),
       );
     })
   );
@@ -136,8 +131,10 @@ export function prepareBrowserSentryEvent<T extends Event>(
     : event;
   const clean = scrubSentryEvent(classified);
 
-  // Production evidence shows these exact errors are injected by Facebook's
-  // native navigation logger. Require a complete bridge-only stack before
-  // dropping one so missing or mixed application frames remain observable.
-  return isFacebookBridge && hasOnlyFacebookBridgeFrames(clean) ? null : clean;
+  // Sentry can mark injected app:// frames as in-app and can retain the caller
+  // below them. The exact message plus a verified bridge frame establishes the
+  // error source; missing bridge frames and mixed exception chains stay visible.
+  return isFacebookBridge && hasFacebookBridgeFramePerException(clean)
+    ? null
+    : clean;
 }

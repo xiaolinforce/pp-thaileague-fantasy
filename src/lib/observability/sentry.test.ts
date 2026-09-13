@@ -139,7 +139,9 @@ test("drops a verified iOS bridge-only failure only in Facebook", () => {
         {
           value:
             "undefined is not an object (evaluating 'window.webkit.messageHandlers[e].postMessage')",
-          stacktrace: { frames: [{ filename: "app:///:1", lineno: 697 }] },
+          stacktrace: {
+            frames: [{ filename: "app:///:1", lineno: 697, in_app: true }],
+          },
         },
       ],
     },
@@ -168,6 +170,7 @@ test("drops a verified Android bridge-only failure", () => {
                 {
                   filename:
                     "app://navigation_performance_logger_android/index.js",
+                  in_app: true,
                 },
               ],
             },
@@ -180,7 +183,7 @@ test("drops a verified Android bridge-only failure", () => {
   assert.equal(clean, null);
 });
 
-test("keeps bridge errors with any application frame", () => {
+test("drops an exact bridge failure when application callers follow its source", () => {
   const clean = prepareBrowserSentryEvent<Event>(
     {
       exception: {
@@ -189,7 +192,31 @@ test("keeps bridge errors with any application frame", () => {
             value: "Error invoking postMessage: Java object is gone",
             stacktrace: {
               frames: [
-                { filename: "app://navigation_performance_logger_android" },
+                {
+                  filename: "app://navigation_performance_logger_android",
+                  in_app: true,
+                },
+                { filename: "/_next/static/chunks/app.js", in_app: true },
+              ],
+            },
+          },
+        ],
+      },
+    },
+    "Mozilla/5.0 [FB_IAB/FB4A;]",
+  );
+  assert.equal(clean, null);
+});
+
+test("keeps an exact bridge message without a verified bridge frame", () => {
+  const clean = prepareBrowserSentryEvent<Event>(
+    {
+      exception: {
+        values: [
+          {
+            value: "Error invoking postMessage: Java object is gone",
+            stacktrace: {
+              frames: [
                 { filename: "/_next/static/chunks/app.js", in_app: true },
               ],
             },
@@ -200,5 +227,5 @@ test("keeps bridge errors with any application frame", () => {
     "Mozilla/5.0 [FB_IAB/FB4A;]",
   );
   assert.equal(clean?.tags?.error_origin, "facebook_browser_bridge");
-  assert.equal(clean?.exception?.values?.[0]?.stacktrace?.frames?.length, 2);
+  assert.equal(clean?.exception?.values?.[0]?.stacktrace?.frames?.length, 1);
 });
