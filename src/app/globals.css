@@ -10719,6 +10719,54 @@ body {
   background: var(--orange);
 }
 
+@media (width >= 48rem) {
+  [data-slot="dialog-content"].league-standings-dialog {
+    max-width: 500px;
+  }
+
+  .league-overall-standings-dialog .league-table-scroll {
+    border-top: 0;
+  }
+
+  .league-overall-standings-dialog [data-slot="dialog-header"] {
+    position: relative;
+    z-index: 3;
+    background: var(--paper);
+    /* Cover fractional-pixel seams above the sticky cells while scrolling. */
+    box-shadow: 0 2px 0 var(--paper);
+  }
+
+  .league-overall-standings-dialog .league-standings-table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  .league-overall-standings-dialog .league-standings-table thead {
+    background: #faf9f7;
+  }
+
+  .league-overall-standings-dialog .league-standings-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  .league-overall-standings-dialog .league-standings-table th:nth-child(1),
+  .league-overall-standings-dialog .league-standings-table td:nth-child(1) {
+    padding-left: 16px;
+  }
+
+  .league-overall-standings-dialog .league-standings-table th:nth-child(3),
+  .league-overall-standings-dialog .league-standings-table td:nth-child(3) {
+    padding-right: 16px;
+  }
+
+  .league-overall-standings-dialog .league-standings-table tbody td,
+  .league-overall-standings-dialog .league-standings-table tbody th {
+    font-size: 16px;
+  }
+}
+
 .league-row-action,
 .league-text-action,
 .league-danger-action {
