@@ -13,6 +13,7 @@ import {
   markStaleDeadlineBatchUncertain,
   sendNextDeadlineBatch,
 } from "@/lib/email/deadline-campaign-service";
+import { sendAdminDeadlineTest } from "@/lib/email/deadline-admin-test";
 
 function destination(gameweekNumber: number, audience: string, notice: string) {
   const query = new URLSearchParams({
@@ -59,6 +60,36 @@ export async function createDeadlineCampaignAction(formData: FormData) {
     // The admin page shows only a bounded error; no recipient data enters logs.
   }
   redirect(destination(week.number, audience, notice));
+}
+
+export async function sendAdminDeadlineTestAction(formData: FormData) {
+  const admin = await requireAdmin();
+  const context = await getAdminContext();
+  const week = context.weeks.find(
+    (item) => item.id === formData.get("gameweekId"),
+  );
+  const audience = parseDeadlineAudience(
+    String(formData.get("audience") ?? ""),
+  );
+  let notice = "test-error";
+  if (week) {
+    try {
+      const result = await sendAdminDeadlineTest({
+        adminUserId: admin.user.id,
+        gameweekId: week.id,
+        confirmation: String(formData.get("confirmation") ?? ""),
+      });
+      notice =
+        result.kind === "accepted"
+          ? "test-accepted"
+          : result.kind === "uncertain"
+            ? "test-uncertain"
+            : "test-error";
+    } catch {
+      // Never reveal the administrator's address or provider details to the page.
+    }
+  }
+  redirect(destination(week?.number ?? 1, audience, notice));
 }
 
 export async function sendDeadlineBatchAction(formData: FormData) {

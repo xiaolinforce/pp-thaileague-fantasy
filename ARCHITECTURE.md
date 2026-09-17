@@ -79,7 +79,10 @@ manual batch. Server-only delivery rechecks member/email/opt-out/deadline state,
 uses Resend idempotency keys, and stores status without plaintext recipient
 addresses. Signed unsubscribe links and verified Resend webhooks update
 preferences, suppressions, and delivery status. The separate Production-only
-feature gate is off by default and does not affect OTP routing.
+feature gate is off by default and does not affect OTP routing. A separate
+admin-only self-test reuses the production sender and signed opt-out path but
+addresses only the signed-in administrator's freshly verified email; it does
+not create a campaign or require the bulk-send gate.
 
 ## Route model
 

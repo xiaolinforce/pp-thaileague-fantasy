@@ -3,7 +3,10 @@ import { LockKeyhole, MailCheck } from "lucide-react";
 import { getAdminDeadlineReminderPreview } from "@/data/admin-deadline-reminders";
 import { renderDeadlineReminderEmail } from "@/emails/render-deadline-reminder";
 import { getDeadlineCampaignSummary } from "@/lib/email/deadline-campaign-service";
-import { reminderReadiness } from "@/lib/email/deadline-delivery";
+import {
+  reminderReadiness,
+  reminderTestReadiness,
+} from "@/lib/email/deadline-delivery";
 import { getReminderDeadlineLabels } from "@/lib/fantasy/deadline-presentation";
 
 import {
@@ -16,6 +19,7 @@ import { AdminDate, Empty } from "../server-components";
 import {
   createDeadlineCampaignAction,
   markStaleDeadlineBatchAction,
+  sendAdminDeadlineTestAction,
   sendDeadlineBatchAction,
 } from "./actions";
 import adminStyles from "../admin.module.css";
@@ -62,6 +66,7 @@ export default async function DeadlineRemindersPage({
     ? await getDeadlineCampaignSummary(data.targetWeek.id, data.audience)
     : null;
   const readiness = reminderReadiness();
+  const testReadiness = reminderTestReadiness();
   const canPrepare =
     data.targetWeek?.status === "open" &&
     data.targetWeek.deadlineAt.getTime() > new Date(data.generatedAt).getTime();
@@ -78,6 +83,11 @@ export default async function DeadlineRemindersPage({
     "send-error": "ส่งไม่สำเร็จ ตรวจสถานะและผู้ให้บริการก่อนลองอีกครั้ง",
     "stale-reviewed":
       "ย้ายรายการที่ค้างเป็นสถานะไม่แน่ชัดแล้ว ห้ามส่งซ้ำโดยไม่ตรวจผู้ให้บริการ",
+    "test-accepted":
+      "Resend รับอีเมลทดสอบแล้ว ตรวจกล่องจดหมายและลิงก์ยกเลิกก่อนส่งจริง",
+    "test-uncertain":
+      "ผลทดสอบไม่แน่ชัด ตรวจ Resend ก่อนลองอีกครั้ง เพื่อป้องกันอีเมลซ้ำ",
+    "test-error": "ส่งอีเมลทดสอบไม่สำเร็จ ตรวจ Resend และการตั้งค่าก่อนส่งจริง",
     invalid: "คำขอไม่ถูกต้อง",
   };
 
@@ -114,6 +124,44 @@ export default async function DeadlineRemindersPage({
         <p className={styles.operationNotice} role="status">
           {noticeText[notice]}
         </p>
+      ) : null}
+
+      {canPrepare && testReadiness.ready ? (
+        <section className={adminStyles.panel} aria-labelledby="test-heading">
+          <h2 id="test-heading">ทดสอบส่งถึงผู้ดูแล</h2>
+          <p className={adminStyles.hint}>
+            ส่งอีเมลจริงไปยังที่อยู่ที่ยืนยันแล้วของบัญชีผู้ดูแลที่ล็อกอินอยู่
+            ไม่สร้างชุดผู้รับและไม่ส่งถึงสมาชิก
+          </p>
+          <form
+            action={sendAdminDeadlineTestAction}
+            className={styles.sendForm}
+          >
+            <input
+              type="hidden"
+              name="gameweekId"
+              value={data.targetWeek!.id}
+            />
+            <input type="hidden" name="audience" value={data.audience} />
+            <label htmlFor="test-confirmation">
+              <AdminName th="พิมพ์" en="Type" /> TEST GW
+              {data.targetWeek!.number}{" "}
+              <AdminName
+                th="เพื่อส่งทดสอบหนึ่งฉบับ"
+                en="to send one test email"
+              />
+            </label>
+            <input
+              id="test-confirmation"
+              name="confirmation"
+              autoComplete="off"
+              required
+            />
+            <button type="submit" className={styles.secondaryAction}>
+              ส่งอีเมลทดสอบให้ตัวเอง
+            </button>
+          </form>
+        </section>
       ) : null}
 
       <section className={adminStyles.panel} aria-labelledby="audience-heading">

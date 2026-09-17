@@ -147,8 +147,12 @@ below are complete. Committing or deploying code does not send any reminder.
    `https://fantasy.ppfootball.net/api/webhooks/resend-reminders` covering
    `email.delivered`, `email.bounced`, `email.complained`, `email.suppressed`,
    and `email.failed`. Check the signed endpoint, unsubscribe page, and
-   one-click POST from a controlled test address. Keep `AUTH_EMAIL_HASH_SECRET`
-   stable; changing it invalidates frozen email hashes.
+   one-click POST from a controlled test address. The Admin page can send one
+   real `[TEST]` email only to the signed-in admin's freshly verified address,
+   without creating a recipient campaign or requiring the bulk-send gate.
+   Check that message's provider status, Reply-To, signed unsubscribe page,
+   and one-click behavior before enabling the bulk-send gate. Keep
+   `AUTH_EMAIL_HASH_SECRET` stable; changing it invalidates frozen email hashes.
 4. Review the Production audience count and preview. Default is previous-GW
    explicit complete save without a target-GW save; Guest, bot, unverified,
    unsubscribed, and locally suppressed members are excluded. Confirm recipient
@@ -169,8 +173,8 @@ below are complete. Committing or deploying code does not send any reminder.
    metadata only as long as operationally necessary and handle deletion
    requests under the privacy policy.
 
-GW3's example deadline of 16 September 2026 has passed as of this note; this
-workflow will refuse to create or send a GW3 campaign after its deadline.
+Always read the live Gameweek deadline from the Production Admin preview.
+The workflow refuses to create or send a campaign after that deadline.
 
 Mailjet sender `*@auth.ppfootball.net` is Active. Vercel DNS hosts its separate
 Mailjet ownership TXT, `mailjet._domainkey.auth` DKIM and `auth` SPF records;

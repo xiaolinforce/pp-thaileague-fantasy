@@ -443,7 +443,9 @@ The `/admin/fantasy/reminders` page reads the deployment's `DATABASE_URL`, lets
 an admin choose the target Gameweek and an allowlisted audience, and renders at
 most 50 masked candidates plus the shared bilingual preview. Verify the
 environment badge before treating totals as Production counts. A campaign
-snapshot is a database write; manual five-recipient sends require a Production
+snapshot is a database write. The administrator can send a single controlled
+`TEST GWn` message to their own verified address before opening bulk delivery.
+Manual five-recipient sends require a Production
 deployment, the reminder-specific feature gate and secrets, a matching `SEND GWn`
 confirmation, and a pre-send review checkbox. Never use a development/Preview
 recipient count as the basis for a Production send. `src/lib/email` owns the

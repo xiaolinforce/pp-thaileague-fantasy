@@ -21,12 +21,10 @@ export function reminderSiteOrigin() {
   return origin;
 }
 
-export function reminderReadiness() {
+export function reminderTestReadiness() {
   const missing: string[] = [];
   if (process.env.VERCEL_ENV !== "production")
     missing.push("Production deployment");
-  if (process.env.REMINDER_SEND_ENABLED !== "true")
-    missing.push("REMINDER_SEND_ENABLED=true");
   if (!process.env.REMINDER_RESEND_API_KEY)
     missing.push("REMINDER_RESEND_API_KEY");
   if (
@@ -48,6 +46,14 @@ export function reminderReadiness() {
   return { ready: missing.length === 0, missing };
 }
 
+export function reminderReadiness() {
+  const test = reminderTestReadiness();
+  const missing = [...test.missing];
+  if (process.env.REMINDER_SEND_ENABLED !== "true")
+    missing.push("REMINDER_SEND_ENABLED=true");
+  return { ready: missing.length === 0, missing };
+}
+
 export type ReminderProviderResult =
   | { kind: "accepted"; messageId: string }
   | { kind: "failed"; errorCode: string }
@@ -58,7 +64,7 @@ export async function sendDeadlineReminderWithResend(input: {
   email: RenderedDeadlineReminderEmail;
   unsubscribePostUrl: string;
   idempotencyKey: string;
-  recipientId: string;
+  recipientId?: string;
 }): Promise<ReminderProviderResult> {
   const apiKey = process.env.REMINDER_RESEND_API_KEY;
   const from = process.env.REMINDER_EMAIL_FROM;
@@ -84,7 +90,9 @@ export async function sendDeadlineReminderWithResend(input: {
           "List-Unsubscribe": `<${input.unsubscribePostUrl}>`,
           "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
         },
-        tags: [{ name: "reminder_recipient", value: input.recipientId }],
+        ...(input.recipientId
+          ? { tags: [{ name: "reminder_recipient", value: input.recipientId }] }
+          : {}),
       }),
       signal: AbortSignal.timeout(8000),
     });

@@ -81,6 +81,16 @@ export const adminTranslations: Record<string, string> = {
     "Sending failed. Review the campaign and provider before trying again.",
   "ย้ายรายการที่ค้างเป็นสถานะไม่แน่ชัดแล้ว ห้ามส่งซ้ำโดยไม่ตรวจผู้ให้บริการ":
     "Stale claims are now uncertain. Do not resend without checking the provider.",
+  "Resend รับอีเมลทดสอบแล้ว ตรวจกล่องจดหมายและลิงก์ยกเลิกก่อนส่งจริง":
+    "Resend accepted the test email. Check your inbox and unsubscribe link before the live send.",
+  "ผลทดสอบไม่แน่ชัด ตรวจ Resend ก่อนลองอีกครั้ง เพื่อป้องกันอีเมลซ้ำ":
+    "The test outcome is uncertain. Check Resend before retrying to avoid duplicates.",
+  "ส่งอีเมลทดสอบไม่สำเร็จ ตรวจ Resend และการตั้งค่าก่อนส่งจริง":
+    "The test email failed. Check Resend and configuration before the live send.",
+  ทดสอบส่งถึงผู้ดูแล: "Send an administrator test",
+  "ส่งอีเมลจริงไปยังที่อยู่ที่ยืนยันแล้วของบัญชีผู้ดูแลที่ล็อกอินอยู่ ไม่สร้างชุดผู้รับและไม่ส่งถึงสมาชิก":
+    "Sends a real email to the signed-in administrator's verified address. It does not create a recipient snapshot or send to members.",
+  ส่งอีเมลทดสอบให้ตัวเอง: "Send a test email to myself",
   คำขอไม่ถูกต้อง: "Invalid request.",
   "บันทึกทีมครบใน GW ก่อนหน้า แต่ยังไม่บันทึก GW นี้":
     "Saved a complete squad in the previous GW, but not this GW",

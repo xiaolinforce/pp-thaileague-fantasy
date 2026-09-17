@@ -157,8 +157,9 @@ they do not read the database or send email.
 
 Authorized admins can also open `/admin/fantasy/reminders` to choose a
 Gameweek and a built-in audience, inspect privacy-masked candidates from that
-deployment's database, and preview the shared bilingual message. This
-The page can freeze a recipient snapshot and, after explicit confirmation,
+deployment's database, and preview the shared bilingual message. The page
+can send one controlled test to the signed-in admin's verified address,
+then freeze a recipient snapshot and, after explicit confirmation,
 send up to five reminders per click. Sending is disabled unless the Production
 deployment has `REMINDER_SEND_ENABLED=true` and all required sender/webhook
 secrets. It never uses cron. Use the Production deployment for Production counts;
