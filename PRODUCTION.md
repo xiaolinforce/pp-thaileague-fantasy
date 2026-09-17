@@ -120,7 +120,19 @@ within their five-minute lifetime.
 
 ## Transactional email operations (2026-09-04)
 
-### Manual lineup reminders (not yet activated)
+### Manual lineup reminders
+
+GW3 operational record (18 September 2026, Bangkok): the Production
+`previous-unsaved` audience was frozen at 16 eligible members. An admin-only
+app self-test to the owner's verified address was delivered; its Reply-To and
+signed unsubscribe confirmation page were checked. The live one-click POST
+was not exercised to avoid opting the owner out; token verification passed
+local tests and the POST route was code-reviewed. Four manually confirmed
+batches (5 + 5 + 5 + 1) reached 16 `delivered` webhook statuses, with zero
+pending, skipped, failed, uncertain, bounced, complained, or suppressed rows
+at the final check. The Resend account showed no provider suppressions before
+the send. `REMINDER_SEND_ENABLED` was set back to `false` in Production config;
+verify the new deployment is promoted before treating bulk sending as disabled.
 
 Migration `0022` adds recipient snapshots, opt-out/suppression state, and
 delivery/webhook audit. Do not enable `REMINDER_SEND_ENABLED` until all steps
