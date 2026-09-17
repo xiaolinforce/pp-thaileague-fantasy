@@ -2,7 +2,7 @@ import { LockKeyhole, MailCheck } from "lucide-react";
 
 import { getAdminDeadlineReminderPreview } from "@/data/admin-deadline-reminders";
 import { renderDeadlineReminderEmail } from "@/emails/render-deadline-reminder";
-import { getDeadlineLabels } from "@/lib/fantasy/deadline-presentation";
+import { getReminderDeadlineLabels } from "@/lib/fantasy/deadline-presentation";
 
 import { AdminHeading, AdminLocalized, AdminUrlSelect } from "../components";
 import { AdminDate, Empty } from "../server-components";
@@ -30,18 +30,17 @@ export default async function DeadlineRemindersPage({
   const selectedAudience = data.audienceOptions.find(
     (option) => option.id === data.audience,
   );
-  const sampleTeamName = data.recipients[0]?.team_name ?? "ทีมตัวอย่าง";
   const siteOrigin = getSiteOrigin();
   const deadlineLabels = data.targetWeek
-    ? getDeadlineLabels(data.targetWeek.deadlineAt.toISOString())
+    ? getReminderDeadlineLabels(data.targetWeek.deadlineAt.toISOString())
     : null;
   const rendered =
     data.targetWeek && deadlineLabels
       ? await renderDeadlineReminderEmail({
-          teamName: sampleTeamName,
           gameweekNumber: data.targetWeek.number,
-          deadlineTh: `${deadlineLabels.th} น. (เวลาไทย)`,
-          deadlineEn: `${deadlineLabels.en} (Bangkok time)`,
+          deadlineTh: deadlineLabels.th,
+          deadlineEn: deadlineLabels.en,
+          brandLogoUrl: `${siteOrigin}/logo.png`,
           teamUrl: `${siteOrigin}/team`,
           unsubscribeUrl: `${siteOrigin}/email/unsubscribe?preview=1`,
         })
@@ -243,7 +242,7 @@ export default async function DeadlineRemindersPage({
             <div>
               <h2 id="email-preview-heading">Preview เนื้อหาอีเมล</h2>
               <p className={adminStyles.hint}>
-                ใช้ทีมแรกในรายชื่อเป็นตัวอย่าง โดยไม่เปิดเผยอีเมลเต็ม
+                แสดงข้อความที่จะใช้กับทุกคนในกลุ่ม โดยไม่เปิดเผยอีเมลเต็ม
               </p>
             </div>
           </div>
@@ -258,10 +257,6 @@ export default async function DeadlineRemindersPage({
                 <div>
                   <dt>Inbox preview</dt>
                   <dd data-localize="off">{rendered.previewText}</dd>
-                </div>
-                <div>
-                  <dt>ทีมตัวอย่าง</dt>
-                  <dd data-localize="off">{sampleTeamName}</dd>
                 </div>
               </dl>
               <div className={styles.previewViewport}>

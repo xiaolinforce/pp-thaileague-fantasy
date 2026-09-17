@@ -4,6 +4,23 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-17 — Reminder body is shared across recipients
+
+**Decision:** Use the existing PP logo and two-line Thai League Fantasy lockup
+at the top of the email. Remove the team-name-specific introduction and the
+repeated lineup checklist in both languages. Keep one Gameweek and deadline
+block with Thai primary text and secondary English text, plus the action and
+unsubscribe information.
+
+**Context:** The owner reviewed the GW3 preview and requested a simpler message
+that matches the application sidebar branding. A long or auto-generated team
+name should not dominate the reminder.
+
+**Consequences:** The email template no longer accepts a team name. It requires
+an absolute logo URL so email clients can fetch the existing public asset, while
+the adjacent brand text remains readable if images are blocked. Admin preview
+shows the same content for every recipient in the selected audience.
+
 ## 2026-09-12 — Suppress verified Facebook native-bridge noise
 
 **Decision:** Discard a browser error before Sentry ingestion only when its
@@ -38,7 +55,7 @@ keep the workflow read-only until delivery safeguards exist.
 
 **Context:** Weekly sends are owner-triggered rather than scheduled, but the
 owner needs a repeatable way to inspect Production-derived recipients and the
-personalized bilingual message before sending. Ad hoc criteria may still be
+bilingual message before sending. Ad hoc criteria may still be
 requested in chat and must be turned into a separately reviewed snapshot.
 
 **Consequences:** `/admin/fantasy/reminders` reads the database configured for
@@ -62,9 +79,9 @@ and occasional custom criteria supplied by the owner. Establishing and reviewing
 the message contract first avoids coupling copy and layout decisions to Production
 access or irreversible delivery.
 
-**Consequences:** `src/emails` owns presentation and accepts explicit team,
-Gameweek, deadline, destination, and unsubscribe values. Local commands provide a
-live React Email view and ignored review artifacts. A later phase must add the
+**Consequences:** `src/emails` owns presentation and accepts explicit Gameweek,
+deadline, brand image, destination, and unsubscribe values. Local commands
+provide a live React Email view and ignored review artifacts. A later phase must add the
 authenticated admin workflow, Production-backed recipient preview, unsubscribe
 state, idempotent delivery/audit, and a separate confirmation before any send.
 

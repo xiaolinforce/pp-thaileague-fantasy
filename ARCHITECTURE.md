@@ -75,8 +75,9 @@ under `src/emails` receive explicit values, perform no database or provider acce
 and can be inspected through React Email or rendered to ignored local artifacts.
 The role-protected `/admin/fantasy/reminders` route reads audience candidates
 server-side from the deployment's configured database, sends only masked addresses
-to the rendered page, and combines one sample team with the same deterministic
-template. It does not persist a recipient snapshot or call an email provider.
+to the rendered page, and renders the same deterministic, non-personalized
+bilingual template for the selected Gameweek. It does not persist a recipient
+snapshot or call an email provider.
 Unsubscribe persistence, provider suppression filtering, idempotent sending, and
 delivery audit remain future server-only/admin responsibilities.
 

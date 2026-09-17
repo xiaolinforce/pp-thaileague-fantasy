@@ -17,19 +17,31 @@ test("renders aligned Thai-first and English reminder content", async () => {
   assert.match(rendered.html, /<html[^>]+lang="th"/);
   assert.match(rendered.html, /<body[^>]+lang="th"/);
   assert.ok(
-    rendered.html.indexOf("ถึงเวลาตรวจทีมของคุณ") <
-      rendered.html.indexOf("Time to review your lineup"),
+    rendered.html.indexOf("อย่าลืมจัดทีมแฟนตาซีของคุณ") <
+      rendered.html.indexOf("Fantasy lineup"),
   );
-  assert.match(rendered.html, /คลองเตย ยูไนเต็ด/);
-  assert.match(rendered.html, /ศ\.ที่ 11 ก\.ย\. 16:30 น\. \(เวลาไทย\)/);
-  assert.match(rendered.html, /11 Sep 2026, 16:30 \(Bangkok time\)/);
+  assert.match(rendered.html, /THAI LEAGUE/);
+  assert.match(rendered.html, /FANTASY/);
+  assert.match(rendered.html, /https:\/\/fantasy\.ppfootball\.net\/logo\.png/);
+  assert.match(rendered.html, /alt="PP"/);
+  assert.match(rendered.html, /ศุกร์ที่ 11 ก\.ย\. 16:30 น\./);
+  assert.match(rendered.html, /Fri 11 Sep 2026, 16:30 \(Bangkok time\)/);
+  assert.equal(rendered.html.match(/GW02/g)?.length, 1);
+  assert.match(rendered.html, />Deadline<\/p>/);
+  assert.doesNotMatch(rendered.html, /Deadline จัดทีม|Lineup deadline/);
+  assert.ok(
+    rendered.html.indexOf("ศุกร์ที่ 11 ก.ย. 16:30 น.") <
+      rendered.html.indexOf("Fri 11 Sep 2026, 16:30"),
+  );
   assert.match(rendered.html, /https:\/\/fantasy\.ppfootball\.net\/team/);
   assert.match(
     rendered.html,
     /https:\/\/fantasy\.ppfootball\.net\/email\/unsubscribe\?token=preview/,
   );
-  assert.match(rendered.text, /กัปตันและรองกัปตัน/);
-  assert.match(rendered.text, /Captain and vice-captain/);
+  assert.match(rendered.text, /อย่าลืมจัดทีมแฟนตาซีของคุณ/);
+  assert.match(rendered.text, /Don't forget to set your Fantasy lineup/i);
+  assert.match(rendered.text, /ศุกร์ที่ 11 ก\.ย\. 16:30 น\./);
+  assert.match(rendered.text, /Fri 11 Sep 2026, 16:30 \(Bangkok time\)/);
   assert.match(
     rendered.text,
     /ไปจัดทีม \/ Manage team https:\/\/fantasy\.ppfootball\.net\/team/,
@@ -40,14 +52,26 @@ test("renders aligned Thai-first and English reminder content", async () => {
   );
 });
 
-test("escapes private team names in rendered HTML", async () => {
-  const rendered = await renderDeadlineReminderEmail({
-    ...deadlineReminderPreviewProps,
-    teamName: '<script>alert("team")</script>',
-  });
+test("omits team-specific prose and the redundant checklist in both languages", async () => {
+  const rendered = await renderDeadlineReminderEmail(
+    deadlineReminderPreviewProps,
+  );
 
-  assert.doesNotMatch(rendered.html, /<script>alert/);
-  assert.match(rendered.html, /&lt;script&gt;/);
+  assert.doesNotMatch(rendered.html, /คลองเตย ยูไนเต็ด/);
+  assert.doesNotMatch(rendered.html, /ถึงเวลาตรวจทีมของคุณ/);
+  assert.doesNotMatch(rendered.html, /Time to review your lineup/);
+  assert.doesNotMatch(rendered.html, /ก่อนบันทึกทีม อย่าลืมตรวจ/);
+  assert.doesNotMatch(rendered.html, /Before saving, check your/);
+  assert.doesNotMatch(rendered.text, /ผู้เล่นตัวจริงและลำดับตัวสำรอง/);
+  assert.doesNotMatch(rendered.text, /Starting eleven and bench order/);
+  assert.doesNotMatch(
+    rendered.html,
+    /การเปลี่ยนแปลงจะมีผลเมื่อบันทึกทีมสำเร็จเท่านั้น|Changes apply only after your team is saved successfully/,
+  );
+  assert.doesNotMatch(
+    rendered.text,
+    /การเปลี่ยนแปลงจะมีผลเมื่อบันทึกทีมสำเร็จเท่านั้น|Changes apply only after your team is saved successfully/,
+  );
 });
 
 test("keeps inbox preview text concise", () => {

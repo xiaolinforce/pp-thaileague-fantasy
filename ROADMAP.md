@@ -12,7 +12,7 @@
   local React Email preview and deterministic HTML/plain-text rendering.
 - Admin-only, read-only deadline-reminder review with Gameweek selection,
   three server-owned audience definitions, masked recipient candidates, and a
-  personalized bilingual preview from the deployment's configured database.
+  shared bilingual preview from the deployment's configured database.
 - Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.

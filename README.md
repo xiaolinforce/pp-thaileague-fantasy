@@ -157,7 +157,7 @@ they do not read the database or send email.
 
 Authorized admins can also open `/admin/fantasy/reminders` to choose a
 Gameweek and a built-in audience, inspect privacy-masked candidates from that
-deployment's database, and preview the personalized bilingual message. This
+deployment's database, and preview the shared bilingual message. This
 Phase 2 screen is read-only: it does not persist a recipient snapshot or send
 email. Use the Production deployment for Production counts; local and Preview
 deployments read their own configured `DATABASE_URL`.

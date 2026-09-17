@@ -104,9 +104,8 @@ export const adminTranslations: Record<string, string> = {
   ไม่ได้กดบันทึก: "Not explicitly saved",
   ไม่พบสมาชิกที่ตรงเงื่อนไขกลุ่มนี้: "No members match this audience.",
   "Preview เนื้อหาอีเมล": "Email content preview",
-  "ใช้ทีมแรกในรายชื่อเป็นตัวอย่าง โดยไม่เปิดเผยอีเมลเต็ม":
-    "Uses the first team in the list as the example without exposing a full email address.",
-  ทีมตัวอย่าง: "Example team",
+  "แสดงข้อความที่จะใช้กับทุกคนในกลุ่ม โดยไม่เปิดเผยอีเมลเต็ม":
+    "Shows the message for everyone in this audience without exposing full email addresses.",
   ตัวอย่างอีเมลเตือนจัดทีมสองภาษา: "Bilingual lineup reminder email preview",
   "ลิงก์ยกเลิกใน preview เป็น placeholder และจะสร้างแยกสำหรับผู้รับแต่ละคนก่อนเปิดส่งจริง":
     "The preview unsubscribe link is a placeholder and will be generated per recipient before delivery is enabled.",

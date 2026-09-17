@@ -1,33 +1,33 @@
 import {
   Body,
   Button,
+  Column,
   Container,
   Head,
   Heading,
-  Hr,
   Html,
+  Img,
   Preview,
+  Row,
   Section,
   Text,
 } from "react-email";
 
 export type DeadlineReminderEmailProps = {
-  teamName: string;
   gameweekNumber: number;
   deadlineTh: string;
   deadlineEn: string;
+  brandLogoUrl: string;
   teamUrl: string;
   unsubscribeUrl: string;
 };
 
 const colors = {
-  orange: "#f56617",
   orangeDeep: "#bd4306",
   orangeSoft: "#fff0e5",
   navy: "#151d24",
   ink: "#182026",
   muted: "#687078",
-  line: "#e7e4df",
   warm: "#f6f4f0",
   paper: "#ffffff",
 };
@@ -44,20 +44,20 @@ export function deadlineReminderPreviewText(gameweekNumber: number) {
 }
 
 export const deadlineReminderPreviewProps: DeadlineReminderEmailProps = {
-  teamName: "คลองเตย ยูไนเต็ด",
   gameweekNumber: 2,
-  deadlineTh: "ศ.ที่ 11 ก.ย. 16:30 น. (เวลาไทย)",
-  deadlineEn: "11 Sep 2026, 16:30 (Bangkok time)",
+  deadlineTh: "ศุกร์ที่ 11 ก.ย. 16:30 น.",
+  deadlineEn: "Fri 11 Sep 2026, 16:30 (Bangkok time)",
+  brandLogoUrl: "https://fantasy.ppfootball.net/logo.png",
   teamUrl: "https://fantasy.ppfootball.net/team",
   unsubscribeUrl:
     "https://fantasy.ppfootball.net/email/unsubscribe?token=preview",
 };
 
 export default function DeadlineReminderEmail({
-  teamName,
   gameweekNumber,
   deadlineTh,
   deadlineEn,
+  brandLogoUrl,
   teamUrl,
   unsubscribeUrl,
 }: DeadlineReminderEmailProps) {
@@ -70,58 +70,44 @@ export default function DeadlineReminderEmail({
       <Body lang="th" style={body}>
         <Container style={container}>
           <Section style={brandBar}>
-            <Text style={brandMark}>PP</Text>
-            <Text style={brandName}>PP Thai League Fantasy</Text>
+            <Row>
+              <Column style={brandMark}>
+                <Img
+                  src={brandLogoUrl}
+                  alt="PP"
+                  width="44"
+                  height="21"
+                  style={brandLogo}
+                />
+              </Column>
+              <Column style={brandCopy}>
+                <Text lang="en" style={brandName}>
+                  THAI LEAGUE
+                </Text>
+                <Text lang="en" style={brandFantasy}>
+                  FANTASY
+                </Text>
+              </Column>
+            </Row>
           </Section>
 
           <Section style={content}>
             <Section lang="th">
               <Text style={gameweekPill}>{gameweekLabel}</Text>
               <Heading as="h1" style={heading}>
-                ถึงเวลาตรวจทีมของคุณ
+                อย่าลืมจัดทีมแฟนตาซีของคุณ
               </Heading>
-              <Text style={intro}>
-                ทีม <strong>{teamName}</strong> ยังปรับตัวจริง ตัวสำรอง กัปตัน
-                การย้ายทีม และชิปได้ก่อน Deadline
+              <Text lang="en" style={englishSubheading}>
+                Don&apos;t forget to set your Fantasy lineup
               </Text>
 
               <Section style={deadlinePanel}>
-                <Text style={deadlineLabel}>Deadline จัดทีม</Text>
+                <Text style={deadlineLabel}>Deadline</Text>
                 <Text style={deadlineValue}>{deadlineTh}</Text>
+                <Text lang="en" style={deadlineSecondary}>
+                  {deadlineEn}
+                </Text>
               </Section>
-
-              <Text style={checklistTitle}>ก่อนบันทึกทีม อย่าลืมตรวจ</Text>
-              <Text style={checklistItem}>
-                • ผู้เล่นตัวจริงและลำดับตัวสำรอง
-              </Text>
-              <Text style={checklistItem}>• กัปตันและรองกัปตัน</Text>
-              <Text style={checklistItem}>• การย้ายทีมและชิปที่ต้องการใช้</Text>
-            </Section>
-
-            <Hr style={divider} />
-
-            <Section lang="en">
-              <Text style={gameweekPill}>{gameweekLabel}</Text>
-              <Heading as="h2" style={englishHeading}>
-                Time to review your lineup
-              </Heading>
-              <Text style={intro}>
-                You can still update the starters, bench order, captaincy,
-                transfers, and chip for <strong>{teamName}</strong> before the
-                deadline.
-              </Text>
-
-              <Section style={englishDeadlinePanel}>
-                <Text style={englishDeadlineLabel}>Lineup deadline</Text>
-                <Text style={englishDeadlineValue}>{deadlineEn}</Text>
-              </Section>
-
-              <Text style={checklistTitle}>Before saving, check your</Text>
-              <Text style={checklistItem}>
-                • Starting eleven and bench order
-              </Text>
-              <Text style={checklistItem}>• Captain and vice-captain</Text>
-              <Text style={checklistItem}>• Transfers and active chip</Text>
             </Section>
 
             <Section style={actionSection}>
@@ -129,12 +115,6 @@ export default function DeadlineReminderEmail({
                 <span lang="th">ไปจัดทีม</span> /{" "}
                 <span lang="en">Manage team</span>
               </Button>
-              <Text lang="th" style={actionHint}>
-                การเปลี่ยนแปลงจะมีผลเมื่อบันทึกทีมสำเร็จเท่านั้น
-              </Text>
-              <Text lang="en" style={actionHintEnglish}>
-                Changes apply only after your team is saved successfully.
-              </Text>
             </Section>
           </Section>
 
@@ -198,28 +178,39 @@ const brandBar = {
 };
 
 const brandMark = {
-  backgroundColor: colors.orange,
-  borderRadius: "10px",
-  color: colors.paper,
-  display: "inline-block",
-  fontFamily,
-  fontSize: "18px",
-  fontWeight: "700",
-  lineHeight: "36px",
-  margin: "0 12px 0 0",
-  textAlign: "center" as const,
+  verticalAlign: "middle" as const,
   width: "44px",
+};
+
+const brandLogo = {
+  display: "block",
+  height: "21px",
+  width: "44px",
+};
+
+const brandCopy = {
+  paddingLeft: "11px",
+  verticalAlign: "middle" as const,
 };
 
 const brandName = {
   color: colors.paper,
-  display: "inline-block",
   fontFamily,
-  fontSize: "17px",
-  fontWeight: "600",
-  lineHeight: "36px",
+  fontSize: "14px",
+  fontWeight: "900",
+  letterSpacing: "0.08em",
+  lineHeight: "1.1",
   margin: "0",
-  verticalAlign: "top",
+};
+
+const brandFantasy = {
+  color: "#ff9b62",
+  fontFamily,
+  fontSize: "12px",
+  fontWeight: "800",
+  letterSpacing: "0.28em",
+  lineHeight: "1.1",
+  margin: "5px 0 0",
 };
 
 const content = {
@@ -248,26 +239,21 @@ const heading = {
   fontWeight: "700",
   letterSpacing: "-0.02em",
   lineHeight: "1.35",
-  margin: "0 0 12px",
+  margin: "0",
 };
 
-const englishHeading = {
-  ...heading,
-  fontSize: "26px",
-};
-
-const intro = {
-  color: colors.ink,
+const englishSubheading = {
+  color: colors.muted,
   fontFamily,
-  fontSize: "16px",
-  lineHeight: "1.7",
-  margin: "0 0 22px",
+  fontSize: "14px",
+  lineHeight: "1.5",
+  margin: "5px 0 22px",
 };
 
 const deadlinePanel = {
   backgroundColor: colors.navy,
   borderRadius: "14px",
-  margin: "0 0 24px",
+  margin: "0",
   padding: "18px 20px",
 };
 
@@ -288,55 +274,16 @@ const deadlineValue = {
   margin: "0",
 };
 
-const englishDeadlinePanel = {
-  backgroundColor: colors.orangeSoft,
-  borderRadius: "14px",
-  margin: "0 0 24px",
-  padding: "18px 20px",
-};
-
-const englishDeadlineLabel = {
-  color: colors.orangeDeep,
+const deadlineSecondary = {
+  color: "#cbd2d7",
   fontFamily,
-  fontSize: "13px",
-  fontWeight: "600",
-  margin: "0 0 3px",
-};
-
-const englishDeadlineValue = {
-  color: colors.ink,
-  fontFamily,
-  fontSize: "19px",
-  fontWeight: "700",
-  lineHeight: "1.45",
-  margin: "0",
-};
-
-const checklistTitle = {
-  color: colors.ink,
-  fontFamily,
-  fontSize: "15px",
-  fontWeight: "700",
-  margin: "0 0 8px",
-};
-
-const checklistItem = {
-  color: colors.muted,
-  fontFamily,
-  fontSize: "15px",
-  lineHeight: "1.6",
-  margin: "3px 0",
-};
-
-const divider = {
-  borderColor: colors.line,
-  borderStyle: "solid",
-  borderWidth: "1px 0 0",
-  margin: "30px 0",
+  fontSize: "14px",
+  lineHeight: "1.5",
+  margin: "4px 0 0",
 };
 
 const actionSection = {
-  margin: "30px 0 0",
+  margin: "28px 0 0",
   textAlign: "center" as const,
 };
 
@@ -354,19 +301,6 @@ const button = {
   textAlign: "center" as const,
   textDecoration: "none",
   width: "100%",
-};
-
-const actionHint = {
-  color: colors.muted,
-  fontFamily,
-  fontSize: "13px",
-  lineHeight: "1.6",
-  margin: "12px 0 0",
-};
-
-const actionHintEnglish = {
-  ...actionHint,
-  margin: "0",
 };
 
 const footer = {
