@@ -4,6 +4,28 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-17 — Lineup reminders require a frozen, manually approved campaign
+
+**Decision:** Default to members who explicitly saved a complete previous-GW
+team but have not saved the target GW. Keep the three broader allowlisted
+audiences available to admins. Freeze eligible user IDs and salted email hashes
+in a campaign, prevent more than one reminder per user/GW across campaigns,
+and send at most five messages per explicit admin confirmation. Recheck
+eligibility and the deadline before each send. Use a separate Production-only
+feature gate, signed one-click opt-out, Resend idempotency keys, and verified
+delivery/bounce/complaint/suppression webhooks. Never auto-retry ambiguous
+results or schedule reminders.
+
+**Context:** The owner wants to start sending to recently engaged users while
+minimizing unwanted mail, duplicate delivery, and interference with OTP email.
+Provider acceptance and a paid plan cannot guarantee inbox placement.
+
+**Consequences:** Migration `0022` and sender-domain/webhook setup must precede
+Production activation. Recipient email remains server-only and is not stored in
+campaign rows. The admin page reports acceptance separately from delivery;
+unknown outcomes require a manual provider check. A broader audience or custom
+recipient rule still needs explicit owner review before delivery.
+
 ## 2026-09-17 — Reminder body is shared across recipients
 
 **Decision:** Use the existing PP logo and two-line Thai League Fantasy lockup

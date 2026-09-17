@@ -18,5 +18,9 @@
   "0021_needy_black_tom": {
     "sha256": "6d63e27f9295c71662d284d5dd088b5f5b22438553aebc8b29d47812d68d162d",
     "compatibility": "app-first"
+  },
+  "0022_dizzy_quentin_quire": {
+    "sha256": "1f20f2d9242d81add744cca59eb55e5eb1dcab2e8ec6215b7af2831370d7889a",
+    "compatibility": "compatible"
   }
 }

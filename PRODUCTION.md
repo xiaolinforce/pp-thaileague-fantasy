@@ -120,6 +120,58 @@ within their five-minute lifetime.
 
 ## Transactional email operations (2026-09-04)
 
+### Manual lineup reminders (not yet activated)
+
+Migration `0022` adds recipient snapshots, opt-out/suppression state, and
+delivery/webhook audit. Do not enable `REMINDER_SEND_ENABLED` until all steps
+below are complete. Committing or deploying code does not send any reminder.
+
+1. Confirm the intended Neon branch ID and backup/recovery point. Apply the
+   reviewed compatible migration to development first, verify the admin page,
+   then apply it to Production before deploying code that reads the new tables.
+   Production's recorded Neon branch is `br-tiny-shape-azrvakql`; verify it
+   again immediately before the migration. Never run `db:migrate` against an
+   unconfirmed connection string.
+2. Use a dedicated verified reminder sender/domain or subdomain in Resend,
+   separate from `no-reply@auth.ppfootball.net`. Check Resend's current DKIM/SPF
+   verification and a valid DMARC policy, correct branded HTTPS site URL,
+   working `REMINDER_REPLY_TO`, and account quota/headroom. A paid plan or
+   verified DNS does not guarantee inbox delivery. A separate API key in the
+   same Resend account does not separate account-wide quotas; use a separate
+   account if that isolation is needed. Do not change the OTP sender or its
+   Resend/Mailjet fallback.
+3. Configure a dedicated `REMINDER_RESEND_API_KEY`, `REMINDER_EMAIL_FROM`,
+   `REMINDER_REPLY_TO`, a strong separate `REMINDER_UNSUBSCRIBE_SECRET`, and
+   `RESEND_REMINDER_WEBHOOK_SECRET` in
+   Production only. Register a Resend webhook for
+   `https://fantasy.ppfootball.net/api/webhooks/resend-reminders` covering
+   `email.delivered`, `email.bounced`, `email.complained`, `email.suppressed`,
+   and `email.failed`. Check the signed endpoint, unsubscribe page, and
+   one-click POST from a controlled test address. Keep `AUTH_EMAIL_HASH_SECRET`
+   stable; changing it invalidates frozen email hashes.
+4. Review the Production audience count and preview. Default is previous-GW
+   explicit complete save without a target-GW save; Guest, bot, unverified,
+   unsubscribed, and locally suppressed members are excluded. Confirm recipient
+   expectation and applicable privacy/legal basis. Reconcile historical
+   provider suppressions before the first campaign; local suppression rows are
+   populated only from webhooks received after this feature is deployed.
+5. Only after all checks, set `REMINDER_SEND_ENABLED=true` in Production and
+   redeploy. Create the campaign snapshot on the Production admin page, verify
+   its count, then use the `SEND GWn` confirmation and review checkbox for each
+   five-recipient batch. No cron exists. Watch provider acceptance, delivery,
+   bounces, complaints, suppressions, and account quotas after each batch.
+   `accepted` means Resend accepted the API request, not inbox placement.
+   Stop if the deadline passes, complaint/bounce rates rise, or an `uncertain`
+   or stale `sending` row appears. Check Resend by message ID before any manual
+   recovery; this workflow intentionally does not auto-retry ambiguous sends.
+6. To halt future batches, set `REMINDER_SEND_ENABLED=false` and redeploy.
+   This does not recall messages already accepted by Resend. Retain campaign
+   metadata only as long as operationally necessary and handle deletion
+   requests under the privacy policy.
+
+GW3's example deadline of 16 September 2026 has passed as of this note; this
+workflow will refuse to create or send a GW3 campaign after its deadline.
+
 Mailjet sender `*@auth.ppfootball.net` is Active. Vercel DNS hosts its separate
 Mailjet ownership TXT, `mailjet._domainkey.auth` DKIM and `auth` SPF records;
 Mailjet's DNS check reports SPF/DKIM OK. Existing Resend and support-forwarding

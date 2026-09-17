@@ -60,6 +60,53 @@ export const adminTranslations: Record<string, string> = {
   ผู้ดูแลระบบ: "Administrator",
   ผู้เล่นและทีม: "Participants & teams",
   อีเมลเตือนจัดทีม: "Lineup reminder email",
+  "เลือกกลุ่มผู้รับ ตรวจรายชื่อและเนื้อหา แล้วส่งเองทีละชุดหลังยืนยัน":
+    "Choose an audience, review recipients and content, then confirm each manual batch",
+  ส่งอีเมลแบบกดเอง: "Manual email delivery",
+  "ไม่มี cron หรือการส่งอัตโนมัติ ต้องบันทึกชุดผู้รับ ตรวจ preview และยืนยันทีละชุดก่อนส่ง ระบบหยุดส่งเมื่อเลย Deadline":
+    "No cron or automatic sends. Save the recipient snapshot, review the preview, and confirm each batch. Sending stops at the deadline.",
+  "บันทึกชุดผู้รับแล้ว ตรวจจำนวนก่อนส่ง":
+    "Recipient snapshot saved. Review the count before sending.",
+  ชุดผู้รับนี้ถูกบันทึกไว้แล้ว: "This recipient snapshot already exists.",
+  "สร้างชุดผู้รับไม่สำเร็จ ตรวจสถานะ Gameweek และลองใหม่":
+    "Could not create the snapshot. Check the Gameweek and try again.",
+  "ส่งชุดย่อยเสร็จแล้ว ตรวจสถานะก่อนส่งชุดถัดไป":
+    "Batch finished. Review its status before sending the next batch.",
+  "ผู้ให้บริการจำกัดอัตราส่ง รอตรวจโควตาก่อนกดส่งอีกครั้ง":
+    "Provider rate limit reached. Check quota before sending again.",
+  "ผลการส่งไม่แน่ชัด หยุดส่งชุดนี้และตรวจผู้ให้บริการก่อน":
+    "Sending outcome is uncertain. Stop and check the provider first.",
+  ไม่มีผู้รับที่รอส่งในชุดนี้: "No pending recipients remain in this campaign.",
+  "ส่งไม่สำเร็จ ตรวจสถานะและผู้ให้บริการก่อนลองอีกครั้ง":
+    "Sending failed. Review the campaign and provider before trying again.",
+  "ย้ายรายการที่ค้างเป็นสถานะไม่แน่ชัดแล้ว ห้ามส่งซ้ำโดยไม่ตรวจผู้ให้บริการ":
+    "Stale claims are now uncertain. Do not resend without checking the provider.",
+  คำขอไม่ถูกต้อง: "Invalid request.",
+  "บันทึกทีมครบใน GW ก่อนหน้า แต่ยังไม่บันทึก GW นี้":
+    "Saved a complete squad in the previous GW, but not this GW",
+  "เฉพาะสมาชิกที่กดบันทึกทีมครบ 15 คนใน Gameweek ก่อนหน้า และยังไม่ได้กดบันทึกทีมของ Gameweek ที่จะเตือน":
+    "Members who explicitly saved a complete 15-player squad in the previous Gameweek and have not saved their team for the target Gameweek.",
+  ยกเลิกการแจ้งเตือน: "Unsubscribed",
+  ถูกระงับการส่ง: "Suppressed",
+  ชุดส่งอีเมล: "Email campaign",
+  "รายชื่อถูกตรึงไว้ตอนสร้างชุดส่ง แต่ระบบจะตรวจสิทธิ์ อีเมล การยกเลิก และการบันทึกทีมซ้ำก่อนส่งแต่ละฉบับ":
+    "Recipients are frozen at snapshot time. Eligibility, email, unsubscribe state, and team save are checked again before each send.",
+  "มีผลไม่แน่ชัด ต้องตรวจ Resend และให้ผู้ดูแลแก้ไขสถานะก่อนส่งต่อ":
+    "An uncertain result requires Resend review and an administrator's status correction before sending continues.",
+  การส่งยังปิดอยู่: "Sending is disabled",
+  "ส่ง 5 รายถัดไป": "Send next 5 recipients",
+  "ตรวจ DNS/โดเมนส่ง ลิงก์ยกเลิก และความคาดหวังของผู้รับแล้ว":
+    "I have checked sender DNS/domain, unsubscribe links, and recipient expectations.",
+  "หากค้างเกิน 2 นาที ให้ตรวจ Resend ก่อน แล้วทำเครื่องหมายเป็น":
+    "If a claim remains for over 2 minutes, check Resend first, then mark it as",
+  รายการนี้จะไม่ถูกส่งซ้ำ:
+    "These recipients will not be retried automatically.",
+  ทำเครื่องหมายรายการค้าง: "Mark stale claims uncertain",
+  "จะบันทึกเฉพาะผู้รับที่ตรงเงื่อนไขตอนนี้ โดยไม่เก็บอีเมลเต็มในชุดส่ง":
+    "Only currently eligible recipients will be saved. The campaign does not store full email addresses.",
+  สร้างชุดผู้รับ: "Create recipient snapshot",
+  "Gameweek นี้ยังไม่เปิดหรือเลย Deadline แล้ว จึงสร้างชุดส่งไม่ได้":
+    "This Gameweek is not open or its deadline has passed, so no campaign can be created.",
   "เลือกกลุ่มผู้รับจากข้อมูลสมาชิก แล้วตรวจรายชื่อและเนื้อหาก่อนเปิดการส่งจริง":
     "Select an audience from member data, then review recipients and content before delivery is enabled",
   "Phase 2 · ตรวจสอบเท่านั้น": "Phase 2 · Review only",

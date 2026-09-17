@@ -1,5 +1,11 @@
 export const deadlineAudienceOptions = [
   {
+    id: "previous-unsaved",
+    label: "บันทึกทีมครบใน GW ก่อนหน้า แต่ยังไม่บันทึก GW นี้",
+    description:
+      "เฉพาะสมาชิกที่กดบันทึกทีมครบ 15 คนใน Gameweek ก่อนหน้า และยังไม่ได้กดบันทึกทีมของ Gameweek ที่จะเตือน",
+  },
+  {
     id: "previous-complete",
     label: "บันทึกทีมครบใน GW ก่อนหน้า",
     description:
@@ -21,7 +27,7 @@ export const deadlineAudienceOptions = [
 
 export type DeadlineAudienceId = (typeof deadlineAudienceOptions)[number]["id"];
 
-export const defaultDeadlineAudience: DeadlineAudienceId = "previous-complete";
+export const defaultDeadlineAudience: DeadlineAudienceId = "previous-unsaved";
 
 export function parseDeadlineAudience(value: string): DeadlineAudienceId {
   return (

@@ -64,7 +64,7 @@ open.
 | `/admin/fantasy`              | Admin overview with season-team counts and pending operations.                              |
 | `/admin/fantasy/participants` | Team directory, read-only details at `/[id]`, and Gameweek player points at `/[id]/points`. |
 | `/admin/fantasy/gameweeks`    | Gameweek status, locking, and finalization.                                                 |
-| `/admin/fantasy/reminders`    | Read-only recipient selection and bilingual deadline-email preview.                         |
+| `/admin/fantasy/reminders`    | Admin-only recipient preview, frozen campaign, and guarded manual batches.                  |
 | `/admin/fantasy/optimal-team` | Best possible legal team from each completed Gameweek's results.                            |
 | `/admin/fantasy/matches`      | Fixture-scoped player statistics and corrections.                                           |
 | `/admin/fantasy/players`      | Current player search, effective tiers and Thai status.                                     |
@@ -158,9 +158,13 @@ they do not read the database or send email.
 Authorized admins can also open `/admin/fantasy/reminders` to choose a
 Gameweek and a built-in audience, inspect privacy-masked candidates from that
 deployment's database, and preview the shared bilingual message. This
-Phase 2 screen is read-only: it does not persist a recipient snapshot or send
-email. Use the Production deployment for Production counts; local and Preview
-deployments read their own configured `DATABASE_URL`.
+The page can freeze a recipient snapshot and, after explicit confirmation,
+send up to five reminders per click. Sending is disabled unless the Production
+deployment has `REMINDER_SEND_ENABLED=true` and all required sender/webhook
+secrets. It never uses cron. Use the Production deployment for Production counts;
+local and Preview deployments read their own configured `DATABASE_URL` and
+cannot send reminders. See `PRODUCTION.md` for the rollout checklist; committing
+this code alone does not migrate Production or turn on sending.
 
 ## Quality checks
 

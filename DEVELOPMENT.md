@@ -439,14 +439,15 @@ counts with `npm run db:report:participants`. Full mutation/scoring scenarios
 still require a confirmed disposable development branch; do not lock a real
 Gameweek or change player stats merely to capture UI evidence.
 
-The `/admin/fantasy/reminders` page is a read-only exception to the mutation
-workflow. It reads the current deployment's `DATABASE_URL`, lets an admin choose
-the target Gameweek and one of the allowlisted audiences, and renders at most 50
-masked recipient candidates plus a personalized email preview. Verify the
-environment badge before treating its totals as Production counts. The route
-must not expose full email addresses to the browser or gain a send action until
-unsubscribe state, provider suppression filtering, a frozen recipient snapshot,
-idempotency, and delivery audit are implemented.
+The `/admin/fantasy/reminders` page reads the deployment's `DATABASE_URL`, lets
+an admin choose the target Gameweek and an allowlisted audience, and renders at
+most 50 masked candidates plus the shared bilingual preview. Verify the
+environment badge before treating totals as Production counts. A campaign
+snapshot is a database write; manual five-recipient sends require a Production
+deployment, the reminder-specific feature gate and secrets, a matching `SEND GWn`
+confirmation, and a pre-send review checkbox. Never use a development/Preview
+recipient count as the basis for a Production send. `src/lib/email` owns the
+server-only idempotency, opt-out, suppression, and status transitions.
 
 ## Fantasy persistence verification
 

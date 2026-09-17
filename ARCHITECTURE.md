@@ -70,16 +70,16 @@ create synthetic manager identities.
 Runtime routes read from `src/data` and PostgreSQL. The legacy static Fantasy
 dataset has been removed and must not be reintroduced as a runtime fallback.
 
-Deadline-reminder presentation is deliberately separate from delivery. Templates
-under `src/emails` receive explicit values, perform no database or provider access,
-and can be inspected through React Email or rendered to ignored local artifacts.
-The role-protected `/admin/fantasy/reminders` route reads audience candidates
-server-side from the deployment's configured database, sends only masked addresses
-to the rendered page, and renders the same deterministic, non-personalized
-bilingual template for the selected Gameweek. It does not persist a recipient
-snapshot or call an email provider.
-Unsubscribe persistence, provider suppression filtering, idempotent sending, and
-delivery audit remain future server-only/admin responsibilities.
+Deadline-reminder presentation remains separate from delivery. Templates under
+`src/emails` receive explicit values and perform no database/provider access.
+The role-protected `/admin/fantasy/reminders` route reads candidates from the
+deployment database and exposes only masked addresses. Admin actions freeze a
+recipient-ID/email-hash snapshot, then claim at most five rows per confirmed
+manual batch. Server-only delivery rechecks member/email/opt-out/deadline state,
+uses Resend idempotency keys, and stores status without plaintext recipient
+addresses. Signed unsubscribe links and verified Resend webhooks update
+preferences, suppressions, and delivery status. The separate Production-only
+feature gate is off by default and does not affect OTP routing.
 
 ## Route model
 
@@ -97,7 +97,8 @@ delivery audit remain future server-only/admin responsibilities.
 | `/rules`                   | Public long-form rules built from shared executable rule and scoring constants.                     |
 | `/help`                    | Public support destinations and legal links; no account data is required.                           |
 | `/admin/fantasy`           | Role-protected controls for stats, classification, locking, and finalization.                       |
-| `/admin/fantasy/reminders` | Role-protected, read-only recipient counts, masked candidates, and email preview.                   |
+| `/admin/fantasy/reminders` | Role-protected masked preview, recipient snapshot, and manual guarded batches.                      |
+| `/email/unsubscribe`       | Public signed-link confirmation for opting out of reminder emails.                                  |
 
 The `(app)` root layout resolves identity, language and navigation for game and
 document routes, and provides Mitr, shared tooltips and toast feedback. Guest and

@@ -18,6 +18,7 @@ type RawDeadlineRecipient = {
   email: string;
   previous_members: number;
   previous_confirmed_at: string | null;
+  current_confirmed_at: string | null;
   last_confirmed_at: string | null;
 };
 
@@ -26,17 +27,22 @@ type DeadlineAudienceSummary = {
   contactable: number;
   selected: number;
   unavailable_email: number;
+  unsubscribed: number;
+  suppressed: number;
   outside_audience: number;
 };
 
-const audienceCondition = (audience: DeadlineAudienceId) => {
+export const deadlineAudienceCondition = (audience: DeadlineAudienceId) => {
   if (audience === "all-members") return sql`true`;
   if (audience === "ever-complete") return sql`ever_complete`;
+  if (audience === "previous-unsaved")
+    return sql`previous_complete and current_confirmed_at is null`;
   return sql`previous_complete`;
 };
 
-const audienceCandidates = (
+export const deadlineAudienceCandidates = (
   seasonId: string,
+  targetWeekId: string,
   previousWeekId: string | null,
   squadSize: number,
 ) => sql`
@@ -44,16 +50,20 @@ const audienceCandidates = (
     select
       t.id team_id,
       t.name team_name,
+      u.id auth_user_id,
       u.email,
       u.email_verified
         and not coalesce(u.is_anonymous, false)
-        and position('@' in u.email) > 1 contactable,
+        and position('@' in u.email) > 1 email_ready,
+      preference.auth_user_id is not null unsubscribed,
+      suppression.auth_user_id is not null suppressed,
       coalesce((
         select count(*)::int
         from fantasy_team_selection_players previous_player
         where previous_player.selection_id = previous_selection.id
       ), 0)::int previous_members,
       previous_selection.confirmed_at::text previous_confirmed_at,
+      current_selection.confirmed_at::text current_confirmed_at,
       activity.last_confirmed_at::text,
       (
         previous_selection.confirmed_at is not null
@@ -80,6 +90,13 @@ const audienceCandidates = (
     left join fantasy_team_selections previous_selection
       on previous_selection.fantasy_team_id = t.id
       and previous_selection.fantasy_gameweek_id = ${previousWeekId}::uuid
+    left join fantasy_team_selections current_selection
+      on current_selection.fantasy_team_id = t.id
+      and current_selection.fantasy_gameweek_id = ${targetWeekId}::uuid
+    left join deadline_reminder_preferences preference
+      on preference.auth_user_id = u.id
+    left join deadline_reminder_suppressions suppression
+      on suppression.auth_user_id = u.id
     left join lateral (
       select max(saved_selection.confirmed_at) last_confirmed_at
       from fantasy_team_selections saved_selection
@@ -102,7 +119,7 @@ export async function getAdminDeadlineReminderPreview(params: AdminParams) {
     ? context.weeks.filter((week) => week.number < targetWeek.number).at(-1)
     : undefined;
   const audience = parseDeadlineAudience(param(params, "audience"));
-  const condition = audienceCondition(audience);
+  const condition = deadlineAudienceCondition(audience);
 
   if (!targetWeek) {
     return {
@@ -116,6 +133,8 @@ export async function getAdminDeadlineReminderPreview(params: AdminParams) {
         contactable: 0,
         selected: 0,
         unavailable_email: 0,
+        unsubscribed: 0,
+        suppressed: 0,
         outside_audience: 0,
       } satisfies DeadlineAudienceSummary,
       recipients: [],
@@ -124,8 +143,9 @@ export async function getAdminDeadlineReminderPreview(params: AdminParams) {
     };
   }
 
-  const candidates = audienceCandidates(
+  const candidates = deadlineAudienceCandidates(
     context.season.id,
+    targetWeek.id,
     previousWeek?.id ?? null,
     context.season.squadSize,
   );
@@ -133,16 +153,18 @@ export async function getAdminDeadlineReminderPreview(params: AdminParams) {
     db.execute<DeadlineAudienceSummary>(sql`${candidates}
       select
         count(*)::int member_teams,
-        count(*) filter (where contactable)::int contactable,
-        count(*) filter (where contactable and ${condition})::int selected,
-        count(*) filter (where not contactable)::int unavailable_email,
-        count(*) filter (where contactable and not (${condition}))::int outside_audience
+        count(*) filter (where email_ready)::int contactable,
+        count(*) filter (where email_ready and not unsubscribed and not suppressed and ${condition})::int selected,
+        count(*) filter (where not email_ready)::int unavailable_email,
+        count(*) filter (where email_ready and unsubscribed)::int unsubscribed,
+        count(*) filter (where email_ready and not unsubscribed and suppressed)::int suppressed,
+        count(*) filter (where email_ready and not unsubscribed and not suppressed and not (${condition}))::int outside_audience
       from candidates`),
     db.execute<RawDeadlineRecipient>(sql`${candidates}
       select team_id, team_name, email, previous_members,
-        previous_confirmed_at, last_confirmed_at
+        previous_confirmed_at, current_confirmed_at, last_confirmed_at
       from candidates
-      where contactable and ${condition}
+      where email_ready and not unsubscribed and not suppressed and ${condition}
       order by last_confirmed_at desc nulls last, lower(team_name), team_id
       limit 50`),
   ]);
@@ -160,6 +182,8 @@ export async function getAdminDeadlineReminderPreview(params: AdminParams) {
         contactable: 0,
         selected: 0,
         unavailable_email: 0,
+        unsubscribed: 0,
+        suppressed: 0,
         outside_audience: 0,
       } satisfies DeadlineAudienceSummary),
     recipients: recipientResult.rows.map(redactDeadlineRecipient),

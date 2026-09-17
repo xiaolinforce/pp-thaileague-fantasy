@@ -1253,6 +1253,129 @@ export const fantasyTeamSelections = pgTable(
   ],
 );
 
+export const deadlineReminderPreferences = pgTable(
+  "deadline_reminder_preferences",
+  {
+    authUserId: text("auth_user_id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    unsubscribedAt: timestamp("unsubscribed_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+);
+
+export const deadlineReminderSuppressions = pgTable(
+  "deadline_reminder_suppressions",
+  {
+    authUserId: text("auth_user_id")
+      .primaryKey()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    reason: varchar("reason", { length: 24 }).notNull(),
+    providerMessageId: text("provider_message_id"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    check(
+      "deadline_reminder_suppressions_reason_check",
+      sql`${table.reason} in ('bounce', 'complaint', 'suppressed', 'manual')`,
+    ),
+  ],
+);
+
+export const deadlineReminderCampaigns = pgTable(
+  "deadline_reminder_campaigns",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasyGameweekId: uuid("fantasy_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "restrict" }),
+    audience: varchar("audience", { length: 32 }).notNull(),
+    deadlineAtSnapshot: timestamp("deadline_at_snapshot", {
+      withTimezone: true,
+    }).notNull(),
+    subjectSnapshot: text("subject_snapshot").notNull(),
+    templateHash: varchar("template_hash", { length: 64 }).notNull(),
+    createdByAuthUserId: text("created_by_auth_user_id").references(
+      () => authUsers.id,
+      { onDelete: "set null" },
+    ),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("deadline_reminder_campaigns_gameweek_audience_unique").on(
+      table.fantasyGameweekId,
+      table.audience,
+    ),
+    check(
+      "deadline_reminder_campaigns_audience_check",
+      sql`${table.audience} in ('previous-unsaved', 'previous-complete', 'ever-complete', 'all-members')`,
+    ),
+  ],
+);
+
+export const deadlineReminderRecipients = pgTable(
+  "deadline_reminder_recipients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    campaignId: uuid("campaign_id")
+      .notNull()
+      .references(() => deadlineReminderCampaigns.id, { onDelete: "restrict" }),
+    fantasyGameweekId: uuid("fantasy_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id, { onDelete: "restrict" }),
+    authUserId: text("auth_user_id")
+      .notNull()
+      .references(() => authUsers.id, { onDelete: "cascade" }),
+    emailHash: varchar("email_hash", { length: 64 }).notNull(),
+    status: varchar("status", { length: 24 }).default("pending").notNull(),
+    providerMessageId: text("provider_message_id"),
+    errorCode: varchar("error_code", { length: 48 }),
+    claimedAt: timestamp("claimed_at", { withTimezone: true }),
+    acceptedAt: timestamp("accepted_at", { withTimezone: true }),
+    deliveredAt: timestamp("delivered_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("deadline_reminder_recipients_gameweek_user_unique").on(
+      table.fantasyGameweekId,
+      table.authUserId,
+    ),
+    index("deadline_reminder_recipients_campaign_status_idx").on(
+      table.campaignId,
+      table.status,
+    ),
+    uniqueIndex("deadline_reminder_recipients_provider_message_unique").on(
+      table.providerMessageId,
+    ),
+    check(
+      "deadline_reminder_recipients_status_check",
+      sql`${table.status} in ('pending', 'sending', 'accepted', 'delivered', 'bounced', 'complained', 'suppressed', 'skipped', 'failed', 'uncertain')`,
+    ),
+  ],
+);
+
+export const deadlineReminderWebhookEvents = pgTable(
+  "deadline_reminder_webhook_events",
+  {
+    id: text("id").primaryKey(),
+    type: varchar("type", { length: 40 }).notNull(),
+    providerMessageId: text("provider_message_id"),
+    receivedAt: timestamp("received_at", { withTimezone: true })
+      .defaultNow()
+      .notNull(),
+  },
+);
+
 export const fantasyTeamSelectionPlayers = pgTable(
   "fantasy_team_selection_players",
   {

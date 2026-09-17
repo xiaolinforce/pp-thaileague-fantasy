@@ -50,6 +50,10 @@ const sections: LegalSection[] = [
         en: "Email-delivery data such as a recipient hash, provider, delivery status, message ID, and error code, kept to the minimum needed for security and troubleshooting.",
       },
       {
+        th: "ข้อมูลอีเมลเตือนจัดทีม เช่น Gameweek ที่ได้รับการเตือน สถานะการส่ง การยกเลิกรับ และสถานะระงับการส่ง โดยไม่เก็บอีเมลเต็มในชุดส่ง",
+        en: "Lineup-reminder data such as the Gameweek contacted, delivery status, unsubscribe preference, and suppression state; campaign records do not retain full email addresses.",
+      },
+      {
         th: "ข้อมูลบนอุปกรณ์ เช่น ภาษาและสถานะ Guest ที่จำเป็นต่อการใช้งานต่อเนื่อง",
         en: "Device data such as language preference and Guest state needed to continue using the service.",
       },
@@ -66,6 +70,10 @@ const sections: LegalSection[] = [
       {
         th: "ยืนยันตัวตน ส่งรหัส OTP ป้องกันสแปม การใช้งานผิดวัตถุประสงค์ และการเข้าถึงที่ไม่ได้รับอนุญาต",
         en: "To authenticate users, deliver OTPs, and prevent spam, misuse, and unauthorized access.",
+      },
+      {
+        th: "ส่งอีเมลเตือน Deadline จัดทีมให้สมาชิกที่มีส่วนร่วม เมื่อผู้ดูแลระบบเลือกส่งเอง คุณสามารถยกเลิกรับอีเมลเตือนนี้ผ่านลิงก์ในอีเมลได้ โดยไม่กระทบอีเมลยืนยันตัวตน",
+        en: "To send manually initiated lineup-deadline reminders to participating members. You can opt out through the link in each reminder without affecting authentication emails.",
       },
       {
         th: "คำนวณผลการแข่งขัน แสดงอันดับ ตรวจสอบข้อร้องเรียน และรักษาความถูกต้องของข้อมูลย้อนหลัง",

@@ -10,9 +10,10 @@
 - Email OTP, Google, and device-bound Guest identities with 30-day sliding sessions.
 - Provider-neutral Thai-first/English deadline-reminder email presentation with
   local React Email preview and deterministic HTML/plain-text rendering.
-- Admin-only, read-only deadline-reminder review with Gameweek selection,
-  three server-owned audience definitions, masked recipient candidates, and a
-  shared bilingual preview from the deployment's configured database.
+- Admin-only deadline-reminder review with Gameweek selection, four server-owned
+  audience definitions, masked candidates, a frozen recipient snapshot,
+  unsubscribe/suppression tracking, and guarded manual batches. Production
+  migration and sender/webhook activation are separate operational steps.
 - Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
 - Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
   captaincy, and chip validation.

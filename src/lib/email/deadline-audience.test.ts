@@ -9,12 +9,12 @@ import {
 } from "./deadline-audience.ts";
 
 test("defaults unknown deadline audiences to the narrow recommended group", () => {
-  assert.equal(parseDeadlineAudience(""), "previous-complete");
-  assert.equal(parseDeadlineAudience("unexpected"), "previous-complete");
+  assert.equal(parseDeadlineAudience(""), "previous-unsaved");
+  assert.equal(parseDeadlineAudience("unexpected"), "previous-unsaved");
   assert.equal(parseDeadlineAudience("all-members"), "all-members");
   assert.deepEqual(
     deadlineAudienceOptions.map((option) => option.id),
-    ["previous-complete", "ever-complete", "all-members"],
+    ["previous-unsaved", "previous-complete", "ever-complete", "all-members"],
   );
 });
 
