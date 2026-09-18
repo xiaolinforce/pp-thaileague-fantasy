@@ -141,6 +141,33 @@ active registration IDs. Competition and Fantasy database verification passed.
 Published ranking runs, GW1/GW2 player pools, match statistics, points, team
 selections, and standings were not rewritten.
 
+## 2026-09-18 GW3 opening-match review
+
+Owner-approved production-only batch `gw3-ayu-uthai-20260918` recorded
+[Ayutthaya United 1-2 Uthai Thani (`37435`)](https://thaileague.co.th/fixtures/224/match/37435?selectedTab=live&optaSeasonId=2026)
+on Neon branch `br-tiny-shape-azrvakql`. The atomic import stored 63 reviewed
+player results: 32 confirmed appearances and 31 explicit zero-minute results
+for active registrants or players already selected in GW3. It also stored 63
+deterministic Fantasy point rows and one batch audit entry; development was not
+changed.
+
+[LiveSoccerTV's event timeline](https://www.livesoccertv.com/it/match/ayutthaya-united-vs-uthai-thani/58rba8)
+records Diogo Brito assisted by Yuki Kusano (59'), Robertinho assisted by
+Willian Lira (62'), and Siroch Chatthong assisted by Ben Davis (90+1'). It also
+records yellow cards for Willen Mota, Atsadawut Changthong, Charalampos
+Charalampous, and Jakkit Wachpirom, with no red cards or goalkeeper changes.
+[Bankeela's post-match report](https://www.bankeela.info/thai-league/386783/)
+corroborates the Siroch winner and Warut Makemusik's four saves; Caíque's one
+save is inferred from the one Ayutthaya shot on target outside its goal.
+The disallowed Yuki Kusano goal was excluded. Existing locked Fantasy positions
+yield 30 Ayutthaya and 40 Uthai Thani player points, 70 combined. Goal exposure
+includes the 90+1' winner for players still on the pitch after regulation time.
+
+GW3 selection lock was not part of this batch. At import time it remained
+`open` with 317 draft selections and no team scores; the lock action awaits
+separate owner approval because it closes GW3 selection and opens GW4. GW3 was
+not finalized.
+
 ## 2026-09-12 three-match GW2 review
 
 Owner-approved batch `gw2-sep12-three-matches-20260912` was applied to
