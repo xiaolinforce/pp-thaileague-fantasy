@@ -248,6 +248,7 @@ function evaluateSquad(
       })),
       activeChip: null,
       transferPoints: 0,
+      scoreComplete: true,
     });
     const evaluated = { members, score };
     if (isBetterTeam(evaluated, best)) best = evaluated;

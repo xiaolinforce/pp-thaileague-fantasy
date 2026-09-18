@@ -2014,6 +2014,8 @@ async function applyGameweekScenario(
         playerResults: results,
         activeChip: scoringState.activeChip,
         transferPoints: scoringState.transferPoints,
+        scoreComplete:
+          gameweek < definition.targetGameweek || definition.phase === "final",
       });
       teamScoreRows.push({
         team_id: team.id,

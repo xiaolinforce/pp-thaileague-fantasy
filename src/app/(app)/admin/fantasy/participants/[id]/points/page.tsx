@@ -65,6 +65,7 @@ export default async function TeamPointsPage({
               players={state.players}
               score={state.score}
               activeChip={state.activeChip}
+              scoreComplete={state.week.scoreComplete}
             />
           </>
         ) : (

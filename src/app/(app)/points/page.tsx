@@ -12,6 +12,7 @@ import {
   getDisplayedPlayerPoints,
   sortBenchMembersForDisplay,
 } from "@/lib/fantasy/points-presentation";
+import { getScoringCaptainId } from "@/lib/fantasy/captaincy";
 import { PointsGameweekSwitcher } from "./gameweek-switcher";
 import { HighestScoreDialog } from "./highest-score-dialog";
 
@@ -76,13 +77,12 @@ export default async function PointsPage({
   const viceCaptain = points.squad.find(
     (member) => member.captainRole === "vice_captain",
   );
-  const scoringCaptain =
-    captain && (resultByPlayer.get(captain.fantasyPlayerId)?.minutes ?? 0) > 0
-      ? captain
-      : viceCaptain &&
-          (resultByPlayer.get(viceCaptain.fantasyPlayerId)?.minutes ?? 0) > 0
-        ? viceCaptain
-        : undefined;
+  const scoringCaptainId = getScoringCaptainId(
+    captain?.fantasyPlayerId ?? null,
+    viceCaptain?.fantasyPlayerId ?? null,
+    resultByPlayer,
+    points.fantasy.gameweek.scoreComplete,
+  );
   const captainMultiplier =
     points.fantasy.selection.activeChip === "triple_captain" ? 3 : 2;
   const playerContribution = (fantasyPlayerId: string) => {
@@ -90,7 +90,7 @@ export default async function PointsPage({
     return getDisplayedPlayerPoints({
       rawPoints,
       counted: countedIds.has(fantasyPlayerId),
-      isScoringCaptain: scoringCaptain?.fantasyPlayerId === fantasyPlayerId,
+      isScoringCaptain: scoringCaptainId === fantasyPlayerId,
       captainMultiplier,
     });
   };
@@ -140,6 +140,7 @@ export default async function PointsPage({
             <HighestScoreDialog
               team={points.highestScoringTeam}
               players={points.players}
+              scoreComplete={points.fantasy.gameweek.scoreComplete}
             />
           </section>
 
@@ -196,8 +197,7 @@ export default async function PointsPage({
                             }
                             result={resultByPlayer.get(member.fantasyPlayerId)}
                             multiplier={
-                              scoringCaptain?.fantasyPlayerId ===
-                              member.fantasyPlayerId
+                              scoringCaptainId === member.fantasyPlayerId
                                 ? captainMultiplier
                                 : 1
                             }
@@ -233,8 +233,7 @@ export default async function PointsPage({
                         showPositionBadge
                         result={resultByPlayer.get(member.fantasyPlayerId)}
                         multiplier={
-                          scoringCaptain?.fantasyPlayerId ===
-                          member.fantasyPlayerId
+                          scoringCaptainId === member.fantasyPlayerId
                             ? captainMultiplier
                             : 1
                         }

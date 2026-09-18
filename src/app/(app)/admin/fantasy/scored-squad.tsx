@@ -7,6 +7,7 @@ import {
   sortBenchMembersForDisplay,
 } from "@/lib/fantasy/points-presentation";
 import type { FantasyChip } from "@/lib/fantasy/rules";
+import { getScoringCaptainId } from "@/lib/fantasy/captaincy";
 import styles from "./admin.module.css";
 
 const positionRows = [
@@ -27,11 +28,13 @@ export function AdminScoredSquad({
   players,
   score,
   activeChip = null,
+  scoreComplete = true,
 }: {
   squad: FantasyPointsSquadMember[];
   players: PlayerPointsRow[];
   score: ScoredSquadScore | null;
   activeChip?: FantasyChip | null;
+  scoreComplete?: boolean;
 }) {
   const resultByPlayer = new Map(
     players.map((player) => [player.fantasyPlayerId, player]),
@@ -65,19 +68,18 @@ export function AdminScoredSquad({
   const viceCaptain = squad.find(
     (member) => member.captainRole === "vice_captain",
   );
-  const scoringCaptain =
-    captain && (resultByPlayer.get(captain.fantasyPlayerId)?.minutes ?? 0) > 0
-      ? captain
-      : viceCaptain &&
-          (resultByPlayer.get(viceCaptain.fantasyPlayerId)?.minutes ?? 0) > 0
-        ? viceCaptain
-        : undefined;
+  const scoringCaptainId = getScoringCaptainId(
+    captain?.fantasyPlayerId ?? null,
+    viceCaptain?.fantasyPlayerId ?? null,
+    resultByPlayer,
+    scoreComplete,
+  );
   const captainMultiplier = activeChip === "triple_captain" ? 3 : 2;
   const contribution = (fantasyPlayerId: string) =>
     getDisplayedPlayerPoints({
       rawPoints: resultByPlayer.get(fantasyPlayerId)?.totalPoints ?? 0,
       counted: countedIds.has(fantasyPlayerId),
-      isScoringCaptain: scoringCaptain?.fantasyPlayerId === fantasyPlayerId,
+      isScoringCaptain: scoringCaptainId === fantasyPlayerId,
       captainMultiplier,
     });
   const activeChipLabel =
@@ -131,8 +133,7 @@ export function AdminScoredSquad({
                       }
                       result={resultByPlayer.get(member.fantasyPlayerId)}
                       multiplier={
-                        scoringCaptain?.fantasyPlayerId ===
-                        member.fantasyPlayerId
+                        scoringCaptainId === member.fantasyPlayerId
                           ? captainMultiplier
                           : 1
                       }
@@ -160,7 +161,7 @@ export function AdminScoredSquad({
                   showPositionBadge
                   result={resultByPlayer.get(member.fantasyPlayerId)}
                   multiplier={
-                    scoringCaptain?.fantasyPlayerId === member.fantasyPlayerId
+                    scoringCaptainId === member.fantasyPlayerId
                       ? captainMultiplier
                       : 1
                   }

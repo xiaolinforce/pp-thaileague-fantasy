@@ -137,6 +137,7 @@ async function recalculateGameweekInTransaction(
       playerResults,
       activeChip: selection.activeChip,
       transferPoints: selection.transferPoints,
+      scoreComplete: gameweek.scoreComplete,
     });
     scoredTeams.push({
       playerCount: members.length,

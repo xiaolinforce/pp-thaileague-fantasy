@@ -207,8 +207,11 @@ commit together so a failed calculation cannot leave a partially transitioned
 Gameweek.
 
 On the Points view, a squad member without a match-stat row remains pending
-until scoring is complete. Once the Gameweek is final, that absence is presented
-as a zero-minute, zero-point result so every selected player has a final score.
+until scoring is complete. During provisional scoring, a missing result does not
+trigger automatic substitution or vice-captain fallback; a recorded zero-minute
+result does. Once the Gameweek is final, a missing result counts as zero minutes
+for substitution and captaincy and is presented as a zero-point result so every
+selected player has a final score.
 
 When the last Gameweek has no `open` or `planned` successor, authenticated
 routes use the latest Gameweek as a read-only display context. Existing teams

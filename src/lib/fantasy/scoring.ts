@@ -3,6 +3,7 @@ import {
   type FantasyChip,
   type FantasyPosition,
 } from "./rules.ts";
+import { getScoringCaptainId, hasConfirmedNoAppearance } from "./captaincy.ts";
 
 export type PlayerMatchStats = {
   minutes: number;
@@ -121,11 +122,13 @@ export function resolveTeamScore({
   playerResults,
   activeChip,
   transferPoints,
+  scoreComplete,
 }: {
   selection: SelectionPlayer[];
   playerResults: GameweekPlayerResult[];
   activeChip: FantasyChip | null;
   transferPoints: number;
+  scoreComplete: boolean;
 }): TeamScore {
   const results = new Map(
     playerResults.map((result) => [result.playerId, result]),
@@ -140,8 +143,8 @@ export function resolveTeamScore({
   let counted = [...starters];
 
   if (activeChip !== "bench_boost") {
-    const missingStarters = starters.filter(
-      (player) => resultFor(results, player.playerId).minutes === 0,
+    const missingStarters = starters.filter((player) =>
+      hasConfirmedNoAppearance(results, player.playerId, scoreComplete),
     );
     const usedBench = new Set<string>();
 
@@ -182,15 +185,15 @@ export function resolveTeamScore({
   const viceCaptain = selection.find(
     (player) => player.captainRole === "vice_captain",
   );
-  const scoringCaptain =
-    captain && resultFor(results, captain.playerId).minutes > 0
-      ? captain
-      : viceCaptain && resultFor(results, viceCaptain.playerId).minutes > 0
-        ? viceCaptain
-        : null;
+  const scoringCaptainId = getScoringCaptainId(
+    captain?.playerId ?? null,
+    viceCaptain?.playerId ?? null,
+    results,
+    scoreComplete,
+  );
   const multiplier = activeChip === "triple_captain" ? 3 : 2;
-  const captainBonus = scoringCaptain
-    ? resultFor(results, scoringCaptain.playerId).points * (multiplier - 1)
+  const captainBonus = scoringCaptainId
+    ? resultFor(results, scoringCaptainId).points * (multiplier - 1)
     : 0;
   const countedPlayerIds =
     activeChip === "bench_boost"

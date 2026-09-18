@@ -320,6 +320,12 @@ recalculation persists average and highest points on the Gameweek from every
 scored selection that contains at least one player. Points pages read those
 stored summaries instead of aggregating every team on each request.
 
+Provisional scoring distinguishes an absent player result from a recorded
+zero-minute result: only the latter confirms a non-appearance for automatic
+substitution and vice-captain fallback. Final scoring treats any still-absent
+result as zero minutes. The Points and admin read models use that same captaincy
+decision, while recalculation updates persisted team totals and standings.
+
 The same scoring transaction rebuilds the current Overall Classic standings.
 It aggregates season totals once, applies the deterministic Classic
 tie-breakers, and persists one latest rank row for every ranked team. Overall

@@ -17,6 +17,7 @@ import {
   getDisplayedPlayerPoints,
   sortBenchMembersForDisplay,
 } from "@/lib/fantasy/points-presentation";
+import { getScoringCaptainId } from "@/lib/fantasy/captaincy";
 
 const positionRows = [
   "goalkeeper",
@@ -36,9 +37,11 @@ type HighestScoringTeam = {
 export function HighestScoreDialog({
   team,
   players,
+  scoreComplete,
 }: {
   team: HighestScoringTeam | null;
   players: PlayerPointsRow[];
+  scoreComplete: boolean;
 }) {
   const { translate } = useLanguage();
   const teamView = useMemo(() => {
@@ -75,20 +78,18 @@ export function HighestScoreDialog({
     const viceCaptain = team.squad.find(
       (member) => member.captainRole === "vice_captain",
     );
-    const scoringCaptain =
-      captain &&
-      (resultsByPlayer.get(captain.fantasyPlayerId)?.minutes ?? 0) > 0
-        ? captain
-        : viceCaptain &&
-            (resultsByPlayer.get(viceCaptain.fantasyPlayerId)?.minutes ?? 0) > 0
-          ? viceCaptain
-          : undefined;
+    const scoringCaptainId = getScoringCaptainId(
+      captain?.fantasyPlayerId ?? null,
+      viceCaptain?.fantasyPlayerId ?? null,
+      resultsByPlayer,
+      scoreComplete,
+    );
     const captainMultiplier = team.activeChip === "triple_captain" ? 3 : 2;
     const playerContribution = (fantasyPlayerId: string) =>
       getDisplayedPlayerPoints({
         rawPoints: resultsByPlayer.get(fantasyPlayerId)?.totalPoints ?? 0,
         counted: countedIds.has(fantasyPlayerId),
-        isScoringCaptain: scoringCaptain?.fantasyPlayerId === fantasyPlayerId,
+        isScoringCaptain: scoringCaptainId === fantasyPlayerId,
         captainMultiplier,
       });
     return {
@@ -99,10 +100,10 @@ export function HighestScoreDialog({
       countedIds,
       fieldMembers,
       playerContribution,
-      scoringCaptain,
+      scoringCaptainId,
       captainMultiplier,
     };
-  }, [players, team]);
+  }, [players, scoreComplete, team]);
 
   if (!team || !teamView) {
     return (
@@ -187,8 +188,7 @@ export function HighestScoreDialog({
                           member.fantasyPlayerId,
                         )}
                         multiplier={
-                          teamView.scoringCaptain?.fantasyPlayerId ===
-                          member.fantasyPlayerId
+                          teamView.scoringCaptainId === member.fantasyPlayerId
                             ? teamView.captainMultiplier
                             : 1
                         }
@@ -220,8 +220,7 @@ export function HighestScoreDialog({
                   showPositionBadge
                   result={teamView.resultsByPlayer.get(member.fantasyPlayerId)}
                   multiplier={
-                    teamView.scoringCaptain?.fantasyPlayerId ===
-                    member.fantasyPlayerId
+                    teamView.scoringCaptainId === member.fantasyPlayerId
                       ? teamView.captainMultiplier
                       : 1
                   }

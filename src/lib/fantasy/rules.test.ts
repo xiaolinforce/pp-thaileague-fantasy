@@ -577,6 +577,7 @@ test("auto-subs preserve formation and triple captain passes to vice captain", (
     playerResults: results,
     activeChip: "triple_captain",
     transferPoints: 0,
+    scoreComplete: true,
   });
   assert.deepEqual(score.autoSubstitutions, [
     { out: "d1", in: "d4" },
@@ -607,6 +608,7 @@ test("bench boost counts every squad member exactly once", () => {
     })),
     activeChip: "bench_boost",
     transferPoints: 0,
+    scoreComplete: true,
   });
   assert.equal(score.totalPoints, 32);
   assert.equal(score.countedPlayerIds.length, 15);
@@ -618,6 +620,7 @@ test("an unsaved empty selection scores zero when the Gameweek locks", () => {
     playerResults: [],
     activeChip: null,
     transferPoints: 0,
+    scoreComplete: true,
   });
 
   assert.deepEqual(score, {
