@@ -163,9 +163,10 @@ The disallowed Yuki Kusano goal was excluded. Existing locked Fantasy positions
 yield 30 Ayutthaya and 40 Uthai Thani player points, 70 combined. Goal exposure
 includes the 90+1' winner for players still on the pitch after regulation time.
 
-GW3 selection lock was not part of this batch. At import time it remained
-`open` with 317 draft selections and no team scores; the lock action awaits
-separate owner approval because it closes GW3 selection and opens GW4. GW3 was
+The separately owner-approved authenticated admin lock moved all 317 GW3
+selections from draft to locked, recalculated provisional team scores, and
+opened GW4 for selection. The admin view shows GW3 average 4 and highest 18
+after this opening fixture; remaining GW3 matches are still unscored. GW3 was
 not finalized.
 
 ## 2026-09-12 three-match GW2 review
