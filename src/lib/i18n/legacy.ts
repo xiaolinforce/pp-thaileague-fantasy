@@ -387,6 +387,8 @@ const translations: Record<string, string> = {
   ต่างชาติ: "Foreign",
   "L1 / พรีเมียม": "L1 / premium",
   ทุกระดับ: "All tiers",
+  "ต่ำกว่าระดับ 2": "Tier 2 and below",
+  "ต่ำกว่าระดับ 3": "Tier 3 and below",
   ทุกสัญชาติ: "All nationalities",
   นักเตะไทย: "Thai players",
   นักเตะต่างชาติ: "Foreign players",

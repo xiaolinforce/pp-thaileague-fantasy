@@ -199,7 +199,7 @@ export default function TransfersClient({
     .filter((player) => player.fantasyPlayerId)
     .filter((player) => clubId === "all" || player.clubId === clubId)
     .filter((player) => position === "ALL" || player.position === position)
-    .filter((player) => tier === "all" || player.tier === Number(tier))
+    .filter((player) => tier === "all" || player.tier >= Number(tier))
     .filter(
       (player) =>
         nationality === "all" ||
@@ -419,7 +419,7 @@ export default function TransfersClient({
                 ทุกระดับ
               </span>
             </SelectItem>
-            {[1, 2, 3, 4].map((filterTier) => (
+            {[2, 3, 4].map((filterTier) => (
               <SelectItem value={String(filterTier)} key={filterTier}>
                 <span className="market-select-item">
                   <span
@@ -427,7 +427,7 @@ export default function TransfersClient({
                   >
                     {filterTier}
                   </span>
-                  ระดับ {filterTier}
+                  {filterTier === 4 ? "ระดับ 4" : `ต่ำกว่าระดับ ${filterTier}`}
                 </span>
               </SelectItem>
             ))}
