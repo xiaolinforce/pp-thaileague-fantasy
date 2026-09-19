@@ -7430,12 +7430,12 @@ button.vacant-squad-slot {
 
   .unified-team-workspace {
     overflow-anchor: none;
-    scroll-margin-top: calc(var(--compact-topbar-height) + 64px);
+    scroll-margin-top: calc(var(--compact-topbar-height) + 52px);
   }
 
   .segment-tabs.team-workspace-tabs {
     width: 100%;
-    height: 56px;
+    height: 44px;
     margin-bottom: 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -7456,8 +7456,8 @@ button.vacant-squad-slot {
 
   .team-workspace-tabs [data-slot="tabs-trigger"] {
     min-width: 0;
-    height: 48px;
-    min-height: 48px;
+    height: 36px;
+    min-height: 36px;
     padding-inline: 12px;
     border-radius: 9px;
     color: #6e7478;
@@ -9176,7 +9176,7 @@ body {
   }
 
   .unified-team-workspace.team-workspace--market {
-    scroll-margin-top: calc(var(--compact-topbar-height) + 56px);
+    scroll-margin-top: calc(var(--compact-topbar-height) + 44px);
   }
 
   .compact-transfer-market {
@@ -9189,7 +9189,7 @@ body {
 
   .squad-quota-summary {
     position: sticky;
-    top: calc(var(--compact-topbar-height) + 56px);
+    top: calc(var(--compact-topbar-height) + 44px);
     z-index: 18;
     display: block;
     padding-block: 8px;
@@ -9207,7 +9207,7 @@ body {
 
   .compact-market-sticky-controls {
     position: sticky;
-    top: calc(var(--compact-topbar-height) + 56px);
+    top: calc(var(--compact-topbar-height) + 44px);
     z-index: 18;
     display: block;
     border-bottom: 1px solid var(--line);
@@ -9273,7 +9273,7 @@ body {
   }
 
   .unified-team-workspace.team-workspace--market {
-    scroll-margin-top: calc(var(--compact-topbar-height) + 56px);
+    scroll-margin-top: calc(var(--compact-topbar-height) + 44px);
   }
 
   .compact-transfer-market {
@@ -9286,7 +9286,7 @@ body {
 
   .squad-quota-summary {
     position: sticky;
-    top: calc(var(--compact-topbar-height) + 56px);
+    top: calc(var(--compact-topbar-height) + 44px);
     z-index: 18;
     display: block;
     padding-block: 8px;
@@ -9305,7 +9305,7 @@ body {
 
   .compact-market-sticky-controls {
     position: sticky;
-    top: calc(var(--compact-topbar-height) + 56px);
+    top: calc(var(--compact-topbar-height) + 44px);
     z-index: 18;
     display: block;
     border-bottom: 1px solid var(--line);
