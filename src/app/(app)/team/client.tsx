@@ -94,16 +94,17 @@ import {
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import { getChipOptionState } from "@/lib/fantasy/chip-state";
 import {
+  captureSavedDraftPlayers,
   createEmptySquadDraft,
   getCompleteSelectionMembers,
+  getRestorableSavedPlayer,
   getValidDraftSwapTargetSlotIds,
   haveSameSelectionMembers,
-  pruneRemovedDraftPlayers,
   removePlayerFromDraft,
-  restoreRemovedPlayerToDraft,
+  restoreSavedPlayerToDraft,
   swapDraftLineupMembers,
   type DraftLineupMember,
-  type RemovedDraftPlayersBySlot,
+  type SavedDraftPlayersBySlot,
 } from "@/lib/fantasy/team-draft";
 import TransfersClient from "./transfers-client";
 import {
@@ -639,8 +640,8 @@ function VacantSquadSlot({
   swapDisabled,
   swapState,
   captain,
-  undoPlayerName,
-  onUndo,
+  savedPlayerName,
+  onRestore,
 }: {
   slotId: string;
   position: CompetitionPosition;
@@ -651,14 +652,20 @@ function VacantSquadSlot({
   swapDisabled: boolean;
   swapState?: PlayerSwapState;
   captain?: "C" | "V";
-  undoPlayerName?: string;
-  onUndo?: () => void;
+  savedPlayerName?: string;
+  onRestore?: () => void;
 }) {
-  const { language } = useLanguage();
+  const { language, translate } = useLanguage();
   const isSource = swapState === "source";
   const localizedPosition = getLocalizedPositionLabel(position, language);
   const shortPosition = getShortPositionLabel(position);
   const canSelectSlot = !swapState || swapState === "available";
+  const restoreLabel = savedPlayerName
+    ? translate("คืน {player} จากทีมที่บันทึกไว้").replace(
+        "{player}",
+        savedPlayerName,
+      )
+    : null;
   const slotContent = (
     <>
       <span className="vacant-squad-icon">
@@ -721,18 +728,14 @@ function VacantSquadSlot({
           <ArrowLeftRight size={13} aria-hidden="true" />
         </button>
       )}
-      {!hideAction && undoPlayerName && onUndo && (
+      {!hideAction && restoreLabel && onRestore && (
         <button
           type="button"
-          className="squad-token-action squad-undo-action"
-          onClick={onUndo}
+          className="squad-token-action squad-restore-action"
+          onClick={onRestore}
           disabled={actionsDisabled}
-          aria-label={
-            language === "th"
-              ? `เลิกทำการลบ ${undoPlayerName}`
-              : `Undo removing ${undoPlayerName}`
-          }
-          title={language === "th" ? "เลิกทำ" : "Undo"}
+          aria-label={restoreLabel}
+          title={restoreLabel}
         >
           <Undo2 size={13} aria-hidden="true" />
         </button>
@@ -767,11 +770,34 @@ export default function TeamClient({
       ? null
       : fantasy.selection.activeChip,
   );
+  const playersByFantasyId = useMemo(
+    () =>
+      new Map(
+        data.players.flatMap((player) =>
+          player.fantasyPlayerId
+            ? [[player.fantasyPlayerId, player] as const]
+            : [],
+        ),
+      ),
+    [data.players],
+  );
+  const playerPositionsById = useMemo(
+    () =>
+      new Map(
+        [...playersByFantasyId].map(([fantasyPlayerId, player]) => [
+          fantasyPlayerId,
+          fantasyPositions[player.position],
+        ]),
+      ),
+    [playersByFantasyId],
+  );
   const [members, setMembers] = useState<DraftLineupMember[]>(() =>
     createSelectionDraft(fantasy.selection.members),
   );
-  const [removedPlayersBySlot, setRemovedPlayersBySlot] =
-    useState<RemovedDraftPlayersBySlot>({});
+  const [savedPlayersBySlot, setSavedPlayersBySlot] =
+    useState<SavedDraftPlayersBySlot>(() =>
+      captureSavedDraftPlayers(members, playerPositionsById),
+    );
   const [isPending, startTransition] = useTransition();
   const [, startAutoFillTransition] = useTransition();
   const [isAutoFilling, setIsAutoFilling] = useState(false);
@@ -834,21 +860,7 @@ export default function TeamClient({
         ? current
         : null,
     );
-    setRemovedPlayersBySlot((current) =>
-      pruneRemovedDraftPlayers(current, nextMembers),
-    );
   };
-  const playersByFantasyId = useMemo(
-    () =>
-      new Map(
-        data.players.flatMap((player) =>
-          player.fantasyPlayerId
-            ? [[player.fantasyPlayerId, player] as const]
-            : [],
-        ),
-      ),
-    [data.players],
-  );
   const clubNameById = useMemo(
     () =>
       new Map(
@@ -978,16 +990,6 @@ export default function TeamClient({
           member.fantasyPlayerId === null && member.vacancyPosition !== null,
       ),
     [members],
-  );
-  const playerPositionsById = useMemo(
-    () =>
-      new Map(
-        [...playersByFantasyId].map(([fantasyPlayerId, player]) => [
-          fantasyPlayerId,
-          fantasyPositions[player.position],
-        ]),
-      ),
-    [playersByFantasyId],
   );
   const validSwapTargetSlotIds = useMemo(() => {
     if (!swapFrom) return new Set<string>();
@@ -1332,6 +1334,7 @@ export default function TeamClient({
       });
       return;
     }
+    const submittedMembers = members;
     startTransition(async () => {
       try {
         const result = await saveFantasySelectionAction({
@@ -1342,7 +1345,9 @@ export default function TeamClient({
         });
         if (result.ok) {
           selectionRevision.current = result.revision;
-          setRemovedPlayersBySlot({});
+          setSavedPlayersBySlot(
+            captureSavedDraftPlayers(submittedMembers, playerPositionsById),
+          );
           toast.success(translate(result.message));
           router.refresh();
         } else {
@@ -1373,7 +1378,6 @@ export default function TeamClient({
   ) => {
     setMembers(createSelectionDraft(restoredMembers));
     setActiveChip(restoredChip);
-    setRemovedPlayersBySlot({});
     setSwapFrom(null);
     setSelected(null);
     setPreferredVacancySlotId(null);
@@ -1482,50 +1486,33 @@ export default function TeamClient({
       fantasyPositions[player.position],
     );
     setMembers(nextMembers);
-    setRemovedPlayersBySlot((current) => ({
-      ...pruneRemovedDraftPlayers(current, nextMembers),
-      [member.slotId]: {
-        fantasyPlayerId: player.fantasyPlayerId!,
-        captainRole: member.captainRole,
-      },
-    }));
     setSwapFrom(null);
     setPreferredVacancySlotId(null);
     setSelected(null);
   };
 
-  const undoPlayerRemoval = (slotId: string) => {
+  const restoreSavedPlayer = (slotId: string) => {
     if (interactionsDisabled) return;
-    const removedPlayer = removedPlayersBySlot[slotId];
-    if (!removedPlayer) return;
-    const restoredMembers = restoreRemovedPlayerToDraft(
+    const restoredMembers = restoreSavedPlayerToDraft(
       members,
       slotId,
-      removedPlayer,
+      savedPlayersBySlot,
     );
-    if (!restoredMembers) {
-      setRemovedPlayersBySlot((current) => {
-        const remaining = { ...current };
-        delete remaining[slotId];
-        return remaining;
-      });
-      return;
-    }
+    if (!restoredMembers) return;
     setMembers(restoredMembers);
-    setRemovedPlayersBySlot((current) => {
-      const remaining = { ...current };
-      delete remaining[slotId];
-      return pruneRemovedDraftPlayers(remaining, restoredMembers);
-    });
     setSwapFrom(null);
     setPreferredVacancySlotId(null);
     setSelected(null);
   };
 
-  const getUndoPlayerName = (slotId: string) => {
-    const removedPlayer = removedPlayersBySlot[slotId];
-    if (!removedPlayer) return undefined;
-    const player = playersByFantasyId.get(removedPlayer.fantasyPlayerId);
+  const getSavedPlayerNameForVacancy = (slotId: string) => {
+    const savedPlayer = getRestorableSavedPlayer(
+      members,
+      slotId,
+      savedPlayersBySlot,
+    );
+    if (!savedPlayer) return undefined;
+    const player = playersByFantasyId.get(savedPlayer.fantasyPlayerId);
     return player ? localize(player.name, language) : undefined;
   };
 
@@ -2029,10 +2016,12 @@ export default function TeamClient({
                                   ? "V"
                                   : undefined
                             }
-                            undoPlayerName={getUndoPlayerName(
+                            savedPlayerName={getSavedPlayerNameForVacancy(
                               slot.member.slotId,
                             )}
-                            onUndo={() => undoPlayerRemoval(slot.member.slotId)}
+                            onRestore={() =>
+                              restoreSavedPlayer(slot.member.slotId)
+                            }
                           />
                         ),
                       )}
@@ -2083,8 +2072,10 @@ export default function TeamClient({
                               ? "V"
                               : undefined
                         }
-                        undoPlayerName={getUndoPlayerName(slot.member.slotId)}
-                        onUndo={() => undoPlayerRemoval(slot.member.slotId)}
+                        savedPlayerName={getSavedPlayerNameForVacancy(
+                          slot.member.slotId,
+                        )}
+                        onRestore={() => restoreSavedPlayer(slot.member.slotId)}
                       />
                     )}
                   </div>

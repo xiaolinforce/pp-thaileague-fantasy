@@ -124,10 +124,12 @@ proven behaviors unless a deliberate product decision replaces them:
   expose removal rather than another transfer-in action.
 - A compatible market player fills a selected matching vacancy first, then the
   first matching vacancy when the selected slot cannot accept that position.
-- Removing a player creates a local Undo action for that vacancy beside Swap.
-  Multiple vacancies keep independent Undo histories. Filling a vacancy clears
-  its Undo; swapping the vacancy first keeps the history with that vacancy, and
-  Undo restores the player into its current lineup assignment. Captain or
+- A vacancy has a Restore action beside Swap only when its slot held a player in
+  the latest saved team. Name that saved player in the action. Unsaved players
+  never become Restore targets until a successful Save; vacancies in an unsaved
+  opening team have no Restore action. Filling a vacancy hides Restore until the
+  slot becomes vacant again. Swapping a vacancy keeps its saved player tied to
+  that slot, and Restore uses the slot's current lineup assignment. Captain or
   vice-captain status is reclaimed only when that role is still unassigned.
 - Swap and remove are compact repeated actions with accessible names. Vacancy,
   player, source, valid target, invalid target, captaincy, tier, and bench state

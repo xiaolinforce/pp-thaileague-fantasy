@@ -4,6 +4,22 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-09-19 — Vacant squad slots restore the latest saved player
+
+**Decision:** A vacant slot offers Restore only when that slot has a player in
+the latest saved team. Unsaved replacements do not replace this target. Restore
+puts the saved player into the slot's current lineup assignment and reclaims
+saved captaincy only when that role is still free. Slots without a saved player
+show no Restore action.
+
+**Context:** Undoing the removal of an unsaved replacement brought that
+replacement back instead of the player the manager had last saved. The owner
+wants the control to recover the saved team member while exploring transfers.
+
+**Consequences:** A successful Save updates each slot's Restore target. Restore
+remains a local draft change; only Save persists the selection and transfer
+revision. The action names the saved player in Thai and English.
+
 ## 2026-09-17 — Lineup reminders require a frozen, manually approved campaign
 
 **Decision:** Default to members who explicitly saved a complete previous-GW

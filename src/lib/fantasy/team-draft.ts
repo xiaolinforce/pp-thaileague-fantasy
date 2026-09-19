@@ -42,12 +42,33 @@ export function haveSameSelectionMembers(
   });
 }
 
-export type RemovedDraftPlayer = {
+export type SavedDraftPlayer = {
   fantasyPlayerId: string;
+  position: FantasyPosition;
   captainRole: CaptainRole;
 };
 
-export type RemovedDraftPlayersBySlot = Record<string, RemovedDraftPlayer>;
+export type SavedDraftPlayersBySlot = Record<string, SavedDraftPlayer>;
+
+export function captureSavedDraftPlayers(
+  members: readonly DraftLineupMember[],
+  playerPositionsById: ReadonlyMap<string, FantasyPosition>,
+): SavedDraftPlayersBySlot {
+  const savedPlayersBySlot: SavedDraftPlayersBySlot = {};
+  for (const member of members) {
+    const fantasyPlayerId = member.fantasyPlayerId;
+    const position = fantasyPlayerId
+      ? playerPositionsById.get(fantasyPlayerId)
+      : null;
+    if (!fantasyPlayerId || !position) continue;
+    savedPlayersBySlot[member.slotId] = {
+      fantasyPlayerId,
+      position,
+      captainRole: member.captainRole,
+    };
+  }
+  return savedPlayersBySlot;
+}
 
 const starterShape: Array<[FantasyPosition, number]> = [
   ["goalkeeper", 1],
@@ -102,61 +123,58 @@ export function removePlayerFromDraft(
   );
 }
 
-export function restoreRemovedPlayerToDraft(
-  members: DraftLineupMember[],
+export function getRestorableSavedPlayer(
+  members: readonly DraftLineupMember[],
   slotId: string,
-  removedPlayer: RemovedDraftPlayer,
+  savedPlayersBySlot: SavedDraftPlayersBySlot,
 ) {
+  const savedPlayer = savedPlayersBySlot[slotId];
   const vacancy = members.find((member) => member.slotId === slotId);
   if (
+    !savedPlayer ||
     !vacancy ||
     vacancy.fantasyPlayerId !== null ||
+    vacancy.vacancyPosition !== savedPlayer.position ||
     members.some(
-      (member) => member.fantasyPlayerId === removedPlayer.fantasyPlayerId,
+      (member) => member.fantasyPlayerId === savedPlayer.fantasyPlayerId,
     )
   ) {
     return null;
   }
+  return savedPlayer;
+}
+
+export function restoreSavedPlayerToDraft(
+  members: DraftLineupMember[],
+  slotId: string,
+  savedPlayersBySlot: SavedDraftPlayersBySlot,
+) {
+  const savedPlayer = getRestorableSavedPlayer(
+    members,
+    slotId,
+    savedPlayersBySlot,
+  );
+  if (!savedPlayer) return null;
+  const vacancy = members.find((member) => member.slotId === slotId);
+  if (!vacancy) return null;
 
   const canRestoreCaptainRole =
     vacancy.captainRole === "none" &&
-    removedPlayer.captainRole !== "none" &&
+    savedPlayer.captainRole !== "none" &&
     vacancy.lineupRole === "starter" &&
-    !members.some((member) => member.captainRole === removedPlayer.captainRole);
+    !members.some((member) => member.captainRole === savedPlayer.captainRole);
 
   return members.map((member) =>
     member.slotId === slotId
       ? {
           ...member,
-          fantasyPlayerId: removedPlayer.fantasyPlayerId,
+          fantasyPlayerId: savedPlayer.fantasyPlayerId,
           vacancyPosition: null,
           captainRole: canRestoreCaptainRole
-            ? removedPlayer.captainRole
+            ? savedPlayer.captainRole
             : member.captainRole,
         }
       : member,
-  );
-}
-
-export function pruneRemovedDraftPlayers(
-  removedPlayersBySlot: RemovedDraftPlayersBySlot,
-  members: DraftLineupMember[],
-) {
-  const ownedPlayerIds = new Set(
-    members.flatMap((member) =>
-      member.fantasyPlayerId ? [member.fantasyPlayerId] : [],
-    ),
-  );
-  const membersBySlotId = new Map(
-    members.map((member) => [member.slotId, member]),
-  );
-
-  return Object.fromEntries(
-    Object.entries(removedPlayersBySlot).filter(
-      ([slotId, removedPlayer]) =>
-        membersBySlotId.get(slotId)?.fantasyPlayerId === null &&
-        !ownedPlayerIds.has(removedPlayer.fantasyPlayerId),
-    ),
   );
 }
 

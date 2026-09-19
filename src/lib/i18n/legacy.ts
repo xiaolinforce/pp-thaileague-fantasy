@@ -167,6 +167,7 @@ const translations: Record<string, string> = {
   "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน":
     "You can select no more than {count} Tier 1 players",
   ลบนักเตะออกจากตำแหน่งแล้ว: "Player removed from the slot",
+  "คืน {player} จากทีมที่บันทึกไว้": "Restore {player} from saved team",
   จัดทีมลุยไทยลีก: "Build Your Thai League Squad",
   "เลือก 11 ตัวจริง วางกัปตัน แล้วพาทีมของคุณขึ้นจ่าฝูง":
     "Choose your starting XI, name a captain, and take your team to the top",

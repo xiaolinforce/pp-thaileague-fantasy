@@ -4117,7 +4117,7 @@ textarea:focus-visible {
   color: #b42318;
 }
 
-.squad-undo-action {
+.squad-restore-action {
   right: calc(50% - 34px);
 }
 
@@ -7823,7 +7823,7 @@ button.vacant-squad-slot {
   }
 
   .squad-remove-action,
-  .squad-undo-action {
+  .squad-restore-action {
     right: calc(50% - 32px);
   }
 
@@ -9522,7 +9522,7 @@ body {
     left: calc(50% - 30px);
   }
 
-  .vacant-squad-token-shell .squad-undo-action {
+  .vacant-squad-token-shell .squad-restore-action {
     right: calc(50% - 30px);
   }
 

@@ -4,16 +4,17 @@ import test from "node:test";
 import type { FantasyPosition } from "./rules.ts";
 
 import {
+  captureSavedDraftPlayers,
   createEmptySquadDraft,
   fillDraftVacancy,
   fillFirstMatchingDraftVacancy,
   fillPreferredOrFirstMatchingDraftVacancy,
   getCompleteSelectionMembers,
+  getRestorableSavedPlayer,
   getValidDraftSwapTargetSlotIds,
   haveSameSelectionMembers,
-  pruneRemovedDraftPlayers,
   removePlayerFromDraft,
-  restoreRemovedPlayerToDraft,
+  restoreSavedPlayerToDraft,
   swapDraftLineupMembers,
   type DraftLineupMember,
 } from "./team-draft.ts";
@@ -119,17 +120,59 @@ test("removing a player preserves the lineup slot as a position-locked vacancy",
   assert.equal(getCompleteSelectionMembers(next), null);
 });
 
-test("undoing a removal restores the player and an available captain role", () => {
+const savedPlayersBySlot = captureSavedDraftPlayers(
+  members,
+  new Map<string, FantasyPosition>([
+    ["gk-1", "goalkeeper"],
+    ["gk-2", "goalkeeper"],
+    ["gk-3", "goalkeeper"],
+  ]),
+);
+
+test("restores the latest saved player after an unsaved replacement is removed", () => {
   const vacancy = removePlayerFromDraft(members, "gk-1", "goalkeeper");
-  const restored = restoreRemovedPlayerToDraft(vacancy, "starter-gk", {
-    fantasyPlayerId: "gk-1",
-    captainRole: "captain",
-  });
+  const replacement = fillDraftVacancy(vacancy, "starter-gk", "gk-3");
+  const replacementRemoved = removePlayerFromDraft(
+    replacement,
+    "gk-3",
+    "goalkeeper",
+  );
+  const restored = restoreSavedPlayerToDraft(
+    replacementRemoved,
+    "starter-gk",
+    savedPlayersBySlot,
+  );
 
   assert.deepEqual(restored, members);
+  assert.equal(
+    getRestorableSavedPlayer(replacement, "starter-gk", savedPlayersBySlot),
+    null,
+  );
 });
 
-test("undo preserves later lineup changes and does not reclaim an occupied captain role", () => {
+test("a successful save makes the replacement the next Restore target", () => {
+  const replacement = fillDraftVacancy(
+    removePlayerFromDraft(members, "gk-1", "goalkeeper"),
+    "starter-gk",
+    "gk-3",
+  );
+  const latestSavedPlayers = captureSavedDraftPlayers(
+    replacement,
+    new Map<string, FantasyPosition>([
+      ["gk-2", "goalkeeper"],
+      ["gk-3", "goalkeeper"],
+    ]),
+  );
+  const vacancy = removePlayerFromDraft(replacement, "gk-3", "goalkeeper");
+
+  assert.equal(
+    restoreSavedPlayerToDraft(vacancy, "starter-gk", latestSavedPlayers)?.[0]
+      .fantasyPlayerId,
+    "gk-3",
+  );
+});
+
+test("Restore preserves later lineup changes and does not reclaim an occupied captain role", () => {
   const vacancy = removePlayerFromDraft(members, "gk-1", "goalkeeper").map(
     (member) =>
       member.slotId === "starter-gk"
@@ -145,10 +188,11 @@ test("undo preserves later lineup changes and does not reclaim an occupied capta
             captainRole: "captain" as const,
           },
   );
-  const restored = restoreRemovedPlayerToDraft(vacancy, "starter-gk", {
-    fantasyPlayerId: "gk-1",
-    captainRole: "captain",
-  });
+  const restored = restoreSavedPlayerToDraft(
+    vacancy,
+    "starter-gk",
+    savedPlayersBySlot,
+  );
 
   assert.deepEqual(restored?.[0], {
     slotId: "starter-gk",
@@ -161,14 +205,16 @@ test("undo preserves later lineup changes and does not reclaim an occupied capta
   assert.equal(restored?.[1].captainRole, "captain");
 });
 
-test("undo rejects an occupied slot or a player already restored elsewhere", () => {
+test("Restore is unavailable without a saved player or when its slot is occupied", () => {
+  const vacancy = removePlayerFromDraft(members, "gk-1", "goalkeeper");
+  assert.equal(getRestorableSavedPlayer(vacancy, "starter-gk", {}), null);
   assert.equal(
-    restoreRemovedPlayerToDraft(members, "starter-gk", {
-      fantasyPlayerId: "gk-3",
-      captainRole: "none",
-    }),
+    restoreSavedPlayerToDraft(members, "starter-gk", savedPlayersBySlot),
     null,
   );
+});
+
+test("Restore rejects a player already selected elsewhere or a mismatched position", () => {
   const vacancyWithDuplicate = removePlayerFromDraft(
     members,
     "gk-1",
@@ -179,30 +225,26 @@ test("undo rejects an occupied slot or a player already restored elsewhere", () 
       : member,
   );
   assert.equal(
-    restoreRemovedPlayerToDraft(vacancyWithDuplicate, "starter-gk", {
-      fantasyPlayerId: "gk-1",
-      captainRole: "captain",
-    }),
+    restoreSavedPlayerToDraft(
+      vacancyWithDuplicate,
+      "starter-gk",
+      savedPlayersBySlot,
+    ),
     null,
   );
-});
-
-test("prunes undo history after a slot is filled or its player returns elsewhere", () => {
-  const removedPlayers = {
-    "starter-gk": { fantasyPlayerId: "gk-1", captainRole: "captain" as const },
-    "bench-gk": { fantasyPlayerId: "gk-3", captainRole: "none" as const },
-  };
-  const draft = removePlayerFromDraft(members, "gk-1", "goalkeeper");
-
-  assert.deepEqual(pruneRemovedDraftPlayers(removedPlayers, draft), {
-    "starter-gk": removedPlayers["starter-gk"],
-  });
-  assert.deepEqual(
-    pruneRemovedDraftPlayers(
-      removedPlayers,
-      fillDraftVacancy(draft, "starter-gk", "gk-3"),
+  assert.equal(
+    getRestorableSavedPlayer(
+      removePlayerFromDraft(members, "gk-1", "goalkeeper"),
+      "starter-gk",
+      {
+        "starter-gk": {
+          fantasyPlayerId: "gk-1",
+          position: "defender",
+          captainRole: "captain",
+        },
+      },
     ),
-    {},
+    null,
   );
 });
 
