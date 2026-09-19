@@ -209,7 +209,7 @@ const translations: Record<string, string> = {
   ยังไม่มีผลการแข่งขัน: "No recent matches",
   ดูสถิติ: "View Stats",
   เลือกผู้เล่นนี้: "Select Player",
-  บันทึกการจัดทีมแล้ว: "Team saved",
+  บันทึกทีมเรียบร้อย: "Team saved successfully",
   ยืนยันทีมใหม่แล้ว: "New squad confirmed:",
   "เลย Deadline ของ Gameweek นี้แล้ว": "This Gameweek deadline has passed",
   พบรายชื่อนักเตะซ้ำในทีม: "The squad contains duplicate players",

@@ -331,10 +331,7 @@ export async function saveFantasySelectionInTransaction(
   return {
     ok: true,
     revision,
-    message:
-      transferCount === 0
-        ? "บันทึกการจัดทีมแล้ว"
-        : `ยืนยันทีมใหม่แล้ว ${transferCount} Transfer`,
+    message: "บันทึกทีมเรียบร้อย",
   };
 }
 
