@@ -32,6 +32,29 @@ competition facts, or historical scores. Operational provenance belongs in
 entries with the target Gameweek, random seed, and candidate-pool hash. This
 does not authorize roster, fixture, tier, or historical-score changes.
 
+## Development reminder schema repair
+
+On 2026-10-02, the reviewed, additive migration
+`0022_dizzy_quentin_quire` was applied to development
+(`br-green-queen-az934b4e`, database `neondb`) after confirming the target
+with `npm run db:check`. Sentry issues `PP-THAILEAGUE-FANTASY-10` and
+`PP-THAILEAGUE-FANTASY-11` reported the missing
+`deadline_reminder_preferences` relation on `/admin/fantasy/reminders`.
+The branch previously had 22 applied migrations and none of the five
+`deadline_reminder_*` tables.
+
+Post-application verification found all 23 repository migrations applied,
+with no pending migrations, and all five reminder tables present. The new
+tables have seven foreign keys, three check constraints, five primary keys,
+and nine indexes. Applied SQL hashes match the committed LF sources; older
+Windows checkout files may contain CRLF without changing the committed SQL.
+The local admin reminder page loaded its audience summary, campaign lookup,
+and bilingual email preview against this branch without a database error.
+Rendering was checked in both Thai and English display modes.
+Both Sentry issues were marked resolved after this verification.
+Verification did not create campaigns or send emails. Production was not
+modified in this operation.
+
 ## Current season identifiers
 
 | Item                      | Value                   |

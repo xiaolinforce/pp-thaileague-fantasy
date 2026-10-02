@@ -255,10 +255,14 @@ export default async function DeadlineRemindersPage({
       <section className={adminStyles.panel} aria-labelledby="campaign-heading">
         <div className={styles.sectionHeading}>
           <div>
-            <h2 id="campaign-heading">ชุดส่งอีเมล</h2>
+            <h2 id="campaign-heading">
+              <AdminName th="ชุดส่งอีเมล" en="Email campaign" />
+            </h2>
             <p className={adminStyles.hint}>
-              รายชื่อถูกตรึงไว้ตอนสร้างชุดส่ง แต่ระบบจะตรวจสิทธิ์ อีเมล
-              การยกเลิก และการบันทึกทีมซ้ำก่อนส่งแต่ละฉบับ
+              <AdminName
+                th="รายชื่อถูกตรึงไว้ตอนสร้างชุดส่ง แต่ระบบจะตรวจสิทธิ์ อีเมล การยกเลิก และการบันทึกทีมซ้ำก่อนส่งแต่ละฉบับ"
+                en="Recipients are frozen at snapshot time. Eligibility, email, unsubscribe state, and team save are checked again before each send."
+              />
             </p>
           </div>
         </div>

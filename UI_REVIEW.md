@@ -57,6 +57,19 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-10-02 Reminder schema repair verification
+
+- Local Chrome on `/admin/fantasy/reminders`, authenticated against development
+  branch `br-green-queen-az934b4e` after applying migration `0022`, loaded the
+  audience summary, empty recipient list, campaign lookup, and bilingual email
+  preview in Thai and English without a database error.
+- The campaign heading and eligibility explanation now use explicit `AdminName`
+  content, matching the existing dictionary, because the compatibility boundary
+  left those server-rendered strings untranslated in English.
+- This covered the existing GW3 deadline-passed state. Campaign creation, live
+  delivery, other audiences, mobile layouts, and missing-data simulations were
+  not exercised; the admin route maturity remains `In progress`.
+
 ## Recommended audit order
 
 ### 2026-09-10 Team mobile player actions
