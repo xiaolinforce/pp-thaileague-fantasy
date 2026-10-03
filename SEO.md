@@ -32,8 +32,12 @@ do not enter canonicals. Internal public links are visible in the rendered
 HTML. The signed-in home redirect and shared account shell are retained.
 
 Public fixtures reuse the server-only, five-minute cached fixture read model;
-no manager, account or private league data is passed to the page. Fixture status
-and times reflect the selected environment's database, not a live source feed.
+no manager, account or private league data is passed to the page. Its fixture
+browser is shared with `/fixtures`, starts at the current Gameweek, and renders
+that week's matches in the initial HTML; previous/next controls browse other
+weeks locally. The public metadata, canonical and footer links remain available.
+Fixture status and times reflect the selected environment's database, not a
+live source feed.
 Development scenarios are not evidence of production match results.
 
 ## Search Console

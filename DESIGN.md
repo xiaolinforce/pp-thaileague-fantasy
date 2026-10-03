@@ -172,19 +172,20 @@ updated in `UI_REVIEW.md`.
 
 ### Public discovery and reading surfaces
 
-Public guides and season fixtures extend the existing reading-page composition,
-Mitr typography, semantic colors, and shared shell. Rules combines a short
+Public guides extend the existing reading-page composition, Mitr typography,
+semantic colors, and shared shell. Rules combines a short
 ordered beginner introduction with the detailed rule reference. The home page
 has no lower reading section: retain a short game description and compact
 public links beside the authentication choices. Fit the normal landing state
 within one viewport where space permits, while preserving natural scrolling for
 short screens, enlarged text, keyboard display and taller authentication states.
 
-Public fixture lists group matches by matchweek with readable team names,
-centered scores, and written date, time, venue, and postponement information.
-Stack timing above the matchup on narrow screens. Keep the matchweek jump links
-inside a native disclosure so a long season selector does not push the fixtures
-out of the first view. Unknown times need an explicit TBC label.
+Public season fixtures use the same data-browser composition as `/fixtures`:
+the shared Gameweek selector, date groups, club colors, and centered time or
+score. Start at the read model's current Gameweek and browse locally with
+previous/next controls. On Mobile, stack team names beside the time or score.
+Unknown times and postponed matches need explicit written labels. Keep the
+public season/timezone note and game-information links below the primary list.
 
 Finish these surfaces with visible, wrapping game-information links, including
 the guide, rules, public fixtures, support, and legal pages. Preserve practical

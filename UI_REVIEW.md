@@ -1355,3 +1355,28 @@ account was created. Keyboard display and successful authentication were exclude
 Verification passed: 145 rules/auth/SEO tests, five localization tests, TypeScript,
 ESLint, formatting, final production build and the anonymous HTTP SEO check
 (six public pages, retired-guide redirect, private headers, sitemap and robots).
+
+## 2026-10-04 shared public fixture browser
+
+`/thai-league/2026-27/fixtures` now uses the same `FixturesBrowser`, Gameweek
+bar, date groups, club colors, fixture rows and responsive geometry as
+`/fixtures`. Both initialize from the existing current-Gameweek read model;
+previous/next browsing stays in local state. Public season/timezone/source notes
+and discovery links follow the list. The semantic heading remains in initial
+HTML. Anonymous visitors retain the public shell without sidebar or hamburger.
+
+Anonymous browser review covered Thai and English at 1440x900 and 360x800,
+current GW3 kickoff times, recorded GW1 results including 0-0, previous/next
+interaction, and the disabled first-Gameweek control. Document width matched
+client width. Captures: `shared-fixtures-desktop.png`,
+`shared-fixtures-mobile-th.png`, and `shared-fixtures-mobile-en.png` in the
+2026-10-03 Codex visualization directory for this task. These are existing
+development scenario records, not production result verification.
+
+Ten temporary in-memory SSR assertions checked Thai/English TBC, zero scores,
+postponement, initial-week fallback and empty results without adding simulation
+routes or changing the database. Rules/SEO tests (138), localization tests (5),
+types, lint, formatting and production build passed. Anonymous HTTP SEO checks
+covered public metadata and private-route headers. Signed-in rendering uses the
+same extracted browser; no new authenticated account or session was created
+for this review. The supplied signed-in screenshot is the visual reference.

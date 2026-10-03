@@ -58,6 +58,15 @@ Use this hierarchy when applicable:
 Do not start a page with decorative summary cards when the user first needs to
 make a decision or understand a blocking state.
 
+## Shared fixture browser
+
+`FixturesBrowser` under `src/components/fantasy` owns the Gameweek selection,
+date grouping, club-color identity, score/kickoff display, and empty state for
+`/fixtures` and `/thai-league/2026-27/fixtures`. Both routes use the same
+`fixtures-page` geometry and server-only fixture dataset. Route wrappers own
+the shell and public supporting notes/links; authentication stays in the
+private route. Thai and English labels come directly from the language context.
+
 ## Action pattern
 
 - Give each local task one visually dominant action.
