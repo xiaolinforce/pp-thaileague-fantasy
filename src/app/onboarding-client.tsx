@@ -12,6 +12,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { preload } from "react-dom";
 import { useRouter } from "next/navigation";
 
 import { completeAuthenticationAction } from "@/app/auth-actions";
@@ -102,6 +103,11 @@ export default function OnboardingClient({
   upgradeMode?: boolean;
   returnTo?: string;
 }) {
+  if (!upgradeMode)
+    preload("/onboarding-pitch-pattern.svg", {
+      as: "image",
+      fetchPriority: "high",
+    });
   const router = useRouter();
   const setIdentity = useSetAppIdentity();
   const { language, setLanguage } = useLanguage();

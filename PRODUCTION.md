@@ -630,3 +630,9 @@ recheck it when adding external browser integrations.
 ## 2026-10-03 SEO measurement setup
 
 Search Console sc-domain:ppfootball.net was DNS-verified in the owner's existing Google account and registered in GSC Wizard. Keep the Vercel TXT verification record. GA4 property PP Thai League Fantasy (557241764), web stream Fantasy production web (16010183369), measurement ID G-BRD4T65GNK uses Thailand reporting time and THB. Enhanced measurement is disabled; the application sends explicitly filtered events after consent. See SEO.md for indexability, measurement and post-release checks.
+
+The foundation shipped as `4c66600` through Production release #106 and passed
+the production HTTP SEO checks. The Fantasy URL-prefix Search Console property
+is linked to GA4, the sitemap was accepted, and a consented Incognito visit was
+visible in GA4 Realtime on 2026-10-04. `SEO.md` records measurement limits and
+the PageSpeed baseline. No database migration accompanied this release.

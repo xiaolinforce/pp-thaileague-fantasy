@@ -100,4 +100,29 @@ This is a workflow recommendation, not an automatically scheduled job.
 Re-check current official guidance before changing structured-data or AI-search
 strategy. Community skills are prompts, not evidence that a ranking tactic works.
 
-A separate URL-prefix property https://fantasy.ppfootball.net/ was also created and auto-verified under the domain property, then activated in GSC Wizard. Prefer it for Fantasy-only reports without a hostname filter.
+A separate URL-prefix property `https://fantasy.ppfootball.net/` was also created
+and auto-verified under the domain property, then activated in GSC Wizard. Prefer
+it for Fantasy-only reports without a hostname filter. It is linked to the GA4
+Fantasy production web stream. `sign_up` and `first_squad_saved` are marked as key
+events, once per event, with no invented monetary value.
+
+## Release evidence (2026-10-04, Bangkok)
+
+The foundation shipped in `4c66600` through Production release #106. Production
+HTTP verification passed all seven public routes, seven representative private
+routes, robots and sitemap. Google accepted the sitemap at 00:02 Bangkok; its
+initial status was pending. Initial inspection of `/how-to-play` returned
+"URL is unknown to Google", with no crawl yet. Neither result means indexed.
+
+The owner's consented Incognito visit appeared in GA4 Realtime as one active
+user, with `/how-to-play`, `/rules` and public fixture page views. The administrator
+session loads no GA script. Signup and squad key events still await actual
+consented activity; no fake member or team was created for measurement testing.
+
+PageSpeed Insights at 00:05 Bangkok on production measured mobile lab scores
+75 Performance, 96 Accessibility, 100 Best Practices and 100 SEO; LCP 4.5s,
+TBT 310ms and CLS 0. CrUX returned No Data. The report identified the homepage
+CSS pitch background as LCP and the Guest button's white-on-orange contrast.
+The follow-up preloads that existing image at high priority and uses the existing
+accessible orange action tokens. These lab values are a dated baseline, not a
+ranking guarantee or a real-user Core Web Vitals result.

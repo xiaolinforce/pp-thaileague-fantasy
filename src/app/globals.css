@@ -407,10 +407,10 @@ textarea:focus-visible {
 }
 .guest-button {
   color: #fff;
-  background: var(--orange);
+  background: var(--orange-action);
 }
 .guest-button:not(:disabled):hover {
-  background: var(--orange-deep);
+  background: var(--orange-action-hover);
 }
 .auth-error {
   color: #aa2d24;

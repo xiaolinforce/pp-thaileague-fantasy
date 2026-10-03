@@ -1312,3 +1312,10 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
 ## 2026-10-03 public discovery extension
 
 Home explanatory content, /how-to-play and /thai-league/2026-27/fixtures reuse the current shell and reading archetype. Production-build checks covered anonymous rendered HTML, Thai/English metadata and copy, and 1440x1000 / 390x844 captures. Public links are native anchors. The finish reviewer requested compact matchweek navigation; native details/summary resolved it, with two fixtures visible in the first mobile viewport. The final verdict was ship for that fix only. Local captures use development scenario data and do not certify production fixture provenance. Evidence: ignored outputs/seo-audit/review/. Analytics consent is production-host-gated and requires the deployed-host check documented in SEO.md.
+
+The 2026-10-04 production PageSpeed pass found the Guest button contrast and
+homepage pitch-image discovery issues. The bounded follow-up uses existing
+orange action tokens and an SSR high-priority image preload; the production
+build and rendered preload/computed colors were verified. The owner exercised
+consent in Incognito and GA4 Realtime received the public route labels. This
+does not certify signup, team-save or consent withdrawal end-to-end.
