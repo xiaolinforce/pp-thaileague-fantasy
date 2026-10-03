@@ -1,4 +1,8 @@
 import { redirect } from "next/navigation";
+import { pageMetadata } from "@/lib/seo-server";
+import { websiteSchema } from "@/lib/seo";
+
+export const generateMetadata = () => pageMetadata("/");
 
 import OnboardingClient from "@/app/onboarding-client";
 import { getCurrentFantasyIdentity } from "@/lib/auth/context";
@@ -17,12 +21,20 @@ export default async function HomePage({
   if (identity?.manager && identity.team) redirect(returnTo);
   if (identity) redirect(authCompleteHref(returnTo));
   return (
-    <OnboardingClient
-      emailEnabled={authFeatures.email}
-      emailAvailable={await checkEmailAvailabilityAction()}
-      googleEnabled={authFeatures.google}
-      turnstileSiteKey={authFeatures.turnstileSiteKey}
-      returnTo={returnTo}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(websiteSchema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <OnboardingClient
+        emailEnabled={authFeatures.email}
+        emailAvailable={await checkEmailAvailabilityAction()}
+        googleEnabled={authFeatures.google}
+        turnstileSiteKey={authFeatures.turnstileSiteKey}
+        returnTo={returnTo}
+      />
+    </>
   );
 }

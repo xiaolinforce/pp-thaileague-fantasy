@@ -485,3 +485,11 @@ Drizzle Kit drops the legacy loader.
 Upstream advisories: [fast-uri](https://github.com/fastify/fast-uri/security/advisories/GHSA-f65p-4m7j-42xc),
 [qs](https://github.com/ljharb/qs/security/advisories/GHSA-4mjr-xmp4-gh2g), and
 [esbuild](https://github.com/evanw/esbuild/security/advisories/GHSA-67mh-4wv8-2f99).
+
+## SEO verification
+
+Run `node --experimental-strip-types --test scripts/tests/seo.test.ts` and
+`node scripts/check-seo.mjs <origin>` for metadata/indexability changes. The
+release workflow also runs the SEO unit tests. The HTTP check requires a running
+server and performs no authenticated writes. `SEO.md` owns search and measurement
+behavior.

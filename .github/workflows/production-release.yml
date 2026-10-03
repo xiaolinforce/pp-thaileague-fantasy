@@ -37,6 +37,7 @@ jobs:
       - run: npm run test:auth
       - run: npm run test:observability
       - run: npm run test:i18n
+      - run: node --experimental-strip-types --test scripts/tests/seo.test.ts
       - run: npm run test:readiness
       - run: npm run types
       - run: npm run lint

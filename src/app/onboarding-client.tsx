@@ -1,4 +1,6 @@
 "use client";
+import { IntroContent } from "@/components/public/intro-content";
+import { trackEvent } from "@/lib/analytics";
 
 import {
   ArrowLeft,
@@ -172,6 +174,7 @@ export default function OnboardingClient({
       if (result.error) throw result.error;
       const completion = await completeAuthenticationAction({ returnTo });
       setIdentity(completion.identity);
+      trackEvent("guest_start");
       router.replace(completion.destination);
     } catch (requestError) {
       setError(errorMessage(requestError));
@@ -612,6 +615,7 @@ export default function OnboardingClient({
             </p>
           )}
         </section>
+        <IntroContent />
       </main>
     </Localized>
   );

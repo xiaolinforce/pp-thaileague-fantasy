@@ -167,6 +167,26 @@ Only Team and Points currently have reference status. The other archetypes are
 working hypotheses until their routes receive rendered review and the status is
 updated in `UI_REVIEW.md`.
 
+### Public discovery and reading surfaces
+
+Public guides and season fixtures extend the existing reading-page composition,
+Mitr typography, semantic colors, and shared shell. The home introduction follows
+the authentication choices; supporting explanation must not displace starting or
+returning to a team. Guides use ordered steps and visible question-and-answer
+sections, followed by a clear path to start playing or read the full rules.
+
+Public fixture lists group matches by matchweek with readable team names,
+centered scores, and written date, time, venue, and postponement information.
+Stack timing above the matchup on narrow screens. Keep the matchweek jump links
+inside a native disclosure so a long season selector does not push the fixtures
+out of the first view. Unknown times need an explicit TBC label.
+
+Finish these surfaces with visible, wrapping game-information links, including
+the guide, rules, public fixtures, support, and legal pages. Preserve practical
+touch targets and underlined link text; discovery must not depend on opening the
+account menu. Select complete Thai or English copy from the shared language
+preference, including fixture status and supporting notes.
+
 ## Components and interaction
 
 - Use primitives under `src/components/ui` for buttons, dialogs, sheets,

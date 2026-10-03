@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
+import { PublicLinks } from "./public-links";
 
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
@@ -58,6 +59,7 @@ export default function RulesPage() {
             ))}
           </article>
         </div>
+        <PublicLinks />
       </main>
     </AppShell>
   );

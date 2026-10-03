@@ -1,4 +1,5 @@
 "use client";
+import { trackEvent } from "@/lib/analytics";
 
 import {
   ArrowLeftRight,
@@ -1344,6 +1345,7 @@ export default function TeamClient({
           activeChip,
         });
         if (result.ok) {
+          if (result.firstSquadSaved) trackEvent("first_squad_saved");
           selectionRevision.current = result.revision;
           setSavedPlayersBySlot(
             captureSavedDraftPlayers(submittedMembers, playerPositionsById),

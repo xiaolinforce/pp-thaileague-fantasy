@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PublicLinks } from "./public-links";
 
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
@@ -63,6 +64,7 @@ export default function HelpPage() {
             </div>
           </section>
         </section>
+        <PublicLinks />
       </main>
     </AppShell>
   );

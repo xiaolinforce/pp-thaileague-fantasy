@@ -1,17 +1,30 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/seo-server";
 
 import {
   LegalDocument,
   type LegalSection,
 } from "@/components/fantasy/legal-document";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | PP Thai League Fantasy",
-  description:
-    "How PP Thai League Fantasy collects, uses, stores, and protects personal data.",
-};
+export const generateMetadata = () => pageMetadata("/privacy");
 
 const sections: LegalSection[] = [
+  {
+    id: "analytics",
+    title: {
+      th: "การวิเคราะห์การใช้งานที่คุณเลือกได้",
+      en: "Optional usage analytics",
+    },
+    paragraphs: [
+      {
+        th: "หากคุณอนุญาต เราจะโหลด Google Analytics 4 เพื่อวัดการเข้าชม แหล่งที่มา การเริ่มเล่นแบบ Guest การสมัครสำเร็จ และการบันทึกทีมครั้งแรก Google อาจประมวลผลตัวระบุคุกกี้ ข้อมูลอุปกรณ์ และข้อมูลการใช้งานในต่างประเทศ เราไม่ส่งชื่อ อีเมล ชื่อทีม รหัสบัญชี หรือพารามิเตอร์ลับใน URL ให้ Analytics และไม่เปิด Google Signals หรือการปรับโฆษณาตามบุคคล",
+        en: "If you allow it, we load Google Analytics 4 to measure visits, referral sources, guest starts, completed registrations and first squad saves. Google may process cookie identifiers, device information and usage data outside Thailand. We do not send names, emails, team names, account IDs or secret URL parameters to Analytics, and do not enable Google Signals or advertising personalisation.",
+      },
+      {
+        th: "คุณปฏิเสธได้โดยยังเล่นเกมตามปกติ และถอนความยินยอมผ่านปุ่มตั้งค่าคุกกี้วิเคราะห์ท้ายหน้านี้หรือหน้าตั้งค่า ก่อนอนุญาตจะไม่โหลด Analytics คุกกี้ Analytics ที่ตั้งโดยเว็บนี้มีอายุสูงสุด 90 วันและอาจต่ออายุเมื่อกลับมาใช้บริการ การถอนความยินยอมจะหยุดการเก็บครั้งต่อไปและลบคุกกี้ดังกล่าวบนอุปกรณ์นี้ แต่ไม่ลบข้อมูลที่ส่งไปแล้ว คุณติดต่อเราเพื่อขอจัดการข้อมูลเพิ่มเติมได้",
+        en: "You can decline and still play normally, or withdraw consent using Analytics cookie settings below or on Settings. Analytics is not loaded before consent. Analytics cookies set by this site last up to 90 days and may be renewed on return visits. Withdrawal stops future collection and removes those cookies on this device; it does not erase previously sent data. Contact us for further data requests.",
+      },
+    ],
+  },
   {
     id: "controller",
     title: {
@@ -164,7 +177,7 @@ export default function PrivacyPage() {
         th: "ข้อมูลที่เราเก็บ เหตุผลที่ใช้ การเปิดเผย การเก็บรักษา และสิทธิของคุณ",
         en: "What we collect, why we use it, how it is shared and retained, and your rights.",
       }}
-      updatedAt={{ th: "3 กันยายน 2569", en: "September 3, 2026" }}
+      updatedAt={{ th: "3 ตุลาคม 2569", en: "October 3, 2026" }}
       sections={sections}
     />
   );

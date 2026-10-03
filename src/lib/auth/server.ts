@@ -67,6 +67,28 @@ const authPlugins = [
 
 export const auth = betterAuth({
   appName: "PP Thai League Fantasy",
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user, context) => {
+          // A short-lived receipt for an actual member creation, consumed after sign-in.
+          // No identifier or account data is included or sent to Analytics.
+          if (
+            !user.isAnonymous &&
+            context?.getCookie("pp-fantasy-analytics") === "granted"
+          ) {
+            context.setCookie("pp-fantasy-sign-up", "1", {
+              path: "/",
+              maxAge: 600,
+              httpOnly: false,
+              sameSite: "lax",
+              secure: process.env.NODE_ENV === "production",
+            });
+          }
+        },
+      },
+    },
+  },
   hooks: { before: awaitEmailDelivery },
   advanced: {
     cookiePrefix: "pp-thaileague-fantasy",

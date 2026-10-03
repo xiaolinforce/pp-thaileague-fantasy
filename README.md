@@ -205,3 +205,7 @@ Rules, Help, Privacy and Terms use the same database-backed `(app)` layout as th
 game routes so their shell receives the current manager identity and navigation
 state in the initial render. Interface language follows the account or device
 preference; separate `/en/…` document routes are not published.
+
+## Search and measurement
+
+See [SEO.md](SEO.md) for public search routes, Search Console, consented GA4 events, and verification commands.
