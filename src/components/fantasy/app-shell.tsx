@@ -443,6 +443,19 @@ export function AppShell({
   const pathname = usePathname();
   const identity = useAppIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
+  const compactTopbar = (
+    <div className="compact-topbar">
+      {identity && (
+        <SheetTrigger
+          className="compact-menu-trigger"
+          aria-label={message("openNavigation")}
+        >
+          <Menu size={23} strokeWidth={2} aria-hidden="true" />
+        </SheetTrigger>
+      )}
+      <Brand />
+    </div>
+  );
   return (
     <>
       <div className="app-shell">
@@ -450,45 +463,47 @@ export function AppShell({
           {message("skipContent")}
         </a>
         {showDevelopmentLanguageTester ? <DevelopmentLanguageTester /> : null}
-        <aside className="sidebar">
-          <SidebarContent pathname={pathname} identity={identity} />
-        </aside>
+        {identity && (
+          <aside className="sidebar">
+            <SidebarContent pathname={pathname} identity={identity} />
+          </aside>
+        )}
 
-        <div className="main-shell">
-          <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
-            <div className="compact-topbar">
-              <SheetTrigger
-                className="compact-menu-trigger"
-                aria-label={message("openNavigation")}
+        <div
+          className={`main-shell${identity ? "" : ` ${styles.publicMainShell}`}`}
+        >
+          {identity ? (
+            <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
+              {compactTopbar}
+              <SheetContent
+                side="left"
+                className="compact-sidebar-sheet"
+                showCloseButton={false}
               >
-                <Menu size={23} strokeWidth={2} aria-hidden="true" />
-              </SheetTrigger>
-              <Brand />
-            </div>
-            <SheetContent
-              side="left"
-              className="compact-sidebar-sheet"
-              showCloseButton={false}
-            >
-              <SheetHeader className="sr-only">
-                <SheetTitle>{message("mainNavigation")}</SheetTitle>
-              </SheetHeader>
-              <aside className="drawer-sidebar">
-                <SheetClose
-                  className="compact-sidebar-close"
-                  aria-label={message("closeNavigation")}
-                >
-                  <Menu size={17} strokeWidth={2} aria-hidden="true" />
-                  <span className="sr-only">{message("closeNavigation")}</span>
-                </SheetClose>
-                <SidebarContent
-                  pathname={pathname}
-                  identity={identity}
-                  onNavigate={() => setMenuOpen(false)}
-                />
-              </aside>
-            </SheetContent>
-          </Sheet>
+                <SheetHeader className="sr-only">
+                  <SheetTitle>{message("mainNavigation")}</SheetTitle>
+                </SheetHeader>
+                <aside className="drawer-sidebar">
+                  <SheetClose
+                    className="compact-sidebar-close"
+                    aria-label={message("closeNavigation")}
+                  >
+                    <Menu size={17} strokeWidth={2} aria-hidden="true" />
+                    <span className="sr-only">
+                      {message("closeNavigation")}
+                    </span>
+                  </SheetClose>
+                  <SidebarContent
+                    pathname={pathname}
+                    identity={identity}
+                    onNavigate={() => setMenuOpen(false)}
+                  />
+                </aside>
+              </SheetContent>
+            </Sheet>
+          ) : (
+            compactTopbar
+          )}
           {localizeContent ? <Localized>{children}</Localized> : children}
         </div>
       </div>

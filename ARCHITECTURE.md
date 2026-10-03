@@ -499,9 +499,12 @@ Recheck CSP whenever an external browser integration or Sentry region changes.
 
 Rules, Help, Privacy and Terms use the `(app)` root layout and the same initial
 identity, navigation availability and request language as game routes. The shell
-therefore renders the current manager menu without a second client-side identity
-request. These document routes depend on the database-backed layout and do not
-have separate `/en/…` counterparts; English content follows the account or device
+therefore renders navigation only when a manager identity exists, without a
+second client-side identity request. Visitors without a session receive no
+sidebar or compact drawer, and their main canvas has no sidebar offset. Started
+Guest sessions retain player navigation. These document routes depend on the
+database-backed layout and do not have separate `/en/…` counterparts; English
+content follows the account or device
 language used throughout the application.
 
 The lightweight common namespace and explicit message keys own shared-shell copy.

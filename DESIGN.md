@@ -124,6 +124,9 @@ their own account controls.
 
 Reuse `AppShell` and `PageHeader` for authenticated product routes.
 
+- Visitors without a session see no sidebar, hamburger, or navigation drawer
+  on any route. Their main canvas uses the full available width; the compact
+  Top bar retains the brand. A started Guest session has normal player navigation.
 - Desktop uses a fixed 238px navy sidebar and a flexible main canvas.
 - Mobile and Tablet use a navy Top bar with a hamburger that opens the same full
   navigation in a left drawer.
@@ -326,9 +329,11 @@ areas. Internal bot counts and labels appear only within authorized admin pages.
 ## Document shell contract (2026-09-06)
 
 Reading pages share the game layout, request language and manager identity. Their
-shell must expose the same Profile, Settings, upgrade and sign-out controls as the
-rest of the application. Shared shell messages use explicit common keys instead
-of traversing the page, while document content selects its Thai or English copy
+shell exposes the same Profile, Settings, upgrade and sign-out controls as the
+rest of the application when a manager identity exists. Visitors without a
+session use the public shell without the sidebar or compact menu. Shared shell
+messages use explicit common keys instead of traversing the page, while document
+content selects its Thai or English copy
 from the common request language. Game and admin compatibility translations remain
 separate namespaces until individually migrated.
 

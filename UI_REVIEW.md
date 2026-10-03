@@ -1319,3 +1319,17 @@ orange action tokens and an SSR high-priority image preload; the production
 build and rendered preload/computed colors were verified. The owner exercised
 consent in Incognito and GA4 Realtime received the public route labels. This
 does not certify signup, team-save or consent withdrawal end-to-end.
+
+## 2026-10-04 public navigation visibility
+
+The shared AppShell now omits the Desktop sidebar and compact hamburger/drawer
+when there is no manager identity. The public main canvas removes the 238px
+sidebar offset; the compact brand remains. Started Guest and member sessions
+retain the same navigation condition, independent of the current route.
+
+Local Chrome checks covered `/how-to-play` without a session at 1440x900 and
+390x844: no sidebar or hamburger nodes, zero main-canvas left offset, and no
+Mobile horizontal overflow. The existing Guest session on `/rules` retained its
+Desktop sidebar and opened/closed the Mobile drawer. Thai was rendered; no copy
+or language-specific condition changed. Targeted ESLint and formatting passed.
+No account sign-in/sign-out, team write, or production deployment was performed.

@@ -1,3 +1,8 @@
+:global(.main-shell).publicMainShell {
+  width: 100%;
+  margin-left: 0;
+}
+
 :global(.side-nav) .disabledNavigationItem {
   position: relative;
   width: 100%;
