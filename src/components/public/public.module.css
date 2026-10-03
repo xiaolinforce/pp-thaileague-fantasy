@@ -70,9 +70,3 @@
   flex-wrap: wrap;
   gap: 12px;
 }
-.fixtureNote {
-  margin: 24px 0 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.8;
-}

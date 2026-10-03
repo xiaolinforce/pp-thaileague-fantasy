@@ -185,7 +185,7 @@ the shared Gameweek selector, date groups, club colors, and centered time or
 score. Start at the read model's current Gameweek and browse locally with
 previous/next controls. On Mobile, stack team names beside the time or score.
 Unknown times and postponed matches need explicit written labels. Keep the
-public season/timezone note and game-information links below the primary list.
+game-information links below the primary list.
 
 Finish these surfaces with visible, wrapping game-information links, including
 the guide, rules, public fixtures, support, and legal pages. Preserve practical
