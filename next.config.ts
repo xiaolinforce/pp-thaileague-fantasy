@@ -6,11 +6,11 @@ const isDevelopment = process.env.NODE_ENV === "development";
 // Per-request nonces would require request-specific CSP plumbing across the app.
 const contentSecurityPolicy = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
+  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com https://www.googletagmanager.com${isDevelopment ? " 'unsafe-eval'" : ""}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob: https:",
   "font-src 'self'",
-  `connect-src 'self' https://challenges.cloudflare.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io${isDevelopment ? " ws://localhost:* ws://127.0.0.1:*" : ""}`,
+  `connect-src 'self' https://challenges.cloudflare.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io https://*.ingest.de.sentry.io https://www.google-analytics.com https://region1.google-analytics.com https://www.googletagmanager.com${isDevelopment ? " ws://localhost:* ws://127.0.0.1:*" : ""}`,
   "frame-src https://challenges.cloudflare.com",
   "worker-src 'self' blob:",
   "object-src 'none'",
@@ -22,6 +22,22 @@ const contentSecurityPolicy = [
 const nextConfig: NextConfig = {
   async headers() {
     return [
+      ...[
+        "team",
+        "points",
+        "leagues",
+        "fixtures",
+        "profile",
+        "settings",
+        "upgrade",
+        "auth",
+        "admin",
+        "email",
+        "api",
+      ].map((path) => ({
+        source: `/${path}/:rest*`,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      })),
       {
         source: "/:path*",
         headers: [

@@ -55,8 +55,8 @@ Fantasy service:
    recovery drill remains.
 6. Expand automated coverage to Server Actions, database invariants,
    source-data maintenance, and end-to-end critical paths.
-7. Public Thai/English SEO routes, shared-shell keys, isolated dictionaries and
-   server-translated Points are implemented. Continue migrating the remaining
+7. Public SEO metadata, beginner guidance, season fixtures, shared-shell keys and
+   server-translated Points are implemented. English remains a same-URL display mode, not separate SEO routes. Continue migrating the remaining
    game screens from the compatibility translation boundary to explicit keys.
 8. Review privacy, terms of play, competition/player data usage, club identity,
    and abuse controls.

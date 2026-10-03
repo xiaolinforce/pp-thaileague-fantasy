@@ -39,7 +39,7 @@ import { getTransferRevisionState } from "./transfer-revisions";
 import { updateFantasyPlayerOwnershipForSelection } from "./ownership-service";
 
 export type FantasySelectionResult =
-  | { ok: true; message: string; revision: number }
+  | { ok: true; message: string; revision: number; firstSquadSaved: boolean }
   | { ok: false; message: string; violations?: string[]; conflict?: boolean };
 
 export type FantasySelectionRevertResult =
@@ -271,6 +271,21 @@ export async function saveFantasySelectionInTransaction(
     };
   }
   const revision = currentRevision + 1;
+  // The team lock serializes saves; include reverted revisions so restoring an
+  // empty opening squad cannot count as a second first save. No scoring changes.
+  const previousSave =
+    openingGameweek && currentRevision === 0
+      ? await db
+          .select({ id: fantasyTransferRevisions.id })
+          .from(fantasyTransferRevisions)
+          .innerJoin(
+            fantasyTeamSelections,
+            eq(fantasyTransferRevisions.selectionId, fantasyTeamSelections.id),
+          )
+          .where(eq(fantasyTeamSelections.fantasyTeamId, team.id))
+          .limit(1)
+      : [true];
+  const firstSquadSaved = previousSave.length === 0;
   const playerValues: Array<typeof fantasyTeamSelectionPlayers.$inferInsert> =
     lineup.map((player) => ({
       selectionId: selection.id,
@@ -331,6 +346,7 @@ export async function saveFantasySelectionInTransaction(
   return {
     ok: true,
     revision,
+    firstSquadSaved,
     message: "บันทึกทีมเรียบร้อย",
   };
 }

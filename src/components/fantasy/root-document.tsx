@@ -10,6 +10,7 @@ const mitr = Mitr({
 });
 
 export const metadata: Metadata = {
+  robots: { index: false, follow: false },
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3006",
   ),

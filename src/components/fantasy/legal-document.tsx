@@ -2,6 +2,7 @@
 
 import { ScrollText, ShieldCheck } from "lucide-react";
 import Link from "next/link";
+import { PublicLinks } from "@/components/public/public-links";
 
 import { AppShell } from "@/components/fantasy/app-shell";
 import { useLanguage } from "@/components/fantasy/i18n";
@@ -118,6 +119,7 @@ export function LegalDocument({
             </footer>
           </article>
         </div>
+        <PublicLinks />
       </main>
     </AppShell>
   );

@@ -626,3 +626,7 @@ place the credential in a URL. Since 2026-09-06 the document routes use the same
 database-backed layout as the game and may be unavailable during a database
 outage. CSP includes the current Turnstile, Google and Sentry browser requirements;
 recheck it when adding external browser integrations.
+
+## 2026-10-03 SEO measurement setup
+
+Search Console sc-domain:ppfootball.net was DNS-verified in the owner's existing Google account and registered in GSC Wizard. Keep the Vercel TXT verification record. GA4 property PP Thai League Fantasy (557241764), web stream Fantasy production web (16010183369), measurement ID G-BRD4T65GNK uses Thailand reporting time and THB. Enhanced measurement is disabled; the application sends explicitly filtered events after consent. See SEO.md for indexability, measurement and post-release checks.

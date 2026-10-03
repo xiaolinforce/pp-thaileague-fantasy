@@ -1,4 +1,5 @@
 import { RootDocument } from "@/components/fantasy/root-document";
+import { AnalyticsConsent } from "@/components/public/analytics-consent";
 export { metadata } from "@/components/fantasy/root-document";
 import type { ReactNode } from "react";
 import { GameProviders } from "@/components/fantasy/game-providers";
@@ -41,6 +42,7 @@ export default async function GameLayout({
       >
         <div lang={language} className="contents">
           {children}
+          <AnalyticsConsent />
         </div>
       </GameProviders>
     </RootDocument>

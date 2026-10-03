@@ -516,3 +516,7 @@ CRON_SECRET Bearer credential before issuing a shared-client `select 1`; it
 returns 200 or a bounded 503 with no SQL/provider details and never caches the
 response. Its five-second response deadline does not claim cancellation of a
 already dispatched driver request. No external monitor was created by this change.
+
+## Public discovery and analytics
+
+Public discovery routes share the existing dynamic application shell and language preference. The public season fixtures page reads only the server-only fixtures dataset. Metadata defaults to noindex; reviewed public routes opt in via src/lib/seo.ts. Analytics is client-only, production-host-only and opt-in; auth creation emits a short-lived consented signup receipt, and the existing selection transaction returns a first-save flag without changing rules or schema. See SEO.md.

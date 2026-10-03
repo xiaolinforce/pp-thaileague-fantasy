@@ -1308,3 +1308,7 @@ Rules, Help, Privacy and Terms now use the database-backed game layout.
 - **Boundaries/runtime:** Mobile retains its existing dialog flow; Desktop keeps
   its inline filter controls. No player selection, filter save, or team save
   was performed during review.
+
+## 2026-10-03 public discovery extension
+
+Home explanatory content, /how-to-play and /thai-league/2026-27/fixtures reuse the current shell and reading archetype. Production-build checks covered anonymous rendered HTML, Thai/English metadata and copy, and 1440x1000 / 390x844 captures. Public links are native anchors. The finish reviewer requested compact matchweek navigation; native details/summary resolved it, with two fixtures visible in the first mobile viewport. The final verdict was ship for that fix only. Local captures use development scenario data and do not certify production fixture provenance. Evidence: ignored outputs/seo-audit/review/. Analytics consent is production-host-gated and requires the deployed-host check documented in SEO.md.
