@@ -4,7 +4,6 @@ export const SITE_URL = "https://fantasy.ppfootball.net";
 export const SITE_NAME = "PP Thai League Fantasy";
 export const PUBLIC_PATHS = [
   "/",
-  "/how-to-play",
   "/rules",
   "/thai-league/2026-27/fixtures",
   "/help",
@@ -26,24 +25,14 @@ const copy: Record<PublicPath, { th: [string, string]; en: [string, string] }> =
         "Build a 15-player Thai League fantasy squad, choose your captain and compete with friends using points from real matches. Try playing as a guest.",
       ],
     },
-    "/how-to-play": {
-      th: [
-        "วิธีเล่นแฟนตาซีไทยลีกสำหรับมือใหม่",
-        "เริ่มเล่น PP Thai League Fantasy ตั้งแต่เลือกนักเตะ จัดตัวจริง เลือกกัปตัน บันทึกทีมก่อนเส้นตาย ไปจนถึงดูคะแนนและเข้าลีกกับเพื่อน",
-      ],
-      en: [
-        "How to play Thai League Fantasy",
-        "Start your first fantasy squad: select players, pick your starting eleven and captain, save before the deadline and join a league with friends.",
-      ],
-    },
     "/rules": {
       th: [
-        "กติกาและวิธีคิดคะแนนแฟนตาซีไทยลีก",
-        "อ่านกติกาเลือกทีม โควตานักเตะ Level การย้ายทีม ชิป กัปตัน ตัวสำรอง และการคิดคะแนนของ PP Thai League Fantasy",
+        "กติกาและวิธีเล่นแฟนตาซีไทยลีก",
+        "เริ่มเล่น PP Thai League Fantasy พร้อมกติกาเลือกทีม โควตานักเตะ Level การย้ายทีม ชิป กัปตัน ตัวสำรอง และการคิดคะแนน",
       ],
       en: [
-        "Game rules and fantasy scoring",
-        "Read the squad limits, player tiers, transfer rules, chips, captaincy, substitutions and scoring rules for PP Thai League Fantasy.",
+        "Thai League Fantasy rules and how to play",
+        "Get started with PP Thai League Fantasy and read the squad limits, player tiers, transfers, chips, captaincy, substitutions and scoring rules.",
       ],
     },
     "/thai-league/2026-27/fixtures": {

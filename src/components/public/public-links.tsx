@@ -8,8 +8,7 @@ export function PublicLinks() {
   const { language } = useLanguage();
   const links = [
     ["/", "เริ่มเล่น", "Start playing"],
-    ["/how-to-play", "วิธีเล่น", "How to play"],
-    ["/rules", "กติกาและคะแนน", "Rules and scoring"],
+    ["/rules", "กติกาและวิธีเล่น", "Rules and how to play"],
     ["/thai-league/2026-27/fixtures", "โปรแกรมไทยลีก", "Thai League fixtures"],
     ["/help", "ช่วยเหลือ", "Help"],
     ["/privacy", "ความเป็นส่วนตัว", "Privacy"],

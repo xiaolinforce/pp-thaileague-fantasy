@@ -57,7 +57,7 @@ open.
 | `/fixtures`                   | Competition fixtures grouped by Gameweek.                                                   |
 | `/profile`                    | Account details, the public team name, or Guest upgrade.                                    |
 | `/settings`                   | Interface language preference for the current identity/device.                              |
-| `/rules`                      | Public rules generated from the executable Fantasy configuration.                           |
+| `/rules`                      | Public beginner introduction and rules generated from the executable Fantasy configuration. |
 | `/help`                       | Public Facebook and email support, plus privacy and terms links.                            |
 | `/privacy`                    | Public bilingual privacy policy and data-rights contact.                                    |
 | `/terms`                      | Public bilingual service and fair-play terms.                                               |

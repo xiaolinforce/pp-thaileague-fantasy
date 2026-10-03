@@ -1,5 +1,4 @@
 "use client";
-import { IntroContent } from "@/components/public/intro-content";
 import { trackEvent } from "@/lib/analytics";
 
 import {
@@ -525,7 +524,7 @@ export default function OnboardingClient({
 
           <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
           <h1>จัดทีมไทยลีกของคุณ</h1>
-          <p>เลือกนักเตะ ลุ้นคะแนน และแข่งกับเพื่อนตลอดฤดูกาล</p>
+          <p>เลือกนักเตะไทยลีก 15 คน ลุ้นคะแนนจากผลงานจริง และแข่งกับเพื่อน</p>
         </section>
 
         <section className="onboarding-panel" aria-labelledby="start-title">
@@ -620,8 +619,20 @@ export default function OnboardingClient({
               {error}
             </p>
           )}
+          <nav
+            className="onboarding-links"
+            aria-label={language === "th" ? "ข้อมูลเกม" : "Game information"}
+            data-localize="off"
+          >
+            <Link href="/rules">
+              {language === "th" ? "กติกาและวิธีเล่น" : "Rules and how to play"}
+            </Link>
+            <Link href="/thai-league/2026-27/fixtures">
+              {language === "th" ? "โปรแกรมแข่งขัน" : "Fixtures"}
+            </Link>
+            <Link href="/help">{language === "th" ? "ช่วยเหลือ" : "Help"}</Link>
+          </nav>
         </section>
-        <IntroContent />
       </main>
     </Localized>
   );

@@ -19,9 +19,16 @@ test("analytics never exposes private URL parameters or league identifiers", () 
     "/admin/fantasy/participants/person",
     "/upgrade",
     "/unreviewed-page",
+    "/how-to-play",
   ]) {
     assert.equal(analyticsPath(path), null);
   }
+});
+
+test("retired guide is excluded from public indexing and measurement", () => {
+  assert.ok(!PUBLIC_PATHS.some((path: string) => path === "/how-to-play"));
+  assert.equal(analyticsPath("/how-to-play"), null);
+  assert.equal(analyticsPath("/rules"), "/rules");
 });
 
 test("public pages have unique titles and canonical URLs in both languages", () => {

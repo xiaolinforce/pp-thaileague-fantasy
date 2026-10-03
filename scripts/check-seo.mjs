@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 const origin = new URL(process.argv[2] || "http://127.0.0.1:3016").origin;
 const paths = [
   "/",
-  "/how-to-play",
   "/rules",
   "/help",
   "/privacy",
@@ -40,6 +39,15 @@ for (const path of paths) {
   console.log(`PASS public ${path}`);
 }
 assert.equal(new Set(titles).size, paths.length);
+const retiredGuide = await fetch(origin + "/how-to-play", {
+  redirect: "manual",
+});
+assert.equal(retiredGuide.status, 308, "guide permanently redirects");
+assert.equal(
+  new URL(retiredGuide.headers.get("location"), origin).pathname,
+  "/rules",
+);
+console.log("PASS retired guide redirects to rules");
 for (const path of [
   "/team",
   "/points",
@@ -58,6 +66,10 @@ for (const path of [
 }
 const sitemap = await (await fetch(origin + "/sitemap.xml")).text();
 assert.equal((sitemap.match(/<loc>/g) || []).length, paths.length);
+assert.ok(
+  !sitemap.includes("/how-to-play"),
+  "retired guide is absent from sitemap",
+);
 for (const path of paths)
   assert.ok(
     sitemap.includes(

@@ -229,6 +229,21 @@ textarea:focus-visible {
   align-self: center;
   justify-self: center;
 }
+.onboarding-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0 18px;
+  margin-top: 16px;
+  font-size: 14px;
+}
+.onboarding-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
 .onboarding-panel-heading {
   margin-bottom: 18px;
 }
@@ -528,6 +543,7 @@ textarea:focus-visible {
 @media (width < 80rem) {
   .onboarding-page {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
   }
   .onboarding-hero {
     min-height: auto;
@@ -548,7 +564,7 @@ textarea:focus-visible {
     right: 16px;
   }
   .onboarding-hero {
-    padding: 82px 20px 30px;
+    padding: 76px 20px 24px;
   }
   .onboarding-kicker {
     font-size: 15px;

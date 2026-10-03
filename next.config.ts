@@ -20,6 +20,9 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
+  async redirects() {
+    return [{ source: "/how-to-play", destination: "/rules", permanent: true }];
+  },
   async headers() {
     return [
       ...[

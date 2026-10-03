@@ -4,6 +4,20 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-10-04 — Consolidate beginner guidance into Rules
+
+**Decision:** Keep `/rules` as the single public page for learning to play and
+referencing Fantasy rules. Permanently redirect `/how-to-play` there. Remove
+the lower introduction from Home and retain compact public links beside sign-in.
+
+**Context:** The owner prefers a compact entry screen and one maintainable
+rules page instead of separate guides. Search discovery must support that flow.
+
+**Consequences:** Rules keeps a short bilingual beginner introduction. The
+retired guide is absent from the sitemap and current analytics allowlist.
+Normal landing screens should fit a viewport, while short screens, zoom and
+taller authentication states can scroll so controls remain reachable.
+
 ## 2026-09-19 — Vacant squad slots restore the latest saved player
 
 **Decision:** A vacant slot offers Restore only when that slot has a player in

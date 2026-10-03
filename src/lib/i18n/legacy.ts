@@ -108,6 +108,8 @@ const translations: Record<string, string> = {
     "Sign in to save this team and continue on any device",
   "เลือกนักเตะ ลุ้นคะแนน และแข่งกับเพื่อนตลอดฤดูกาล":
     "Pick players, score points, and compete with friends all season",
+  "เลือกนักเตะไทยลีก 15 คน ลุ้นคะแนนจากผลงานจริง และแข่งกับเพื่อน":
+    "Pick 15 Thai League players, earn points from real performances, and compete with friends",
   พร้อมลงสนาม: "Ready to play",
   เก็บทีมของคุณ: "Save your team",
   เริ่มเล่น: "Start playing",

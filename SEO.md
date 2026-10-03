@@ -8,11 +8,17 @@ the existing language preference. English is a display mode on the same URL,
 not a separate locale route. Do not publish `/en` hreflang until real English
 routes and their canonical policy exist.
 
-Indexable routes: `/`, `/how-to-play`, `/rules`, `/help`, `/privacy`, `/terms`,
+Indexable routes: `/`, `/rules`, `/help`, `/privacy`, `/terms`,
 and `/thai-league/2026-27/fixtures`. Each has its own title, description,
 canonical, Open Graph and Twitter metadata. The home page includes a WebSite
 schema with the real PP Football publisher. No invented ratings, FAQ rich-result
 promises, injury news or automatic mass-generated player pages.
+
+Rules includes a short beginner introduction followed by the executable-rule
+reference. `/how-to-play` permanently redirects to `/rules` with HTTP 308 and
+is excluded from public metadata, the sitemap and analytics route labels. The
+home page contains the authentication choices, a short game description and
+compact links to Rules, public fixtures and Help, without a lower content section.
 
 The shared root defaults to noindex; public pages opt in. Private/auth/admin/API
 route families also receive `X-Robots-Tag: noindex, nofollow`, including redirects.

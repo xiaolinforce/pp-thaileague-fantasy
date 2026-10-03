@@ -173,10 +173,12 @@ updated in `UI_REVIEW.md`.
 ### Public discovery and reading surfaces
 
 Public guides and season fixtures extend the existing reading-page composition,
-Mitr typography, semantic colors, and shared shell. The home introduction follows
-the authentication choices; supporting explanation must not displace starting or
-returning to a team. Guides use ordered steps and visible question-and-answer
-sections, followed by a clear path to start playing or read the full rules.
+Mitr typography, semantic colors, and shared shell. Rules combines a short
+ordered beginner introduction with the detailed rule reference. The home page
+has no lower reading section: retain a short game description and compact
+public links beside the authentication choices. Fit the normal landing state
+within one viewport where space permits, while preserving natural scrolling for
+short screens, enlarged text, keyboard display and taller authentication states.
 
 Public fixture lists group matches by matchweek with readable team names,
 centered scores, and written date, time, venue, and postponement information.

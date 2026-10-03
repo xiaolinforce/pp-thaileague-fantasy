@@ -18,7 +18,6 @@ export function analyticsPath(path: string): string | null {
   if (/^\/leagues\/[^/]+/.test(clean)) return "/leagues/detail";
   return [
     "/",
-    "/how-to-play",
     "/rules",
     "/help",
     "/privacy",

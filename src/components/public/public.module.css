@@ -1,9 +1,3 @@
-.intro {
-  grid-column: 1 / -1;
-  padding: 48px 24px;
-  background: var(--warm);
-  color: var(--ink);
-}
 .consent {
   position: fixed;
   z-index: 80;
@@ -30,23 +24,6 @@
   margin: 24px auto 100px;
   padding: 0 24px;
 }
-.introInner {
-  max-width: 880px;
-  margin: 0 auto;
-}
-.intro h2 {
-  margin: 0 0 20px;
-  font-size: clamp(24px, 3vw, 32px);
-}
-.intro p,
-.guide p {
-  line-height: 1.8;
-  margin: 12px 0 24px;
-}
-.note {
-  color: var(--muted);
-  font-size: 14px;
-}
 .links {
   display: flex;
   flex-wrap: wrap;
@@ -64,32 +41,29 @@
   text-decoration: underline;
   text-underline-offset: 4px;
 }
-.guide {
-  max-width: 780px;
-}
-.steps {
+.quickStart {
   padding-left: 28px;
+  margin: 20px 0;
+  list-style: decimal;
 }
-.steps li {
+:global(.rules-document-section) .quickStart > li {
   padding-left: 8px;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
-.steps li::marker {
+:global(.rules-document-section) .quickStart > li::before {
+  content: none;
+}
+.quickStart li::marker {
   color: var(--orange-deep);
   font-weight: 500;
 }
-.guide h2 {
-  font-size: 23px;
+.quickStart h3 {
+  font-size: 18px;
   line-height: 1.5;
   margin: 0 0 8px;
 }
-.guide h3 {
-  font-size: 18px;
-  margin: 24px 0 8px;
-}
-.faq {
-  border-top: 1px solid var(--line);
-  padding-top: 28px;
+.quickStart p {
+  line-height: 1.8;
 }
 .actions {
   display: flex;
@@ -158,14 +132,8 @@
   white-space: nowrap;
 }
 @media (max-width: 48rem) {
-  .intro {
-    padding: 32px 20px;
-  }
   .fixture {
     grid-template-columns: 1fr;
     gap: 10px;
-  }
-  .guide h2 {
-    font-size: 21px;
   }
 }

@@ -1333,3 +1333,25 @@ Mobile horizontal overflow. The existing Guest session on `/rules` retained its
 Desktop sidebar and opened/closed the Mobile drawer. Thai was rendered; no copy
 or language-specific condition changed. Targeted ESLint and formatting passed.
 No account sign-in/sign-out, team write, or production deployment was performed.
+
+## 2026-10-04 consolidated Rules and compact Home
+
+Removed the separate guide and lower Home introduction. Rules now begins with
+three bilingual getting-started steps and retains the executable-rule reference.
+Home keeps a short game description and compact links to Rules, fixtures and Help.
+The retired `/how-to-play` URL returns HTTP 308 to `/rules` and is absent from
+current public metadata, the sitemap and analytics route labels.
+
+The local production build was reviewed without a session in Chrome. Home fit
+1440x900 and 390x844 with all three authentication choices, in Thai and English.
+A 360x640 viewport retained natural vertical scrolling and no horizontal overflow;
+the Email form remained reachable. Rules was reviewed in Thai on Mobile and
+English on Desktop, with three numbered steps, contents links and no sidebar.
+The local server's process-only `AUTH_PRODUCTION_READY=true` enabled provider
+choices for this read-only UI pass; no credentials, stored environment settings,
+production configuration or database records changed. No OTP was sent and no
+account was created. Keyboard display and successful authentication were excluded.
+
+Verification passed: 145 rules/auth/SEO tests, five localization tests, TypeScript,
+ESLint, formatting, final production build and the anonymous HTTP SEO check
+(six public pages, retired-guide redirect, private headers, sitemap and robots).
