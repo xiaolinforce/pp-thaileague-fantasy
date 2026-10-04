@@ -97,7 +97,7 @@ export function publicMetadata(
       type: "website",
       locale: language === "th" ? "th_TH" : "en_GB",
       images: [
-        { url: `${SITE_URL}/og.png`, width: 1729, height: 910, alt: SITE_NAME },
+        { url: `${SITE_URL}/og.png`, width: 1728, height: 910, alt: SITE_NAME },
       ],
     },
     twitter: {

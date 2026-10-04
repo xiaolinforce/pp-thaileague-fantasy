@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     description: "จัดทีมไทยลีกในฝันของคุณ วางแผน และท้าทายเพื่อนตลอดฤดูกาล",
     type: "website",
     locale: "th_TH",
-    images: [{ url: "/og.png", width: 1729, height: 910 }],
+    images: [{ url: "/og.png", width: 1728, height: 910 }],
   },
   twitter: {
     card: "summary_large_image",
