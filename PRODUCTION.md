@@ -17,6 +17,67 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-10-09 GW4 opening-match points
+
+The owner approved importing Ratchaburi 6-0 Sukhothai, fixture `37441`, into
+production. Batch `gw4-ratchaburi-sukhothai-20261009` asserted branch
+`br-tiny-shape-azrvakql`, database `neondb`, the scheduled fixture with no
+existing stats, unchanged player identities/locked positions, and the fresh
+registered/selected player set. It took the season lock before fixture and
+Gameweek locks. A complete rollback rehearsal passed before the commit.
+The pre-write recovery reference is `2026-10-09 15:19:03.970678 UTC`, subject
+to the branch's configured restore window.
+
+The committed transaction marked the fixture finished, stored 60 reviewed
+player-stat and point rows (32 appearances, 28 non-appearances), and retained
+the event timeline, source references and one audit entry. Read-back checks
+confirmed 101 total player points with no approved-preview/breakdown mismatch.
+See `DATA_SOURCES.md` for source interpretation.
+
+After the owner explicitly approved the remaining lifecycle operation, the
+authenticated admin lock completed successfully. Production read-back verified
+GW4 `provisional` with `score_complete=false`, 388 locked selections, 388
+provisional team scores, and 388 refreshed Overall standings. GW5 is `open`
+with 388 carried-forward drafts. GW4 average/highest points are 6/32. Team
+score arithmetic and status checks found no mismatches; all 60 imported player
+results and 101 player points remained unchanged. GW4 was not finalized while
+its other fixtures remain unplayed. No development data or application code
+was changed.
+
+## 2026-10-09 GW4 schedule correction
+
+The owner requested a production schedule review. Batch
+`fixtures-gw4-schedule-20261009` corrected Ratchaburi–Sukhothai (`37441`)
+from 19:00 to 18:00 and moved the open GW4 deadline from 17:30 to 16:30
+on 2026-10-09 Asia/Bangkok, following the live official Thai League API.
+The other seven GW4 fixtures and all eight GW5 fixtures already matched.
+
+The authenticated Neon SQL Editor transaction asserted production branch
+`br-tiny-shape-azrvakql`, database `neondb`, the exact old values, open GW4
+state, a future corrected deadline, and absence of locked selections,
+player-pool snapshots, or target match statistics. It acquired the existing
+exclusive Fantasy season lock before the Gameweek and fixture locks. A complete
+rehearsal passed and rolled back before the same operation was committed.
+
+Three audit entries preserve full before/after values and the source URL.
+Transaction hashes verified that unrelated competition and Fantasy history,
+including frozen reminder snapshots, were unchanged. The competition and
+Fantasy verification scripts passed against production after the commit.
+The recovery reference in the batch audit is
+`2026-10-09 08:53:33.643516 UTC` (15:53:33 Asia/Bangkok), subject to the
+configured Neon history window. A fresh API comparison also confirmed all 16
+GW4/GW5 kickoffs and both 90-minute deadlines.
+Development was not changed. No deployment is required; direct maintenance
+reaches the five-minute competition and fixture caches on their next refresh.
+Live Production verification confirmed 18:00 on `/fixtures` and 16:30 on
+`/team` after the caches refreshed.
+
+The existing frozen GW4 reminder campaign retains its original 17:30 snapshot
+and five recipients, with none marked sent. The sender rejects a campaign when
+its deadline snapshot differs from the current Gameweek deadline, so that
+campaign cannot continue after this correction. No reminder snapshots were
+rewritten and no emails were sent by this maintenance operation.
+
 ## 2026-09-13 GW2 match scoring
 
 The owner authorized a production-only import for fixtures `37420` and

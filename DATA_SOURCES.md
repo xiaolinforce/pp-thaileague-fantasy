@@ -385,6 +385,61 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-09 GW4 opening-match import
+
+Owner-approved production-only batch `gw4-ratchaburi-sukhothai-20261009`
+recorded Ratchaburi 6-0 Sukhothai (official fixture `37441`). A transaction
+rehearsal rolled back before the production commit. The import retained the
+official event timeline and FotMob references in each reviewed source payload
+and one batch audit entry. It stored 60 player results and point breakdowns:
+32 appearances and 28 explicit zero-minute results, covering active registrants
+and every GW4 selection member whose club snapshot belongs to this fixture.
+Existing locked Fantasy positions were preserved. Player points total 101
+(Ratchaburi 90, Sukhothai 11), matching the owner-approved preview.
+
+The official Thai League report supplies goals, cards and substitution times;
+FotMob supplies the six assists and direct individual goalkeeper save totals.
+Kampol Pathomakkakul and Kittipun Saensuk each made four saves and played the
+full match. Adisorn Promrak received a direct red at 27 minutes, and Thiti
+Thumporn received a yellow at 45+2. The final Njiva goal uses the official
+89th minute rather than FotMob's 88th; this does not affect points. Regulation
+minutes are derived from reviewed event minutes with halftime treated as 45
+and a one-minute minimum for confirmed appearances; Murilo Souza's directly
+reported 60 minutes is retained. Goal exposure follows substitution timing.
+
+Post-commit reads verified 60 stats/point rows, six goals, six assists, eight
+saves, one yellow, one red, and no point mismatches. After the owner's explicit
+follow-up approval, the authenticated admin lock moved GW4 to `provisional`,
+locked and scored all 388 team selections, refreshed 388 Overall standings,
+and carried 388 drafts into the newly opened GW5. GW4 average/highest points
+are 6/32; all team scores are provisional with no arithmetic mismatches.
+Player results remained unchanged. GW4 is not final, and development was not
+changed.
+
+## 2026-10-09 production GW4 schedule correction
+
+Owner-requested production-only batch `fixtures-gw4-schedule-20261009`
+checked all eight GW4 fixtures and all eight GW5 fixtures against the live
+[Thai League tournament 224 fixture API](https://competition.tl.prod.c0d1um.io/thaileague/api/match-day-match-public/?tournament=224&none_pagination=True).
+Official fixture `37441`, Ratchaburi–Sukhothai, now kicks off on
+2026-10-09 at **18:00 Asia/Bangkok**, replacing the previously reviewed 19:00.
+The other seven GW4 fixtures and all eight GW5 fixtures already agreed with
+the official dates and times, including Uthai Thani–Rasisalai at 19:00 on
+2026-10-10.
+
+The unchanged 90-minute rule moves the open GW4 deadline from 17:30 to
+**16:30 on 2026-10-09 Asia/Bangkok**. The correction was applied before the
+new deadline with no locked GW4 selections or captured GW4 player pool.
+GW5 retains its 2026-10-16 17:30 deadline. Original fixture source identifiers,
+source URLs, venues, matchweek assignments, and match statuses remain intact.
+
+The transaction on production `br-tiny-shape-azrvakql`, database `neondb`,
+records three audit entries containing the before/after values, live source
+URL, recovery timestamp, and hashes proving preservation of unrelated fixtures,
+Gameweeks, selections, selection players, transfer revisions, player pools,
+match statistics, player points, team scores, standings, and reminder snapshots.
+Development was not changed. See `PRODUCTION.md` for verification evidence.
+
 ## Fixture schedule review (2026-09-04)
 
 Owner-approved batch `fixtures-acl-schedule-20260904` updated development
