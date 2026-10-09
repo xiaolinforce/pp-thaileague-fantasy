@@ -57,6 +57,25 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-10-09 Admin action pending feedback
+
+- Local Chrome exercised the shared admin action components through a temporary,
+  development-only page with delayed fake Server Actions and no email/database
+  writes. Thai desktop and English 360px states covered native required-field
+  validation, server-form pending/completion, double-click prevention, save
+  confirmation pending/success/failure, preserved inputs after failure, and
+  read-only search transition pending/completion. The narrow view had no
+  document-level overflow.
+- Pending buttons showed a decorative spinner, localized progress, disabled
+  and busy state, plus a screen-reader status. The existing `.spin` CSS disables
+  rotation under reduced motion; assistive speech and OS motion preferences
+  were not manually exercised.
+- Reminder test/send/snapshot/recovery buttons, match/player save forms,
+  Gameweek lifecycle forms, filter submit buttons, URL selects, and error retry
+  now share pending feedback. Actual email/scoring/lifecycle writes and error
+  boundary retry were not exercised. Temporary QA files were removed before
+  commit; admin maturity remains `In progress`.
+
 ### 2026-10-02 Reminder schema repair verification
 
 - Local Chrome on `/admin/fantasy/reminders`, authenticated against development

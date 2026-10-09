@@ -2,6 +2,19 @@
   max-width: 1540px;
   min-width: 0;
 }
+.pendingButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.pendingButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+.pendingButton[aria-busy="true"] {
+  cursor: wait;
+}
 .heading {
   display: flex;
   flex-wrap: wrap;

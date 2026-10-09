@@ -458,6 +458,14 @@ form acknowledgement. Never use a development/Preview
 recipient count as the basis for a Production send. `src/lib/email` owns the
 server-only idempotency, opt-out, suppression, and status transitions.
 
+Admin operation buttons share `AdminActionButton` pending feedback. Use it inside
+native Server Action forms, or pass a controlled `pending` state for transitions.
+`AdminFilters` provides pending context for search/load buttons; `autoSubmit=false`
+preserves submit-only filtering where needed. Run `npm run test:admin` for the
+render-only idle, disabled, bilingual pending, and filter-context checks. Browser
+QA of actual submissions must use read-only navigation or development-only fake
+actions, never send mail or mutate Fantasy data merely to inspect a spinner.
+
 ## Fantasy persistence verification
 
 After confirming the development branch, run:

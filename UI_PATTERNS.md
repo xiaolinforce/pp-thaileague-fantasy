@@ -73,6 +73,13 @@ private route. Thai and English labels come directly from the language context.
 - Place the action next to the state it commits or changes.
 - Keep secondary actions quieter and destructive actions explicit.
 - Disable the action during pending work and expose written progress.
+- Admin submit/action buttons use `AdminActionButton` for a decorative spinner,
+  localized progress, disabled/busy semantics, and a screen-reader status. Native
+  Server Action forms read `useFormStatus`; filters and confirmation/retry actions
+  supply their own transition state. The existing `.spin` reduced-motion override
+  keeps the icon stationary without removing written progress.
+- Keep admin save confirmations visible during the operation, disable their
+  confirmation/cancel controls, and close them only after success or failure.
 - Preserve local input after validation or server failure.
 - Confirm a consequential action with the affected object, consequence, and
   escape path.

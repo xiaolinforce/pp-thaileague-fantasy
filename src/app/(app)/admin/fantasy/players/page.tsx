@@ -1,4 +1,5 @@
 import { AdminLocalized } from "../components";
+import { AdminActionButton } from "../admin-action-button";
 import { updateFantasyPlayerClassificationAction } from "@/app/fantasy-actions";
 import { getAdminPlayerOptions, type AdminParams } from "@/data/admin";
 import {
@@ -94,7 +95,12 @@ export default async function Players({
               ))}
             </select>
           </label>
-          <button className="secondary-button">โหลดข้อมูล</button>
+          <AdminActionButton
+            className="secondary-button"
+            pendingLabel="กำลังโหลด…"
+          >
+            โหลดข้อมูล
+          </AdminActionButton>
         </AdminFilters>
       </section>
       {data.player && data.week && data.state ? (

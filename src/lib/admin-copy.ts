@@ -20,6 +20,11 @@ export const adminFieldLabels: Record<string, string> = {
 };
 
 export const adminTranslations: Record<string, string> = {
+  "กำลังดำเนินการ…": "Processing…",
+  "กำลังส่ง…": "Sending…",
+  "กำลังสร้างชุดผู้รับ…": "Creating recipient snapshot…",
+  "กำลังโหลด…": "Loading…",
+  "กำลังค้นหา…": "Searching…",
   แสดงข้อมูล: "View data",
   ปรับระดับนักเตะตามรายการ: "Apply tier changes",
   นำเข้าการแก้ไขจากเอกสารนักเตะ: "Apply reviewed player sheet",

@@ -1,8 +1,9 @@
 import { AdminLocalized } from "../components";
+import { AdminActionButton } from "../admin-action-button";
 import { AdminDate } from "../server-components";
 import Link from "next/link";
 import { getAdminParticipants, type AdminParams } from "@/data/admin";
-import { AdminHeading, Pagination, Status } from "../components";
+import { AdminFilters, AdminHeading, Pagination, Status } from "../components";
 import { Empty, WeekSelect } from "../server-components";
 import styles from "../admin.module.css";
 
@@ -20,7 +21,10 @@ export default async function Participants({
         description="ค้นหาทีมและดูการมีส่วนร่วม แยกสมาชิก Guest และ Bot"
       />
       <section className={styles.panel}>
-        <form className={styles.toolbar}>
+        <AdminFilters
+          key={`${query}:${kind}:${state}:${week?.number}`}
+          autoSubmit={false}
+        >
           <label>
             <span>ค้นหาชื่อทีม</span>
             <input
@@ -50,7 +54,12 @@ export default async function Participants({
             </select>
           </label>
           <WeekSelect weeks={weeks} selected={week?.number} />
-          <button className="secondary-button">ค้นหา</button>
+          <AdminActionButton
+            className="secondary-button"
+            pendingLabel="กำลังค้นหา…"
+          >
+            ค้นหา
+          </AdminActionButton>
           <Link
             className={styles.link}
             href="/admin/fantasy/participants"
@@ -58,7 +67,7 @@ export default async function Participants({
           >
             ล้างตัวกรอง
           </Link>
-        </form>
+        </AdminFilters>
         <p className={styles.hint}>
           กิจกรรมล่าสุดนับการบันทึกและย้อนการจัดทีม ไม่ใช่การเข้าชมเว็บ
           จำนวนทีมไม่ใช่จำนวนคนไม่ซ้ำ

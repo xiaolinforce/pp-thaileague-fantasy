@@ -4,6 +4,7 @@ import Link from "next/link";
 import {
   useEffect,
   useId,
+  useRef,
   useState,
   useTransition,
   type ReactNode,
@@ -29,6 +30,11 @@ import {
 } from "@/components/ui/select";
 import styles from "./admin.module.css";
 import { adminFieldLabels } from "@/lib/admin-copy";
+import {
+  AdminActionButton,
+  AdminPendingContext,
+  AdminPendingIndicator,
+} from "./admin-action-button";
 
 export function AdminLocalized({ children }: { children: ReactNode }) {
   return <Localized>{children}</Localized>;
@@ -114,8 +120,10 @@ export function AdminUrlSelect({
           aria-label={hideLabel ? t(label) : undefined}
           aria-labelledby={hideLabel ? undefined : labelId}
           disabled={pending || options.length === 0}
+          aria-busy={pending}
         >
           <SelectValue />
+          {pending ? <AdminPendingIndicator /> : null}
         </SelectTrigger>
         <SelectContent align="start">
           {options.map((option) => (
@@ -170,9 +178,11 @@ export function NameOption({
 export function AdminFilters({
   children,
   dependencies = {},
+  autoSubmit = true,
 }: {
   children: ReactNode;
   dependencies?: Record<string, string[]>;
+  autoSubmit?: boolean;
 }) {
   const router = useRouter();
   const { requestNavigation } = useNavigationBlocker();
@@ -183,6 +193,7 @@ export function AdminFilters({
     changed?: string,
   ) => {
     event.preventDefault();
+    if (pending) return;
     const params = new URLSearchParams();
     new FormData(form).forEach((value, key) => {
       if (typeof value === "string" && value) params.set(key, value);
@@ -208,11 +219,13 @@ export function AdminFilters({
       aria-busy={pending}
       onSubmit={(event) => navigate(event.currentTarget, event)}
       onChange={(event) => {
-        if (event.target instanceof HTMLSelectElement)
+        if (autoSubmit && event.target instanceof HTMLSelectElement)
           navigate(event.currentTarget, event, event.target.name);
       }}
     >
-      {children}
+      <AdminPendingContext.Provider value={pending}>
+        {children}
+      </AdminPendingContext.Provider>
     </form>
   );
 }
@@ -293,6 +306,7 @@ export function AdminForm({
   const [dirty, setDirty] = useState(false);
   const [payload, setPayload] = useState<FormData | null>(null);
   const [result, setResult] = useState<"success" | "error" | null>(null);
+  const saving = useRef(false);
   const { setNavigationBlocked } = useNavigationBlocker();
   useEffect(() => {
     if (!trackChanges) return;
@@ -306,9 +320,9 @@ export function AdminForm({
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty, pending]);
   const save = () => {
-    if (!payload || pending) return;
+    if (!payload || pending || saving.current) return;
     const data = payload;
-    setPayload(null);
+    saving.current = true;
     startTransition(async () => {
       setResult(null);
       try {
@@ -317,6 +331,9 @@ export function AdminForm({
         setResult("success");
       } catch {
         setResult("error");
+      } finally {
+        saving.current = false;
+        setPayload(null);
       }
     });
   };
@@ -338,14 +355,14 @@ export function AdminForm({
         <fieldset disabled={pending} className={styles.form}>
           {children}
           <div className={styles.actions}>
-            <button
+            <AdminActionButton
               type="submit"
               className="primary-button"
-              disabled={pending}
-              aria-busy={pending}
+              pending={pending}
+              pendingLabel="กำลังบันทึก…"
             >
-              {t(pending ? "กำลังบันทึก…" : label)}
-            </button>
+              {label}
+            </AdminActionButton>
           </div>
         </fieldset>
         {result && (
@@ -364,9 +381,13 @@ export function AdminForm({
       </form>
       <Dialog
         open={Boolean(payload)}
-        onOpenChange={(open) => !open && setPayload(null)}
+        onOpenChange={(open) => !open && !pending && setPayload(null)}
       >
-        <DialogContent className="product-dialog" closeLabel={t("ปิด")}>
+        <DialogContent
+          className="product-dialog"
+          closeLabel={t("ปิด")}
+          showCloseButton={!pending}
+        >
           <DialogHeader>
             <DialogTitle>{t(label)}</DialogTitle>
             <DialogDescription>{confirmation[language]}</DialogDescription>
@@ -391,10 +412,21 @@ export function AdminForm({
             </div>
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setPayload(null)}>
+            <Button
+              variant="outline"
+              disabled={pending}
+              onClick={() => setPayload(null)}
+            >
               {t("กลับไปตรวจสอบ")}
             </Button>
-            <Button onClick={save}>{t("ยืนยันการบันทึก")}</Button>
+            <AdminActionButton
+              type="button"
+              pending={pending}
+              pendingLabel="กำลังบันทึก…"
+              onClick={save}
+            >
+              ยืนยันการบันทึก
+            </AdminActionButton>
           </DialogFooter>
         </DialogContent>
       </Dialog>

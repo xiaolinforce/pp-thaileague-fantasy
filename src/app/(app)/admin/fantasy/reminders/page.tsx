@@ -1,4 +1,5 @@
 import { LockKeyhole, MailCheck } from "lucide-react";
+import { AdminActionButton } from "../admin-action-button";
 
 import { getAdminDeadlineReminderPreview } from "@/data/admin-deadline-reminders";
 import { renderDeadlineReminderEmail } from "@/emails/render-deadline-reminder";
@@ -157,9 +158,13 @@ export default async function DeadlineRemindersPage({
               autoComplete="off"
               required
             />
-            <button type="submit" className={styles.secondaryAction}>
+            <AdminActionButton
+              type="submit"
+              className={styles.secondaryAction}
+              pendingLabel="กำลังส่ง…"
+            >
               ส่งอีเมลทดสอบให้ตัวเอง
-            </button>
+            </AdminActionButton>
           </form>
         </section>
       ) : null}
@@ -337,9 +342,13 @@ export default async function DeadlineRemindersPage({
                   autoComplete="off"
                   required
                 />
-                <button type="submit" className={styles.primaryAction}>
+                <AdminActionButton
+                  type="submit"
+                  className={styles.primaryAction}
+                  pendingLabel="กำลังส่ง…"
+                >
                   ส่ง 5 รายถัดไป
-                </button>
+                </AdminActionButton>
               </form>
             ) : null}
             {(campaign.counts.uncertain ?? 0) > 0 ? (
@@ -363,9 +372,12 @@ export default async function DeadlineRemindersPage({
                   หากค้างเกิน 2 นาที ให้ตรวจ Resend ก่อน แล้วทำเครื่องหมายเป็น
                   “ผลไม่แน่ชัด” รายการนี้จะไม่ถูกส่งซ้ำ
                 </p>
-                <button type="submit" className={styles.secondaryAction}>
+                <AdminActionButton
+                  type="submit"
+                  className={styles.secondaryAction}
+                >
                   ทำเครื่องหมายรายการค้าง
-                </button>
+                </AdminActionButton>
               </form>
             ) : null}
           </>
@@ -384,15 +396,16 @@ export default async function DeadlineRemindersPage({
               จะบันทึกเฉพาะผู้รับที่ตรงเงื่อนไขตอนนี้
               โดยไม่เก็บอีเมลเต็มในชุดส่ง
             </p>
-            <button
+            <AdminActionButton
               type="submit"
               className={styles.primaryAction}
               disabled={data.summary.selected === 0}
+              pendingLabel="กำลังสร้างชุดผู้รับ…"
             >
               <AdminName th="สร้างชุดผู้รับ" en="Create snapshot for" />{" "}
               {data.summary.selected.toLocaleString()}{" "}
               <AdminName th="ราย" en="recipients" />
-            </button>
+            </AdminActionButton>
           </form>
         ) : (
           <p className={styles.blockedNotice}>

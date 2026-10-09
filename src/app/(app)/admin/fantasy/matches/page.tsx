@@ -1,4 +1,5 @@
 import { AdminLocalized } from "../components";
+import { AdminActionButton } from "../admin-action-button";
 import { savePlayerMatchStatsAction } from "@/app/fantasy-actions";
 import { getAdminMatchOptions, type AdminParams } from "@/data/admin";
 import {
@@ -78,7 +79,12 @@ export default async function Matches({
               ))}
             </select>
           </label>
-          <button className="secondary-button">โหลดสถิติ</button>
+          <AdminActionButton
+            className="secondary-button"
+            pendingLabel="กำลังโหลด…"
+          >
+            โหลดสถิติ
+          </AdminActionButton>
         </AdminFilters>
       </section>
       {data.fixture && data.player ? (
