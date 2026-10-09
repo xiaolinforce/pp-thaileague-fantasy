@@ -95,6 +95,8 @@ export default async function PointsPage({
     });
   };
   const total = points.teamScore?.totalPoints ?? 0;
+  const transferPoints =
+    points.teamScore?.transferPoints ?? points.fantasy.selection.transferPoints;
   const activeChipLabel =
     points.fantasy.selection.activeChip === "triple_captain"
       ? translate("กัปตัน ×3")
@@ -144,106 +146,122 @@ export default async function PointsPage({
             />
           </section>
 
-          <section className="product-card points-pitch-card">
-            {activeChipLabel ? (
-              <div className="points-chip-banner">
-                <span className="points-chip-banner__icon" aria-hidden="true">
-                  <Zap size={16} fill="currentColor" />
-                </span>
-                <strong className="points-chip-banner__label">
-                  {activeChipLabel}
+          <div className="points-pitch-stack">
+            {transferPoints > 0 ? (
+              <div className="points-transfer-deduction">
+                <strong className="points-transfer-deduction__label">
+                  {translate("หักคะแนน Transfer")}
+                </strong>
+                <strong className="points-transfer-deduction__amount">
+                  −{transferPoints}
                 </strong>
               </div>
             ) : null}
-            <div
-              className={`points-pitch${points.squad.length === 0 ? " is-empty" : ""}`}
-            >
-              <div className="field-lines" aria-hidden="true">
-                <span />
-                <i />
-                <b />
-              </div>
-              {points.squad.length === 0 ? (
-                <div className="points-empty-squad" role="status">
-                  <strong>
-                    {points.fantasy.seasonFinished
-                      ? translate("ไม่มีทีมที่บันทึกไว้สำหรับ Gameweek นี้")
-                      : translate("ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้")}
-                  </strong>
-                  <span>
-                    {points.fantasy.seasonFinished
-                      ? translate(
-                          "ฤดูกาลนี้สิ้นสุดแล้ว จึงไม่สามารถจัดทีมย้อนหลังได้",
-                        )
-                      : translate("เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน")}
+            <section className="product-card points-pitch-card">
+              {activeChipLabel ? (
+                <div className="points-chip-banner">
+                  <span className="points-chip-banner__icon" aria-hidden="true">
+                    <Zap size={16} fill="currentColor" />
                   </span>
+                  <strong className="points-chip-banner__label">
+                    {activeChipLabel}
+                  </strong>
                 </div>
-              ) : (
-                <div className="points-pitch-rows">
-                  {positionRows.map((position) => (
-                    <div className="points-pitch-row" key={position}>
-                      {fieldMembers
-                        .filter((member) => member.position === position)
-                        .map((member) => (
-                          <PointsPlayerToken
-                            key={member.fantasyPlayerId}
-                            member={member}
-                            points={playerContribution(member.fantasyPlayerId)}
-                            counted
-                            substitution={
-                              autoSubIn.has(member.fantasyPlayerId)
-                                ? "in"
-                                : undefined
-                            }
-                            result={resultByPlayer.get(member.fantasyPlayerId)}
-                            multiplier={
-                              scoringCaptainId === member.fantasyPlayerId
-                                ? captainMultiplier
-                                : 1
-                            }
-                          />
-                        ))}
-                    </div>
-                  ))}
+              ) : null}
+              <div
+                className={`points-pitch${points.squad.length === 0 ? " is-empty" : ""}`}
+              >
+                <div className="field-lines" aria-hidden="true">
+                  <span />
+                  <i />
+                  <b />
+                </div>
+                {points.squad.length === 0 ? (
+                  <div className="points-empty-squad" role="status">
+                    <strong>
+                      {points.fantasy.seasonFinished
+                        ? translate("ไม่มีทีมที่บันทึกไว้สำหรับ Gameweek นี้")
+                        : translate("ยังไม่ได้บันทึกทีมสำหรับ Gameweek นี้")}
+                    </strong>
+                    <span>
+                      {points.fantasy.seasonFinished
+                        ? translate(
+                            "ฤดูกาลนี้สิ้นสุดแล้ว จึงไม่สามารถจัดทีมย้อนหลังได้",
+                          )
+                        : translate("เลือกนักเตะให้ครบ 15 คนจากหน้าทีมของฉัน")}
+                    </span>
+                  </div>
+                ) : (
+                  <div className="points-pitch-rows">
+                    {positionRows.map((position) => (
+                      <div className="points-pitch-row" key={position}>
+                        {fieldMembers
+                          .filter((member) => member.position === position)
+                          .map((member) => (
+                            <PointsPlayerToken
+                              key={member.fantasyPlayerId}
+                              member={member}
+                              points={playerContribution(
+                                member.fantasyPlayerId,
+                              )}
+                              counted
+                              substitution={
+                                autoSubIn.has(member.fantasyPlayerId)
+                                  ? "in"
+                                  : undefined
+                              }
+                              result={resultByPlayer.get(
+                                member.fantasyPlayerId,
+                              )}
+                              multiplier={
+                                scoringCaptainId === member.fantasyPlayerId
+                                  ? captainMultiplier
+                                  : 1
+                              }
+                            />
+                          ))}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {points.squad.length > 0 && (
+                <div className="points-bench-panel">
+                  <div className="bench-title">
+                    <h3>{translate("ม้านั่งสำรอง")}</h3>
+                  </div>
+                  <div className="points-bench-grid">
+                    {benchMembers.map((member, index) => (
+                      <div
+                        className="points-bench-item"
+                        key={member.fantasyPlayerId}
+                      >
+                        <b>{index === 0 ? "GK" : index}</b>
+                        <PointsPlayerToken
+                          member={member}
+                          points={playerContribution(member.fantasyPlayerId)}
+                          counted={countedIds.has(member.fantasyPlayerId)}
+                          substitution={
+                            autoSubOut.has(member.fantasyPlayerId)
+                              ? "out"
+                              : undefined
+                          }
+                          showPositionBadge
+                          result={resultByPlayer.get(member.fantasyPlayerId)}
+                          multiplier={
+                            scoringCaptainId === member.fantasyPlayerId
+                              ? captainMultiplier
+                              : 1
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-            </div>
-
-            {points.squad.length > 0 && (
-              <div className="points-bench-panel">
-                <div className="bench-title">
-                  <h3>{translate("ม้านั่งสำรอง")}</h3>
-                </div>
-                <div className="points-bench-grid">
-                  {benchMembers.map((member, index) => (
-                    <div
-                      className="points-bench-item"
-                      key={member.fantasyPlayerId}
-                    >
-                      <b>{index === 0 ? "GK" : index}</b>
-                      <PointsPlayerToken
-                        member={member}
-                        points={playerContribution(member.fantasyPlayerId)}
-                        counted={countedIds.has(member.fantasyPlayerId)}
-                        substitution={
-                          autoSubOut.has(member.fantasyPlayerId)
-                            ? "out"
-                            : undefined
-                        }
-                        showPositionBadge
-                        result={resultByPlayer.get(member.fantasyPlayerId)}
-                        multiplier={
-                          scoringCaptainId === member.fantasyPlayerId
-                            ? captainMultiplier
-                            : 1
-                        }
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </section>
+            </section>
+          </div>
         </div>
       </main>
     </AppShell>

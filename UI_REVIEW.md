@@ -57,6 +57,21 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-10-09 Points transfer deduction
+
+- Local Chrome on `/points?gw=3` displayed the red outlined deduction notice
+  above the pitch in Thai and English, on the normal desktop viewport and at
+  360px. The narrow English view had no document-level horizontal overflow.
+- The owner-requested development simulation replaced six players against four
+  free transfers for the selected team, producing an eight-point deduction.
+  The valid squad, new transfer revision, twelve affected ownership rows, and
+  restoration context were saved atomically with an admin audit entry on
+  `br-green-queen-az934b4e`. GW3 remains open without computed scores; the notice
+  therefore reads the selection deduction while the headline score stays zero.
+- GW2, with no deduction, was checked without the notice. Other deduction
+  amounts and coexistence with a chip were inspected in source. No production
+  data, match facts, or Gameweek lifecycle changes were made.
+
 ### 2026-10-09 Admin action pending feedback
 
 - Local Chrome exercised the shared admin action components through a temporary,

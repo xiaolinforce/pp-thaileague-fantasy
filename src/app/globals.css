@@ -5000,8 +5000,38 @@ button.vacant-squad-slot {
 }
 
 .points-pitch-card {
-  grid-area: pitch;
   overflow: hidden;
+}
+
+.points-pitch-stack {
+  grid-area: pitch;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.points-transfer-deduction {
+  margin: 0;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  border: 1px solid var(--red);
+  border-radius: 13px;
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 6%, var(--paper));
+}
+
+.points-transfer-deduction__label {
+  margin-right: auto;
+  font-size: 16px;
+}
+
+.points-transfer-deduction__amount {
+  margin-left: auto;
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .points-chip-banner {

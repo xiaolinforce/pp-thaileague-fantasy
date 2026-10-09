@@ -469,6 +469,8 @@ const translations: Record<string, string> = {
   คะแนนตัวจริง: "Lineup points",
   โบนัสกัปตัน: "Captain bonus",
   "หักคะแนน Transfer": "Transfer deduction",
+  "เปลี่ยนตัวเกินโควต้าฟรีใน Gameweek นี้":
+    "Transfers exceeded the free allowance this Gameweek",
   "Chip ที่ใช้": "Active chip",
   "คะแนน Gameweek รวม": "Gameweek total",
   "สรุปคะแนน Gameweek": "Gameweek score summary",
