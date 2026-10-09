@@ -452,7 +452,9 @@ snapshot is a database write. The administrator can send a single controlled
 `TEST GWn` message to their own verified address before opening bulk delivery.
 Manual five-recipient sends require a Production
 deployment, the reminder-specific feature gate and secrets, a matching `SEND GWn`
-confirmation, and a pre-send review checkbox. Never use a development/Preview
+confirmation, but no pre-send review checkbox. Sender/domain, unsubscribe, and
+recipient-expectation checks remain operational prerequisites, not a per-batch
+form acknowledgement. Never use a development/Preview
 recipient count as the basis for a Production send. `src/lib/email` owns the
 server-only idempotency, opt-out, suppression, and status transitions.
 

@@ -337,12 +337,6 @@ export default async function DeadlineRemindersPage({
                   autoComplete="off"
                   required
                 />
-                <label className={styles.reviewCheck}>
-                  <input type="checkbox" name="checksReviewed" required />
-                  <span>
-                    ตรวจ DNS/โดเมนส่ง ลิงก์ยกเลิก และความคาดหวังของผู้รับแล้ว
-                  </span>
-                </label>
                 <button type="submit" className={styles.primaryAction}>
                   ส่ง 5 รายถัดไป
                 </button>

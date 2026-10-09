@@ -303,7 +303,6 @@ async function updateRecipient(
 export async function sendNextDeadlineBatch(input: {
   campaignId: string;
   confirmation: string;
-  checksReviewed: boolean;
 }) {
   const readiness = reminderReadiness();
   if (!readiness.ready) {
@@ -330,11 +329,7 @@ export async function sendNextDeadlineBatch(input: {
     )
     .where(eq(deadlineReminderCampaigns.id, input.campaignId))
     .limit(1);
-  if (
-    !campaign ||
-    !input.checksReviewed ||
-    input.confirmation !== `SEND GW${campaign.gameweekNumber}`
-  ) {
+  if (!campaign || input.confirmation !== `SEND GW${campaign.gameweekNumber}`) {
     throw new Error("The campaign confirmation does not match.");
   }
   if (

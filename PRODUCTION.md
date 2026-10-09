@@ -173,8 +173,9 @@ below are complete. Committing or deploying code does not send any reminder.
    populated only from webhooks received after this feature is deployed.
 5. Only after all checks, set `REMINDER_SEND_ENABLED=true` in Production and
    redeploy. Create the campaign snapshot on the Production admin page, verify
-   its count, then use the `SEND GWn` confirmation and review checkbox for each
-   five-recipient batch. No cron exists. Watch provider acceptance, delivery,
+   its count, then use the `SEND GWn` confirmation for each five-recipient batch.
+   No review checkbox is required; the checks above remain operational
+   prerequisites. No cron exists. Watch provider acceptance, delivery,
    bounces, complaints, suppressions, and account quotas after each batch.
    `accepted` means Resend accepted the API request, not inbox placement.
    Stop if the deadline passes, complaint/bounce rates rise, or an `uncertain`

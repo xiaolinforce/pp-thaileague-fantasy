@@ -105,8 +105,6 @@ export const adminTranslations: Record<string, string> = {
     "An uncertain result requires Resend review and an administrator's status correction before sending continues.",
   การส่งยังปิดอยู่: "Sending is disabled",
   "ส่ง 5 รายถัดไป": "Send next 5 recipients",
-  "ตรวจ DNS/โดเมนส่ง ลิงก์ยกเลิก และความคาดหวังของผู้รับแล้ว":
-    "I have checked sender DNS/domain, unsubscribe links, and recipient expectations.",
   "หากค้างเกิน 2 นาที ให้ตรวจ Resend ก่อน แล้วทำเครื่องหมายเป็น":
     "If a claim remains for over 2 minutes, check Resend first, then mark it as",
   รายการนี้จะไม่ถูกส่งซ้ำ:

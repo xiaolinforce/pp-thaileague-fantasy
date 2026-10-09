@@ -83,23 +83,6 @@
   color: var(--ink);
 }
 
-.reviewCheck {
-  display: flex;
-  align-items: flex-start;
-  gap: 9px;
-  max-width: 64ch;
-}
-
-.sendForm .reviewCheck input {
-  width: 18px;
-  min-height: 18px;
-  margin: 2px 0 0;
-  padding: 0;
-  border: 0;
-  flex: none;
-  accent-color: var(--orange-deep);
-}
-
 .sendForm input:focus-visible,
 .primaryAction:focus-visible,
 .secondaryAction:focus-visible {

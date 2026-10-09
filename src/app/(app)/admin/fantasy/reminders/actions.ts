@@ -105,7 +105,6 @@ export async function sendDeadlineBatchAction(formData: FormData) {
       const result = await sendNextDeadlineBatch({
         campaignId,
         confirmation: String(formData.get("confirmation") ?? ""),
-        checksReviewed: formData.get("checksReviewed") === "on",
       });
       notice = result.uncertain
         ? "send-uncertain"
