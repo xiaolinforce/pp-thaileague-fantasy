@@ -139,10 +139,17 @@ Drizzle's `Failed query` message contains bound values independently of SDK
 database instrumentation, so its query text and parameters are replaced while
 the chained database cause and stack locations remain available. Recognized
 Facebook native-bridge errors receive `error_origin=facebook_browser_bridge`.
-An event is discarded only when every exception matches a verified bridge
+A Facebook event is discarded only when every exception matches a verified bridge
 message and includes a frame from Facebook's injected `app://` navigation
 logger. Sentry's `in_app` classification and caller frames do not determine the
 exception source. Missing bridge frames and mixed errors remain observable.
+
+The browser hook also discards the verified Obscura runtime `toLowerCase`
+rejection from issue `PP-THAILEAGUE-FANTASY-Y`: every exception must match the
+exact TypeError and unhandled-rejection mechanism, contain both
+`<obscura:bootstrap>` and `ext:core/01_core.js`, and use only those filenames or
+`<script>`. Application/unknown frames, incomplete stacks, other messages and
+mixed exception chains remain reportable regardless of `in_app` labels.
 
 Team deadline labels are formatted once on the server in both supported
 languages and serialized into the Client Component. This avoids depending on

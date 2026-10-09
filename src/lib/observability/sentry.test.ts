@@ -229,3 +229,98 @@ test("keeps an exact bridge message without a verified bridge frame", () => {
   assert.equal(clean?.tags?.error_origin, "facebook_browser_bridge");
   assert.equal(clean?.exception?.values?.[0]?.stacktrace?.frames?.length, 1);
 });
+
+function obscuraRuntimeEvent(): Event {
+  return {
+    environment: "production",
+    release: "eb02685548c7174d0d1d998ee647380317fc51da",
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value: "Cannot read properties of undefined (reading 'toLowerCase')",
+          mechanism: {
+            type: "auto.browser.global_handlers.onunhandledrejection",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              { filename: "ext:core/01_core.js", lineno: 294, colno: 9 },
+              { filename: "<script>", lineno: 1, colno: 100633, in_app: true },
+              {
+                filename: "<obscura:bootstrap>",
+                lineno: 346,
+                colno: 75,
+                in_app: true,
+              },
+              { filename: "<script>", lineno: 48, colno: 260184, in_app: true },
+            ],
+          },
+        },
+      ],
+    },
+  };
+}
+
+test("drops the observed Obscura runtime rejection despite in-app labels", () => {
+  const event = obscuraRuntimeEvent();
+  assert.equal(prepareBrowserSentryEvent(event, "Chrome/152.0.0"), null);
+  assert.equal(event.exception?.values?.[0]?.stacktrace?.frames?.length, 4);
+});
+
+test("keeps the same TypeError from application code or an unidentified frame", () => {
+  for (const filename of [
+    "/_next/static/chunks/app.js",
+    "https://fantasy.ppfootball.net/_next/static/chunks/app.js",
+    "/src/components/fantasy/position-badge.tsx",
+    "<anonymous>",
+    undefined,
+  ]) {
+    const event = obscuraRuntimeEvent();
+    event.exception!.values![0].stacktrace!.frames!.push({ filename });
+    assert.ok(prepareBrowserSentryEvent(event, "Chrome/152.0.0"), filename);
+  }
+});
+
+test("keeps incomplete Obscura stacks even with the exact TypeError", () => {
+  for (const filename of ["<obscura:bootstrap>", "ext:core/01_core.js"]) {
+    const event = obscuraRuntimeEvent();
+    const stack = event.exception!.values![0].stacktrace!;
+    stack.frames = stack.frames!.filter((frame) => frame.filename !== filename);
+    assert.ok(prepareBrowserSentryEvent(event, "Chrome/152.0.0"));
+  }
+  const event = obscuraRuntimeEvent();
+  delete event.exception!.values![0].stacktrace;
+  assert.ok(prepareBrowserSentryEvent(event, "Chrome/152.0.0"));
+  assert.ok(prepareBrowserSentryEvent({}, "Chrome/152.0.0"));
+});
+
+test("keeps other failures and capture mechanisms in the injected runtime", () => {
+  const otherMessage = obscuraRuntimeEvent();
+  otherMessage.exception!.values![0].value = "Saving the team failed";
+  assert.ok(prepareBrowserSentryEvent(otherMessage, "Chrome/152.0.0"));
+
+  const otherType = obscuraRuntimeEvent();
+  otherType.exception!.values![0].type = "Error";
+  assert.ok(prepareBrowserSentryEvent(otherType, "Chrome/152.0.0"));
+
+  const manualCapture = obscuraRuntimeEvent();
+  manualCapture.exception!.values![0].mechanism!.type = "generic";
+  assert.ok(prepareBrowserSentryEvent(manualCapture, "Chrome/152.0.0"));
+
+  const missingMechanism = obscuraRuntimeEvent();
+  delete missingMechanism.exception!.values![0].mechanism;
+  assert.ok(prepareBrowserSentryEvent(missingMechanism, "Chrome/152.0.0"));
+});
+
+test("retains and scrubs application exceptions chained to an Obscura failure", () => {
+  const event = obscuraRuntimeEvent();
+  event.exception!.values!.push({
+    type: "Error",
+    value: "Failed query: select * from test\nparams: private-manager-id",
+  });
+  const clean = prepareBrowserSentryEvent(event, "Chrome/152.0.0");
+  assert.ok(clean);
+  assert.equal(clean.exception?.values?.length, 2);
+  assert.ok(!JSON.stringify(clean).includes("private-manager-id"));
+});

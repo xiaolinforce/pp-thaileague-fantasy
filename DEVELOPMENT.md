@@ -100,6 +100,11 @@ Facebook bridge-noise boundary: only verified bridge messages whose exception
 stacks each contain an injected `app://` frame are dropped. Sentry may mark
 those injected frames as `in_app` and may retain application callers below the
 error source. Missing bridge frames and mixed exceptions remain reportable.
+The Obscura runtime filter requires the exact observed `toLowerCase` TypeError,
+the browser unhandled-rejection mechanism, both verified runtime markers, and
+no application or unknown stack frames. The same observability tests ensure
+incomplete stacks, other errors/mechanisms and mixed exception chains remain
+visible and privacy-scrubbed.
 `test:maintenance` exercises the actual Drizzle HTTP batch through a fake
 transport (including failure propagation), without loading `.env.local` or
 contacting Neon.

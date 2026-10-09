@@ -4,6 +4,23 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-10-09 — Suppress the verified Obscura runtime rejection
+
+**Decision:** Drop the exact `toLowerCase` TypeError observed in Sentry issue
+`PP-THAILEAGUE-FANTASY-Y` only when every exception has the browser
+unhandled-rejection mechanism, contains both `<obscura:bootstrap>` and
+`ext:core/01_core.js`, and has no filenames outside those markers and `<script>`.
+
+**Context:** Two production events across releases `38a8d780f59c` and
+`eb02685548c7` share this injected runtime stack, without application source or
+Next.js chunk frames. Sentry's `in_app` labels also mark these external frames.
+
+**Consequences:** This specific runtime failure no longer consumes error quota.
+The same message from application code, incomplete or unknown stacks, manual
+captures, other errors and mixed exception chains remain reportable. This adds
+one evidence-based boundary alongside the Facebook bridge filter; it does not
+ignore `toLowerCase` errors generally. It takes effect only after deployment.
+
 ## 2026-10-04 — Consolidate beginner guidance into Rules
 
 **Decision:** Keep `/rules` as the single public page for learning to play and

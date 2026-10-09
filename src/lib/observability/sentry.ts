@@ -112,6 +112,32 @@ function hasFacebookBridgeFramePerException(event: Event): boolean {
   );
 }
 
+const obscuraRuntimeFrames = new Set([
+  "<script>",
+  "<obscura:bootstrap>",
+  "ext:core/01_core.js",
+]);
+
+function isVerifiedObscuraRuntimeFailure(event: Event): boolean {
+  const exceptions = event.exception?.values ?? [];
+  return (
+    exceptions.length > 0 &&
+    exceptions.every((exception) => {
+      const frames = exception.stacktrace?.frames ?? [];
+      return (
+        exception.type === "TypeError" &&
+        exception.value ===
+          "Cannot read properties of undefined (reading 'toLowerCase')" &&
+        exception.mechanism?.type ===
+          "auto.browser.global_handlers.onunhandledrejection" &&
+        frames.some((frame) => frame.filename === "<obscura:bootstrap>") &&
+        frames.some((frame) => frame.filename === "ext:core/01_core.js") &&
+        frames.every((frame) => obscuraRuntimeFrames.has(frame.filename ?? ""))
+      );
+    })
+  );
+}
+
 export function prepareBrowserSentryEvent<T extends Event>(
   event: T,
   userAgent: string,
@@ -130,6 +156,10 @@ export function prepareBrowserSentryEvent<T extends Event>(
       }
     : event;
   const clean = scrubSentryEvent(classified);
+
+  // Issue #Y contains only injected runtime frames, including both source
+  // markers. Keep incomplete stacks, new variants, and any application frames.
+  if (isVerifiedObscuraRuntimeFailure(clean)) return null;
 
   // Sentry can mark injected app:// frames as in-app and can retain the caller
   // below them. The exact message plus a verified bridge frame establishes the
