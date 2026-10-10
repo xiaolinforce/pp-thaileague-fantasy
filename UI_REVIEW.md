@@ -1414,3 +1414,32 @@ types, lint, formatting and production build passed. Anonymous HTTP SEO checks
 covered public metadata and private-route headers. Signed-in rendering uses the
 same extracted browser; no new authenticated account or session was created
 for this review. The supplied signed-in screenshot is the visual reference.
+
+## 2026-10-10 beginner-friendly Rules reference
+
+`/rules` now defines Gameweek and deadline in the introduction, explains normal
+captaincy and automatic substitutions in a dedicated section, and exposes
+postponed results and ranking tiebreakers in the contents. Thai and English
+copy use short explanations and worked tier, transfer and scoring examples.
+Reset guidance explicitly distinguishes an unsaved draft from the confirmed
+team. Guest naming and Private League guidance now identify member-only actions.
+No Fantasy behavior or database state changed.
+
+Auto-fill has one essential instruction with its selection priorities in a
+native disclosure. Cumulative tier limits and all player scoring events use
+captioned tables with row/column headers. The scoring table scrolls locally,
+retains its event column, and supports keyboard focus and horizontal scrolling.
+Compact anchor offsets keep section headings below the fixed top bar.
+
+Local in-app browser review used the existing Guest session at 1440x900,
+900x900 and 360x800. Thai and English desktop/mobile screenshots, the English
+tablet layout, contents destinations, disclosure keyboard activation, scoring
+table keyboard scrolling and language switching were inspected. Document width
+matched the viewport's client width; scoring-table overflow remained inside its
+own region. No session was created and no team mutation was performed. Account
+and Gameweek states do not alter this static rules content and were not simulated.
+
+Verification passed: all 139 Fantasy tests, including four new checks comparing
+both languages' published scoring and tier tables with the executable rules;
+TypeScript, ESLint, repository formatting and production build. The build needed
+to run outside the Windows sandbox after SWC was denied workspace-path access.

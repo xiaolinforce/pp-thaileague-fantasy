@@ -15,8 +15,8 @@ export default function RulesPage() {
   const gettingStarted = th
     ? [
         [
-          "เริ่มเล่นและตั้งชื่อทีม",
-          "ทดลองเล่นแบบ Guest หรือเข้าสู่ระบบด้วยอีเมลหรือ Google บัญชี Guest ผูกกับอุปกรณ์ปัจจุบัน อัปเกรดเป็นสมาชิกเพื่อกลับมาเล่นบนอุปกรณ์อื่นได้",
+          "เริ่มเล่น",
+          "ทดลองเล่นแบบผู้เยี่ยมชม (Guest) หรือเข้าสู่ระบบด้วยอีเมลหรือ Google บัญชี Guest ผูกกับอุปกรณ์ปัจจุบัน สมัครสมาชิกเพื่อตั้งชื่อทีมและกลับมาเล่นบนอุปกรณ์อื่นได้",
         ],
         [
           "เลือกนักเตะและจัดทีม",
@@ -24,13 +24,13 @@ export default function RulesPage() {
         ],
         [
           "บันทึกก่อนเส้นตาย แล้วติดตามคะแนน",
-          "ตรวจเวลาปิดรับจัดทีมที่แสดงในเกม แล้วบันทึกทีมให้เรียบร้อยก่อนเส้นตาย การเลือกนักเตะโดยยังไม่บันทึกไม่ได้ยืนยันทีม หลังการแข่งขันดูคะแนนและอันดับ หรือตั้งลีกส่วนตัวเพื่อแข่งกับเพื่อน",
+          "ตรวจเวลาปิดรับจัดทีมที่แสดงในเกม แล้วบันทึกทีมให้เรียบร้อยก่อนเส้นตาย การเลือกนักเตะโดยยังไม่บันทึกไม่ได้ยืนยันทีม หลังการแข่งขันดูคะแนนและอันดับ สมาชิกสามารถตั้งลีกส่วนตัวเพื่อแข่งกับเพื่อนได้",
         ],
       ]
     : [
         [
-          "Start playing and name your team",
-          "Try playing as a guest or sign in with email or Google. Guest access is tied to the current device; upgrade to a member account to return on another device.",
+          "Start playing",
+          "Try playing as a guest or sign in with email or Google. Guest access is tied to the current device; upgrade to a member account to name your team and return on another device.",
         ],
         [
           "Pick players and set your lineup",
@@ -38,14 +38,11 @@ export default function RulesPage() {
         ],
         [
           "Save before the deadline and follow your points",
-          "Check the deadline shown in the game and save your squad before it closes. Picking players without saving does not confirm your team. After matches, follow your points and standings or create a private league to compete with friends.",
+          "Check the deadline shown in the game and save your squad before it closes. Picking players without saving does not confirm your team. After matches, follow your points and standings. Members can create private leagues to compete with friends.",
         ],
       ];
   const sections = useMemo(
-    () =>
-      buildFantasyRuleSections(language).filter(
-        (section) => section.id !== "results",
-      ),
+    () => buildFantasyRuleSections(language),
     [language],
   );
 
@@ -77,13 +74,18 @@ export default function RulesPage() {
 
           <article className="product-card rules-document">
             <section
-              className="rules-document-section"
+              className={`rules-document-section ${styles.ruleSection}`}
               id="getting-started"
               aria-labelledby="getting-started-heading"
             >
               <h2 id="getting-started-heading">
                 {th ? "เริ่มเล่นใน 3 ขั้นตอน" : "Get started in 3 steps"}
               </h2>
+              <p>
+                {th
+                  ? "จัดทีมจากนักเตะไทยลีก แล้วสะสมคะแนนจากผลงานจริงในแต่ละรอบแข่งขัน (Gameweek หรือ GW) แต่ละรอบมีเส้นตายปิดรับจัดทีม (Deadline) ของตัวเอง"
+                  : "Build a squad of Thai League players and earn points from their real performances in each scoring round (Gameweek or GW). Each round has its own deadline for team changes."}
+              </p>
               <ol className={styles.quickStart}>
                 {gettingStarted.map(([title, description]) => (
                   <li key={title}>
@@ -100,18 +102,83 @@ export default function RulesPage() {
             </section>
             {sections.map((section) => (
               <section
-                className="rules-document-section"
+                className={`rules-document-section ${styles.ruleSection}`}
                 id={section.id}
                 aria-labelledby={`${section.id}-heading`}
                 key={section.id}
               >
                 <h2 id={`${section.id}-heading`}>{section.title}</h2>
                 <p>{section.summary}</p>
+                {section.table && (
+                  <>
+                    {section.id === "scoring" && (
+                      <p id="scoring-scroll-hint">
+                        {th
+                          ? "หากเห็นไม่ครบทุกตำแหน่ง เลื่อนตารางซ้าย–ขวาเพื่อดูคะแนน"
+                          : "Scroll the table sideways if not all positions are visible."}
+                      </p>
+                    )}
+                    <div
+                      className={styles.tableScroll}
+                      role={section.id === "scoring" ? "region" : undefined}
+                      tabIndex={section.id === "scoring" ? 0 : undefined}
+                      aria-labelledby={
+                        section.id === "scoring"
+                          ? `${section.id}-caption`
+                          : undefined
+                      }
+                      aria-describedby={
+                        section.id === "scoring"
+                          ? "scoring-scroll-hint"
+                          : undefined
+                      }
+                    >
+                      <table
+                        className={`${styles.rulesTable} ${section.id === "scoring" ? styles.scoringTable : ""}`}
+                      >
+                        <caption id={`${section.id}-caption`}>
+                          {section.table.caption}
+                        </caption>
+                        <thead>
+                          <tr>
+                            {section.table.headings.map((heading) => (
+                              <th scope="col" key={heading}>
+                                {heading}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {section.table.rows.map((row) => (
+                            <tr key={row.id}>
+                              <th scope="row">{row.label}</th>
+                              {row.values.map((value, index) => (
+                                <td key={section.table!.headings[index + 1]}>
+                                  {value}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </>
+                )}
                 <ul>
                   {section.points.map((point) => (
                     <li key={point}>{point}</li>
                   ))}
                 </ul>
+                {section.details && (
+                  <details className={styles.ruleDetails}>
+                    <summary>{section.details.title}</summary>
+                    <ul>
+                      {section.details.points.map((point) => (
+                        <li key={point}>{point}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
               </section>
             ))}
           </article>

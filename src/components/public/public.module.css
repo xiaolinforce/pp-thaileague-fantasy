@@ -70,3 +70,88 @@
   flex-wrap: wrap;
   gap: 12px;
 }
+
+.tableScroll {
+  max-width: 100%;
+  overflow-x: auto;
+  margin-block: 16px 24px;
+}
+.tableScroll:focus-visible,
+.ruleDetails summary:focus-visible {
+  outline: 2px solid var(--orange-deep);
+  outline-offset: 4px;
+}
+.rulesTable {
+  width: 100%;
+  border-collapse: collapse;
+  color: var(--ink);
+  line-height: 1.7;
+}
+.rulesTable caption {
+  text-align: start;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+.rulesTable th,
+.rulesTable td {
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+.rulesTable thead th {
+  background: var(--warm);
+  font-weight: 500;
+}
+.rulesTable th:first-child {
+  text-align: start;
+}
+.rulesTable tbody th {
+  font-weight: 400;
+}
+.rulesTable td,
+.rulesTable th:not(:first-child) {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.scoringTable {
+  min-width: 40rem;
+  table-layout: fixed;
+}
+.scoringTable th:first-child {
+  width: 34%;
+  position: sticky;
+  left: 0;
+  background: var(--paper);
+}
+.scoringTable thead th:first-child {
+  background: var(--warm);
+}
+.ruleDetails {
+  margin-top: 20px;
+  border-block: 1px solid var(--line);
+}
+.ruleDetails summary {
+  padding-block: 14px;
+  min-height: 44px;
+  cursor: pointer;
+  color: var(--ink);
+  font-weight: 500;
+  line-height: 1.7;
+}
+.ruleDetails summary::marker {
+  color: var(--orange-deep);
+}
+.ruleDetails[open] > ul {
+  margin-block: 4px 20px;
+}
+
+@media (width < 80rem) {
+  .ruleSection {
+    scroll-margin-top: 84px;
+  }
+}
+
+@media (width < 48rem) {
+  .scoringTable th:first-child {
+    width: 10rem;
+  }
+}
