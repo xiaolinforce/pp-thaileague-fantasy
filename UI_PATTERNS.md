@@ -138,6 +138,10 @@ proven behaviors unless a deliberate product decision replaces them:
   also switches to the market tab.
 - Keep selected players visible in the market, identify them as owned, and
   expose removal rather than another transfer-in action.
+- Retain unavailable saved players on the pitch with a text status and a
+  replacement warning, while excluding them from purchase candidates. Resolve
+  current clubs before showing quotas; a real club move does not consume a
+  Fantasy transfer. Historical kits use the viewed Gameweek's deadline pool.
 - A compatible market player fills a selected matching vacancy first, then the
   first matching vacancy when the selected slot cannot accept that position.
 - A vacancy has a Restore action beside Swap only when its slot held a player in

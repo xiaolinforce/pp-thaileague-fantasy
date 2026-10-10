@@ -65,6 +65,23 @@ An unavailable player cannot be added to a newly validated squad. Existing
 selection rows retain their snapshots so later availability or classification
 changes do not rewrite history.
 
+Real-world club transfers do not count as Fantasy transfers. Open squad reads,
+normal saves, baseline restores and next-Gameweek carryover resolve current
+eligible registrations in the same competition season and Bangkok date range.
+A move can make an existing squad exceed the three-player club quota; the Team
+screen shows the existing validation warning and the manager chooses replacements.
+Unavailable retained players remain visible and removable, but cannot be bought
+or included in a newly validated save. Baseline restore retains those identities.
+
+At lock, club snapshots on current drafts are refreshed from the deadline pool
+with audit context. Player choices, lineup roles, captaincy and transfer counts
+are preserved. Historical Points (including the highest-scoring-team dialog)
+and admin team points resolve club names and kits from that Gameweek's deadline
+pool, falling back to the saved selection club only when the player has no pool
+reference. Locked selection rows and original transfer revisions are not rewritten
+by later registrations. Provenance errors in a backfilled pool require an explicit
+reviewed data correction and an optimal-team impact check.
+
 ## Thai classification
 
 The competition import retains source nationality text, while the Fantasy

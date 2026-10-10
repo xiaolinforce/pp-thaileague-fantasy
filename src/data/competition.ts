@@ -348,6 +348,7 @@ async function loadCompetitionDataset() {
         {
           id: player.id,
           fantasyPlayerId: fantasyPlayer?.id ?? null,
+          isAvailable: fantasyPlayer?.isAvailable ?? true,
           clubId: clubRow.club.id,
           name: localized(
             player.fullNameTh,

@@ -250,6 +250,23 @@ preserved Guests, rather than unique humans or active users. Run `db:check`
 against the intended environment first. `db:verify:fantasy` additionally checks
 bot identity invariants while continuing to reject obsolete seeded managers.
 
+Run `npm run db:audit:player-clubs -- <confirmed-Neon-branch-id>` after roster
+maintenance and before locking a Gameweek. This command is read-only and refuses
+an unmatched branch. It reports ambiguous eligible clubs, stale draft clubs,
+historical raw-snapshot differences and missing references separately. Historical
+differences can be expected because Points reads the deadline pool. An unavailable
+retained player can legitimately have no pool reference; an entirely missing
+deadline pool is reported separately. Ambiguous clubs, draft mismatches and missing
+deadline pools return a nonzero exit code. Verify dated source evidence before
+correcting a pool, and recompute the optimal team from the corrected candidate
+pool before deciding whether its persisted result needs updating.
+
+`verify-fantasy-persistence.ts` also rehearses real-world club changes through save
+and baseline restore, no additional Fantasy transfer, and unavailable-save
+rejection. An expired development fixture deadline is extended only inside its
+rolled-back transaction. The fingerprint includes registrations so the rehearsal
+must leave both Fantasy history and source registrations unchanged.
+
 ### Fantasy QA scenarios
 
 Use a disposable Neon branch for lifecycle and League UI testing. Set

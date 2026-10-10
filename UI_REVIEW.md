@@ -1443,3 +1443,30 @@ Verification passed: all 139 Fantasy tests, including four new checks comparing
 both languages' published scoring and tier tables with the executable rules;
 TypeScript, ESLint, repository formatting and production build. The build needed
 to run outside the Windows sandbox after SWC was denied workspace-path access.
+
+## 2026-10-11 player club and availability corrections
+
+Team resolves fresh club eligibility before presenting saved members and the
+market. Retained unavailable players remain on the pitch with a text status and
+a replacement warning, and are excluded from purchase candidates. The existing
+club-quota warning uses the refreshed clubs. Points and its highest-scoring-team
+dialog, plus admin team points, use the viewed Gameweek's deadline pool for club
+names and kit colors; players without a pool reference retain the saved club.
+
+A temporary development-only props fixture covered a moved captain, retained
+unavailable goalkeeper, an over-quota club, disabled Save, removal to a position
+vacancy and local saved-player restore. Chrome review covered Thai/English text,
+desktop 1440x900 and mobile 360x800; mobile document scroll width matched its
+345px client width. English captures are `club-fixes-desktop-en.png` and
+`club-fixes-mobile-en-removed.png` in this task's Codex visualization directory.
+Thai status and warnings were verified in the rendered accessibility tree.
+No team mutation or authentication change was made for UI testing. The fixture
+route was removed and absent from the final production build. Historical source
+and score invariants are checked separately against production, not simulated
+through this fixture.
+
+Verification passed: 144 Fantasy tests, localization tests, types, lint,
+formatting and production build. Development database regressions exercised
+fresh-club save/restore, unavailable save rejection and audited deadline-club
+refresh while preserving revisions; all test writes rolled back. Production
+correction and independent all-player audit evidence are in `PRODUCTION.md`.

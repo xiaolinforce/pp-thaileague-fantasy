@@ -590,3 +590,27 @@ Activity reads selection confirmation timestamps rather than visits, session
 refreshes or transfer-revision creation timestamps. Audit history exposes only
 recorded operations and allowlisted before/after fields; operations before audit
 collection are not reconstructed. No external source is fetched by admin pages.
+
+## 2026-10-11 player club corrections
+
+Owner-approved production maintenance targeted Neon `br-tiny-shape-azrvakql`,
+database `neondb`. Batch `player-club-corrections-20261011` corrected 22 Zulj
+GW5 draft club snapshots from Buriram to Ratchaburi. His active Ratchaburi
+registration begins 2026-09-17; the GW3/GW4 deadline pools already contain that
+club. The 44 older selection snapshots remain intact and display through those
+pools. GW1/GW2 retain Buriram.
+
+Anucha Sakaekum's GW1 backfill pool incorrectly recorded Ayutthaya. Official
+Rasisalai registration `2026:24691` starts 2026-07-01 and was stored on
+2026-09-02, before the 2026-09-04 deadline; the live official roster corroborates
+it. Only that pool row's club was corrected to Rasisalai, preserving its source
+and capture timestamp. Recomputing both canonical 462-player optimizer inputs
+produced identical 15-player choices, roles and 110 total points.
+
+The atomic transaction recorded 23 before/after audits and asserted unchanged
+scores, standings, transfer revisions, locked selections and other pool rows.
+Independent readback found zero draft club mismatches, ambiguous active clubs
+or missing complete deadline pools. Its 48 missing individual references are
+retained unavailable Chirasak Srisopa, Marc Navarro and Soffan Sanron selections
+across GW3–GW5; preserve them for historical display and manager replacement.
+See `PRODUCTION.md` for execution and recovery references.

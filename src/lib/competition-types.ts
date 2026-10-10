@@ -12,6 +12,7 @@ export type ClubColorPalette = [string, string, string, string];
 export type CompetitionPlayerView = {
   id: string;
   fantasyPlayerId: string | null;
+  isAvailable?: boolean;
   clubId: string;
   name: LocalizedText;
   shortName: LocalizedText;

@@ -1,4 +1,5 @@
 import type { CaptainRole } from "./rules.ts";
+import { refreshPlayerClubSnapshots } from "./player-club.ts";
 
 export type GameweekCarryoverMember = {
   fantasyPlayerId: string;
@@ -15,11 +16,13 @@ export type GameweekCarryoverMember = {
 export function createGameweekCarryover({
   selectionId,
   members,
+  currentClubs,
 }: {
   selectionId: string;
   members: GameweekCarryoverMember[];
+  currentClubs: ReadonlyMap<string, string>;
 }) {
-  return members.map((member) => ({
+  return refreshPlayerClubSnapshots(members, currentClubs).map((member) => ({
     selectionId,
     fantasyPlayerId: member.fantasyPlayerId,
     clubIdSnapshot: member.clubIdSnapshot,

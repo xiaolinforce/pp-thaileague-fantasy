@@ -527,6 +527,23 @@ returns 200 or a bounded 503 with no SQL/provider details and never caches the
 response. Its five-second response deadline does not claim cancellation of a
 already dispatched driver request. No external monitor was created by this change.
 
+## Gameweek club identity
+
+`player-club-service.ts` owns fresh server-only club eligibility for squad reads,
+saves, restores, carryover and auto-fill. It checks Fantasy availability, active
+player/competition entry, registration status and Bangkok registration dates,
+and rejects conflicting eligible clubs. Its pure companion refreshes only the
+club snapshot, preserving player identity and every other selection field.
+
+`src/data/fantasy.ts` and admin team points join the selected Gameweek's deadline
+pool for historical names and kits. `src/data/team-players.ts` merges fresh club
+eligibility with the cached competition data and resolves retained identities
+missing from the active roster, including baseline players needed for restore.
+Those identities stay outside the general competition dataset; the team market
+excludes unavailable players. The lock transaction batches club updates and
+records each changed draft member in the existing admin audit log. No schema
+change or historical revision mutation is required.
+
 ## Public discovery and analytics
 
 Public discovery routes share the existing dynamic application shell and language preference. Rules combines the beginner introduction and rule reference; next.config.ts permanently redirects the retired /how-to-play URL to /rules before route rendering. The home page keeps its authentication flow and compact public links without a lower reading section. The public season fixtures page reads only the server-only fixtures dataset. Metadata defaults to noindex; reviewed public routes opt in via src/lib/seo.ts. Analytics is client-only, production-host-only and opt-in; auth creation emits a short-lived consented signup receipt, and the existing selection transaction returns a first-save flag without changing rules or schema. See SEO.md.

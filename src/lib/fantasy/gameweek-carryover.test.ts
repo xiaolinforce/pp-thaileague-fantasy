@@ -32,6 +32,7 @@ test("copies a complete locked squad into the next Gameweek selection", () => {
   const copied = createGameweekCarryover({
     selectionId: "next-selection",
     members: source,
+    currentClubs: new Map(),
   });
 
   assert.equal(copied.length, 15);
@@ -44,7 +45,11 @@ test("copies a complete locked squad into the next Gameweek selection", () => {
 
 test("keeps the following Gameweek empty when the locked draft is empty", () => {
   assert.deepEqual(
-    createGameweekCarryover({ selectionId: "next-selection", members: [] }),
+    createGameweekCarryover({
+      selectionId: "next-selection",
+      members: [],
+      currentClubs: new Map(),
+    }),
     [],
   );
 });
@@ -55,7 +60,28 @@ test("preserves a partial draft instead of making the lock transaction fail", ()
     createGameweekCarryover({
       selectionId: "next-selection",
       members: source,
+      currentClubs: new Map(),
     }),
     source.map((member) => ({ selectionId: "next-selection", ...member })),
   );
+});
+
+test("refreshes moved clubs without changing choices, roles or classifications", () => {
+  const source = completeSquad();
+  const copied = createGameweekCarryover({
+    selectionId: "next",
+    members: source,
+    currentClubs: new Map([[source[2].fantasyPlayerId, "new-club"]]),
+  });
+  assert.deepEqual(
+    copied,
+    source.map((member, index) => ({
+      selectionId: "next",
+      ...member,
+      clubIdSnapshot: index === 2 ? "new-club" : member.clubIdSnapshot,
+    })),
+  );
+  assert.equal(source[2].clubIdSnapshot, "club-3");
+  assert.equal(copied[2].captainRole, "captain");
+  assert.equal(copied.length, source.length);
 });

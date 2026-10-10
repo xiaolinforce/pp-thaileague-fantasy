@@ -3,6 +3,7 @@ import { and, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import {
   fantasyAdminAuditLog,
   fantasyGameweeks,
+  fantasyGameweekPlayerPool,
   fantasyPlayers,
   fantasyPlayerMatchPoints,
   fantasyPlayerMatchStats,
@@ -26,6 +27,7 @@ import {
   type FantasyPosition,
 } from "./rules";
 import { createGameweekCarryover } from "./gameweek-carryover";
+import { getCurrentPlayerClubs } from "./player-club-service";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
 import { snapshotFantasyGameweekPlayerPool } from "./player-pool-service";
 import { refreshFantasyPlayerOwnership } from "./ownership-service";
@@ -371,6 +373,63 @@ export async function lockFantasyGameweek(
         .for("update")
     : [];
   const teamsById = new Map(teams.map((team) => [team.id, team]));
+  // Freeze club membership from the deadline pool, without changing Fantasy transfers.
+  const deadlineClubs = new Map(
+    (
+      await db
+        .select()
+        .from(fantasyGameweekPlayerPool)
+        .where(eq(fantasyGameweekPlayerPool.fantasyGameweekId, gameweek.id))
+    ).map((member) => [member.fantasyPlayerId, member.clubIdSnapshot]),
+  );
+  const draftMembers = selections.length
+    ? await db
+        .select()
+        .from(fantasyTeamSelectionPlayers)
+        .where(
+          inArray(
+            fantasyTeamSelectionPlayers.selectionId,
+            selections.map((selection) => selection.id),
+          ),
+        )
+    : [];
+  const clubChanges = draftMembers.flatMap((member) => {
+    const clubId = deadlineClubs.get(member.fantasyPlayerId);
+    return clubId && clubId !== member.clubIdSnapshot
+      ? [{ member, clubId }]
+      : [];
+  });
+  for (const [clubId, changes] of Map.groupBy(
+    clubChanges,
+    (change) => change.clubId,
+  )) {
+    await db
+      .update(fantasyTeamSelectionPlayers)
+      .set({ clubIdSnapshot: clubId, updatedAt: new Date() })
+      .where(
+        inArray(
+          fantasyTeamSelectionPlayers.id,
+          changes.map(({ member }) => member.id),
+        ),
+      );
+  }
+  for (let offset = 0; offset < clubChanges.length; offset += 500) {
+    await db.insert(fantasyAdminAuditLog).values(
+      clubChanges.slice(offset, offset + 500).map(({ member, clubId }) => ({
+        action: "refresh_deadline_player_club",
+        entityType: "fantasy_selection_player",
+        entityId: member.id,
+        changedBy,
+        reason:
+          "Refresh club from the Gameweek deadline pool before locking; preserve player choices and transfer revisions.",
+        before: {
+          clubIdSnapshot: member.clubIdSnapshot,
+          gameweekId: gameweek.id,
+        },
+        after: { clubIdSnapshot: clubId, gameweekId: gameweek.id },
+      })),
+    );
+  }
   const previousLockedSquads = selections.length
     ? await db
         .select({
@@ -512,6 +571,13 @@ export async function lockFantasyGameweek(
       allMembers,
       (member) => member.selectionId,
     );
+    const currentClubs = await getCurrentPlayerClubs({
+      database: db,
+      season,
+      fantasyPlayerIds: [
+        ...new Set(allMembers.map((member) => member.fantasyPlayerId)),
+      ],
+    });
     const previousByTeam = new Map(
       selections.map((selection) => [selection.fantasyTeamId, selection.id]),
     );
@@ -521,6 +587,7 @@ export async function lockFantasyGameweek(
       if (membersBySelection.has(next.id)) continue;
       const members = createGameweekCarryover({
         selectionId: next.id,
+        currentClubs,
         members:
           membersBySelection.get(previousByTeam.get(next.fantasyTeamId)!) ?? [],
       });

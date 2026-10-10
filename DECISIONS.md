@@ -1142,3 +1142,19 @@ unchanged. Recalculation produces a canonical 15-player result whose badges and
 bench match the admin view's meaning, and future Gameweeks inherit the same
 ranking rule. An algorithm-version marker lets the release recalculate stale
 historical results once after this change, then skip them on later deployments.
+
+## 2026-10-11 — Club identity follows the viewed Gameweek
+
+**Decision:** Use fresh eligible registrations for open squads and their restores
+and carryover, and the deadline pool for historical club names and kits. Refresh
+draft club metadata at lock with an audit; preserve original locked selections
+and transfer revisions. A real-world move never counts as a Fantasy transfer.
+
+**Context:** Zulj's carried selections retained Buriram after his Ratchaburi
+registration became active. Reading those copied clubs produced incorrect kits
+in GW3/GW4; restoring the original baseline could reintroduce the stale club.
+
+**Consequences:** Historical displays remain stable after subsequent moves.
+Missing pool references retain the saved club, and unavailable players remain
+visible for replacement. Source errors in a backfilled pool are corrected only
+with dated registration evidence, audit context and an optimal-team impact check.

@@ -1,11 +1,12 @@
 import "server-only";
 
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import {
   clubs,
   clubVisualIdentities,
+  fantasyGameweekPlayerPool,
   fantasyPlayerMatchPoints,
   fantasyPlayerMatchStats,
   fantasyPlayers,
@@ -18,6 +19,7 @@ import {
 } from "@/db/schema";
 import type { FantasyPointsSquadMember, PlayerPointsRow } from "@/data/fantasy";
 import { getAdminContext, param, type AdminParams } from "./admin";
+import { getCurrentPlayerClubs } from "@/lib/fantasy/player-club-service";
 
 const UUID_PATTERN =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -69,9 +71,30 @@ export async function getAdminTeamPoints(teamId: string, params: AdminParams) {
 
   const scoringStarted =
     week.status === "provisional" || week.status === "final";
+  let displayClubId = sql<string>`coalesce(${fantasyGameweekPlayerPool.clubIdSnapshot}, ${fantasyTeamSelectionPlayers.clubIdSnapshot})`;
+  if (week.status === "open" && selection.status === "draft") {
+    const members = await db
+      .select({ id: fantasyTeamSelectionPlayers.fantasyPlayerId })
+      .from(fantasyTeamSelectionPlayers)
+      .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
+    const currentClubs = await getCurrentPlayerClubs({
+      database: db,
+      season: context.season,
+      fantasyPlayerIds: members.map((member) => member.id),
+    });
+    if (currentClubs.size)
+      displayClubId = sql<string>`case ${sql.join(
+        [...currentClubs].map(
+          ([id, clubId]) =>
+            sql`when ${fantasyTeamSelectionPlayers.fantasyPlayerId} = ${id}::uuid then ${clubId}::uuid`,
+        ),
+        sql` `,
+      )} else ${fantasyTeamSelectionPlayers.clubIdSnapshot} end`;
+  }
   const memberRowsPromise = db
     .select({
       member: fantasyTeamSelectionPlayers,
+      displayClubId,
       fullNameTh: players.fullNameTh,
       fullNameEn: players.fullNameEn,
       shortNameTh: players.shortNameTh,
@@ -90,13 +113,20 @@ export async function getAdminTeamPoints(teamId: string, params: AdminParams) {
       eq(fantasyTeamSelectionPlayers.fantasyPlayerId, fantasyPlayers.id),
     )
     .innerJoin(players, eq(fantasyPlayers.playerId, players.id))
-    .innerJoin(clubs, eq(fantasyTeamSelectionPlayers.clubIdSnapshot, clubs.id))
+    .leftJoin(
+      fantasyGameweekPlayerPool,
+      and(
+        eq(fantasyGameweekPlayerPool.fantasyGameweekId, week.id),
+        eq(
+          fantasyGameweekPlayerPool.fantasyPlayerId,
+          fantasyTeamSelectionPlayers.fantasyPlayerId,
+        ),
+      ),
+    )
+    .innerJoin(clubs, eq(displayClubId, clubs.id))
     .leftJoin(
       clubVisualIdentities,
-      eq(
-        fantasyTeamSelectionPlayers.clubIdSnapshot,
-        clubVisualIdentities.clubId,
-      ),
+      eq(displayClubId, clubVisualIdentities.clubId),
     )
     .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
 
@@ -137,7 +167,7 @@ export async function getAdminTeamPoints(teamId: string, params: AdminParams) {
   const squad: FantasyPointsSquadMember[] = memberRows
     .map((row) => ({
       fantasyPlayerId: row.member.fantasyPlayerId,
-      clubId: row.member.clubIdSnapshot,
+      clubId: row.displayClubId,
       position: row.member
         .positionSnapshot as FantasyPointsSquadMember["position"],
       tier: row.member.tierSnapshot,

@@ -1,6 +1,6 @@
 import "server-only";
 
-import { and, asc, count, desc, eq, inArray, lt } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, lt, sql } from "drizzle-orm";
 import { connection } from "next/server";
 
 import { db } from "@/db";
@@ -8,6 +8,7 @@ import {
   clubs,
   clubVisualIdentities,
   fantasyGameweeks,
+  fantasyGameweekPlayerPool,
   fantasyPlayerMatchPoints,
   fantasyPlayerMatchStats,
   fantasyPlayers,
@@ -31,12 +32,14 @@ import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { logServerTiming } from "@/lib/server/performance";
 import { isFantasySelectionInput } from "@/lib/fantasy/selection-input";
 import { normalizeFantasyRevisionMembers } from "@/lib/fantasy/revision-snapshot";
+import { getCurrentPlayerClubs } from "@/lib/fantasy/player-club-service";
 
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
 
 export type FantasySquadMember = {
   fantasyPlayerId: string;
   clubId: string;
+  isAvailable?: boolean;
   position: "goalkeeper" | "defender" | "midfielder" | "forward";
   tier: number;
   isThai: boolean;
@@ -181,6 +184,24 @@ export async function getFantasyState(): Promise<FantasyState> {
   };
   for (const row of chipRows) if (row.chip) chipUses[row.chip] = row.uses;
 
+  const editable =
+    !profile.seasonFinished &&
+    selection?.status === "draft" &&
+    gameweek.status === "open";
+  const displayClubs = editable
+    ? await getCurrentPlayerClubs({
+        database: db,
+        season: fantasySeason,
+        fantasyPlayerIds: members.map((member) => member.fantasyPlayerId),
+      })
+    : new Map(
+        (
+          await db
+            .select()
+            .from(fantasyGameweekPlayerPool)
+            .where(eq(fantasyGameweekPlayerPool.fantasyGameweekId, gameweek.id))
+        ).map((member) => [member.fantasyPlayerId, member.clubIdSnapshot]),
+      );
   const state = {
     seasonId: fantasySeason.id,
     seasonFinished: profile.seasonFinished,
@@ -212,7 +233,9 @@ export async function getFantasyState(): Promise<FantasyState> {
       transferPoints: selection?.transferPoints ?? 0,
       members: members.map((member) => ({
         fantasyPlayerId: member.fantasyPlayerId,
-        clubId: member.clubIdSnapshot,
+        clubId:
+          displayClubs.get(member.fantasyPlayerId) ?? member.clubIdSnapshot,
+        isAvailable: editable ? displayClubs.has(member.fantasyPlayerId) : true,
         position: member.positionSnapshot as FantasySquadMember["position"],
         tier: member.tierSnapshot,
         isThai: member.isThaiSnapshot,
@@ -301,11 +324,13 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
     (row) => row.gameweek.id === selectedGameweek.id,
   )?.selection;
 
+  const displayClubId = sql<string>`coalesce(${fantasyGameweekPlayerPool.clubIdSnapshot}, ${fantasyTeamSelectionPlayers.clubIdSnapshot})`;
   const pointsSquadQuery = (selectionId?: string) =>
     selectionId
       ? db
           .select({
             member: fantasyTeamSelectionPlayers,
+            displayClubId,
             fullNameTh: players.fullNameTh,
             fullNameEn: players.fullNameEn,
             shortNameTh: players.shortNameTh,
@@ -324,16 +349,23 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
             eq(fantasyTeamSelectionPlayers.fantasyPlayerId, fantasyPlayers.id),
           )
           .innerJoin(players, eq(fantasyPlayers.playerId, players.id))
-          .innerJoin(
-            clubs,
-            eq(fantasyTeamSelectionPlayers.clubIdSnapshot, clubs.id),
+          .leftJoin(
+            fantasyGameweekPlayerPool,
+            and(
+              eq(
+                fantasyGameweekPlayerPool.fantasyGameweekId,
+                selectedGameweek.id,
+              ),
+              eq(
+                fantasyGameweekPlayerPool.fantasyPlayerId,
+                fantasyTeamSelectionPlayers.fantasyPlayerId,
+              ),
+            ),
           )
+          .innerJoin(clubs, eq(displayClubId, clubs.id))
           .leftJoin(
             clubVisualIdentities,
-            eq(
-              fantasyTeamSelectionPlayers.clubIdSnapshot,
-              clubVisualIdentities.clubId,
-            ),
+            eq(displayClubId, clubVisualIdentities.clubId),
           )
           .where(eq(fantasyTeamSelectionPlayers.selectionId, selectionId))
       : Promise.resolve([]);
@@ -438,7 +470,7 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
   const members: FantasyPointsSquadMember[] = squadRows
     .map((row) => ({
       fantasyPlayerId: row.member.fantasyPlayerId,
-      clubId: row.member.clubIdSnapshot,
+      clubId: row.displayClubId,
       position: row.member.positionSnapshot as FantasySquadMember["position"],
       tier: row.member.tierSnapshot,
       isThai: row.member.isThaiSnapshot,
@@ -473,7 +505,7 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
   const highestScoringMembers: FantasyPointsSquadMember[] = highestScoringSquad
     .map((row) => ({
       fantasyPlayerId: row.member.fantasyPlayerId,
-      clubId: row.member.clubIdSnapshot,
+      clubId: row.displayClubId,
       position: row.member.positionSnapshot as FantasySquadMember["position"],
       tier: row.member.tierSnapshot,
       isThai: row.member.isThaiSnapshot,

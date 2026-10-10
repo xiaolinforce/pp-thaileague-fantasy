@@ -1,5 +1,8 @@
 // Compatibility namespace for game screens still using source-copy translation.
 const translations: Record<string, string> = {
+  ไม่พร้อมให้เลือก: "Unavailable",
+  "นักเตะบางคนไม่พร้อมให้เลือกแล้ว กรุณาเปลี่ยนออกก่อนบันทึกทีม":
+    "Some players are unavailable. Replace them before saving your squad.",
   "ข้อมูลทีมไม่ถูกต้อง กรุณาเลือกนักเตะที่ไม่ซ้ำกันให้ครบ 15 คน":
     "Invalid squad data. Select exactly 15 different players.",
   "นักเตะบางคนไม่พร้อมให้เลือกแล้ว กรุณาตรวจสอบทีมอีกครั้ง":

@@ -698,3 +698,35 @@ the production HTTP SEO checks. The Fantasy URL-prefix Search Console property
 is linked to GA4, the sitemap was accepted, and a consented Incognito visit was
 visible in GA4 Realtime on 2026-10-04. `SEO.md` records measurement limits and
 the PageSpeed baseline. No database migration accompanied this release.
+
+## 2026-10-11 player club data maintenance
+
+The owner authorized all proposed player club fixes and a code commit.
+Production Neon branch `br-tiny-shape-azrvakql`, database `neondb`, was confirmed
+before rehearsal and commit through the authenticated SQL Editor. Batch
+`player-club-corrections-20261011` changed 22 Zulj GW5 draft clubs and one
+verified Anucha GW1 deadline-pool club. There was no schema migration.
+
+The guarded transaction locked the season and affected Gameweeks, checked
+official registration evidence, the exact expected row counts, the complete
+GW1 optimizer input and persisted optimal team. A rollback rehearsal passed;
+the same transaction then committed. Its pre-write recovery reference is
+`2026-10-10 17:29:02.756198 UTC`, subject to Neon history retention, not a
+permanent backup. All 23 audit entries retain the original row and corrected
+row for review or targeted reversal.
+
+Checksums preserved scores, standings, revisions, locked selections, player
+stats, other pool rows and team metadata. The canonical GW1 optimizer remained
+identical at 110 points. Independent readback confirmed 23 Ratchaburi Zulj GW5
+members (22 corrected plus one already correct), zero Buriram GW5 members and
+the Rasisalai Anucha pool row. A production-wide selected-player audit found
+zero active draft club mismatches, ambiguous active clubs or missing complete
+deadline pools. The 44 GW3/GW4 raw Zulj snapshots and 48 retained unavailable
+references are intentional historical/replacement cases; see `DATA_SOURCES.md`.
+
+The application changes were verified locally with 144 Fantasy tests,
+localization tests, types, lint, formatting, production build and a development
+database rollback regression for save, restore and deadline locking. A removed
+development-only UI fixture covered both languages and desktop/mobile states.
+No application deployment or push accompanied this maintenance: historical
+pool-based kit display and the availability fixes require deploying the code.

@@ -31,8 +31,10 @@ async function run() {
     expected && expected === branch,
     "Explicit matching development branch is required.",
   );
-  const { saveFantasySelectionInTransaction } =
-    await import("../src/lib/fantasy/selection-service.ts");
+  const {
+    saveFantasySelectionInTransaction,
+    revertFantasySelectionInTransaction,
+  } = await import("../src/lib/fantasy/selection-service.ts");
   const { lockFantasySeason } =
     await import("../src/lib/fantasy/season-lock.ts");
   const {
@@ -107,6 +109,7 @@ async function run() {
       union all select row_to_json(t)::text from fantasy_teams t
       union all select row_to_json(t)::text from fantasy_players t
       union all select row_to_json(t)::text from fantasy_player_tiers t
+      union all select row_to_json(t)::text from player_registrations t
     ) records
   `)
     ).rows[0].digest;
@@ -119,6 +122,14 @@ async function run() {
   ) {
     await assert.rejects(
       database.transaction(async (tx) => {
+        // Historical development scenarios may have an expired open deadline.
+        // Keep the fixture editable only inside this rolled-back transaction.
+        if (target.gameweek.deadlineAt.getTime() <= Date.now()) {
+          await tx
+            .update(schema.fantasyGameweeks)
+            .set({ deadlineAt: new Date(Date.now() + 86_400_000) })
+            .where(eq(schema.fantasyGameweeks.id, target.gameweek.id));
+        }
         await work(tx);
         throw rollback;
       }),
@@ -187,6 +198,113 @@ async function run() {
   });
   console.log(
     "Squad payload, missing player, revision conflict and deadline verified.",
+  );
+
+  await rolledBack(async (tx) => {
+    const season = await lockFantasySeason(tx, owner.seasonId);
+    const [registration] = await tx
+      .select({
+        registration: schema.playerRegistrations,
+        player: schema.fantasyPlayers,
+      })
+      .from(schema.fantasyPlayers)
+      .innerJoin(
+        schema.playerRegistrations,
+        eq(schema.playerRegistrations.playerId, schema.fantasyPlayers.playerId),
+      )
+      .innerJoin(
+        schema.competitionEntries,
+        eq(
+          schema.competitionEntries.id,
+          schema.playerRegistrations.competitionEntryId,
+        ),
+      )
+      .where(
+        and(
+          eq(schema.fantasyPlayers.id, members[0].fantasyPlayerId),
+          eq(schema.playerRegistrations.status, "active"),
+          eq(
+            schema.competitionEntries.competitionSeasonId,
+            season.competitionSeasonId,
+          ),
+        ),
+      );
+    assert.ok(registration);
+    const entries = await tx
+      .select()
+      .from(schema.competitionEntries)
+      .where(
+        and(
+          eq(
+            schema.competitionEntries.competitionSeasonId,
+            season.competitionSeasonId,
+          ),
+          eq(schema.competitionEntries.isActive, true),
+        ),
+      );
+    const unusedClub = entries.find(
+      (entry) =>
+        !members.some((member) => member.clubIdSnapshot === entry.clubId),
+    );
+    assert.ok(unusedClub, "A club outside the fixture squad is required.");
+    await tx
+      .update(schema.playerRegistrations)
+      .set({ competitionEntryId: unusedClub.id })
+      .where(eq(schema.playerRegistrations.id, registration.registration.id));
+    const saved = await saveFantasySelectionInTransaction(owner, input, tx);
+    assert.ok(saved.ok, saved.message);
+    const refreshed = await tx.query.fantasyTeamSelectionPlayers.findFirst({
+      where: and(
+        eq(schema.fantasyTeamSelectionPlayers.selectionId, target.selection.id),
+        eq(
+          schema.fantasyTeamSelectionPlayers.fantasyPlayerId,
+          members[0].fantasyPlayerId,
+        ),
+      ),
+    });
+    assert.equal(refreshed?.clubIdSnapshot, unusedClub.clubId);
+    const savedSelection = await tx.query.fantasyTeamSelections.findFirst({
+      where: eq(schema.fantasyTeamSelections.id, target.selection.id),
+    });
+    assert.equal(
+      savedSelection?.netTransferCount,
+      target.selection.netTransferCount,
+    );
+    const restored = await revertFantasySelectionInTransaction(
+      owner,
+      { selectionId: target.selection.id, expectedRevision: saved.revision },
+      tx,
+    );
+    assert.ok(restored.ok, restored.message);
+    const restoredPlayer = await tx.query.fantasyTeamSelectionPlayers.findFirst(
+      {
+        where: and(
+          eq(
+            schema.fantasyTeamSelectionPlayers.selectionId,
+            target.selection.id,
+          ),
+          eq(
+            schema.fantasyTeamSelectionPlayers.fantasyPlayerId,
+            members[0].fantasyPlayerId,
+          ),
+        ),
+      },
+    );
+    assert.equal(restoredPlayer?.clubIdSnapshot, unusedClub.clubId);
+    await tx
+      .update(schema.fantasyPlayers)
+      .set({ isAvailable: false })
+      .where(eq(schema.fantasyPlayers.id, members[0].fantasyPlayerId));
+    const rejected = await saveFantasySelectionInTransaction(
+      owner,
+      { ...input, expectedRevision: restored.revision },
+      tx,
+    );
+    assert.equal(rejected.ok, false);
+    assert.match(rejected.message, /ไม่พร้อมให้เลือก/);
+  });
+  console.log(
+    "Club transfers refresh save and baseline restore without charging Fantasy transfers; unavailable saves are rejected.",
   );
 
   await rolledBack(async (tx) => {
@@ -282,11 +400,59 @@ async function run() {
   await rolledBack(async (tx) => {
     const form = new FormData();
     form.set("gameweekId", target.gameweek.id);
+    const staleClub = await tx.query.competitionEntries.findFirst({
+      where: and(
+        eq(
+          schema.competitionEntries.competitionSeasonId,
+          (await tx.query.fantasySeasons.findFirst({
+            where: eq(schema.fantasySeasons.id, owner.seasonId),
+          }))!.competitionSeasonId,
+        ),
+        sql`${schema.competitionEntries.clubId} <> ${members[0].clubIdSnapshot}::uuid`,
+      ),
+    });
+    assert.ok(staleClub);
+    await tx
+      .update(schema.fantasyTeamSelectionPlayers)
+      .set({ clubIdSnapshot: staleClub.clubId })
+      .where(eq(schema.fantasyTeamSelectionPlayers.id, members[0].id));
     await lockFantasyGameweek(form, "rollback-verification", tx);
     const locked = await tx.query.fantasyTeamSelections.findFirst({
       where: eq(schema.fantasyTeamSelections.id, target.selection.id),
     });
     assert.equal(locked?.status, "locked");
+    const deadlinePlayer = await tx.query.fantasyGameweekPlayerPool.findFirst({
+      where: and(
+        eq(
+          schema.fantasyGameweekPlayerPool.fantasyGameweekId,
+          target.gameweek.id,
+        ),
+        eq(
+          schema.fantasyGameweekPlayerPool.fantasyPlayerId,
+          members[0].fantasyPlayerId,
+        ),
+      ),
+    });
+    const lockedPlayer = await tx.query.fantasyTeamSelectionPlayers.findFirst({
+      where: eq(schema.fantasyTeamSelectionPlayers.id, members[0].id),
+    });
+    assert.ok(deadlinePlayer);
+    assert.equal(lockedPlayer?.clubIdSnapshot, deadlinePlayer.clubIdSnapshot);
+    const clubAudit = await tx.query.fantasyAdminAuditLog.findFirst({
+      where: and(
+        eq(schema.fantasyAdminAuditLog.action, "refresh_deadline_player_club"),
+        eq(schema.fantasyAdminAuditLog.entityId, members[0].id),
+      ),
+    });
+    assert.equal(clubAudit?.before?.clubIdSnapshot, staleClub.clubId);
+    assert.equal(
+      clubAudit?.after?.clubIdSnapshot,
+      deadlinePlayer.clubIdSnapshot,
+    );
+    const baseline = await tx.query.fantasyTransferRevisions.findFirst({
+      where: eq(schema.fantasyTransferRevisions.id, latest!.id),
+    });
+    assert.deepEqual(baseline?.lineup, latest?.lineup);
     assert.ok(
       await tx.query.fantasyTeamGameweekScores.findFirst({
         where: eq(

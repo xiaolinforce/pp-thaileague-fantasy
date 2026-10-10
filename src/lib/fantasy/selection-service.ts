@@ -1,4 +1,6 @@
 import "server-only";
+import { getCurrentPlayerClubs } from "./player-club-service";
+import { refreshPlayerClubSnapshots } from "./player-club";
 import { and, asc, desc, eq, gt, inArray, lt } from "drizzle-orm";
 import { transactionDb } from "@/db/transaction";
 import {
@@ -453,10 +455,10 @@ export async function revertFantasySelectionInTransaction(
         (revision) => revision.revision === revisionState.baselineRevision,
       ) ?? null)
     : null;
-  const restored = openingGameweek
+  const baselineMembers = openingGameweek
     ? []
     : restoreBaselineMembers(baseline, selection.id, season.id);
-  if (restored === null) {
+  if (baselineMembers === null) {
     return {
       ok: false,
       message: baseline
@@ -464,6 +466,15 @@ export async function revertFantasySelectionInTransaction(
         : "ไม่พบทีมตั้งต้นสำหรับยกเลิกการเปลี่ยนแปลง",
     };
   }
+
+  const restored = refreshPlayerClubSnapshots(
+    baselineMembers,
+    await getCurrentPlayerClubs({
+      database: db,
+      season,
+      fantasyPlayerIds: baselineMembers.map((member) => member.fantasyPlayerId),
+    }),
+  );
 
   const activeChip = openingGameweek ? null : (baseline?.activeChip ?? null);
   const settlement = settleTransfers({
@@ -682,6 +693,11 @@ async function getCurrentPlayerSnapshots(
   gameweek: typeof fantasyGameweeks.$inferSelect,
   db: FantasyTransaction,
 ) {
+  const currentClubs = await getCurrentPlayerClubs({
+    database: db,
+    season,
+    fantasyPlayerIds,
+  });
   const playerRows = await db
     .select({
       fantasyPlayer: fantasyPlayers,
@@ -727,15 +743,19 @@ async function getCurrentPlayerSnapshots(
     }
   }
   return new Map(
-    playerRows.map((row) => [
-      row.fantasyPlayer.id,
-      {
-        fantasyPlayerId: row.fantasyPlayer.id,
-        clubId: row.entry.clubId,
-        position: row.fantasyPlayer.lockedPosition as FantasyPosition,
-        tier: tierByPlayer.get(row.fantasyPlayer.id) ?? 4,
-        isThai: row.fantasyPlayer.isThai,
-      },
-    ]),
+    playerRows
+      .filter(
+        (row) => currentClubs.get(row.fantasyPlayer.id) === row.entry.clubId,
+      )
+      .map((row) => [
+        row.fantasyPlayer.id,
+        {
+          fantasyPlayerId: row.fantasyPlayer.id,
+          clubId: row.entry.clubId,
+          position: row.fantasyPlayer.lockedPosition as FantasyPosition,
+          tier: tierByPlayer.get(row.fantasyPlayer.id) ?? 4,
+          isThai: row.fantasyPlayer.isThai,
+        },
+      ]),
   );
 }

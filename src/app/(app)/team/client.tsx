@@ -393,8 +393,11 @@ function formatClientViolation(
     case "squad_size":
     case "position_quota":
     case "unknown_tier":
-    case "unavailable_player":
       return translate("เกิดข้อผิดพลาด โปรด Refresh หน้านี้");
+    case "unavailable_player":
+      return translate(
+        "นักเตะบางคนไม่พร้อมให้เลือกแล้ว กรุณาเปลี่ยนออกก่อนบันทึกทีม",
+      );
     case "duplicate_player":
     case "starter_count":
     case "formation":
@@ -953,12 +956,19 @@ export default function TeamClient({
     );
   }, [data.fixtures, data.players, language, squadSecondaryDisplay, translate]);
   const getSquadSecondaryInfo = (player: CompetitionPlayerView) =>
-    player.fantasyPlayerId
-      ? (squadSecondaryInfoByFantasyId.get(player.fantasyPlayerId) ?? {
-          value: "—",
-          title: "—",
-        })
-      : { value: "—", title: "—" };
+    player.isAvailable === false
+      ? {
+          value: translate("ไม่พร้อมให้เลือก"),
+          title: translate(
+            "นักเตะบางคนไม่พร้อมให้เลือกแล้ว กรุณาเปลี่ยนออกก่อนบันทึกทีม",
+          ),
+        }
+      : player.fantasyPlayerId
+        ? (squadSecondaryInfoByFantasyId.get(player.fantasyPlayerId) ?? {
+            value: "—",
+            title: "—",
+          })
+        : { value: "—", title: "—" };
   const lineupAssignments = useMemo<LineupPlayer[]>(
     () =>
       members.flatMap((member) => {
@@ -974,7 +984,7 @@ export default function TeamClient({
                 position: fantasyPositions[squadPlayer.position],
                 tier: squadPlayer.tier,
                 isThai: squadPlayer.isThai,
-                isAvailable: true,
+                isAvailable: squadPlayer.isAvailable !== false,
                 lineupRole: member.lineupRole,
                 benchOrder: member.benchOrder,
                 captainRole: member.captainRole,

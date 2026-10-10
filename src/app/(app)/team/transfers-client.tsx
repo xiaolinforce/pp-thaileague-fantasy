@@ -196,7 +196,7 @@ export default function TransfersClient({
     vacancies.map((member) => competitionPositions[member.vacancyPosition!]),
   );
   const players = data.players
-    .filter((player) => player.fantasyPlayerId)
+    .filter((player) => player.fantasyPlayerId && player.isAvailable !== false)
     .filter((player) => clubId === "all" || player.clubId === clubId)
     .filter((player) => position === "ALL" || player.position === position)
     .filter((player) => tier === "all" || player.tier >= Number(tier))
@@ -264,7 +264,7 @@ export default function TransfersClient({
       toast.error("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว");
       return;
     }
-    if (!player.fantasyPlayerId) return;
+    if (!player.fantasyPlayerId || player.isAvailable === false) return;
     if (ownedIds.has(player.fantasyPlayerId)) return;
     const nextMembers = fillPreferredOrFirstMatchingDraftVacancy(
       members,

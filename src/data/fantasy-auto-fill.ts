@@ -20,6 +20,7 @@ import {
   type AutoFillCandidate,
 } from "@/lib/fantasy/auto-fill";
 import type { FantasyPosition } from "@/lib/fantasy/rules";
+import { getCurrentPlayerClubs } from "@/lib/fantasy/player-club-service";
 
 export async function getFantasyAutoFillCandidates(
   season: typeof fantasySeasons.$inferSelect,
@@ -95,6 +96,11 @@ export async function getFantasyAutoFillCandidates(
     .orderBy(asc(fantasyPlayers.id), asc(competitionEntries.id));
   const fantasyPlayerIds = [...new Set(rows.map((row) => row.fantasyPlayerId))];
   if (fantasyPlayerIds.length === 0) return [];
+  const currentClubs = await getCurrentPlayerClubs({
+    database,
+    season,
+    fantasyPlayerIds,
+  });
 
   const tierRows = await database
     .select({
@@ -122,6 +128,7 @@ export async function getFantasyAutoFillCandidates(
 
   const candidatesById = new Map<string, AutoFillCandidate>();
   for (const row of rows) {
+    if (currentClubs.get(row.fantasyPlayerId) !== row.clubId) continue;
     if (candidatesById.has(row.fantasyPlayerId)) continue;
     candidatesById.set(row.fantasyPlayerId, {
       id: row.fantasyPlayerId,
