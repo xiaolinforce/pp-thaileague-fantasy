@@ -385,6 +385,50 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-10 GW4 three-match import
+
+Owner-approved production-only batch `gw4-three-matches-20261010` recorded
+Uthai Thani 4-2 Rasisalai United (`37440`), Buriram United 3-2 Rayong (`37442`),
+and BG Pathum United 1-1 Ayutthaya United (`37443`). The shared transaction
+client confirmed Neon branch `br-tiny-shape-azrvakql` before the atomic import.
+It stored 268 reviewed results and point breakdowns: 93 appearances and 175
+explicit zero-minute results, including selected players whose locked club
+snapshot belongs to a finished fixture. Locked positions and the GW4/GW5
+selection and member snapshots were preserved; their hashes were checked
+inside the transaction. The batch audit and each source payload retain the
+official reports, FotMob references, reviewed event timeline, and owner decisions.
+
+The owner independently reviewed and confirmed no assister for Stefan
+Schimmer's 45th-minute goal, Patrik Gustavsson's 54th-minute goal, and Trent
+Buhagiar's 53rd-minute goal. Ratthanakorn Maikami receives one Fantasy assist
+for Willian Lira's 17th-minute rebound goal: the Uthai highlight at 1:01-1:06
+shows his initial shot being parried before Lira scores. This follows the
+owner's first-shooter rebound rule; his source assist count remains zero.
+João Felipe has two yellows and one red, matching the previously implemented
+second-yellow scoring convention, and totals five points. Official Thai League
+event times govern substitutions and goal exposure, with halftime normalized
+to 45 minutes and a minimum one minute for every confirmed appearance.
+
+FotMob's individual goalkeeper panels directly reported Neil Etheridge 1,
+Wichaya Ganthong 6, Saranon Anuin 1, Warut Makemusik 1, Caíque 13, and Gabriel
+Bernard 7 saves. No goalkeeper was substituted. Saves were not inferred from
+shots on target. The import contains 13 goals, nine source assists, ten Fantasy
+assists, 29 saves, 16 yellows, and two reds. Player points total 199: Buriram 37,
+Rayong 30, BG 25, Ayutthaya 23, Uthai 51, and Rasisalai 33.
+
+Recalculation in the same transaction scored all 388 locked GW4 teams and
+refreshed 390 Overall standings, including the newer teams without a GW4
+selection. GW4 average/highest points are 15/41; its persisted optimal team
+totals 95. Independent post-commit reads verified all 268 player breakdowns,
+the event totals, one batch audit, and all 388 team-score arithmetic checks.
+Production competition and Fantasy verification passed. Four GW4 fixtures are
+finished and four remain scheduled, so GW4 remains `provisional` with
+`score_complete=false`; GW5 remains `open`. The October 9 result still has 60
+rows totaling 101 points. No match data was written to development. Its
+transaction rollback check passed; its separate Fantasy verification found
+pre-existing optimal-team coverage/status gaps, which this production task
+did not change. The targeted Fantasy rules tests passed (31 tests).
+
 ## 2026-10-09 GW4 opening-match import
 
 Owner-approved production-only batch `gw4-ratchaburi-sukhothai-20261009`
