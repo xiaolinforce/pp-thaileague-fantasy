@@ -385,6 +385,41 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-12 GW5 Anderson and Rui registration activation
+
+Owner-approved production-only batch `gw5-anderson-rui-registration-20261012`
+confirmed Neon branch `br-tiny-shape-azrvakql`, database `neondb`, and the live
+[official tournament 224 roster](https://competition.tl.prod.c0d1um.io/thaileague/api/player-public/all_players_search/?tournament=224).
+It added active official registrations `2026:62840` for Sisaket defender
+Anderson do Nascimento Carneiro (person `95567`) and `2026:62411` for Port
+forward Rui Costa (person `94702`), using their existing player/Fantasy
+identities. Both registrations begin on the owner-authorized activation date,
+2026-10-12; this is the Fantasy maintenance boundary, not an inferred historic
+signing date. Both Fantasy players are now available, and Rui's player master
+is active. Rui's old inactive Transfermarkt registration remains unchanged.
+
+Anderson receives Level 4 effective from GW5. Rui retains his existing Level 2
+effective-tier history from GW1 without adding or changing a tier row. Their
+locked defender/forward positions and foreign-player classifications remain
+unchanged. The open GW5 deadline pool remains uncaptured; the normal lock
+lifecycle will capture the newly eligible players. GW4 remains final and both
+players retain their one-point match results.
+
+The atomic operation records one administrative audit containing before/after
+state, official roster evidence, the activation-date decision, and protected
+fingerprints. A rolled-back rehearsal verified current purchase eligibility
+through the canonical club resolver and a savepoint verified both players'
+clubs and Level 4/2 tiers in the canonical GW5 deadline snapshot. The snapshot
+rehearsal was undone before committing, leaving the open pool untouched.
+Independent post-commit readback and production competition/Fantasy checks
+passed; active official registrations increased from 647 to 649. Fingerprints
+verified unchanged Gameweeks, fixtures, all match/player/team scores, standings,
+optimal teams, historical pools, selections, transfer revisions, rankings,
+Rui's tiers, and unrelated registrations/player data. Development's transaction
+rollback check passed without persistent data changes. The production
+`competition-dataset` cache tag was invalidated through Vercel for the next
+request to refresh the Player Market.
+
 ## 2026-10-11 GW4 final-match import and finalization
 
 Owner-approved production-only batch `gw4-final-four-matches-20261011`,
