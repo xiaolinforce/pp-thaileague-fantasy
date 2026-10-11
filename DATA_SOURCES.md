@@ -385,6 +385,76 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-11 GW4 final-match import and finalization
+
+Owner-approved production-only batch `gw4-final-four-matches-20261011`,
+executed on October 12, recorded Port 3-2 Pattani (`37436`), Sisaket United
+2-1 Chonburi (`37437`), Lamphun Warriors 0-2 Bangkok United (`37438`), and
+PT Prachuap 2-1 Chiangrai United (`37439`). These are the latest completed
+matches, played on October 11. The shared transaction client confirmed Neon
+branch `br-tiny-shape-azrvakql`, database `neondb`, before importing 325 reviewed
+results and point breakdowns: 126 appearances and 199 explicit zero-minute
+results, including players covered by historical selection club snapshots.
+
+The [official Thai League results](https://thaileague.co.th/results/224) and
+the four official match reports govern goals, cards, substitution times, and
+goal exposure. FotMob supplies source assists and directly reported individual
+goalkeeper saves. The eight goalkeepers played the full match without a
+goalkeeper substitution: Michael Falkesgaard 3, Damyan Damyanov 2, Steven Van
+Dijk 3, Kevin Ray Mendoza 3, Nont Muangngam 4, Patiwat Khammai 6, Wattanachai
+Srathongjan 1, and Apirak Worawong 3 saves. Saves were not inferred from shots
+on target. Every confirmed appearance receives at least one Fantasy minute;
+official 60th-minute substitutions retain the full 60 minutes.
+
+The reviewed [Port highlight](https://www.youtube.com/watch?v=UdrekrDY41A)
+at 2:23-2:49 shows Igor Neves's shot being parried before Jean-Pierre Da Sylva
+scores. Igor receives one Fantasy assist under the owner's first-shooter
+rebound rule, while his source assist remains zero. The
+[Sisaket highlight](https://www.youtube.com/watch?v=TG5leZJekpM) confirms
+Mendoza's own goal from Patrick Valverde's free kick hitting the post and
+goalkeeper, and Dennis Murillo's direct free kick; neither receives an assist.
+The [Prachuap highlight](https://www.youtube.com/watch?v=M_YuXPx9iJo), including
+the VAR replay at 3:28-3:54, shows Edgar Mendez himself being fouled for his
+penalty, so that goal also has no assist. Noboru Shimura receives one direct
+red at 28 minutes. Additional Chaiyaphon Otton and Marlon yellows appearing
+on AiScore were not imported because neither the official report nor FotMob
+records them. Source payloads and the batch audit retain the reviewed event
+timeline, report URLs, FotMob references, highlights, and these decisions.
+
+The current official roster confirms Sisaket defender Anderson do Nascimento
+Carneiro, official player `62840` / person `95567`. A missing player master and
+unavailable Fantasy identity were created solely to attach his one-minute,
+one-point result. No tier, registration start date, or purchasing eligibility
+was inferred, and the captured GW4/GW5 pools were not changed. An identity
+creation audit records this boundary. Port's Rui Costa, official player
+`62411` / person `94702`, was matched to his existing unavailable Fantasy
+identity and receives one point for 30 minutes. His existing Level 2 history,
+registration, and availability remain unchanged. Both identities require
+separate registration/availability maintenance before becoming purchasable;
+Anderson also requires a tier decision.
+
+The batch contains 12 credited goals plus one own goal, nine source assists,
+ten Fantasy assists, 25 saves, 18 yellows, and one red. Its player points total
+273 (Port-Pattani 71, Sisaket-Chonburi 53, Lamphun-Bangkok 85, and
+Prachuap-Chiangrai 64). All eight GW4 fixtures are now finished. Finalization
+through the canonical admin service in the same transaction sets GW4 to
+`final` with `score_complete=true`, recalculates all 388 locked teams including
+automatic substitutes, captain fallback, and chips, and refreshes 390 Overall
+standings. There are 238 automatic substitution entries. GW4 average/highest
+points are 32/56 and its persisted final optimal team totals 116 points. The
+complete Gameweek has 653 stats/point rows, 251 appearances, and 573 player
+points. The previous four fixtures retain their 328 rows and 300 points.
+
+A full transaction rehearsal rolled back before the real commit. Independent
+post-commit readback verified all 325 player breakdowns, all 388 team results
+against the canonical scoring engine, event totals, complete selected-player
+result coverage, and the batch, identity, and finalization audits. Protected
+hashes confirm unchanged prior-fixture results, existing player classification,
+selection/member snapshots, transfer revisions, GW4/GW5 pools, and the GW5
+row; GW5 remains `open`. Production competition and Fantasy verification
+passed, as did the development transaction rollback check and 31 targeted
+Fantasy rules tests. No persistent match data was written to development.
+
 ## 2026-10-10 GW4 three-match import
 
 Owner-approved production-only batch `gw4-three-matches-20261010` recorded
