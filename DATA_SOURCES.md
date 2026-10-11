@@ -420,6 +420,68 @@ rollback check passed without persistent data changes. The production
 `competition-dataset` cache tag was invalidated through Vercel for the next
 request to refresh the Player Market.
 
+## 2026-10-12 production roster reconciliation for GW5
+
+Owner-approved batch `roster-reconciliation-20261012-gw5` reconciled production
+branch `br-tiny-shape-azrvakql`, database `neondb`, against all 17 pages of the
+[official tournament 224 roster](https://competition.tl.prod.c0d1um.io/thaileague/api/player-public/all_players_search/?tournament=224).
+The source contains 651 unique registration IDs and 651 unique person IDs;
+its reviewed SHA-256 fingerprint is
+`047df5404c6a8e8ffdbb43c42383301514ce90ee89d33cc2892daea990948e79`.
+The pre-write recovery reference is `2026-10-11 19:24:18.441489 UTC`, subject
+to the branch's configured restore window. Development was not modified.
+
+Five missing player masters, official registrations, Fantasy identities, and
+Level 4 tier rows were created, with tiers effective from GW5:
+
+| Player           | Club      | Official registration | Person  | Position   |
+| ---------------- | --------- | --------------------- | ------- | ---------- |
+| จตุรพัช สัทธรรม  | Chonburi  | `2026:4104`           | `5638`  | Defender   |
+| ธนกฤต อ่ำพายัพ   | Chonburi  | `2026:62838`          | `95557` | Goalkeeper |
+| กฤตภัค แสงสวัสดิ | BG Pathum | `2026:24946`          | `46452` | Midfielder |
+| วรวรรณ วรธรรม    | Rayong    | `2026:47552`          | `73887` | Defender   |
+| พัชรพล ชาญดี     | Rayong    | `2026:35711`          | `58484` | Defender   |
+
+Their registrations begin on the observed maintenance date, 2026-10-12.
+Three registrations absent from the complete official roster were made inactive
+with `registered_until=2026-10-12`, and their Fantasy identities made unavailable:
+Thanawat Rodjan at Rayong (`2026:59432`), Wongsakorn Saenruecha at Sisaket
+(`2026:15160`), and Ruan Ribeiro at Port (`2026:62409`). These dates record
+administrative eligibility boundaries, not asserted signing or deregistration
+dates. No destination club was inferred. None of the three unavailable players
+has a persisted team selection; their identities and history remain retained.
+
+Official birth dates filled four previously unknown values: Kingsley Schindler
+`1993-07-12`, Stefan Schimmer `1994-04-28`, Matheus Costa `1999-08-14`, and
+Rui Costa `1996-02-20`. Matheus Lins's birth date changed from `1997-05-01`
+to `2001-03-24`; the official date is also corroborated by a matching full-name
+entry in the [Sao Paulo football federation roster](https://futebolpaulista.com.br/Repositorio/Noticia/22914/5983_1.pdf).
+Costa's current plausible official birth date supersedes the implausible
+`2026-08-14` value rejected during the opening-match review. Schindler's
+nationality changed from Ghana to Germany to follow current official authority,
+and his nationality provenance now names that source. His foreign-player
+classification and Fantasy forward position remain unchanged.
+
+The atomic transaction took the exclusive Fantasy season lock and stored one
+administrative audit with before/after state, source identities, date decisions,
+and verification fingerprints. A full rollback rehearsal and independent
+post-commit readback verified all 651 active registrations and their clubs.
+The canonical current-club resolver confirms all five additions purchasable
+and the three closures unavailable. A savepoint rehearsal of the canonical
+GW5 deadline pool contained 651 players, including all five additions at Level 4;
+the rehearsal snapshot was rolled back, leaving the open GW5 pool uncaptured.
+
+Fingerprints verified 24 protected data groups and unchanged existing player
+fields outside the approved corrections, including reviewed names and Fantasy
+positions, effective tier history, selections, transfer revisions, match/player/
+team scores, standings, optimal teams, published rankings, and historical pools.
+Anderson retains Level 4 and Rui Level 2. Production competition and Fantasy
+verification and the club audit passed; the latter has no ambiguous active
+clubs, draft club mismatches, or missing whole deadline pools. Development's
+transaction rollback check passed without persistent changes. The production
+`competition-dataset` cache tag was invalidated through Vercel. No player photos,
+shirt-number fields, match results, or ranking projections were imported.
+
 ## 2026-10-11 GW4 final-match import and finalization
 
 Owner-approved production-only batch `gw4-final-four-matches-20261011`,
