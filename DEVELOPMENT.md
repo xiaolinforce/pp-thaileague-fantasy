@@ -182,6 +182,14 @@ format-check failures.
 
 ## Database workflow
 
+Local development and the `dev` Vercel Preview use independent Neon root
+`development` (`br-broad-recipe-azz9hbkx`). Production uses root `production`
+(`br-floral-silence-azzesg4n`, default). Neither has a parent. The 2026-10-13
+cutover preserved both compute endpoints and role passwords, so existing
+connection strings remain valid; confirm the new branch ID with `db:check`
+before maintenance. Never reset one environment from the other. Disposable QA
+branches remain temporary and must be removed when testing finishes.
+
 1. Change `src/db/schema.ts`.
 2. Run `npm run db:generate`.
 3. Review the generated SQL and snapshot under `drizzle`.

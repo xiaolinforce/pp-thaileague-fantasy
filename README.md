@@ -98,6 +98,10 @@ operation against the intended Neon branch.
 
 ## Database workflow
 
+- The two long-lived Neon environments are independent root branches with no
+  parent: `production` (`br-floral-silence-azzesg4n`, default) and `development`
+  (`br-broad-recipe-azz9hbkx`). See `PRODUCTION.md` for the verified cutover and
+  recovery evidence. Temporary QA branches must be removed after testing.
 - Local development uses the Neon `development` branch.
 - Vercel Production must use a separate Neon `production` branch through
   `DATABASE_URL`.

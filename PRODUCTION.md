@@ -17,6 +17,68 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-10-13 — Independent Neon environment roots
+
+The owner authorized replacing the three-branch ancestry with exactly two
+independent roots in project `lingering-butterfly-08105579`, Singapore:
+
+| Environment | Current branch ID            | Parent | Default | Preserved compute        |
+| ----------- | ---------------------------- | ------ | ------- | ------------------------ |
+| Production  | `br-floral-silence-azzesg4n` | None   | Yes     | `ep-empty-pine-azpofr24` |
+| Development | `br-broad-recipe-azz9hbkx`   | None   | No      | `ep-rough-math-az3vmrh0` |
+
+Schema-only roots were provisioned from each environment's own schema. Full
+PostgreSQL backups were restored and rehearsed before cutover. Each final copy
+used direct connections while all 48 application/journal tables were locked
+against writes; the original compute was moved only after schema, per-table
+data, sequence state, ownership and application ACL comparisons passed.
+Production retained 48,734 rows and development retained 34,284 rows, with the
+same aggregate data/sequence fingerprints before and after each compute move.
+Accounts, sessions, selections, transfer revisions, scores, audit records and all
+23 applied migrations were preserved separately for each environment.
+
+CHECK constraint comparisons normalized only the equivalent PostgreSQL
+varchar-array-to-text cast representations. The two provider-owned
+`cloud_admin` default ACL entries were inherited from Neon rather than replayed
+by `neondb_owner`; new roots use Neon's current system default grants, while
+application/object privileges and ownership matched the source. The compute
+move API was rehearsed on disposable branches and preserves endpoint hostnames,
+role passwords and autoscaling settings. Its `branch_id` update field is
+deprecated; this was a task-scoped operation, not a new runtime dependency.
+
+The bounded write pauses/cutovers were 2026-10-12 18:03:11–18:04:27 UTC for
+production and 18:05:00–18:06:14 UTC for development (2026-10-13 01:03–01:06
+Asia/Bangkok). Vercel and local connection strings stayed valid. GitHub's
+Production environment `NEON_PRODUCTION_BRANCH_ID` was updated to
+`br-floral-silence-azzesg4n` after owner-confirmed GitHub Mobile reauthentication.
+Migration `check` and `verify` confirmed 23 applied migrations and zero pending.
+Competition verification passed on both roots; Fantasy verification passed on
+production. Development's existing Optimal Team integrity issues remain:
+one scored Gameweek has no result, and one stored result has a mismatched
+status. All-table checksum equality with the pre-move inventory confirms these
+persisted issues were preserved, not introduced by the root migration.
+Production liveness and the database-backed public Rules page returned HTTP 200;
+local Rules and the unchanged local database connection also passed.
+
+Encrypted full backups and manifests are retained outside Git at
+`C:/Users/piyaw/.codex/backups/pp-thaileague-fantasy/neon-root-20261013`.
+The final `production-final-root.dump.dpapi` and
+`development-final-root.dump.dpapi` were decrypted in memory and matched their
+recorded SHA-256 hashes before deleting retired branches. Windows DPAPI binds
+these backups to this Windows user profile; recover the custom-format dumps with
+`ProtectedData.Unprotect(..., CurrentUser)` before `pg_restore`. Keep that
+profile available for recovery. Neon also retains manual production snapshot
+`snap-dry-fire-az3ca284` (`production-root-verified-20261013`), created at
+2026-10-12 18:07:32 UTC; history retention remains six hours and no recurring
+snapshot schedule was configured.
+
+After verifying backups, new targets and endpoint ownership, the retired
+`br-tiny-shape-azrvakql`, `br-green-queen-az934b4e` and
+`br-nameless-salad-azzeaa2c` (`production_old_2026-09-03 00:13:32 +07:00`)
+were deleted. Final Neon API inventory contains exactly the two roots above.
+Historical operation entries below retain the branch IDs used at the time;
+use the current IDs above for new operations.
+
 ## 2026-10-09 GW4 opening-match points
 
 The owner approved importing Ratchaburi 6-0 Sukhothai, fixture `37441`, into
@@ -202,7 +264,7 @@ below are complete. Committing or deploying code does not send any reminder.
 1. Confirm the intended Neon branch ID and backup/recovery point. Apply the
    reviewed compatible migration to development first, verify the admin page,
    then apply it to Production before deploying code that reads the new tables.
-   Production's recorded Neon branch is `br-tiny-shape-azrvakql`; verify it
+   Production's recorded Neon branch is `br-floral-silence-azzesg4n`; verify it
    again immediately before the migration. Never run `db:migrate` against an
    unconfirmed connection string.
 2. Use a dedicated verified reminder sender/domain or subdomain in Resend,

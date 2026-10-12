@@ -1,5 +1,15 @@
 # Guarded production release
 
+## Database target — 2026-10-13
+
+Production now uses independent Neon root `br-floral-silence-azzesg4n`.
+GitHub's Production environment `NEON_PRODUCTION_BRANCH_ID` matches this ID;
+the `DATABASE_URL` secret remains valid because its compute endpoint and role
+password were preserved. Read-only migration `check` and `verify` confirmed all
+23 applied migrations and zero pending after cutover. No deployment or migration
+was applied as part of the root migration. See `PRODUCTION.md` for recovery and
+data verification. The activation evidence below retains its historical IDs.
+
 ## Activation status — 2026-09-05
 
 Automatic production releases are active. GitHub's default branch is `main`;
@@ -38,7 +48,7 @@ pre-existing warnings in `DATA_SOURCES.md` and the Points `player-token.tsx`.
 2. Set these environment variables:
    - `VERCEL_ORG_ID`: `team_DTmT5wZoWAHcAf3l2y8MzUW2`
    - `VERCEL_PROJECT_ID`: `prj_21PtanGKPn9ZhcX3C5DfUbaDQp6r`
-   - `NEON_PRODUCTION_BRANCH_ID`: `br-tiny-shape-azrvakql`
+   - `NEON_PRODUCTION_BRANCH_ID`: `br-floral-silence-azzesg4n`
 3. Store these encrypted environment secrets, never repository files:
    - `DATABASE_URL`: Neon production `neondb` connection, confirmed by branch ID.
    - `READINESS_SECRET`: dedicated read-only readiness credential, also stored as

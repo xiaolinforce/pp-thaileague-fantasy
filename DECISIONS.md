@@ -4,6 +4,26 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-10-13 — Production and development use independent Neon roots
+
+**Decision:** Maintain exactly two long-lived Neon environments, `production`
+(default) and `development`, as root branches without parents. Preserve each
+environment's own accounts, competition data and Fantasy history. Temporary
+QA branches must be removed when their work finishes.
+
+**Context:** The previous ancestry was a retired production restore backup →
+development → production. Its unused ancestor could not be deleted while child
+branches remained. The owner requested two independent environments and removal
+of that ancestry; a verified schema-only root and full-data copy for each
+environment achieved this while preserving connection endpoints.
+
+**Consequences:** Apply reviewed migrations independently and verify current
+branch IDs before maintenance. Do not use cross-environment reset/restore as a
+release mechanism. Independent roots store their data separately; recovery uses
+verified backups or snapshots rather than keeping obsolete ancestor branches.
+Current IDs, cutover verification and recovery references live in
+`PRODUCTION.md`; historical evidence keeps its original IDs.
+
 ## 2026-10-09 — Suppress the verified Obscura runtime rejection
 
 **Decision:** Drop the exact `toLowerCase` TypeError observed in Sentry issue
