@@ -385,6 +385,60 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-16 GW5 Ayutthaya-Lamphun match import
+
+Owner-approved production-only batch `gw5-ayutthaya-lamphun-20261016` recorded
+[Ayutthaya United 0-2 Lamphun Warriors (`37451`)](https://thaileague.co.th/results/224/match/37451?selectedTab=live&optaSeasonId=2026)
+on the current independent production root `br-floral-silence-azzesg4n`,
+database `neondb`. The official fixture API confirms the finished match and
+approved report. The pre-write recovery reference is
+`2026-10-16 15:34:49.239960 UTC`, subject to the branch's configured restore
+window. Development received no persistent changes.
+
+The official match report supplies the starting lists, substitutions, Anderson
+Chaves's 62nd-minute goal, Passakorn Biaothungnoi's 75th-minute own goal, and
+yellow cards for Osarenren Okungbowa (13') and Kerim Palic (54'). No red cards,
+penalty events, or goalkeeper substitutions were recorded. FotMob's individual
+goalkeeper match panels directly report Warut Makemusik two saves and Nont
+Muangngam three; saves were not inferred from shots on target.
+The [AIS PLAY highlight](https://www.youtube.com/watch?v=7C6GC562gFQ) shows a
+defensive clearance before Anderson scores and Luis Felipe's cross before
+Passakorn's own goal. Both goals receive no assist. The owner explicitly
+confirmed no Fantasy assist for Luis, who retains two appearance points.
+
+The atomic import stored 60 reviewed player-stat rows and 60 deterministic
+point breakdowns: 32 appearances and 28 explicit zero-minute results covering
+all 31 Ayutthaya and 29 Lamphun active registrants. Every GW5 selection member
+whose club snapshot belongs to these clubs is covered. Recorded halftime
+substitutions at 46' use 45 minutes per regulation half; the original event
+timestamps remain in source payloads. Confirmed appearances retain the minimum
+one-minute convention. Goal exposure follows the actual on-pitch intervals.
+
+Points use the existing Fantasy positions, including Passakorn as a midfielder
+(two appearance points minus two for the own goal, total zero) and Athit Berg
+as a forward. Nont earns seven points and Anderson five. Club player-point
+totals are Ayutthaya 18 and Lamphun 54, 72 combined, with no MOTM or bonus.
+The batch totals one credited goal, one own goal, zero assists, five saves,
+two yellows, and zero reds. The fixture is finished with attendance 3,228.
+
+The owner withdrew the request to close GW5. All 471 GW5 selections were
+still draft, so the operation did not lock or finalize a Gameweek, open GW6,
+or calculate team scores from drafts. GW5 remains `open` with
+`score_complete=false`; GW6 remains `planned`. The normal later lock will
+calculate team scores from the stored player results. Selection snapshots,
+transfers, ownership, historical scores, standings, optimal teams, classifications,
+registrations, rankings, and deadline pools remain unchanged.
+
+The transaction took the exclusive Fantasy season lock before Gameweek and
+fixture locks and stored one batch audit containing source references, the
+reviewed timeline, the owner's assist/lifecycle decisions, per-player results,
+and protected fingerprints. A full rollback rehearsal, independent post-commit
+readback of all stats and breakdowns, 25 protected data-group fingerprints,
+production competition/Fantasy verification, development rollback verification,
+and 36 targeted Fantasy rules/provisional-scoring tests passed. Production
+`competition-dataset` and `fixtures-dataset` cache tags were invalidated through
+Vercel. No runtime code or schema changed.
+
 ## 2026-10-12 GW5 Anderson and Rui registration activation
 
 Owner-approved production-only batch `gw5-anderson-rui-registration-20261012`
