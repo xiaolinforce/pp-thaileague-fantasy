@@ -385,6 +385,34 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-16 GW5 provisional lock and GW6 opening
+
+The owner explicitly authorized locking GW5 as `provisional` and opening GW6,
+without finalization. The canonical `lockFantasyGameweek` service ran in one
+transaction against confirmed production branch `br-floral-silence-azzesg4n`,
+database `neondb`, after a complete rollback rehearsal. Its pre-write recovery
+reference is `2026-10-16 15:50:20.442113 UTC`, subject to Neon history retention.
+
+All 471 GW5 selections are locked with 471 provisional team scores and refreshed
+Overall standings. The 2,640 selection members retain their existing snapshots;
+the same player choices, lineup roles, captaincy and classifications carry into
+471 GW6 drafts. The deadline player pool contains 651 eligible players. GW5 has
+an average of 1 and a highest manager score of 9; its persisted optimal legal
+team has 32 points. These are partial results from one finished fixture, with
+seven fixtures remaining. GW5 retains `score_complete=false` and no finalization
+timestamp. GW6 is open with its unchanged deadline of 2026-10-24 16:30 Bangkok.
+
+Independent readback recomputed all 471 scores and checked carryover. Fourteen
+protected fingerprints preserved match events/statistics, player points,
+registrations, classifications, GW5 members, prior Gameweeks and their scores,
+pools, optimal teams, selections and revisions. Both production dataset
+verifiers, the development transaction rollback check, and 36 Fantasy rules and
+provisional-scoring tests passed. The canonical lock audit and batch
+`gw5-lock-open-gw6-20261016` retain operation context and recovery evidence.
+Production ownership, competition and fixture cache tags were invalidated;
+the Points page displays GW5 highest score 9. Development received no permanent
+data changes. No application code, schema, deployment or push was required.
+
 ## 2026-10-16 GW5 Ayutthaya-Lamphun match import
 
 Owner-approved production-only batch `gw5-ayutthaya-lamphun-20261016` recorded
