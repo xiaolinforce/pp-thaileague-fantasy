@@ -385,6 +385,56 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-17 GW5 three-match import
+
+Owner-approved production-only batch `gw5-oct17-three-matches-20261017`
+recorded Sukhothai 5-1 Rasisalai (`37450`), Chonburi 1-2 PT Prachuap (`37449`)
+and Rayong 1-1 Uthai Thani (`37448`) on confirmed Neon branch
+`br-floral-silence-azzesg4n`, database `neondb`. The official Sukhothai report
+was approved; the owner explicitly accepted the reviewed FotMob events and
+AIS PLAY highlights for the other two matches before their official reports
+were approved. This acceptance does not claim official approval of those reports.
+Sources are retained in the database audit and each reviewed stat payload:
+[Sukhothai events](https://www.fotmob.com/matches/sukhothai-fc-vs-rasisalai-united/1a22eeb9g#1000017750),
+[Chonburi events](https://www.fotmob.com/matches/chonburi-fc-vs-prachuap-fc/32rbxs07#1000017751),
+[Rayong events](https://www.fotmob.com/matches/uthai-thani-fc-vs-rayong-fc/8dyckvvz#1000017752),
+and highlights
+[Sukhothai](https://www.youtube.com/watch?v=_p2DIpN-qWM),
+[Chonburi](https://www.youtube.com/watch?v=Lp-QVhVevwk),
+[Rayong](https://www.youtube.com/watch?v=93Sk1KvQpK8).
+
+The atomic transaction stored 277 reviewed results and point breakdowns: 94
+confirmed appearances and 183 explicit zero-minute results covering current
+registrants, deadline-pool players and retained GW5 selections. The latter
+include unavailable Chirasak Srisopa and Soffan Sanron without reopening their
+registrations. Existing Fantasy positions remain unchanged. The batch records
+10 credited goals, one Lara own goal, six assists, 13 yellows, no reds and 22
+actual goalkeeper saves. Individual FotMob keeper panels report Kittipun 0,
+Sakkongpop 2, Mendoza 4, Wattanachai 10, Wichaya 2 and Caique 4; all played 90
+minutes. Saves were not inferred from shots on target. The owner explicitly
+confirmed no Fantasy assist for Lara's own goal. Stenio's self-rebound has no
+assist, and Yotsakon's VAR-disallowed goal is excluded.
+
+The player-point totals are Sukhothai 57, Rasisalai 24, Chonburi 24,
+PT Prachuap 38, Rayong 27 and Uthai Thani 25, totaling 195. Canonical
+`recalculateGameweek` refreshed all 471 locked GW5 team scores, the optimal
+team and 473 Overall standings. GW5 remains `provisional` with
+`score_complete=false`, average 8 and highest manager score 23; the optimal
+legal team has 90 points. Four GW5 fixtures remain unscored. GW6 remains open
+with its unchanged 2026-10-24 16:30 Bangkok deadline.
+
+A full rollback rehearsal preceded commit. Independent readback checked all
+277 results and recomputed all 471 team scores. Twenty-five protected
+fingerprints preserved prior results, selections, revisions, deadline pools,
+classifications, ownership, registrations and Gameweek lifecycle fields. Both
+production dataset verifiers, the development transaction rollback check and
+36 Fantasy rules/provisional-scoring tests passed. Three fixture audits and
+one completion audit retain the sources, owner decisions, per-player results
+and pre-write recovery reference `2026-10-17 16:36:43.827098 UTC`, subject to
+Neon history retention. Production competition/fixture cache tags were
+invalidated; Points displays highest score 23 and Lara zero. No runtime code,
+schema, deployment or push changed; development received no permanent writes.
+
 ## 2026-10-16 GW5 provisional lock and GW6 opening
 
 The owner explicitly authorized locking GW5 as `provisional` and opening GW6,
