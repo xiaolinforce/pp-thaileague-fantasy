@@ -385,6 +385,65 @@ and Supanat Mahawai. Published preseason ranking rows and historical selection
 snapshots were not rewritten. See `PRODUCTION.md` for finalization and
 verification results.
 
+## 2026-10-18 GW5 final four matches and finalization
+
+Owner-approved production-only batch `gw5-oct18-four-matches-final-20261018`
+recorded Sisaket 1-1 BG Pathum (`37447`), Bangkok United 0-2 Port (`37446`),
+Chiangrai 1-2 Ratchaburi (`37445`) and Pattani 0-1 Buriram (`37444`) on confirmed
+Neon branch `br-floral-silence-azzesg4n`, database `neondb`. All four official
+Thai League reports were approved. Their event timing takes precedence over
+FotMob, with halftime substitutions counting 45 minutes per half and confirmed
+stoppage-time entrants receiving at least one minute. Sources are retained in
+each reviewed stat payload and the fixture audits:
+[Sisaket events](https://www.fotmob.com/matches/bg-pathum-united-vs-sisaket-united/3ecbvcfj#1000017753),
+[Bangkok events](https://www.fotmob.com/matches/bangkok-united-vs-port-fc/gfnbj20#1000017754),
+[Chiangrai events](https://www.fotmob.com/matches/chiangrai-united-vs-ratchaburi-fc/2tgag4e5#1000017755),
+[Pattani events](https://www.fotmob.com/matches/buriram-united-vs-pattani-fc/3lbtgf88#1000017756),
+and AIS PLAY highlights for
+[Sisaket](https://www.youtube.com/watch?v=Ha7RLFIjRVo),
+[Bangkok](https://www.youtube.com/watch?v=c2Y4asWGAWk) and
+[Chiangrai](https://www.youtube.com/watch?v=HERyExNtuM8).
+
+The transaction stored 317 reviewed results and point breakdowns: 124
+appearances and 193 explicit zero-minute results covering current registrants,
+deadline-pool players and retained selections. The four matches contain seven
+credited goals, one Pattarapon Suksakit own goal, five assists, 13 yellows and
+no reds. The owner explicitly confirmed no Fantasy assist for Lucas Andersen
+on Joao Magno's goal or Ekanit Panya on Pattarapon's own goal; both assist
+values are stored as zero and both players receive three points. Teerasak's
+unassisted goal also remains unassisted after highlight review. Existing Fantasy
+positions remain unchanged: a fresh database read confirmed Kingsley Schindler
+is a forward, correcting the earlier UI-based preview from three to two points.
+
+Individual FotMob goalkeeper statistics report Steven Van Dijk 2 saves,
+Saranon 4, Patiwat 4, Falkesgaard 5, Apirak 5, Kampon 4, Damyanov 6 and
+Etheridge 0. All played 90 minutes without a goalkeeper substitution; saves
+were not inferred from shots on target. The respective match player-point
+totals are 60, 78, 63 and 74, totaling 275. No bonus or MOTM points were added.
+
+Canonical `finalizeFantasyGameweek` finalized GW5 and recalculated all 471
+locked team scores, including 312 automatic substitutions and 26 captain
+fallback cases. All eight fixtures are finished, and all 651 deadline-pool
+players plus three retained unavailable identities have explicit results
+(654 total). GW5 is `final`, `score_complete=true`, with average 32, highest
+manager score 55 and optimal legal team score 95. All 473 Overall standings
+were refreshed. GW6 remains open with its unchanged 2026-10-24 16:30 Bangkok
+deadline and existing drafts.
+
+A complete rollback rehearsal preceded the atomic commit. Independent readback
+verified every new player result and recomputed all 471 team scores. Twenty-two
+protected fingerprints preserved registrations, classifications, snapshots,
+transfer revisions, ownership, earlier results and all other Gameweeks.
+Production competition and Fantasy verifiers, the development rollback check
+and 36 Fantasy rules/provisional-scoring tests passed. Four fixture audits,
+the canonical finalization audit and one completion audit retain the evidence
+and pre-write recovery reference `2026-10-18 15:40:34.207021 UTC`, subject to
+Neon history retention. Finalization was recorded at `2026-10-18 15:40:38.409 UTC`.
+Production competition/fixture cache tags were invalidated; the live Points
+page displayed average 32, highest 55 and ItsMePP's 35 points. Temporary
+credentials and maintenance tools were removed after verification. No runtime
+code, schema, deployment or push changed; development received no permanent writes.
+
 ## 2026-10-17 GW5 three-match import
 
 Owner-approved production-only batch `gw5-oct17-three-matches-20261017`
