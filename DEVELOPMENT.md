@@ -78,6 +78,10 @@ may remain visible for at most the cache lifetime.
 
 ### Error monitoring
 
+`npm run test:requests` verifies Home's unsupported multipart submission guard
+and preserves JavaScript action calls and native forms on other routes. If Home
+gains a native Server Action form, update this route-specific contract first.
+
 Sentry receives uncaught browser, Server Component, Route Handler, Server
 Action, and Edge errors through the Next.js instrumentation hooks. Keep the DSN
 in `.env.local` for local verification and set the environment tag to

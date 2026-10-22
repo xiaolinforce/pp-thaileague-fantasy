@@ -616,6 +616,21 @@ repairs drift and reports a separate `fantasy-ownership` Sentry check-in.
 
 ## Monitoring cadence
 
+Sentry #13 investigation (2026-10-23): seven new `POST /` failures occurred on
+2026-10-21 at 14:40:10–20 UTC on release `d3834c7`, deployed on 2026-10-19 at
+16:58 UTC. The exact Next.js error is emitted while decoding native multipart
+forms containing unknown action references. Home only invokes actions through
+the JavaScript client, so its proxy now rejects unsupported multipart POSTs
+without `Next-Action` with 400 before rendering. Historical request logs had
+expired under Hobby retention; automated traffic versus a stale client remains
+unconfirmed. Do not suppress this error in Sentry or resolve #13 before the
+guard is deployed and checked. Sentry #15 was resolved as an intentional local
+`pending-qa` simulated failure.
+Local production-build verification returned 400 with `no-store` for a native
+multipart `$ACTION_ID_missing` submission, 200 for Home GET, and Next's normal
+404 with `x-nextjs-action-not-found: 1` for an unknown fetch-action ID. Request
+guard tests, Fantasy/observability tests, types, lint, formatting and build passed.
+
 Sentry monitors `https://fantasy.ppfootball.net/api/health` for application
 availability, groups uncaught errors by release, and emails the account owner
 for high-priority new issues, regressions, failed/missed Cron runs, and outages.

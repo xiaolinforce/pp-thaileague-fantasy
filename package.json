@@ -18,6 +18,7 @@
     "test:auth": "node --experimental-strip-types --test src/lib/auth/*.test.ts",
     "test:maintenance": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/auth-maintenance.test.ts",
     "test:observability": "node --experimental-strip-types --test src/lib/observability/*.test.ts",
+    "test:requests": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/root-request.test.ts",
     "test:i18n": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/localization.test.tsx",
     "test:admin": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/admin-action-button.test.tsx",
     "test:rules": "node --experimental-strip-types --test src/lib/fantasy/*.test.ts",

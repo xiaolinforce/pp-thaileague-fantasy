@@ -52,6 +52,12 @@ create synthetic manager identities.
 
 ## Main boundaries
 
+`src/proxy.ts` matches only Home (`/`). Home has no native multipart forms;
+its JavaScript Server Action calls carry `Next-Action`. Multipart POSTs without
+that header return a non-cacheable 400 before Next decodes unsupported action
+references. Other routes and fetch actions retain normal framework handling.
+This is a request-shape guard, not authentication or an action-ID allowlist.
+
 | Area                  | Location                             | Responsibility                                                                                   |
 | --------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | Routes and screens    | `src/app`                            | App Router pages, layouts, loading/error boundaries, and fantasy Server Actions.                 |
