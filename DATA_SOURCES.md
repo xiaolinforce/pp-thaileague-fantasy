@@ -55,6 +55,53 @@ Both Sentry issues were marked resolved after this verification.
 Verification did not create campaigns or send emails. Production was not
 modified in this operation.
 
+## 2026-10-23 production full-season fixture review
+
+Owner-requested batch `fixtures-season-review-20261023` checked all 240
+fixtures against the live [Thai League tournament 224 fixture API](https://competition.tl.prod.c0d1um.io/thaileague/api/match-day-match-public/?tournament=224&none_pagination=True)
+on production `br-floral-silence-azzesg4n`, database `neondb`. All kickoff
+dates/times, home/away entries, match numbers, matchweek assignments and match
+statuses already matched. All 30 deadlines remain exactly 90 minutes before
+their matchweek's first kickoff; open GW6 remains 2026-10-24 16:30 Bangkok.
+The six official `MD ... (ตกค้าง)` labels retain their original GW numbers
+and already-correct rescheduled kickoffs.
+
+Seventeen scheduled fixtures had a null venue although the official source
+now identifies an existing venue. Only their `venue_id` and `updated_at`
+changed:
+
+| Official venue ID | Venue                          | Official fixture IDs                                          |
+| ----------------- | ------------------------------ | ------------------------------------------------------------- |
+| `64`              | Srinakhonlamduan Stadium       | `37454`, `37629`, `37463`, `37471`, `37497`, `37650`, `37544` |
+| `118`             | Tinnasulanon Stadium           | `37633`, `37638`, `37486`, `37501`                            |
+| `272`             | Sisaket Stadium (Ko Klang Nam) | `37639`, `37505`, `37538`                                     |
+| `110`             | Pattani Stadium                | `37517`, `37524`, `37540`                                     |
+
+The remaining 20 null venues match official venue `208` (`TBC`) and remain
+unconfirmed. No venue master records, home-venue defaults, source identifiers,
+kickoffs, results or Gameweeks were changed.
+
+An interactive transaction acquired the exclusive Fantasy season lock before
+fixture locks, asserted the branch and fresh target state, and passed a complete
+rollback rehearsal before commit. Seventeen fixture audits retain full
+before/after values; one completion audit records source provenance and
+preservation fingerprints. The source SHA-256 is
+`4d78e08c9c1c1ce848e88ecb55e10d96baeab2ae484eacd8c5d1b87c9d215723`.
+The recovery reference is `2026-10-22 18:03:47.281113 UTC`, subject to the
+configured Neon history window.
+
+Fresh post-write comparison passed all 240 fixtures and 30 deadlines, with
+220 confirmed venues and 20 official TBC venues. Fingerprints preserved
+Gameweeks, selections, selection players, transfer revisions, deadline pools,
+match statistics, player/team scores and standings. All 223 unrelated fixtures
+retained their venue and update timestamp. Production competition and Fantasy
+verification passed; read-only development branch identification and competition
+verification also passed. Development data was not modified. No application
+deployment or schema migration is required; fixture caches refresh within their
+existing five-minute lifetime. The live production Fixtures page was checked
+after refresh and exposes Srinakhonlamduan Stadium for GW6 Rasisalai–Ayutthaya,
+with its unchanged 2026-10-25 18:00 Bangkok kickoff.
+
 ## Current season identifiers
 
 | Item                      | Value                   |
