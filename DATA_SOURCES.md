@@ -55,6 +55,71 @@ Both Sentry issues were marked resolved after this verification.
 Verification did not create campaigns or send emails. Production was not
 modified in this operation.
 
+## 2026-10-24 GW6 opening four matches and GW7 opening
+
+Owner-approved production-only batch `gw6-oct24-four-matches-open-gw7-20261024`
+recorded Port 4-1 Rayong (`37459`), Buriram 2-3 Sisaket (`37458`), BG Pathum
+2-0 Chiangrai (`37457`) and Ratchaburi 1-2 Chonburi (`37456`) on confirmed Neon
+branch `br-floral-silence-azzesg4n`, database `neondb`. All four official Thai
+League match reports were approved. Their event minutes, lineup and disciplinary
+records were reviewed against FotMob:
+[Port events](https://www.fotmob.com/matches/port-fc-vs-rayong-fc/3lacapxk#1000017757),
+[Buriram events](https://www.fotmob.com/matches/buriram-united-vs-sisaket-united/3ec8tukf#1000017758),
+[BG events](https://www.fotmob.com/matches/bg-pathum-united-vs-chiangrai-united/12bua0za#1000017759),
+[Ratchaburi events](https://www.fotmob.com/matches/chonburi-fc-vs-ratchaburi-fc/1sp5bpx8#1000017760).
+AIS PLAY highlights for [Buriram](https://www.youtube.com/watch?v=Sut29YuEHL8)
+and [BG](https://www.youtube.com/watch?v=oE4Tx44FEys) informed the two source
+unassisted-goal reviews. The owner explicitly confirmed no Fantasy assist for
+Ratthasat Buaban's fifth-minute goal or Kingsley Schindler's 62nd-minute goal.
+No extra assists were added to either event.
+
+The atomic transaction stored 342 reviewed results and point breakdowns: 125
+appearances and 217 explicit zero-minute results covering eligible registrations,
+the GW6 deadline pool and retained selected players. Unavailable Marc Navarro
+receives a zero result without reopening his registration. Existing Fantasy
+positions are preserved, including Schindler and Chaiyaphon as forwards. The
+batch contains 15 goals, 13 assists, 16 yellows and Ze Ricardo's direct red at
+28 minutes, with no own goals, penalties or bonus/MOTM points. Per-match player
+point totals are 75, 70, 80 and 67 respectively, totaling 292.
+
+Actual individual FotMob keeper statistics report Falkesgaard 3 saves,
+Worawut Srisupha 0, Wichaya 3, Etheridge 2, Steven Van Dijk 2, Saranon 3,
+Apirak 2, Kampon 0 and Mendoza 4. Rayong changed keepers at halftime: Worawut
+played 45 minutes and conceded three; Wichaya played 45 minutes and conceded
+one. All other keepers played 90 minutes. Saves were not inferred from shots
+on target. Official halftime labels of 46 count as 45 minutes per half.
+The official Stenio goal minute is 62 and Yotsakon's substitution minute is 61;
+FotMob orders his credited assist before the substitution, so the reviewed
+result retains 61 minutes and one assist. Magno's credited assist confirms he
+entered before Fabio's goal at their shared official minute 61.
+
+Canonical `lockFantasyGameweek` captured the 651-player deadline pool, locked
+517 GW6 selections, settled free transfers, refreshed ownership and created
+517 GW7 drafts with 2,700 copied selection members. Choices, lineup roles,
+captaincy and classification snapshots are preserved; only current club
+resolution is allowed during carryover. Canonical recalculation then refreshed
+all 517 provisional team scores, 517 Overall standings and the optimal legal
+team. GW6 remains `provisional`, `score_complete=false`, with four unplayed
+fixtures on 2026-10-25 still pending rather than assigned zero results. Its
+current average is 18, highest manager score 43 and optimal team score 86.
+GW7 is open with the unchanged 2026-10-30 17:30 Bangkok deadline.
+
+A full rollback rehearsal preceded commit. Independent readback verified every
+new player result, all 517 team scores and the GW7 carryover. Twenty-five
+protected fingerprints preserved historical results, other fixtures, player
+classifications, registrations, existing revisions and saved player choices.
+Free-transfer settlements were independently recomputed. Both production
+dataset verifiers, the development transaction rollback check and 40 Fantasy
+rules/provisional-scoring/carryover tests passed. Four fixture audits, the
+canonical lock audit and the completion audit retain sources, event timelines,
+per-player results and recovery reference `2026-10-24 16:11:24.960740 UTC`, subject
+to Neon history retention. Competition/fixture cache tags were invalidated;
+live Points displayed average 18, highest 43 and ItsMePP's provisional 22 points,
+while Team displayed editable GW7 and its deadline. Temporary credentials,
+database exports and maintenance tools were removed after verification. No
+runtime code, schema, deployment or push changed; development received no
+permanent writes.
+
 ## 2026-10-23 production full-season fixture review
 
 Owner-requested batch `fixtures-season-review-20261023` checked all 240
