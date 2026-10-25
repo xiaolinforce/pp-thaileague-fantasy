@@ -17,6 +17,49 @@ The `development` Neon branch and Vercel Preview environment remain isolated
 from Production. Never copy member, session, team, selection, score, league, or
 audit rows between environments.
 
+## 2026-10-26 — Tier-change allowance release and recovery
+
+Owner-approved commit `856742a` was pushed to `main` and `dev`. Production
+release [40224071991](https://github.com/xiaolinforce/pp-thaileague-fantasy/actions/runs/40224071991)
+passed CI, staged production deployment `dpl_3sGdPjgyjcRtrxTmSAzcUqTmefWk`,
+applied compatible migration `0024` on `br-floral-silence-azzesg4n`, and
+verified 25 applied / zero pending migrations. Candidate and production
+checks passed for liveness, database readiness, Rules and Privacy before and
+after promotion. The existing optimal-team backfill was a no-op. The
+pre-migration recovery reference is `2026-10-25 19:05:10.436 UTC`, subject to
+Neon's retention window rather than a durable backup.
+
+The authenticated Neon SQL Editor then recovered the 23 squads from source
+review audit `99473d43-320c-4bf8-ad5a-1405f3eef88c`. A complete rollback
+rehearsal passed; independent readback confirmed zero remaining rehearsal
+events, relief rows and audits. The identical guarded operation committed at
+`2026-10-25 19:08:21.846064 UTC` (26 October 02:08 Asia/Bangkok), creating
+event `b4d3d636-7e9a-4acb-ad2d-1e95aa53c6b8`, 23 relief rows and 24 audits.
+Batch audit `9700f483-c046-414c-976e-59c494ea31a4` retains the source reference,
+per-team counts and all 23 protected-table fingerprints.
+
+The operation asserted the production branch/database, open GW7 and future
+deadline, unchanged 730 classifications, exact original/current 15-player
+membership, valid pre-review Level 1 counts, no post-review saved revisions,
+and agreement with the source audit's changed-member snapshots. It acquired
+the season lock before Gameweek and selection locks. This maintenance batch
+refuses changed squads rather than guessing their eligibility, and an existing
+source event makes a retry a no-op. The reusable application recovery service
+also handles subsequent saved removals using revision history.
+
+All 23 squads (22 human/Guest and one bot) received relief: 13 have six Level 1
+players, seven have seven, ItsMePP has eight, and two have nine. Independent
+readback found zero grant/roster mismatches and zero unauthorized over-quota
+GW7 squads. Every protected-table fingerprint matched, including player tiers,
+draft and locked selections, transfer revisions, scores, standings and ranking
+history. Only the event, relief and audit tables received data writes.
+
+The actual production ItsMePP page displayed 8/5 with the allowance notice
+after reload; its unchanged-team Save button no longer reported a quota error.
+No production squad was edited for this check. Liveness returned HTTP 200 and
+the new deployment's error-log scan through `2026-10-25 19:09 UTC` returned no
+matching errors. This is bounded post-release evidence, not ongoing monitoring.
+
 ## 2026-10-13 — Independent Neon environment roots
 
 The owner authorized replacing the three-branch ancestry with exactly two

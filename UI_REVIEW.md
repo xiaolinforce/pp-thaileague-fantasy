@@ -34,8 +34,11 @@ purchase remained blocked with an explanatory title. At a 360×800 viewport the
 English notice wrapped without horizontal overflow; Thai mobile text and DOM
 bounds also passed. Backend persistence, restore and carryover were verified
 separately in rollback-only integration tests. The temporary route and link
-were removed. Production interaction and authenticated admin scheduling are
-not claimed as rendered evidence for this change.
+were removed. After production release and audited recovery, the actual
+ItsMePP `/team` page rendered the Thai 8/5 allowance and excess of three; Save
+reported no unsaved changes rather than a tier-quota error. Production rendering
+was read-only; no team was changed for UI verification. Authenticated admin
+scheduling remains excluded from rendered evidence for this change.
 
 2026-09-04 focused email-delivery review: `/upgrade` was rendered at
 1280×720 and 390×844 in Thai and English with both provider budgets exhausted.

@@ -1204,11 +1204,18 @@ transaction. Locked snapshots and revisions retain their original evidence.
 
 Development branch `br-broad-recipe-azz9hbkx` has migration `0024`; rollback-only
 integration verified repeated-event/carryover and audited-review recovery.
-Production release and adoption of audit
-`99473d43-320c-4bf8-ad5a-1405f3eef88c` remain pending. Recovery must prove the
-original 23 affected squads from revision history and retain only rights not
-consumed by subsequent saves. Do not infer eligibility solely from today's
-Level 1 count. `DEVELOPMENT.md` documents the guarded rehearsal/apply command.
+Production migration and release completed on 2026-10-26. Source audit
+`99473d43-320c-4bf8-ad5a-1405f3eef88c` was adopted as event
+`b4d3d636-7e9a-4acb-ad2d-1e95aa53c6b8`, granting all 23 affected squads
+(22 human/Guest, one bot) retained-player relief. Original 15-player membership
+matched the last pre-review revision for every team; no subsequent saved
+revision existed. Counts are 13 squads at six Level 1 players, seven at seven,
+one at eight and two at nine. Recovery changed no player tiers, selections,
+transfer revisions or scores; 23 protected-table fingerprints matched before,
+after and on independent readback. See `PRODUCTION.md` for release and audit
+references. Future recovery must preserve consumed rights; never infer
+eligibility solely from today's count. `DEVELOPMENT.md` documents the guarded
+rehearsal/apply command.
 
 ### Report sources
 
