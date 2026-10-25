@@ -93,6 +93,7 @@ import {
   type RuleViolation,
 } from "@/lib/fantasy/rules";
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
+import { TierReliefNotice } from "@/components/fantasy/tier-relief-notice";
 import { getChipOptionState } from "@/lib/fantasy/chip-state";
 import {
   captureSavedDraftPlayers,
@@ -1185,7 +1186,11 @@ export default function TeamClient({
       ? translate("Wildcard ทำงานอยู่ · ไม่หักคะแนน และเก็บสิทธิ์ฟรีไว้")
       : translate("Gameweek แรกที่เริ่มเล่น เปลี่ยนได้ไม่จำกัด");
   const lineupValidationViolations = useMemo(() => {
-    const violations = validateLineup(lineupAssignments);
+    const violations = validateLineup(
+      lineupAssignments,
+      THAI_LEAGUE_FANTASY_RULES,
+      fantasy.selection.tierRelief?.allowedPlayerIds,
+    );
     return hasVacancies
       ? violations.filter((violation) =>
           [
@@ -1197,7 +1202,7 @@ export default function TeamClient({
           ].includes(violation.code),
         )
       : violations;
-  }, [hasVacancies, lineupAssignments]);
+  }, [hasVacancies, lineupAssignments, fantasy.selection.tierRelief]);
   const clientValidationMessages = useMemo(() => {
     return [
       ...new Set(
@@ -1345,7 +1350,15 @@ export default function TeamClient({
           setSavedPlayersBySlot(
             captureSavedDraftPlayers(submittedMembers, playerPositionsById),
           );
-          toast.success(translate(result.message));
+          toast.success(translate(result.message), {
+            description: fantasy.selection.tierRelief
+              ? levelOne > 5
+                ? translate(
+                    "ระดับ 1 เหลือ {count}/5 คน · ยังใช้สิทธิ์ผ่อนผัน",
+                  ).replace("{count}", String(levelOne))
+                : translate("กลับเข้าโควตาแล้ว ซื้อขายระดับ 1 ได้ตามปกติ")
+              : undefined,
+          });
           router.refresh();
         } else {
           toast.error(translate(result.message), {
@@ -1766,7 +1779,11 @@ export default function TeamClient({
                   </Popover>
                   {isTierQuotaOver && (
                     <strong className="compact-tier-quota-warning">
-                      {translate("เกินโควต้า")}
+                      {translate(
+                        fantasy.selection.tierRelief
+                          ? "ผ่อนผันจากการปรับระดับ"
+                          : "เกินโควต้า",
+                      )}
                     </strong>
                   )}
                 </div>
@@ -1869,6 +1886,13 @@ export default function TeamClient({
                 </SelectContent>
               </Select>
             </div>
+            {fantasy.selection.tierRelief && (
+              <TierReliefNotice
+                count={levelOne}
+                pending={hasUnsavedChanges}
+                incomplete={hasVacancies}
+              />
+            )}
             {hasClientValidationErrors && (
               <>
                 {clientValidationMessages.map((message) => (

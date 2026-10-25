@@ -1,5 +1,21 @@
 # Decision log
 
+## 2026-10-26 — Identity-based tier-change relief
+
+**Decision:** Teams pushed above five Level 1 players by an authorized
+reclassification may retain existing identities and reduce gradually across
+Gameweeks. Above five, new Level 1 identities are prohibited even if the total
+decreases. A complete saved team at five or fewer returns to normal rules.
+Saving a removal consumes that identity's permission; unsaved undo remains
+possible, but restoring a prior revision cannot restore consumed permission.
+
+**Consequences:** Persist reclassification events and per-selection allowances,
+apply changes and grants atomically, and activate planned changes against the
+actual roster at Gameweek opening. Repeated events may grant newly promoted
+current players without reviving sold players. Preserve historical tiers,
+snapshots, scores and transfer revisions. Transfer fees and chip allowances
+are unchanged; no forced replacements or automatic bot rebuilding occurs.
+
 ## 2026-10-25 — Two tiers with five Level 1 places
 
 **Decision:** Keep existing Level 1 players in Level 1; interpret former Levels

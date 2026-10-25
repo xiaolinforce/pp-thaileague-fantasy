@@ -63,6 +63,7 @@ import {
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
+import { isTierOneAllowed } from "@/lib/fantasy/tier-relief";
 import {
   getCountedTransfers,
   getCumulativeTierLimits,
@@ -251,6 +252,10 @@ export default function TransfersClient({
     }
     if (!player.fantasyPlayerId || player.isAvailable === false) return;
     if (ownedIds.has(player.fantasyPlayerId)) return;
+    if (isTierPurchaseBlocked(player)) {
+      toast.error(translate("ซื้อระดับ 1 คนใหม่ไม่ได้ขณะยังเกินโควตา"));
+      return;
+    }
     const nextMembers = fillPreferredOrFirstMatchingDraftVacancy(
       members,
       preferredVacancySlotId,
@@ -259,6 +264,22 @@ export default function TransfersClient({
     );
     if (!nextMembers) return;
     onMembersChange(nextMembers);
+  }
+
+  function isTierPurchaseBlocked(player: CompetitionPlayerView) {
+    if (
+      player.tier !== 1 ||
+      !player.fantasyPlayerId ||
+      ownedIds.has(player.fantasyPlayerId)
+    )
+      return false;
+    return !isTierOneAllowed(
+      [
+        ...squadPlayers.map((p) => ({ id: p.fantasyPlayerId!, tier: p.tier })),
+        { id: player.fantasyPlayerId, tier: player.tier },
+      ],
+      fantasy.selection.tierRelief?.allowedPlayerIds,
+    );
   }
 
   const hasActiveFilters =
@@ -546,7 +567,11 @@ export default function TransfersClient({
               </Popover>
               {isTierQuotaOver && (
                 <strong className="compact-tier-quota-warning">
-                  เกินโควต้า
+                  {translate(
+                    fantasy.selection.tierRelief
+                      ? "ผ่อนผันจากการปรับระดับ"
+                      : "เกินโควต้า",
+                  )}
                 </strong>
               )}
             </div>
@@ -569,6 +594,12 @@ export default function TransfersClient({
                 ))}
               </span>
             </div>
+            <p className="tier-quota-visible-count">
+              {tierQuotaSummary}
+              {isTierQuotaOver
+                ? ` · ${translate("เกิน {count} คน").replace("{count}", String(levelOne - tierOneLimit))}`
+                : ""}
+            </p>
           </div>
           <Dialog>
             <DialogTrigger className="compact-market-filter-dialog-trigger">
@@ -607,6 +638,7 @@ export default function TransfersClient({
         <div className="compact-market-list">
           {players.map((player) => {
             const compatible = vacantPositions.has(player.position);
+            const tierBlocked = isTierPurchaseBlocked(player);
             const isOwned =
               player.fantasyPlayerId !== null &&
               ownedIds.has(player.fantasyPlayerId);
@@ -670,6 +702,7 @@ export default function TransfersClient({
                   disabled={
                     !isEditable || isAutoFilling || (!isOwned && !compatible)
                   }
+                  aria-disabled={tierBlocked || undefined}
                   onClick={() =>
                     isOwned ? onPlayerRemove(player) : choosePlayer(player)
                   }
@@ -683,11 +716,13 @@ export default function TransfersClient({
                         : `Transfer ${localize(player.name, language)} into the squad`
                   }
                   title={
-                    isOwned
-                      ? language === "th"
-                        ? `ลบ ${localize(player.name, language)} ออกจากทีม`
-                        : `Remove ${localize(player.name, language)} from the squad`
-                      : undefined
+                    tierBlocked
+                      ? translate("ซื้อระดับ 1 คนใหม่ไม่ได้ขณะยังเกินโควตา")
+                      : isOwned
+                        ? language === "th"
+                          ? `ลบ ${localize(player.name, language)} ออกจากทีม`
+                          : `Remove ${localize(player.name, language)} from the squad`
+                        : undefined
                   }
                 >
                   {isOwned ? (

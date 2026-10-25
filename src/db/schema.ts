@@ -1780,6 +1780,57 @@ export const fantasyLeagueAuditLog = pgTable(
   ],
 );
 
+export const fantasyTierChangeEvents = pgTable(
+  "fantasy_tier_change_events",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    fantasySeasonId: uuid("fantasy_season_id")
+      .notNull()
+      .references(() => fantasySeasons.id),
+    effectiveGameweekId: uuid("effective_gameweek_id")
+      .notNull()
+      .references(() => fantasyGameweeks.id),
+    changes: jsonb("changes")
+      .$type<Array<{ fantasyPlayerId: string; level: number }>>()
+      .notNull(),
+    reason: text("reason").notNull(),
+    changedBy: text("changed_by").notNull(),
+    appliedAt: timestamp("applied_at", { withTimezone: true }),
+    sourceAuditId: uuid("source_audit_id"),
+    ...timestamps,
+  },
+  (table) => [
+    index("fantasy_tier_events_gameweek_idx").on(table.effectiveGameweekId),
+    uniqueIndex("fantasy_tier_events_source_audit_unique").on(
+      table.sourceAuditId,
+    ),
+    check(
+      "fantasy_tier_events_changes_check",
+      sql`jsonb_typeof(${table.changes}) = 'array' and jsonb_array_length(${table.changes}) > 0`,
+    ),
+  ],
+);
+
+export const fantasyTierReliefs = pgTable(
+  "fantasy_tier_reliefs",
+  {
+    selectionId: uuid("selection_id")
+      .primaryKey()
+      .references(() => fantasyTeamSelections.id),
+    eventId: uuid("event_id")
+      .notNull()
+      .references(() => fantasyTierChangeEvents.id),
+    allowedPlayerIds: uuid("allowed_player_ids").array().notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    check(
+      "fantasy_tier_relief_size_check",
+      sql`cardinality(${table.allowedPlayerIds}) = 0 or cardinality(${table.allowedPlayerIds}) between 6 and 15`,
+    ),
+  ],
+);
+
 export const fantasyAdminAuditLog = pgTable(
   "fantasy_admin_audit_log",
   {

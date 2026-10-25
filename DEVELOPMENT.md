@@ -186,6 +186,24 @@ format-check failures.
 
 ## Database workflow
 
+`npm run db:verify:tier-relief -- --branch-id=br-broad-recipe-azz9hbkx` runs
+rollback-only integration scenarios for tier events, gradual saves, forbidden
+new elites, stale revisions, restore protection and future-event carryover.
+The command refuses production and verifies fingerprints after rollback.
+Use the server-only `publishTierChange` service for reviewed batch changes;
+planned changes must remain pending events until their Gameweek opens.
+
+After migration `0024`, recover an audited pre-feature review with
+`node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx scripts/recover-tier-relief.ts --branch-id=<confirmed-branch> --audit-id=<review-audit> --actor=<operator>`.
+The default rehearses the complete transaction and rolls it back; add `--apply`
+only for the approved target after reviewing the rehearsal. Recovery verifies
+the still-open Gameweek, unchanged classifications, original membership from
+revisions and every subsequent saved removal. Repeating the same source audit
+never restores consumed identities. It does not rewrite tiers, team snapshots,
+transfer revisions or scores. Release the application with the compatible
+migration before enabling this behavior; recovery is a separate reviewed data
+operation, not a schema migration or an automatic grant to every over-quota team.
+
 Local development and the `dev` Vercel Preview use independent Neon root
 `development` (`br-broad-recipe-azz9hbkx`). Production uses root `production`
 (`br-floral-silence-azzesg4n`, default). Neither has a parent. The 2026-10-13

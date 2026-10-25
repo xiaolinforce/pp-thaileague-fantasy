@@ -111,6 +111,42 @@ club, nationality, transfer, captaincy and chip rules are unchanged.
 
 ## Tier transition and historical rules
 
+### Relief after performance reclassification
+
+An authorized tier-change event may push an existing complete squad above five
+Level 1 players. That selection receives an explicit identity-based allowance;
+arbitrary over-quota squads do not qualify. The manager may save unchanged
+Level 1 identities, lineup/captain changes, Level 2 transfers and gradual Level
+1 removals while over quota. A resulting squad above five may contain only
+authorized Level 1 identities, even when its count is lower than before. A
+complete resulting squad at five or fewer uses normal rules and may introduce
+new Level 1 players in the same save. All other constraints, transfer charges
+and chips remain unchanged.
+
+A successful save or restore removes sold identities from the allowance. At
+five or fewer it ends. Unsaved removals can be undone; restoring an old revision
+cannot resurrect consumed permission or use historical tiers to bypass current
+rules. The remaining allowance carries to the next selection while its locked
+predecessor remains immutable. Auto-fill preserves selected players and uses
+the same identity constraint. Optimal-team calculation has no personal relief
+and retains the ordinary five-player limit.
+
+Reclassification uses `publishTierChange` inside a season-locked transaction.
+Open events update tiers, draft snapshots, allowances and audit records
+atomically. Planned events store their proposed changes and activate when that
+Gameweek opens, using squads actually held at activation. Multiple events are
+ordered by creation time and ID. A later promotion can extend or reopen relief
+only for currently held players; a demotion to five or fewer ends it. Closed
+Gameweeks cannot be reclassified through this path.
+
+`adoptAuditedTierChange` can recover a previously reviewed maintenance event
+only from its decision list, affected-team evidence and saved revisions. It
+replays subsequent removals, checks current classifications still match, and
+is idempotent by source audit ID. It never edits the source event's tiers,
+historical snapshots or scoring.
+
+### Initial two-tier transition
+
 The owner-approved 2026-10-25 transition applies to the Gameweek that is open
 when migration `0023` runs and every planned Gameweek. Former Level 1 players
 remain Level 1; former Levels 2, 3 and 4 become Level 2. No projection reranking

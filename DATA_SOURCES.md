@@ -1193,6 +1193,25 @@ lineup, transfer, chip, scoring, substitution, and auto-fill behavior.
 
 ## Admin reporting provenance
 
+### Recurring tier changes and relief
+
+Migration `0024` adds audited tier-change events and per-selection retained
+identities. Reviewed performance batches must use `publishTierChange`; direct
+tier-row edits would bypass allowance creation. Planned events take effect when
+the Gameweek opens, against the roster actually carried into that week. Open
+events update only draft tier snapshots and their allowance in the same season
+transaction. Locked snapshots and revisions retain their original evidence.
+
+Development branch `br-broad-recipe-azz9hbkx` has migration `0024`; rollback-only
+integration verified repeated-event/carryover and audited-review recovery.
+Production release and adoption of audit
+`99473d43-320c-4bf8-ad5a-1405f3eef88c` remain pending. Recovery must prove the
+original 23 affected squads from revision history and retain only rights not
+consumed by subsequent saves. Do not infer eligibility solely from today's
+Level 1 count. `DEVELOPMENT.md` documents the guarded rehearsal/apply command.
+
+### Report sources
+
 Admin counts read persisted season teams and manager status/bot markers.
 Activity reads selection confirmation timestamps rather than visits, session
 refreshes or transfer-revision creation timestamps. Audit history exposes only

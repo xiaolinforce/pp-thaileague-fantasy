@@ -27,6 +27,8 @@
   deadline player-pool snapshots and a Production GW1 reconstruction.
 - Effective tier changes, Thai-status corrections, reviewed Fantasy assists,
   stat overrides, transfer revisions, and application-level admin audit entries.
+- Identity-based tier-change relief, progressive removal and scheduled
+  reclassification events, with unchanged transfer charges and historical scores.
 - Versioned preseason player ranking with contiguous overall/position ranks,
   source confidence, reviewed tier edits, and preserved publication history.
 - Persisted latest Overall ranks with a Top 100 read model, plus invite-only

@@ -34,6 +34,7 @@
     "db:studio": "node --require ./scripts/windows-node-user-info-shim.cjs ./node_modules/drizzle-kit/bin.cjs studio",
     "db:verify:competition": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-competition-data.ts",
     "db:verify:tiers": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-two-tier-rules.ts",
+    "db:verify:tier-relief": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-tier-relief.ts",
     "db:verify:fantasy": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-game.ts",
     "db:verify:player-stats": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-current-season-player-stats.ts",
     "db:verify:transaction": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-transaction.ts",

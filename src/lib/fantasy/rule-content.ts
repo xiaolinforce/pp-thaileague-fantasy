@@ -132,6 +132,10 @@ export function buildFantasyRuleSections(
           "ระดับนักเตะมีผลแยกตามรอบแข่งขัน การเปลี่ยนระดับภายหลังไม่เปลี่ยนทีมในรอบที่ปิดรับแล้ว",
           "Tiers apply by Gameweek. Later tier changes do not alter squads from closed Gameweeks.",
         ),
+        copy(
+          "ทีมที่เกินโควต้าจากการปรับระดับได้รับสิทธิ์คงนักเตะระดับ 1 เดิมและทยอยลดข้ามเกมวีคได้ ขณะยังเกินจะเพิ่มระดับ 1 คนใหม่ไม่ได้ เมื่อขายแล้วบันทึกสิทธิ์ของคนนั้นจะสิ้นสุด และเมื่อบันทึกทีมที่ไม่เกิน 5 คนจะกลับใช้กติกาปกติ การโอนและการหักคะแนนยังเหมือนเดิม",
+          "Squads pushed over quota by tier changes may retain their existing Level 1 players and reduce gradually across Gameweeks. No new Level 1 players may join while over quota. Saving a removal ends that player's allowance; saving a squad with five or fewer ends relief. Normal transfer limits and points deductions apply.",
+        ),
       ],
     },
     {

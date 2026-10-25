@@ -16,6 +16,7 @@ import { validateFantasyName } from "@/lib/auth/names";
 import { parseInterfaceLanguage } from "@/lib/auth/preferences";
 import { getFantasyAutoFillCandidates } from "@/data/fantasy-auto-fill";
 import { autoFillSquadDraft } from "@/lib/fantasy/auto-fill";
+import { getTierRelief } from "@/lib/fantasy/tier-relief-service";
 import {
   savePlayerMatchStats,
   updateFantasyPlayerClassification,
@@ -127,7 +128,7 @@ function isValidAutoFillMembers(
 export async function suggestFantasyAutoFillAction(input: {
   members: DraftLineupMember[];
 }): Promise<FantasyAutoFillResult> {
-  const { season, gameweek } = await requireFantasyProfile();
+  const { season, gameweek, selection } = await requireFantasyProfile();
   if (gameweek.status !== "open" || !isBeforeDeadline(gameweek.deadlineAt)) {
     return {
       ok: false,
@@ -151,6 +152,8 @@ export async function suggestFantasyAutoFillAction(input: {
   const suggestion = autoFillSquadDraft({
     members: input.members,
     candidates: ranking,
+    tierReliefIds: (await getTierRelief(db, selection?.id ?? null))
+      ?.allowedPlayerIds,
   });
   if (!suggestion) {
     return {

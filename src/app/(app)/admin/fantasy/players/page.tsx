@@ -116,14 +116,22 @@ export default async function Players({
             {data.player.position}
           </p>
           <AdminForm
-            key={`${data.player.id}:${data.week.id}`}
+            key={`${data.player.id}:${data.week.id}:${data.state.tier}:${data.state.isThai}`}
             action={updateFantasyPlayerClassificationAction}
             label="บันทึกระดับและสถานะ"
             confirmation={{
-              th: `ปรับระดับของ ${data.player.th} ตั้งแต่ GW ${data.week.number} และเปลี่ยนสถานะไทยปัจจุบัน รวมถึงข้อมูลทีม Draft ใน GW ที่เลือก ทีมที่ล็อกแล้วคงข้อมูลเดิม`,
-              en: `Set ${data.player.en}’s tier from GW ${data.week.number}, update current Thai status and draft snapshots in the selected GW. Locked snapshots remain unchanged.`,
+              th: `ปรับระดับของ ${data.player.th} ตั้งแต่ GW ${data.week.number} และเปลี่ยนสถานะไทยปัจจุบัน ระดับใน GW ที่วางแผนจะรอจนเปิดรอบ ระบบให้สิทธิ์ผ่อนผันแก่ทีมที่ได้รับผลกระทบเมื่อเริ่มใช้ ทีมที่ล็อกแล้วคงข้อมูลเดิม`,
+              en: `Set ${data.player.en}’s tier from GW ${data.week.number} and update current Thai status. Planned tiers activate when the GW opens, granting relief to affected squads then. Locked snapshots remain unchanged.`,
             }}
           >
+            {data.state.pendingTier !== null && (
+              <p className={styles.hint}>
+                <AdminName
+                  th="บันทึกระดับที่วางแผนแล้ว รอเริ่มใช้เมื่อเปิด Gameweek นี้"
+                  en="Scheduled tier saved. It takes effect when this Gameweek opens."
+                />
+              </p>
+            )}
             <input
               type="hidden"
               name="fantasyPlayerId"

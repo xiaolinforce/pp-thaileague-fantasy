@@ -1,7 +1,7 @@
 import "server-only";
 import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { connection } from "next/server";
 import { cache } from "react";
 import { db } from "@/db";
@@ -12,6 +12,7 @@ import {
   fantasyPlayers,
   fantasyPlayerTiers,
   fantasySeasons,
+  fantasyTierChangeEvents,
 } from "@/db/schema";
 import { requireAdmin } from "@/lib/auth/context";
 import { FANTASY_SEASON_SLUG } from "@/lib/fantasy/provisioning";
@@ -208,12 +209,31 @@ export async function getAdminPlayerState(playerId: string, weekId: string) {
     )
     .where(eq(fantasyPlayerTiers.fantasyPlayerId, playerId))
     .orderBy(desc(fantasyGameweeks.number));
+  const pendingEvents = await db
+    .select()
+    .from(fantasyTierChangeEvents)
+    .where(
+      and(
+        eq(fantasyTierChangeEvents.effectiveGameweekId, week.id),
+        isNull(fantasyTierChangeEvents.appliedAt),
+      ),
+    )
+    .orderBy(
+      desc(fantasyTierChangeEvents.createdAt),
+      desc(fantasyTierChangeEvents.id),
+    );
+  const pendingTier = pendingEvents
+    .flatMap((event) => event.changes)
+    .find((change) => change.fantasyPlayerId === playerId)?.level;
   return {
     isThai: player.isThai,
-    tier: resolvePlayerTier(
-      tiers.find((t) => t.number <= week.number)?.level,
-      week.tierRulesVersion,
-    ),
+    pendingTier: pendingTier ?? null,
+    tier:
+      pendingTier ??
+      resolvePlayerTier(
+        tiers.find((t) => t.number <= week.number)?.level,
+        week.tierRulesVersion,
+      ),
   };
 }
 

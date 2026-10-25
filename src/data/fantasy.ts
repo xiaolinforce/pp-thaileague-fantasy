@@ -35,6 +35,7 @@ import { logServerTiming } from "@/lib/server/performance";
 import { isFantasySelectionInput } from "@/lib/fantasy/selection-input";
 import { normalizeFantasyRevisionMembers } from "@/lib/fantasy/revision-snapshot";
 import { getCurrentPlayerClubs } from "@/lib/fantasy/player-club-service";
+import { getTierRelief } from "@/lib/fantasy/tier-relief-service";
 
 const FANTASY_SEASON_SLUG = "thai-league-1-2026-27";
 
@@ -84,6 +85,7 @@ export type FantasyState = {
     netTransferCount: number;
     transferPoints: number;
     members: FantasySquadMember[];
+    tierRelief?: { eventId: string; allowedPlayerIds: string[] } | null;
   };
   chipsRemaining: Record<FantasyChip, number>;
 };
@@ -205,6 +207,7 @@ export async function getFantasyState(): Promise<FantasyState> {
             .where(eq(fantasyGameweekPlayerPool.fantasyGameweekId, gameweek.id))
         ).map((member) => [member.fantasyPlayerId, member.clubIdSnapshot]),
       );
+  const tierRelief = editable ? await getTierRelief(db, selection.id) : null;
   const state = {
     seasonId: fantasySeason.id,
     seasonFinished: profile.seasonFinished,
@@ -223,6 +226,12 @@ export async function getFantasyState(): Promise<FantasyState> {
       tierRulesVersion: gameweek.tierRulesVersion,
     },
     selection: {
+      tierRelief: tierRelief?.allowedPlayerIds.length
+        ? {
+            eventId: tierRelief.eventId,
+            allowedPlayerIds: tierRelief.allowedPlayerIds,
+          }
+        : null,
       id: selection?.id ?? null,
       revision: revisions.at(-1)?.revision ?? 0,
       status: selection?.status ?? "locked",

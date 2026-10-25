@@ -26,5 +26,9 @@
   "0023_warm_blob": {
     "sha256": "cff0e6aa637e757b8996660e24b3a3eecd682f9c54c5cf4889e9678a8d48813d",
     "compatibility": "compatible"
+  },
+  "0024_busy_bloodaxe": {
+    "sha256": "da4b8527596575b44cb7e6dcb0fecf9c4ebbd6c7227f13a7fc6b7319a1cfbb46",
+    "compatibility": "compatible"
   }
 }

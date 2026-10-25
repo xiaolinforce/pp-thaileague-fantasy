@@ -25,6 +25,18 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
+2026-10-26 tier-change allowance: a temporary development-only fixture rendered
+the real Team components with eight Level 1 players and no writable selection
+ID. Desktop Thai/English showed the exact count, excess, retained-player
+permission and pending-change notice. Changing captain enabled Save at 8/5;
+replacing a Level 1 goalkeeper with Level 2 enabled Save at 7/5. A new Level 1
+purchase remained blocked with an explanatory title. At a 360×800 viewport the
+English notice wrapped without horizontal overflow; Thai mobile text and DOM
+bounds also passed. Backend persistence, restore and carryover were verified
+separately in rollback-only integration tests. The temporary route and link
+were removed. Production interaction and authenticated admin scheduling are
+not claimed as rendered evidence for this change.
+
 2026-09-04 focused email-delivery review: `/upgrade` was rendered at
 1280×720 and 390×844 in Thai and English with both provider budgets exhausted.
 The email choice was disabled, the temporary message and retry action were

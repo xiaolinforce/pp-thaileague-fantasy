@@ -1,3 +1,5 @@
+import { isTierOneAllowed } from "./tier-relief.ts";
+
 export type FantasyPosition =
   "goalkeeper" | "defender" | "midfielder" | "forward";
 
@@ -148,6 +150,7 @@ function countBy<T extends string | number>(values: T[]) {
 export function validateSquad(
   squad: SquadPlayer[],
   rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
+  tierReliefIds: readonly string[] = [],
 ): RuleViolation[] {
   const violations: RuleViolation[] = [];
   const ids = countBy(squad.map((player) => player.id));
@@ -230,7 +233,15 @@ export function validateSquad(
       (player) => player.tier <= tier.level,
     ).length;
     const tierOverflow = Math.max(0, usedSlots - tier.limit);
-    if (tierOverflow > previousTierOverflow) {
+    if (
+      tierOverflow > previousTierOverflow &&
+      !(
+        tier.level === 1 &&
+        rules.tierSlots.length === 2 &&
+        tier.limit === 5 &&
+        isTierOneAllowed(squad, tierReliefIds)
+      )
+    ) {
       violations.push({
         code: "tier_quota",
         message:
@@ -400,9 +411,10 @@ export function getValidLineupSwapTargetIds(
 export function validateLineup(
   lineup: LineupPlayer[],
   rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
+  tierReliefIds: readonly string[] = [],
 ): RuleViolation[] {
   return [
-    ...validateSquad(lineup, rules),
+    ...validateSquad(lineup, rules, tierReliefIds),
     ...validateLineupAssignment(lineup, rules),
   ];
 }

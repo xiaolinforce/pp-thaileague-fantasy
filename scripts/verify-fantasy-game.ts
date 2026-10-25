@@ -381,15 +381,17 @@ async function verifyFantasyGame() {
       select s.id from fantasy_team_selections s
       join fantasy_gameweeks gw on gw.id=s.fantasy_gameweek_id
       join fantasy_team_selection_players p on p.selection_id=s.id
+      left join fantasy_tier_reliefs relief on relief.selection_id=s.id
       where gw.tier_rules_version='two-tier-v1'
       group by s.id
-      having count(*) filter (where p.tier_snapshot=1)>5
+      having (count(*) filter (where p.tier_snapshot=1)>5
+        and bool_or(p.tier_snapshot=1 and not (p.fantasy_player_id = any(coalesce(relief.allowed_player_ids, '{}'::uuid[])))))
         or bool_or(p.tier_snapshot not in (1,2,3,4))
     ) violations
   `);
   if (invalidTwoTierSquads.rows[0]?.invalid !== 0) {
     throw new Error(
-      "A two-tier selection exceeds five Level 1 players or contains an unknown tier.",
+      "A two-tier selection exceeds its authorized Level 1 allowance or contains an unknown tier.",
     );
   }
   console.log(

@@ -370,6 +370,27 @@ const translations: Record<string, string> = {
     "Buy 15 players from the Player Market, then choose your starting XI",
   โควต้าผ่าน: "Quotas valid",
   เกินโควต้า: "Over quota",
+  ผ่อนผันจากการปรับระดับ: "Tier-change allowance",
+  "ระดับ 1: {count}/5 คน · ผ่อนผันจากการปรับระดับ":
+    "Level 1: {count}/5 · Tier-change allowance",
+  "จัดทีมและบันทึกได้โดยคงระดับ 1 เดิมไว้ แต่ซื้อระดับ 1 คนใหม่ไม่ได้ขณะยังเกินโควตา ลดอีก {count} คนเพื่อกลับสู่กติกาปกติ":
+    "You can manage and save your squad while retaining existing Level 1 players. No new Level 1 players while over quota. Reduce by {count} to return to the standard rules.",
+  "เมื่อบันทึกทีมครบ 15 คนโดยมีระดับ 1 ไม่เกิน 5 คน สิทธิ์ผ่อนผันจะสิ้นสุด และซื้อขายตามกติกาปกติ":
+    "Saving a complete 15-player squad with no more than five Level 1 players ends the allowance and restores standard transfers.",
+  ตัวเลขนี้รวมรายการที่ยังไม่ได้บันทึก: "This count includes unsaved changes.",
+  "เลือกนักเตะให้ครบ 15 คนก่อนบันทึก": "Select all 15 players before saving.",
+  เงื่อนไขสิทธิ์ผ่อนผัน: "Allowance conditions",
+  "สิทธิ์ใช้ต่อเนื่องข้ามเกมวีคได้ เมื่อขายระดับ 1 แล้วบันทึก จะซื้อคนนั้นกลับขณะยังเกินโควตาไม่ได้ การยกเลิกรายการที่ยังไม่บันทึกทำได้ และกติกาการโอนกับการหักคะแนนยังเหมือนเดิม":
+    "The allowance carries across Gameweeks. Once you save a Level 1 player's removal, that player cannot return while you remain over quota. Unsaved removals can be undone. Normal transfer limits and points deductions still apply.",
+  "ระดับ 1 เหลือ {count}/5 คน · ยังใช้สิทธิ์ผ่อนผัน":
+    "Level 1: {count}/5 · Allowance remains active",
+  "กลับเข้าโควตาแล้ว ซื้อขายระดับ 1 ได้ตามปกติ":
+    "Back within quota. Standard Level 1 transfers are available.",
+  "ซื้อระดับ 1 คนใหม่ไม่ได้ขณะยังเกินโควตา":
+    "Cannot buy a new Level 1 player while over quota",
+  "เกิน {count} คน": "{count} over quota",
+  "คืนทีมไม่ได้ เพราะทีมเดิมไม่ผ่านกติกาปัจจุบันหรือสิทธิ์ผ่อนผันที่เหลือ":
+    "Cannot restore this squad: it does not meet the current rules or remaining allowance.",
   ฟรี: "Free",
   ซื้อขายตัวอิสระ: "Wildcard",
   เปลี่ยนฟรีได้อีก: "Free transfers",

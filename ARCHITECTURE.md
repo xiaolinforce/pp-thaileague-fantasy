@@ -181,6 +181,16 @@ remain authoritative outside the development language tester.
 
 ## Read flow
 
+Tier reclassification is a server-only transaction under the exclusive season
+lock. `fantasy_tier_change_events` stores reviewed changes and their activation;
+`fantasy_tier_reliefs` stores remaining allowed Level 1 identities per selection.
+The shared pure rule validates client previews, saves, restores and auto-fill;
+only server-loaded allowance rows authorize persistence. Saves shrink rights
+under the existing selection lock and revision check. Carryover copies remaining
+rights without modifying the locked selection, then activates scheduled events.
+Direct tier maintenance must use this event path or an explicitly reviewed
+audit-backed recovery; writing only `fantasy_player_tiers` bypasses the contract.
+
 1. A route resolves the Better Auth session and calls a server-only read model.
 2. The server-only data module queries Drizzle using the shared client from
    `src/db/index.ts`.

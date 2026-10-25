@@ -14,6 +14,7 @@ import {
   fantasyTeams,
   fantasyTransferRevisions,
   fantasyStatOverrides,
+  fantasyTierReliefs,
   fixtures,
   playerRegistrations,
 } from "@/db/schema";
@@ -33,6 +34,12 @@ import { getCurrentPlayerClubs } from "./player-club-service";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
 import { snapshotFantasyGameweekPlayerPool } from "./player-pool-service";
 import { refreshFantasyPlayerOwnership } from "./ownership-service";
+import {
+  applyScheduledTierChanges,
+  publishTierChange,
+  writeTierRelief,
+} from "./tier-relief-service";
+import { isTierOneAllowed } from "./tier-relief";
 
 function formInteger(formData: FormData, key: string) {
   const value = Number(formData.get(key) ?? 0);
@@ -237,27 +244,12 @@ export async function updateFantasyPlayerClassification(
       eq(fantasyPlayerTiers.effectiveGameweekId, effectiveGameweekId),
     ),
   });
-  await db
-    .insert(fantasyPlayerTiers)
-    .values({
-      fantasyPlayerId,
-      effectiveGameweekId,
-      level,
-      sourceName: "fantasy-admin",
-      reason,
-    })
-    .onConflictDoUpdate({
-      target: [
-        fantasyPlayerTiers.fantasyPlayerId,
-        fantasyPlayerTiers.effectiveGameweekId,
-      ],
-      set: {
-        level,
-        sourceName: "fantasy-admin",
-        reason,
-        updatedAt: new Date(),
-      },
-    });
+  await publishTierChange(db, {
+    gameweekId: effectiveGameweekId,
+    changes: [{ fantasyPlayerId, level }],
+    reason,
+    changedBy,
+  });
   await db
     .update(fantasyPlayers)
     .set({ isThai, nationalitySource: "fantasy-admin", updatedAt: new Date() })
@@ -281,7 +273,6 @@ export async function updateFantasyPlayerClassification(
     await db
       .update(fantasyTeamSelectionPlayers)
       .set({
-        tierSnapshot: level,
         isThaiSnapshot: isThai,
         updatedAt: new Date(),
       })
@@ -535,6 +526,37 @@ export async function lockFantasyGameweek(
       settlement: settleTransfers(transferInput),
     };
   });
+  const reliefRows = selections.length
+    ? await db
+        .select()
+        .from(fantasyTierReliefs)
+        .where(
+          inArray(
+            fantasyTierReliefs.selectionId,
+            selections.map((s) => s.id),
+          ),
+        )
+    : [];
+  const reliefBySelection = new Map(reliefRows.map((r) => [r.selectionId, r]));
+  const draftBySelection = Map.groupBy(draftMembers, (m) => m.selectionId);
+  if (gameweek.tierRulesVersion === "two-tier-v1") {
+    for (const selection of selections) {
+      const relief = reliefBySelection.get(selection.id);
+      if (
+        !isTierOneAllowed(
+          (draftBySelection.get(selection.id) ?? []).map((m) => ({
+            id: m.fantasyPlayerId,
+            tier: resolvePlayerTier(m.tierSnapshot, gameweek.tierRulesVersion),
+          })),
+          relief?.allowedPlayerIds,
+        )
+      ) {
+        throw new Error(
+          "A squad exceeds the Level 1 limit without valid tier-change relief.",
+        );
+      }
+    }
+  }
   for (let offset = 0; offset < settled.length; offset += 500) {
     const batch = settled.slice(offset, offset + 500);
     await db
@@ -664,6 +686,21 @@ export async function lockFantasyGameweek(
       await db
         .insert(fantasyTransferRevisions)
         .values(revisions.slice(offset, offset + 500));
+    for (const next of nextSelections) {
+      const previousId = previousByTeam.get(next.fantasyTeamId);
+      // Only newly carried squads inherit permission; never expand an existing draft.
+      if (!previousId || membersBySelection.has(next.id)) continue;
+      const relief = reliefBySelection.get(previousId);
+      if (relief?.allowedPlayerIds.length)
+        await writeTierRelief(
+          db,
+          next.id,
+          relief.eventId,
+          relief.allowedPlayerIds,
+          changedBy,
+          "Carry remaining tier relief into the next Gameweek without modifying the locked allowance.",
+        );
+    }
   }
   await refreshFantasyPlayerOwnership(gameweek.id, db);
   if (nextGameweek) {
@@ -678,6 +715,8 @@ export async function lockFantasyGameweek(
       .update(fantasyGameweeks)
       .set({ status: "open", updatedAt: new Date() })
       .where(eq(fantasyGameweeks.id, nextGameweek.id));
+    if (nextGameweek.tierRulesVersion === "two-tier-v1")
+      await applyScheduledTierChanges(db, nextGameweek.id);
   }
   await recalculateGameweek(gameweek.id, db);
   await db.insert(fantasyAdminAuditLog).values({

@@ -42,6 +42,11 @@ import { normalizeFantasyRevisionMembers } from "./revision-snapshot";
 import { lockFantasySeason, type FantasyTransaction } from "./season-lock";
 import { getTransferRevisionState } from "./transfer-revisions";
 import { updateFantasyPlayerOwnershipForSelection } from "./ownership-service";
+import {
+  consumeTierRelief,
+  getTierRelief,
+  getEffectiveTierMap,
+} from "./tier-relief-service";
 
 export type FantasySelectionResult =
   | { ok: true; message: string; revision: number; firstSquadSaved: boolean }
@@ -161,9 +166,11 @@ export async function saveFantasySelectionInTransaction(
       },
     ];
   });
+  const tierRelief = await getTierRelief(db, selection.id);
   const violations = validateLineup(
     lineup,
     getFantasyRules(gameweek.tierRulesVersion),
+    tierRelief?.allowedPlayerIds,
   );
   if (violations.length > 0) {
     return {
@@ -331,6 +338,7 @@ export async function saveFantasySelectionInTransaction(
     .delete(fantasyTeamSelectionPlayers)
     .where(eq(fantasyTeamSelectionPlayers.selectionId, selection.id));
   await db.insert(fantasyTeamSelectionPlayers).values(playerValues);
+  await consumeTierRelief(db, selection.id, lineup, owner.managerId);
   await updateFantasyPlayerOwnershipForSelection({
     gameweekId: gameweek.id,
     previousPlayerIds: previousOwnershipPlayerIds,
@@ -478,6 +486,7 @@ export async function revertFantasySelectionInTransaction(
     };
   }
 
+  const currentTiers = await getEffectiveTierMap(db, gameweek);
   const restored = refreshPlayerClubSnapshots(
     baselineMembers,
     await getCurrentPlayerClubs({
@@ -485,7 +494,38 @@ export async function revertFantasySelectionInTransaction(
       season,
       fantasyPlayerIds: baselineMembers.map((member) => member.fantasyPlayerId),
     }),
-  );
+  ).map((member) => ({
+    ...member,
+    tierSnapshot:
+      currentTiers.get(member.fantasyPlayerId) ??
+      resolvePlayerTier(undefined, gameweek.tierRulesVersion),
+  }));
+  const relief = await getTierRelief(db, selection.id);
+  const restoredLineup = restored.map((member) => ({
+    id: member.fantasyPlayerId,
+    clubId: member.clubIdSnapshot,
+    position: member.positionSnapshot,
+    tier: member.tierSnapshot,
+    isThai: member.isThaiSnapshot,
+    isAvailable: true,
+    lineupRole: member.lineupRole,
+    benchOrder: member.benchOrder,
+    captainRole: member.captainRole,
+  }));
+  if (
+    restored.length &&
+    validateLineup(
+      restoredLineup,
+      getFantasyRules(gameweek.tierRulesVersion),
+      relief?.allowedPlayerIds,
+    ).length
+  ) {
+    return {
+      ok: false,
+      message:
+        "คืนทีมไม่ได้ เพราะทีมเดิมไม่ผ่านกติกาปัจจุบันหรือสิทธิ์ผ่อนผันที่เหลือ",
+    };
+  }
 
   const activeChip = openingGameweek ? null : (baseline?.activeChip ?? null);
   const settlement = settleTransfers({
@@ -521,6 +561,7 @@ export async function revertFantasySelectionInTransaction(
   if (restored.length > 0) {
     await db.insert(fantasyTeamSelectionPlayers).values(restored);
   }
+  await consumeTierRelief(db, selection.id, restoredLineup, owner.managerId);
   await updateFantasyPlayerOwnershipForSelection({
     gameweekId: gameweek.id,
     previousPlayerIds: previousOwnershipPlayerIds,
@@ -668,7 +709,11 @@ function restoreBaselineMembers(
     })),
     getFantasyRules(tierRulesVersion),
   );
-  return violations.length === 0 ? restored : null;
+  // Historical baseline tiers are evidence, not current transfer permission.
+  // Current tiers and relief are validated by the transactional caller.
+  return violations.filter((v) => v.code !== "tier_quota").length === 0
+    ? restored
+    : null;
 }
 
 async function getPreviousLockedSelectionMembers(

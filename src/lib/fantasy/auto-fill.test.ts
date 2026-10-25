@@ -111,6 +111,43 @@ function createSingleVacancyFixture(
   };
 }
 
+test("fills a relief squad without adding an unauthorized Level 1 player", () => {
+  const fixture = createSingleVacancyFixture(16, (p) => p.tier === 2);
+  const occupied = fixture.candidates.map((p, i) => ({
+    ...p,
+    tier: i < 8 ? 1 : 2,
+  }));
+  const reliefIds = occupied.filter((p) => p.tier === 1).map((p) => p.id);
+  const ordinary = {
+    ...fixture.removedCandidate,
+    id: "ordinary-replacement",
+    tier: 2,
+  };
+  const forbidden = {
+    ...ordinary,
+    id: "new-elite",
+    tier: 1,
+    projectedPoints: 9999,
+  };
+  const candidates = [...occupied, ordinary, forbidden];
+  assert.equal(
+    autoFillSquadDraft({ members: fixture.members, candidates }),
+    null,
+  );
+  const filled = autoFillSquadDraft({
+    members: fixture.members,
+    candidates,
+    tierReliefIds: reliefIds,
+    random: () => 0.5,
+  });
+  assert.ok(filled);
+  assert.deepEqual(filled.addedPlayerIds, [ordinary.id]);
+  assert.deepEqual(
+    validateLineup(toLineup(filled.members, candidates), undefined, reliefIds),
+    [],
+  );
+});
+
 test("classifies the highest-projected goalkeeper in each club's best tier and preserves ties", () => {
   const candidates: AutoFillCandidate[] = [
     {

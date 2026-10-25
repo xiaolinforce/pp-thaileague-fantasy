@@ -1,7 +1,7 @@
 import type { DraftLineupMember } from "./team-draft.ts";
+import { isTierOneAllowed, type TierMember } from "./tier-relief.ts";
 import { getAutoFillOwnershipScore } from "./ownership.ts";
 import {
-  getCumulativeTierLimits,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
   type FantasyPosition,
@@ -232,17 +232,12 @@ function compareSearchStates(
   );
 }
 
-function exceedsTierLimit(tierCounts: Map<number, number>) {
-  return getCumulativeTierLimits().some(({ level, limit }) => {
-    const used = [...tierCounts.entries()].reduce(
-      (sum, [tier, count]) => sum + (tier <= level ? count : 0),
-      0,
-    );
-    return used > limit;
-  });
-}
-
-function canAddCandidate(state: SearchState, candidate: AutoFillCandidate) {
+function canAddCandidate(
+  state: SearchState,
+  candidate: AutoFillCandidate,
+  occupied: TierMember[],
+  reliefIds: readonly string[],
+) {
   const rules = THAI_LEAGUE_FANTASY_RULES;
   const knownTiers = new Set(rules.tierSlots.map((slot) => slot.level));
   if (state.pickedIds.has(candidate.id)) return false;
@@ -253,7 +248,7 @@ function canAddCandidate(state: SearchState, candidate: AutoFillCandidate) {
     return false;
   }
   if (!knownTiers.has(candidate.tier)) return false;
-  return !exceedsTierLimit(incrementCount(state.tierCounts, candidate.tier));
+  return isTierOneAllowed([...occupied, ...state.picked, candidate], reliefIds);
 }
 
 function getPreservedCaptaincyIds(members: DraftLineupMember[]) {
@@ -331,10 +326,12 @@ export function autoFillSquadDraft({
   members,
   candidates,
   random = Math.random,
+  tierReliefIds = [],
 }: {
   members: DraftLineupMember[];
   candidates: AutoFillCandidate[];
   random?: () => number;
+  tierReliefIds?: readonly string[];
 }): AutoFillResult | null {
   const rules = THAI_LEAGUE_FANTASY_RULES;
   if (members.length !== rules.squadSize) return null;
@@ -404,7 +401,7 @@ export function autoFillSquadDraft({
   if (
     [...clubCounts.values()].some((count) => count > rules.sameClubLimit) ||
     foreignCount > rules.foreignPlayerLimit ||
-    exceedsTierLimit(tierCounts) ||
+    !isTierOneAllowed(occupiedCandidates, tierReliefIds) ||
     occupiedCandidates.some((candidate) => !knownTiers.has(candidate.tier))
   ) {
     return null;
@@ -474,7 +471,10 @@ export function autoFillSquadDraft({
       for (let index = startIndex; index < pool.length; index += 1) {
         if (pool.length - index - 1 < remainingForPosition) break;
         const candidate = pool[index];
-        if (!canAddCandidate(state, candidate)) continue;
+        if (
+          !canAddCandidate(state, candidate, occupiedCandidates, tierReliefIds)
+        )
+          continue;
 
         const nextIds = new Set(state.pickedIds);
         nextIds.add(candidate.id);
@@ -617,7 +617,7 @@ export function autoFillSquadDraft({
         ]
       : [];
   });
-  if (validateLineup(lineup).length > 0) return null;
+  if (validateLineup(lineup, rules, tierReliefIds).length > 0) return null;
 
   return {
     members: withCaptaincy,
