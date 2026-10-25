@@ -10393,18 +10393,18 @@ body {
 }
 
 .league-overall-standings-dialog [data-slot="dialog-header"] {
-  background: var(--navy);
-  color: var(--orange);
+  background: var(--orange);
+  color: var(--ink);
 }
 
 .league-overall-standings-dialog > [data-slot="dialog-close"] {
   z-index: 4;
-  color: var(--orange);
+  color: var(--ink);
 }
 
 .league-overall-standings-dialog > [data-slot="dialog-close"]:hover {
   background: var(--orange-soft);
-  color: var(--orange-deep);
+  color: var(--ink);
 }
 
 .league-standings-dialog .league-table-scroll {
@@ -10793,7 +10793,7 @@ body {
     position: relative;
     z-index: 3;
     /* Cover fractional-pixel seams above the sticky cells while scrolling. */
-    box-shadow: 0 2px 0 var(--navy);
+    box-shadow: 0 2px 0 var(--orange);
   }
 
   .league-overall-standings-dialog .league-standings-table {
