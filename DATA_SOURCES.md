@@ -55,6 +55,66 @@ Both Sentry issues were marked resolved after this verification.
 Verification did not create campaigns or send emails. Production was not
 modified in this operation.
 
+## 2026-10-25 GW6 final four matches and finalization
+
+Owner-approved production-only batch `gw6-oct25-four-matches-final-20261025`
+recorded Prachuap 0-0 Bangkok (`37455`), Rasisalai 1-4 Ayutthaya (`37454`),
+Lamphun 3-1 Pattani (`37453`) and Uthai Thani 1-2 Sukhothai (`37452`) on
+confirmed Neon branch `br-floral-silence-azzesg4n`, database `neondb`. All four
+official Thai League reports were approved. Event timing, appearances and cards
+follow those reports; assists and individual keeper statistics were checked
+against [Prachuap events](https://www.fotmob.com/matches/bangkok-united-vs-prachuap-fc/30hocz3h#1000017761),
+[Rasisalai events](https://www.fotmob.com/matches/ayutthaya-united-fc-vs-rasisalai-united/1ttumikk4#1000017762),
+[Lamphun events](https://www.fotmob.com/matches/lamphun-warrior-vs-pattani-fc/8qgrqslg#1000017763)
+and [Uthai events](https://www.fotmob.com/matches/uthai-thani-fc-vs-sukhothai-fc/8dxklchp#1000017764).
+The [AIS PLAY Rasisalai highlight](https://www.youtube.com/watch?v=ba3EpFQ9kzs)
+confirms no Fantasy assist for either Ewerton goal: the first follows a keeper
+distribution error; the second is his own rebound after his header was saved.
+
+The atomic transaction stored 312 reviewed results and point breakdowns: 124
+appearances and 188 explicit zero-minute results covering eligible registrations,
+the deadline pool and retained selections. The batch contains 12 goals, 10
+assists and 12 yellows, with no reds, own goals, penalty scoring events or
+bonus/MOTM points. Per-match player-point totals are 89, 80, 79 and 66,
+totaling 314. Existing Fantasy positions and tiers remain unchanged, including
+Pablo Dias and Clayton as midfielders and Lucas Grossi as a forward.
+
+Actual individual FotMob keeper statistics report Wattanachai 2 saves,
+Patiwat 4, Gabriel Bernard 6, Warut 5, Nont 4, Damyanov 6, Caique 4 and
+Kittipun 4. All eight keepers played 90 minutes without a substitution;
+saves were not inferred from shots on target. Halftime entrants receive
+45 minutes and Nuttee's 90+2 entry receives the one-minute minimum. Only goals
+conceded while on the pitch count: Ewerton, Atsadawut and Chanukun retain
+clean-sheet points after leaving before Ayutthaya conceded. Ewerton receives
+13 points, Suriya 11 and Nathan Palafoz 9.
+
+Canonical `finalizeFantasyGameweek` finalized GW6 and recalculated all 517
+locked team scores, including 276 automatic substitutions and 18 captain
+fallback cases. All eight fixtures are finished. All 651 deadline-pool players
+and three retained unavailable identities have explicit results (654 total).
+GW6 is `final`, `score_complete=true`, with average 32, highest manager score
+56 and optimal legal team score 104. All 517 Overall standings were refreshed.
+GW7 remains open with its unchanged 2026-10-30 17:30 Bangkok deadline and
+existing saved drafts.
+
+A complete rollback rehearsal preceded the atomic commit. Independent readback
+verified the imported results, every GW6 player-point breakdown and all 517
+team scores. Nineteen protected fingerprints preserved registrations,
+classifications, tiers, selections, transfer revisions, ownership, deadline
+pools, earlier results and all other Gameweeks. Both production dataset
+verifiers, the development transaction rollback check and 40 targeted Fantasy
+rules/provisional-scoring/carryover tests passed. Four fixture audits, the
+canonical finalization audit and the completion audit retain sources, event
+timelines, per-player results and recovery reference
+`2026-10-25 15:07:03.27138 UTC`, subject to Neon history retention. Finalization
+was recorded at `2026-10-25 15:07:08.117 UTC`.
+
+After the existing timed caches refreshed, live Fixtures displayed all eight
+results and Points displayed average 32, One More Goal's highest score of 56
+and ItsMePP's final 38 points. Temporary credentials, database-read exports
+and maintenance scripts were removed after verification. Development received
+no persistent data changes.
+
 ## 2026-10-24 GW6 opening four matches and GW7 opening
 
 Owner-approved production-only batch `gw6-oct24-four-matches-open-gw7-20261024`
