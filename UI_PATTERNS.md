@@ -170,7 +170,7 @@ proven behaviors unless a deliberate product decision replaces them:
   pending and failure states.
 - Present chips as supporting controls: visible on Desktop and accessibly
   disclosed in compact modes. Wildcard remains unavailable in Gameweek 1.
-- Order market filters by the user's narrowing task. Keep cumulative tier
+- Order market filters by the user's narrowing task. Keep exact two-tier
   limits visible with a written over-limit state and an accessible explanation.
 - On Mobile and Tablet, keep the market quota and filter-action group sticky
   below the compact workspace tabs. Open filters in the shared dialog from the
@@ -334,3 +334,12 @@ disable the form and completion/failure is announced locally.
 Participant counts link to matching directory filters. Tables retain their
 headers and scroll within an explicitly labelled keyboard-focusable region on
 small screens. Current player data is separate from saved team snapshots.
+
+### Two-tier allowance
+
+Team and Player Market share a five-circle Level 1 indicator. Keep the
+`Level 1: used/5 players` label screen-reader-only. The count continues above
+five and a visible overflow warning identifies an invalid draft. The adjacent explanation states
+that Level 1 is optional and Level 2 fills the squad. Exact Level 1/2 filters
+replace cumulative lower-tier filters. Legacy tier styles remain available for
+historical Gameweeks.

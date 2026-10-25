@@ -1,5 +1,23 @@
 # Data sources
 
+## Two-tier interpretation (2026-10-25)
+
+The owner approved keeping former Level 1 as Level 1, combining former Levels
+2–4 into Level 2, and increasing the Level 1 squad limit to five from the
+currently open Gameweek. Migration `0023` stores the rule version on Gameweeks
+and audits adoption; it does not edit any published ranking, effective-tier
+row, old revision, locked snapshot, player pool, score or standing. Existing
+four-level ranking counts and season tier definitions remain historical source
+provenance. New server reads and snapshot writes apply the target Gameweek's
+interpretation, with new classifications restricted to that version's levels.
+
+The migration was applied to confirmed development branch
+`br-broad-recipe-azz9hbkx`; GW3 is its open test Gameweek and GW1–2 retain
+historical rules. The new development migration journal checksum needs an
+owner-approved CRLF/LF metadata reconciliation before guarded release checks
+can pass. Production rollout remains pending. See `DOMAIN.md` for the
+runtime contract and `UI_REVIEW.md` for verification evidence.
+
 ## Policy
 
 Competition and Fantasy source data is persisted in PostgreSQL before runtime.

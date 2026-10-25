@@ -344,3 +344,12 @@ League dialogs retain input and preview context on transport errors, clear pendi
 state in `finally`, and focus the existing error message so the user can retry or
 close. This applies to create, invite preview, join, rename, invite rotation and
 confirmed member/league operations.
+
+### Two-tier quota presentation
+
+Current Team and market views show only Levels 1–2. Show the Level 1 allowance
+as five circles, with the numeric count available only to screen readers and a
+visible textual overflow warning. Level 2 can occupy all remaining places, including
+all 15 when no Level 1 players are selected. Market filters select exact Level
+1 or Level 2. Historical Points and admin Gameweek views retain the original
+tier labels when displaying a four-tier Gameweek.

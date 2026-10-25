@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, eq } from "drizzle-orm";
 
@@ -94,7 +95,7 @@ export async function getAdminOptimalTeam(params: AdminParams) {
     fantasyPlayerId: row.fantasyPlayerId,
     clubId: row.clubId,
     position: row.position as FantasyPointsSquadMember["position"],
-    tier: row.tier,
+    tier: resolvePlayerTier(row.tier, week.tierRulesVersion),
     isThai: row.isThai,
     lineupRole: row.lineupRole,
     benchOrder: row.benchOrder,

@@ -747,6 +747,10 @@ export const fantasyGameweeks = pgTable(
     deadlineAt: timestamp("deadline_at", { withTimezone: true }).notNull(),
     status: fantasyGameweekStatusEnum("status").default("planned").notNull(),
     scoreComplete: boolean("score_complete").default(false).notNull(),
+    tierRulesVersion: varchar("tier_rules_version", { length: 32 })
+      .$type<"four-tier-v1" | "two-tier-v1">()
+      .default("two-tier-v1")
+      .notNull(),
     averagePoints: integer("average_points").default(0).notNull(),
     highestPoints: integer("highest_points").default(0).notNull(),
     finalizedAt: timestamp("finalized_at", { withTimezone: true }),
@@ -767,6 +771,10 @@ export const fantasyGameweeks = pgTable(
     index("fantasy_gameweeks_deadline_idx").on(table.deadlineAt),
     index("fantasy_gameweeks_status_idx").on(table.status),
     check("fantasy_gameweeks_number_check", sql`${table.number} > 0`),
+    check(
+      "fantasy_gameweeks_tier_rules_check",
+      sql`${table.tierRulesVersion} in ('four-tier-v1', 'two-tier-v1')`,
+    ),
   ],
 );
 

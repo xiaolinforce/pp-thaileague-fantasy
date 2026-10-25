@@ -95,51 +95,58 @@ Fantasy classification; it must not be re-inferred in UI code.
 
 ## Tier slots
 
-The current season defines:
+The current rules use two tiers. Level 1 is limited to **five players across
+starters and substitutes**. Level 2 fills the remaining places up to the
+15-player squad size. There is no minimum number of Level 1 players: all 15
+players may be Level 2.
 
 | Level | Nominal slots |      Cumulative maximum |
 | ----: | ------------: | ----------------------: |
-|     1 |             3 |              Level 1: 3 |
-|     2 |             3 |  Levels 1–2 combined: 6 |
-|     3 |             6 | Levels 1–3 combined: 12 |
-|     4 |             3 | Levels 1–4 combined: 15 |
+|     1 |             5 |              Level 1: 5 |
+|     2 |            10 | Levels 1–2 combined: 15 |
 
-Validation is cumulative. A lower-ranked player may occupy a remaining
-higher-level slot, but a higher-ranked player cannot overflow into any
-lower-tier slot. Tier
-records are effective from a Gameweek so later changes do not alter earlier
-selection snapshots.
+The ten nominal Level 2 slots are not a separate maximum or minimum. Unused
+Level 1 places may be occupied by Level 2 players. The other squad, lineup,
+club, nationality, transfer, captaincy and chip rules are unchanged.
 
-## Player ranking and tier derivation
+## Tier transition and historical rules
 
-The canonical preseason ranking is a versioned, immutable-after-publication
-projection. Rank `1` is the player with the highest projected Fantasy points;
-ranks continue without gaps through every active Fantasy player. Position rank
-is also stored for review, but the tier boundary uses overall rank only.
+The owner-approved 2026-10-25 transition applies to the Gameweek that is open
+when migration `0023` runs and every planned Gameweek. Former Level 1 players
+remain Level 1; former Levels 2, 3 and 4 become Level 2. No projection reranking
+is performed to choose a new elite group.
 
-For the 2026/27 preseason publication, counts are derived from every active,
-eligible player in the published ranking. Cumulative boundaries are rounded so
-the ranks remain contiguous and Level 4 receives the exact remainder:
+Each Gameweek stores `tierRulesVersion`: `two-tier-v1` for the new 5/10
+allocation, or `four-tier-v1` for the historical 3/3/6/3 allocation with
+cumulative limits 3/6/12/15. Migration `0023` marks existing closed Gameweeks
+as historical. Future Gameweeks default to `two-tier-v1`. Recalculation of the
+best legal team uses the selected Gameweek's rule version, never today's global
+quota. Normal player and team scoring is unchanged.
 
-| Overall-rank share | Level | Players |
-| -----------------: | ----: | ------: |
-|             top 5% |     1 |      5% |
-|           next 15% |     2 |     15% |
-|           next 20% |     3 |     20% |
-|          remainder |     4 |     60% |
+Source effective-tier rows, published ranking rows, old transfer revisions and
+locked selection snapshots are preserved. Server reads interpret legacy tiers
+3/4 as 2 only under `two-tier-v1`. A missing source tier defaults to 2 under
+the new rules and 4 under historical rules; other unknown values are rejected.
+New saves, baseline restores, carryover and deadline pools persist the target
+Gameweek's tier interpretation. Locking normalizes remaining legacy draft
+snapshots with audit context, without changing players, lineup, captaincy or
+transfer revisions. Merely deploying or migrating does not count as a manager
+save, transfer, or team confirmation, and does not rebuild existing bot squads.
 
-The projection combines prior-season minutes and events, the project scoring
-rules, competition strength, club attack/defence context, current market value,
-position priors, expected minutes, and a confidence penalty when source history
-is unavailable. Stable source IDs and reviewed manual adjustments may resolve
-exceptional cases. Display names alone never constitute a manual identity
-override.
+## Player ranking
 
-Changing future tier proportions does not require recalculating player order:
-publish a new ranking version or derive new boundaries from the stored overall
-ranks. A published run records the model version, cutoff date, sources,
-configuration, confidence, and per-player reasons. It cannot be applied to a
-Gameweek that already has locked selections or scores.
+The canonical preseason ranking remains a versioned, immutable-after-publication
+projection. Rank 1 has the highest projected Fantasy points. Position rank and
+projected points still support quality bands within each current position/tier.
+Published historical tier boundaries, their source counts, and the legacy
+`fantasy_tier_definitions` rows remain provenance rather than the current
+runtime quota configuration. Current rules come from `src/lib/fantasy/rules.ts`
+and the Gameweek's stored version.
+
+New classification edits must use a tier allowed by the selected Gameweek's
+rules. Future ranking publications must respect that same rule version and
+retain source IDs, confidence, configuration, manual adjustments and audit
+context; they must not rewrite already published runs or locked history.
 
 ### Player ownership
 
@@ -162,11 +169,11 @@ the stored rows and never aggregate all teams.
 Before the deadline, a manager may fill every vacant draft slot automatically.
 The suggestion preserves players already in the draft, ignores market display
 filters, and uses the current published ranking with fresh availability, club,
-position, Thai-status, and effective-tier data. It first minimizes the total
-shortfall from the nominal 3/3/6 slots at Levels 1–3 and then minimizes the
-largest shortfall at any one of those levels. Among equally good tier
-allocations it prefers goalkeepers whose tier is the best available among the
-goalkeepers at their club, then maximizes foreign-player use up to the hard
+position, Thai-status, and effective-tier data interpreted with the current Gameweek rules. It first
+minimizes the shortfall from five Level 1 players, without removing existing
+choices or requiring five when constraints make that impossible. Among equally
+good allocations it prefers the highest-projected goalkeepers within each
+club’s best available tier, then maximizes foreign-player use up to the hard
 limit. Only after those priorities tie does it prefer the best feasible quality
 band, minimizing first the worst band used and then the total band distance.
 Quality bands are calculated separately within each position and tier from the
@@ -180,8 +187,8 @@ foreign-player, cumulative tier, position, duplicate-player, lineup, and bench
 constraints remain hard limits.
 
 For goalkeeper inference, a lower tier number is better; goalkeepers tied for
-their club's best tier are treated equally because the current data does not
-store an explicit depth chart. Auto-fill treats the manager's current formation
+their club's best tier are compared by projected points, preserving equal
+projections as ties. This is an inference; the data has no explicit depth chart. Auto-fill treats the manager's current formation
 and lineup assignment as fixed: it fills each vacant slot without changing any
 existing starter, substitute, or bench order. When starter and substitute slots
 for the same position are both vacant, the better-tier newly selected player

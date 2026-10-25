@@ -364,9 +364,37 @@ async function verifyFantasyGame() {
     )
   ) {
     throw new Error(
-      "Fantasy tier definitions must be Level 1-4 with 3/3/6/3 slots.",
+      "Historical source tier definitions must retain Level 1-4 with 3/3/6/3 slots.",
     );
   }
+
+  const invalidTierRules = await db.execute<{ invalid: number }>(sql`
+    select count(*)::int invalid from fantasy_gameweeks
+    where tier_rules_version not in ('four-tier-v1', 'two-tier-v1')
+       or (status in ('open', 'planned') and tier_rules_version <> 'two-tier-v1')
+  `);
+  if (invalidTierRules.rows[0]?.invalid !== 0) {
+    throw new Error("Gameweek tier rule versions are inconsistent.");
+  }
+  const invalidTwoTierSquads = await db.execute<{ invalid: number }>(sql`
+    select count(*)::int invalid from (
+      select s.id from fantasy_team_selections s
+      join fantasy_gameweeks gw on gw.id=s.fantasy_gameweek_id
+      join fantasy_team_selection_players p on p.selection_id=s.id
+      where gw.tier_rules_version='two-tier-v1'
+      group by s.id
+      having count(*) filter (where p.tier_snapshot=1)>5
+        or bool_or(p.tier_snapshot not in (1,2,3,4))
+    ) violations
+  `);
+  if (invalidTwoTierSquads.rows[0]?.invalid !== 0) {
+    throw new Error(
+      "A two-tier selection exceeds five Level 1 players or contains an unknown tier.",
+    );
+  }
+  console.log(
+    "tierRules: two levels, up to five Level 1 players; historical source definitions retained",
+  );
 
   const publishedRuns = await db
     .select()

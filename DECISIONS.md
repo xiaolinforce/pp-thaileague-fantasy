@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-10-25 — Two tiers with five Level 1 places
+
+**Decision:** Keep existing Level 1 players in Level 1; interpret former Levels
+2–4 as Level 2. Allow zero through five Level 1 players across the whole squad,
+with Level 2 filling all remaining places. Apply from the currently open
+Gameweek, followed by all planned Gameweeks. Auto-fill targets five Level 1
+players when feasible while preserving existing choices, formation and captaincy.
+
+**Consequences:** This supersedes the four-tier and 3/3/6/3 quota decisions for
+new Gameweeks. Persist the tier-rule version on every Gameweek so closed
+Gameweeks and optimal-team recalculation retain the original 3/6/12/15 limits.
+Keep published rankings, source tier definitions, effective-tier history and
+transfer revisions immutable; interpret legacy values through the target rules
+and normalize new snapshots at saves, restores, carryover and lock. The
+highest projection within each club's best goalkeeper tier distinguishes likely
+starters now that most goalkeepers share Level 2. No squad is automatically
+rebuilt, no transfer is charged, and normal points scoring is unchanged.
+
 Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.

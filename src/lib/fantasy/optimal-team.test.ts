@@ -1,8 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { findOptimalTeam, type OptimalTeamCandidate } from "./optimal-team.ts";
-import type { FantasyPosition } from "./rules.ts";
+import {
+  findOptimalTeam as findOptimalTeamWithRules,
+  type OptimalTeamCandidate,
+} from "./optimal-team.ts";
+import {
+  LEGACY_FANTASY_RULES,
+  THAI_LEAGUE_FANTASY_RULES,
+  resolvePlayerTier,
+  type FantasyPosition,
+} from "./rules.ts";
+const findOptimalTeam = (candidates: OptimalTeamCandidate[]) =>
+  findOptimalTeamWithRules(candidates, LEGACY_FANTASY_RULES);
 
 const positionCounts: Record<FantasyPosition, number> = {
   goalkeeper: 2,
@@ -214,3 +224,34 @@ test(
     assert.equal(result.members.length, 15);
   },
 );
+
+test("two-tier optimal teams allow five Level 1 players without changing historical eligibility", () => {
+  const elite = new Set([
+    "goalkeeper-0",
+    "defender-0",
+    "defender-1",
+    "midfielder-0",
+    "forward-0",
+  ]);
+  const pool = legalPool(2).map((candidate) => ({
+    ...candidate,
+    tier: elite.has(candidate.id) ? 1 : 2,
+    isThai: true,
+  }));
+  const current = findOptimalTeamWithRules(pool, THAI_LEAGUE_FANTASY_RULES);
+  assert.ok(current);
+  assert.equal(current.members.filter((p) => p.tier === 1).length, 5);
+  assert.ok(current.members.every((p) => p.tier === 1 || p.tier === 2));
+  // Every full squad in this pool contains 15 top-two players, illegal under
+  // the historical cumulative maximum of six.
+  assert.equal(findOptimalTeam(pool), null);
+  const legacy = legalPool();
+  const before = JSON.stringify(legacy);
+  assert.ok(findOptimalTeam(legacy));
+  assert.ok(
+    findOptimalTeamWithRules(
+      legacy.map((p) => ({ ...p, tier: resolvePlayerTier(p.tier) })),
+    ),
+  );
+  assert.equal(JSON.stringify(legacy), before);
+});

@@ -15,7 +15,7 @@
   unsubscribe/suppression tracking, and guarded manual batches. Production
   migration and sender/webhook activation are separate operational steps.
 - Account-owned managers and season teams; new teams begin with an empty opening draft and choose all 15 players.
-- Fifteen-player squad, formation, club, nationality, tier, deadline, transfer,
+- Fifteen-player squad, two tiers (up to five Level 1 players), formation, club, nationality, deadline, transfer,
   captaincy, and chip validation.
 - Published-ranking-weighted, randomized auto-fill for vacant squad slots.
 - Internally marked bot teams with one-time owner-requested auto-fill, normal

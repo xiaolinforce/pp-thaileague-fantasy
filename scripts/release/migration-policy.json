@@ -22,5 +22,9 @@
   "0022_dizzy_quentin_quire": {
     "sha256": "1f20f2d9242d81add744cca59eb55e5eb1dcab2e8ec6215b7af2831370d7889a",
     "compatibility": "compatible"
+  },
+  "0023_warm_blob": {
+    "sha256": "cff0e6aa637e757b8996660e24b3a3eecd682f9c54c5cf4889e9678a8d48813d",
+    "compatibility": "compatible"
   }
 }

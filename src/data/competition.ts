@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, asc, eq, inArray } from "drizzle-orm";
 import { unstable_cache } from "next/cache";
@@ -318,9 +319,10 @@ async function loadCompetitionDataset() {
       }
       const [color, accent] = club.colors;
       const fantasyPlayer = fantasyPlayerByPlayerId.get(player.id);
-      const tier = fantasyPlayer
-        ? (tierByFantasyPlayerId.get(fantasyPlayer.id) ?? 4)
-        : 4;
+      const tier = resolvePlayerTier(
+        fantasyPlayer ? tierByFantasyPlayerId.get(fantasyPlayer.id) : undefined,
+        currentFantasyGameweek?.tierRulesVersion ?? "two-tier-v1",
+      );
       const matchPoints = fantasyPlayer
         ? (pointsByFantasyPlayer.get(fantasyPlayer.id) ?? []).sort(
             (a, b) => b.matchweek - a.matchweek,

@@ -57,6 +57,48 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-10-26 — Two player tiers and five Level 1 places
+
+- **Scope:** Team and Player Market use two tiers, an exact Level 1/2 filter,
+  and five circles with a screen-reader-only count and visible overflow warning. Rules explains that
+  Level 1 is optional and Level 2 may fill all 15 places. Admin classification
+  options follow the selected Gameweek's version; adoption and lock-time tier
+  normalization have named audit actions and allowlisted before/after fields.
+- **Rendered evidence:** the existing local Guest team showed `3/5` with only
+  Level 1/2 badges. Desktop Thai and 360px English Team views were inspected;
+  market filters returned only the selected tier in both language modes.
+  The public Rules section rendered the 5/15 cumulative table and the
+  all-Level-2 explanation in Thai and English. DOM measurements at 360px
+  reported document scroll width equal to client width. Language, filters and
+  viewport overrides were restored after the check. The owner then requested
+  circles without a visible numeric label; both quota summaries were changed
+  back to `sr-only` and reviewed in source/diff. No mock or debug route was
+  introduced.
+- **Data verification:** migration `0023` was applied only to confirmed Neon
+  development `br-broad-recipe-azz9hbkx`. GW1–2 retain `four-tier-v1`; open GW3
+  and planned weeks use `two-tier-v1`. Before/after counts and hashes match for
+  11 protected tables, including 600 selections, 9,000 selection-player rows,
+  601 revisions, tier/ranking history, pools, optimal teams, scores and standings.
+- **Integration:** `db:verify:tiers` used real fresh candidate reads to save five
+  Level 1 players, reject six, restore a legacy baseline without altering its
+  original revision, lock, score and carry over to the following Gameweek.
+  The complete transaction rolled back and its database fingerprint matched.
+- **Checks:** 147 Fantasy tests, 12 email tests, 19 release tests, five
+  localization tests, TypeScript, ESLint, repository formatting and production
+  build passed. The React checklist found no new hook, serialization or
+  accessibility issue in the affected components.
+- **Limits:** the development fixture's open deadline is already past, so
+  browser checks covered the read-only state; editable saves and lifecycle
+  changes were tested inside the rollback transaction. Authenticated admin
+  rendering was not exercised with this Guest session. The broad
+  `db:verify:fantasy` command still reports pre-existing optimal-team issues
+  (`scored_gameweeks_missing_result=1`, `mismatched_statuses=1`); the matching
+  hashes show those result rows were unchanged. The newly applied development
+  migration journal contains the CRLF-file checksum rather than the canonical
+  LF checksum used by release tooling; reconciling that one metadata row is
+  awaiting owner approval under the migration-history rule. SQL semantics and
+  protected data are unchanged. Production deployment and migration remain pending.
+
 ### 2026-10-09 Points transfer deduction
 
 - Local Chrome on `/points?gw=3` displayed the red outlined deduction notice

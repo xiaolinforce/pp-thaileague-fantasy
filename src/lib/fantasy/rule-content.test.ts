@@ -80,3 +80,16 @@ for (const language of ["th", "en"] as const) {
     );
   });
 }
+
+test("both languages explain two tiers without an exact Level 2 allocation", () => {
+  const th = buildFantasyRuleSections("th").find((s) => s.id === "tiers")!;
+  const en = buildFantasyRuleSections("en").find((s) => s.id === "tiers")!;
+  assert.match(th.summary, /ไม่เกิน 5 คน/);
+  assert.match(en.summary, /at most 5 Level 1/);
+  assert.ok(th.points.some((p) => p.includes("ระดับ 2 ทั้ง 15 คน")));
+  assert.ok(en.points.some((p) => p.includes("all 15 players may be Level 2")));
+  assert.doesNotMatch(
+    JSON.stringify([th, en]),
+    /Level 3|Level 4|ระดับ 3|ระดับ 4/,
+  );
+});

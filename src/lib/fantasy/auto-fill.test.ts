@@ -14,7 +14,7 @@ const positions = ["goalkeeper", "defender", "midfielder", "forward"] as const;
 function createCandidates() {
   const candidates: AutoFillCandidate[] = [];
   for (const position of positions) {
-    for (const tier of [1, 2, 3, 4]) {
+    for (const tier of [1, 2]) {
       for (let index = 0; index < 12; index += 1) {
         candidates.push({
           id: `${position}-${tier}-${index}`,
@@ -111,7 +111,7 @@ function createSingleVacancyFixture(
   };
 }
 
-test("classifies each club's best-tier goalkeepers and preserves ties", () => {
+test("classifies the highest-projected goalkeeper in each club's best tier and preserves ties", () => {
   const candidates: AutoFillCandidate[] = [
     {
       id: "club-a-first",
@@ -129,7 +129,7 @@ test("classifies each club's best-tier goalkeepers and preserves ties", () => {
       id: "club-a-backup",
       clubId: "club-a",
       position: "goalkeeper",
-      tier: 3,
+      tier: 2,
       overallRank: 20,
       projectedPoints: 90,
       ownershipPercent: 0,
@@ -155,7 +155,7 @@ test("classifies each club's best-tier goalkeepers and preserves ties", () => {
       position: "goalkeeper",
       tier: 1,
       overallRank: 2,
-      projectedPoints: 119,
+      projectedPoints: 120,
       ownershipPercent: 0,
       ownershipTeamCount: 0,
       isThai: true,
@@ -190,10 +190,8 @@ test("fills an empty squad with exact tier targets and valid captaincy", () => {
   assert.equal(result.addedPlayerIds.length, 15);
   const lineup = toLineup(result.members, candidates);
   assert.deepEqual(validateLineup(lineup), []);
-  assert.equal(lineup.filter((player) => player.tier === 1).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 2).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 3).length, 6);
-  assert.equal(lineup.filter((player) => player.tier === 4).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 1).length, 5);
+  assert.equal(lineup.filter((player) => player.tier === 2).length, 10);
   assert.equal(
     lineup.filter((player) => player.captainRole === "captain").length,
     1,
@@ -251,7 +249,7 @@ test("fills an empty squad with exact tier targets and valid captaincy", () => {
 });
 
 test("prefers a likely club starting goalkeeper before maximizing foreigners", () => {
-  const preferredGoalkeeperId = "goalkeeper-4-1";
+  const preferredGoalkeeperId = "goalkeeper-2-1";
   const candidates = createCandidates().map((candidate) => ({
     ...candidate,
     isLikelyClubStartingGoalkeeper: candidate.id === preferredGoalkeeperId,
@@ -274,10 +272,8 @@ test("prefers a likely club starting goalkeeper before maximizing foreigners", (
   assert.equal(preferredGoalkeeper.lineupRole, "starter");
   const lineup = toLineup(result.members, candidates);
   assert.equal(lineup.filter((player) => !player.isThai).length, 7);
-  assert.equal(lineup.filter((player) => player.tier === 1).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 2).length, 3);
-  assert.equal(lineup.filter((player) => player.tier === 3).length, 6);
-  assert.equal(lineup.filter((player) => player.tier === 4).length, 3);
+  assert.equal(lineup.filter((player) => player.tier === 1).length, 5);
+  assert.equal(lineup.filter((player) => player.tier === 2).length, 10);
 });
 
 test("preserves selected players and existing captaincy while filling vacancies", () => {
@@ -691,7 +687,7 @@ test("uses quality bands before randomizing tied captaincy candidates", () => {
           ? 1
           : candidate.position === "forward"
             ? 2
-            : 3;
+            : 2;
       return {
         ...candidate,
         tier: positionTier,
@@ -795,4 +791,28 @@ test("returns null when no valid club allocation can fill the squad", () => {
   });
 
   assert.equal(result, null);
+});
+
+test("fills a legal team when fewer than five Level 1 players are available", () => {
+  const source = createCandidates();
+  const candidates = source.filter(
+    (p) => p.tier === 2 || p.id === "forward-1-1",
+  );
+  const result = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates,
+    random: seededRandom(101),
+  });
+  assert.ok(result);
+  const lineup = toLineup(result.members, candidates);
+  assert.deepEqual(validateLineup(lineup), []);
+  assert.equal(lineup.filter((p) => p.tier === 1).length, 1);
+  const allLevelTwo = source.filter((p) => p.tier === 2);
+  const ordinary = autoFillSquadDraft({
+    members: createEmptySquadDraft(),
+    candidates: allLevelTwo,
+    random: seededRandom(103),
+  });
+  assert.ok(ordinary);
+  assert.deepEqual(validateLineup(toLineup(ordinary.members, allLevelTwo)), []);
 });

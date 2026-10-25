@@ -71,13 +71,13 @@ export function buildFantasyRuleSections(
               .map((tier) => `${tier.level} จำนวน ${tier.slots} คน`)
               .join(
                 " ระดับ ",
-              )} ให้ความสำคัญกับผู้รักษาประตูที่น่าจะเป็นตัวจริงของสโมสร แล้วเลือกนักเตะต่างชาติให้มากที่สุดภายในโควต้า`,
+              )} ให้ความสำคัญกับผู้รักษาประตูระดับดีที่สุดของสโมสรที่มีคะแนนคาดการณ์สูงสุด แล้วเลือกนักเตะต่างชาติให้มากที่สุดภายในโควต้า`,
             `It targets ${rules.tierSlots
               .slice(0, -1)
               .map((tier) => `${tier.slots} Level ${tier.level} players`)
               .join(
                 ", ",
-              )}, prefers likely first-choice club goalkeepers, then fills as many foreign-player slots as the rules allow.`,
+              )}, prefers the highest-projected goalkeepers within each club’s best tier, then fills as many foreign-player slots as the rules allow.`,
           ),
           copy(
             "เมื่อเงื่อนไขข้างต้นเสมอกัน ระบบเลือกกลุ่มคุณภาพที่ดีที่สุดที่ยังจัดทีมได้ โดยแบ่งผู้เล่นตำแหน่งและระดับเดียวกันตามคะแนนคาดการณ์ ใช้อันดับรวมตัดสินเมื่อคะแนนเท่ากัน แต่ละกลุ่มมีอย่างน้อย 3 คนหรือ 25% ของผู้เล่นในตำแหน่งและระดับนั้น ปัดขึ้นเป็นจำนวนเต็ม",
@@ -98,8 +98,8 @@ export function buildFantasyRuleSections(
       id: "tiers",
       title: copy("ระดับนักเตะ", "Player tiers"),
       summary: copy(
-        "นักเตะแบ่งเป็นระดับ 1–4 โดยระดับ 1 เป็นกลุ่มสูงสุด เลือกผสมกันได้ตามข้อจำกัดรวมในตาราง",
-        "Players have levels 1–4, with Level 1 the highest tier. Mix levels within the cumulative limits below.",
+        "นักเตะแบ่งเป็นระดับ 1 และ 2 เลือกระดับ 1 ได้ไม่เกิน 5 คน ระดับ 2 เติมได้จนครบทีม 15 คน",
+        "Players have two levels. Select at most 5 Level 1 players and fill the remaining squad places with Level 2 players.",
       ),
       table: {
         caption: copy(
@@ -121,12 +121,12 @@ export function buildFantasyRuleSections(
       },
       points: [
         copy(
-          "ไม่จำเป็นต้องใช้โควต้าระดับ 1 ให้เต็ม สามารถเลือกนักเตะระดับ 2–4 แทนได้ แต่เพิ่มระดับ 1 เกินโควต้าไม่ได้ แม้ระดับอื่นยังมีที่ว่าง",
-          "You do not have to fill the Level 1 allowance: choose Levels 2–4 instead. You cannot exceed the Level 1 limit even if other levels have unused slots.",
+          "ไม่จำเป็นต้องมีนักเตะระดับ 1 สามารถใช้ระดับ 2 ทั้ง 15 คนได้ โควต้าระดับ 1 นับทั้งตัวจริงและตัวสำรอง",
+          "Level 1 players are optional: all 15 players may be Level 2. The Level 1 limit includes both starters and substitutes.",
         ),
         copy(
-          "ตัวอย่างที่ผ่านโควต้าระดับ: ระดับ 1 จำนวน 2 คน + ระดับ 2 จำนวน 4 คน + ระดับ 3 จำนวน 6 คน + ระดับ 4 จำนวน 3 คน รวม 15 คน ทั้งนี้ยังต้องผ่านกฎตำแหน่ง สโมสร และต่างชาติด้วย",
-          "Valid tier example: 2 Level 1 + 4 Level 2 + 6 Level 3 + 3 Level 4 players = 15. Position, club and foreign-player limits still apply.",
+          "ตัวอย่างที่ผ่านโควต้าระดับ: ระดับ 1 จำนวน 5 คน + ระดับ 2 จำนวน 10 คน รวม 15 คน ทั้งนี้ยังต้องผ่านกฎตำแหน่ง สโมสร และต่างชาติด้วย",
+          "Valid tier example: 5 Level 1 + 10 Level 2 players = 15. Position, club and foreign-player limits still apply.",
         ),
         copy(
           "ระดับนักเตะมีผลแยกตามรอบแข่งขัน การเปลี่ยนระดับภายหลังไม่เปลี่ยนทีมในรอบที่ปิดรับแล้ว",

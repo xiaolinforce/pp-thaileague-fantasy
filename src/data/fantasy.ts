@@ -23,6 +23,8 @@ import {
 } from "@/db/schema";
 import {
   isTeamOpeningGameweek,
+  resolvePlayerTier,
+  type TierRulesVersion,
   THAI_LEAGUE_FANTASY_RULES,
   type FantasyChip,
 } from "@/lib/fantasy/rules";
@@ -68,6 +70,7 @@ export type FantasyState = {
     deadlineAt: string;
     status: string;
     scoreComplete: boolean;
+    tierRulesVersion?: TierRulesVersion;
   };
   selection: {
     id: string | null;
@@ -217,6 +220,7 @@ export async function getFantasyState(): Promise<FantasyState> {
       deadlineAt: gameweek.deadlineAt.toISOString(),
       status: gameweek.status,
       scoreComplete: gameweek.scoreComplete,
+      tierRulesVersion: gameweek.tierRulesVersion,
     },
     selection: {
       id: selection?.id ?? null,
@@ -237,7 +241,7 @@ export async function getFantasyState(): Promise<FantasyState> {
           displayClubs.get(member.fantasyPlayerId) ?? member.clubIdSnapshot,
         isAvailable: editable ? displayClubs.has(member.fantasyPlayerId) : true,
         position: member.positionSnapshot as FantasySquadMember["position"],
-        tier: member.tierSnapshot,
+        tier: resolvePlayerTier(member.tierSnapshot, gameweek.tierRulesVersion),
         isThai: member.isThaiSnapshot,
         lineupRole: member.lineupRole,
         benchOrder: member.benchOrder,
@@ -472,7 +476,10 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       fantasyPlayerId: row.member.fantasyPlayerId,
       clubId: row.displayClubId,
       position: row.member.positionSnapshot as FantasySquadMember["position"],
-      tier: row.member.tierSnapshot,
+      tier: resolvePlayerTier(
+        row.member.tierSnapshot,
+        selectedGameweek.tierRulesVersion,
+      ),
       isThai: row.member.isThaiSnapshot,
       lineupRole: row.member.lineupRole,
       benchOrder: row.member.benchOrder,
@@ -507,7 +514,10 @@ export async function getFantasyPointsState(requestedGameweek?: number) {
       fantasyPlayerId: row.member.fantasyPlayerId,
       clubId: row.displayClubId,
       position: row.member.positionSnapshot as FantasySquadMember["position"],
-      tier: row.member.tierSnapshot,
+      tier: resolvePlayerTier(
+        row.member.tierSnapshot,
+        selectedGameweek.tierRulesVersion,
+      ),
       isThai: row.member.isThaiSnapshot,
       lineupRole: row.member.lineupRole,
       benchOrder: row.member.benchOrder,

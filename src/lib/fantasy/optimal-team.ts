@@ -4,6 +4,7 @@ import {
   getCumulativeTierLimits,
   THAI_LEAGUE_FANTASY_RULES,
   validateLineup,
+  type FantasyRules,
   type FantasyPosition,
   type LineupPlayer,
 } from "./rules.ts";
@@ -314,6 +315,7 @@ function findBestLineupForSquad(
 function solveSquadUpperBound(
   candidates: OptimalTeamCandidate[],
   excludedSquads: ReadonlyArray<ReadonlySet<number>>,
+  rules: FantasyRules,
 ) {
   const benchBaseline = Math.min(
     0,
@@ -325,28 +327,28 @@ function solveSquadUpperBound(
     candidates.reduce((total, candidate) => total + benchValue(candidate), 0) +
     1;
   const constraints = new Map<string, Constraint>([
-    ["squad:size", { equal: THAI_LEAGUE_FANTASY_RULES.squadSize }],
+    ["squad:size", { equal: rules.squadSize }],
     ["starter:size", { equal: 11 }],
     ["starter:goalkeeper", { equal: 1 }],
     ["starter:defender", { min: 3 }],
     ["starter:midfielder", { min: 2 }],
     ["starter:forward", { min: 1 }],
-    ["squad:foreign", { max: THAI_LEAGUE_FANTASY_RULES.foreignPlayerLimit }],
+    ["squad:foreign", { max: rules.foreignPlayerLimit }],
     ["captain:size", { equal: 1 }],
   ]);
   for (const position of positions) {
     constraints.set(`squad:${position}`, {
-      equal: THAI_LEAGUE_FANTASY_RULES.positionLimits[position],
+      equal: rules.positionLimits[position],
     });
   }
-  for (const { level, limit } of getCumulativeTierLimits()) {
+  for (const { level, limit } of getCumulativeTierLimits(rules)) {
     constraints.set(`squad:tier:${level}`, { max: limit });
   }
   for (const clubId of new Set(
     candidates.map((candidate) => candidate.clubId),
   )) {
     constraints.set(`squad:club:${clubId}`, {
-      max: THAI_LEAGUE_FANTASY_RULES.sameClubLimit,
+      max: rules.sameClubLimit,
     });
   }
   for (let index = 0; index < candidates.length; index += 1) {
@@ -355,7 +357,7 @@ function solveSquadUpperBound(
   }
   for (let index = 0; index < excludedSquads.length; index += 1) {
     constraints.set(`exclude:${index}`, {
-      max: THAI_LEAGUE_FANTASY_RULES.squadSize - 1,
+      max: rules.squadSize - 1,
     });
   }
 
@@ -371,14 +373,10 @@ function solveSquadUpperBound(
       [`link:starter:${index}`, -1],
     ]);
     if (!candidate.isThai) squad.set("squad:foreign", 1);
-    for (const { level } of getCumulativeTierLimits()) {
+    for (const { level } of getCumulativeTierLimits(rules)) {
       if (candidate.tier <= level) squad.set(`squad:tier:${level}`, 1);
     }
-    if (
-      !THAI_LEAGUE_FANTASY_RULES.tierSlots.some(
-        ({ level }) => level === candidate.tier,
-      )
-    ) {
+    if (!rules.tierSlots.some(({ level }) => level === candidate.tier)) {
       constraints.set(`valid:tier:${index}`, { max: 0 });
       squad.set(`valid:tier:${index}`, 1);
     }
@@ -427,6 +425,7 @@ function solveSquadUpperBound(
 
 export function findOptimalTeam(
   candidates: OptimalTeamCandidate[],
+  rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
 ): OptimalTeam | null {
   const orderedCandidates = [...candidates].sort((left, right) =>
     left.id.localeCompare(right.id),
@@ -448,11 +447,12 @@ export function findOptimalTeam(
     const { solution, benchBaseline } = solveSquadUpperBound(
       orderedCandidates,
       excludedSquads,
+      rules,
     );
     if (solution.status === "infeasible") return best;
     if (solution.status !== "optimal") {
       if (orderedCandidates.length <= 60) {
-        return findOptimalTeamLegacy(orderedCandidates);
+        return findOptimalTeamLegacy(orderedCandidates, rules);
       }
       throw new Error(
         `Optimal-team solver stopped with status ${solution.status}.`,
@@ -472,11 +472,11 @@ export function findOptimalTeam(
       }
     }
     if (
-      selectedIndexes.size !== THAI_LEAGUE_FANTASY_RULES.squadSize ||
+      selectedIndexes.size !== rules.squadSize ||
       starterIndexes.size !== 11 ||
       captainIndex === null
     ) {
-      return findOptimalTeamLegacy(orderedCandidates);
+      return findOptimalTeamLegacy(orderedCandidates, rules);
     }
 
     const primaryUpperBound =
@@ -521,13 +521,14 @@ export function findOptimalTeam(
   }
 
   if (orderedCandidates.length <= 60) {
-    return findOptimalTeamLegacy(orderedCandidates);
+    return findOptimalTeamLegacy(orderedCandidates, rules);
   }
   throw new Error("Optimal-team solver exceeded the exact-solution attempts.");
 }
 
 function findOptimalTeamLegacy(
   candidates: OptimalTeamCandidate[],
+  rules: FantasyRules = THAI_LEAGUE_FANTASY_RULES,
 ): OptimalTeam | null {
   const uniqueCandidates = new Map<string, OptimalTeamCandidate>();
   for (const candidate of candidates) {
@@ -550,7 +551,7 @@ function findOptimalTeamLegacy(
     positions.some(
       (position) =>
         (byPosition.get(position)?.length ?? 0) <
-        THAI_LEAGUE_FANTASY_RULES.positionLimits[position],
+        rules.positionLimits[position],
     )
   ) {
     return null;
@@ -567,9 +568,7 @@ function findOptimalTeamLegacy(
       ...positions.map((position) => ({
         position,
         lineupRole: "bench" as const,
-        count:
-          THAI_LEAGUE_FANTASY_RULES.positionLimits[position] -
-          formation[position],
+        count: rules.positionLimits[position] - formation[position],
       })),
     ].filter((group) => group.count > 0);
     const assigned: Array<
@@ -582,16 +581,10 @@ function findOptimalTeamLegacy(
 
     const canAdd = (candidate: OptimalTeamCandidate) => {
       if (selectedIds.has(candidate.id)) return false;
-      if (
-        (clubCounts.get(candidate.clubId) ?? 0) >=
-        THAI_LEAGUE_FANTASY_RULES.sameClubLimit
-      ) {
+      if ((clubCounts.get(candidate.clubId) ?? 0) >= rules.sameClubLimit) {
         return false;
       }
-      if (
-        !candidate.isThai &&
-        foreignCount >= THAI_LEAGUE_FANTASY_RULES.foreignPlayerLimit
-      ) {
+      if (!candidate.isThai && foreignCount >= rules.foreignPlayerLimit) {
         return false;
       }
       const nextTierCount = new Map(tierCounts);
@@ -599,7 +592,7 @@ function findOptimalTeamLegacy(
         candidate.tier,
         (nextTierCount.get(candidate.tier) ?? 0) + 1,
       );
-      return getCumulativeTierLimits().every(({ level, limit }) => {
+      return getCumulativeTierLimits(rules).every(({ level, limit }) => {
         const used = [...nextTierCount].reduce(
           (sum, [tier, count]) => sum + (tier <= level ? count : 0),
           0,
@@ -693,7 +686,7 @@ function findOptimalTeamLegacy(
           captainRole: "none",
         }));
         if (
-          validateLineup(lineup).some(
+          validateLineup(lineup, rules).some(
             (violation) =>
               violation.code !== "bench_order" &&
               violation.code !== "captain" &&

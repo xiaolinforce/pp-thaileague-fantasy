@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, asc, eq, gte, inArray, isNull, lte, or } from "drizzle-orm";
 
@@ -127,7 +128,10 @@ export async function snapshotFantasyGameweekPlayerPool({
       clubIdSnapshot: player.clubId,
       positionSnapshot: player.position as
         "goalkeeper" | "defender" | "midfielder" | "forward",
-      tierSnapshot: tierByPlayer.get(fantasyPlayerId) ?? 4,
+      tierSnapshot: resolvePlayerTier(
+        tierByPlayer.get(fantasyPlayerId),
+        gameweek.tierRulesVersion,
+      ),
       isThaiSnapshot: player.isThai,
       sourceName: "gameweek-lock",
     };

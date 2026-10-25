@@ -23,6 +23,8 @@ import {
   isTeamOpeningGameweek,
   settleTransfers,
   THAI_LEAGUE_FANTASY_RULES,
+  getFantasyRules,
+  resolvePlayerTier,
   validateTransferLimit,
   type FantasyPosition,
 } from "./rules";
@@ -199,10 +201,7 @@ export async function updateFantasyPlayerClassification(
   const level = formInteger(formData, "level");
   const isThai = String(formData.get("isThai") ?? "false") === "true";
   const reason = String(formData.get("reason") ?? "").trim();
-  const isKnownTier = THAI_LEAGUE_FANTASY_RULES.tierSlots.some(
-    (tier) => tier.level === level,
-  );
-  if (!fantasyPlayerId || !effectiveGameweekId || !reason || !isKnownTier) {
+  if (!fantasyPlayerId || !effectiveGameweekId || !reason) {
     throw new Error("Player, Gameweek, tier and reason are required.");
   }
   const target = await db.query.fantasyPlayers.findFirst({
@@ -224,6 +223,13 @@ export async function updateFantasyPlayerClassification(
     player.fantasySeasonId !== gameweek.fantasySeasonId
   ) {
     throw new Error("Player and Gameweek do not belong to the same season.");
+  }
+  if (
+    !getFantasyRules(gameweek.tierRulesVersion).tierSlots.some(
+      (tier) => tier.level === level,
+    )
+  ) {
+    throw new Error("Unknown tier for the selected Gameweek.");
   }
   const previousTier = await db.query.fantasyPlayerTiers.findFirst({
     where: and(
@@ -430,6 +436,47 @@ export async function lockFantasyGameweek(
       })),
     );
   }
+  // Normalize only drafts at lock. Original transfer revisions and older
+  // locked selections retain their original classifications.
+  const tierChanges = draftMembers.filter(
+    (member) =>
+      member.tierSnapshot !==
+      resolvePlayerTier(member.tierSnapshot, gameweek.tierRulesVersion),
+  );
+  for (const [tierSnapshot, changes] of Map.groupBy(tierChanges, (member) =>
+    resolvePlayerTier(member.tierSnapshot, gameweek.tierRulesVersion),
+  )) {
+    await db
+      .update(fantasyTeamSelectionPlayers)
+      .set({ tierSnapshot, updatedAt: new Date() })
+      .where(
+        inArray(
+          fantasyTeamSelectionPlayers.id,
+          changes.map((member) => member.id),
+        ),
+      );
+  }
+  for (let offset = 0; offset < tierChanges.length; offset += 500) {
+    await db.insert(fantasyAdminAuditLog).values(
+      tierChanges.slice(offset, offset + 500).map((member) => ({
+        action: "refresh_deadline_player_tier",
+        entityType: "fantasy_selection_player",
+        entityId: member.id,
+        changedBy,
+        reason:
+          "Apply the Gameweek tier rules before locking; preserve transfer revisions.",
+        before: { tierSnapshot: member.tierSnapshot, gameweekId: gameweek.id },
+        after: {
+          tierSnapshot: resolvePlayerTier(
+            member.tierSnapshot,
+            gameweek.tierRulesVersion,
+          ),
+          gameweekId: gameweek.id,
+          tierRulesVersion: gameweek.tierRulesVersion,
+        },
+      })),
+    );
+  }
   const previousLockedSquads = selections.length
     ? await db
         .select({
@@ -588,6 +635,7 @@ export async function lockFantasyGameweek(
       const members = createGameweekCarryover({
         selectionId: next.id,
         currentClubs,
+        tierRulesVersion: nextGameweek.tierRulesVersion,
         members:
           membersBySelection.get(previousByTeam.get(next.fantasyTeamId)!) ?? [],
       });

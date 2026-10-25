@@ -11,6 +11,11 @@ export const adminFieldLabels: Record<string, string> = {
   redCards: "ใบแดง",
   ownGoals: "ทำเข้าประตูตัวเอง",
   level: "ระดับ",
+  tierSnapshot: "ระดับที่บันทึก",
+  tierRulesVersion: "รุ่นกติกานักเตะ",
+  tierSlots: "โควต้าแต่ละระดับ",
+  gameweek: "Gameweek",
+  gameweekId: "Gameweek ที่มีผล",
   isThai: "สถานะไทย",
   reason: "เหตุผล",
   effectiveGameweekId: "Gameweek ที่มีผล",
@@ -20,6 +25,10 @@ export const adminFieldLabels: Record<string, string> = {
 };
 
 export const adminTranslations: Record<string, string> = {
+  เริ่มใช้กติกานักเตะสองระดับ: "Adopt two-tier player rules",
+  ปรับระดับตามกติกาก่อนล็อกทีม: "Apply tier rules before locking",
+  รุ่นกติกานักเตะ: "Player rule version",
+  โควต้าแต่ละระดับ: "Slots by level",
   "กำลังดำเนินการ…": "Processing…",
   "กำลังส่ง…": "Sending…",
   "กำลังสร้างชุดผู้รับ…": "Creating recipient snapshot…",

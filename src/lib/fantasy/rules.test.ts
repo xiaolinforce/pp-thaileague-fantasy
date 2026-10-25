@@ -14,12 +14,18 @@ import {
   validateChipUse,
   validateLineup,
   validateLineupAssignment,
-  validateSquad,
+  validateSquad as validateSquadWithRules,
+  LEGACY_FANTASY_RULES,
+  resolvePlayerTier,
+  getFantasyRules,
   validateTransferLimit,
   type LineupPlayer,
   type SquadPlayer,
 } from "./rules.ts";
 import { calculatePlayerPoints, resolveTeamScore } from "./scoring.ts";
+
+const validateSquad = (squad: SquadPlayer[]) =>
+  validateSquadWithRules(squad, LEGACY_FANTASY_RULES);
 
 const positions = [
   "goalkeeper",
@@ -71,6 +77,7 @@ function makeValidLineup() {
   ]);
   return makeSquad().map<LineupPlayer>((player) => ({
     ...player,
+    tier: resolvePlayerTier(player.tier),
     lineupRole: starters.has(player.id) ? "starter" : "bench",
     benchOrder: starters.has(player.id)
       ? null
@@ -89,7 +96,7 @@ test("accepts the four-tier nominal allocation", () => {
 });
 
 test("derives cumulative tier limits of 3, 6, 12, and 15", () => {
-  assert.deepEqual(getCumulativeTierLimits(), [
+  assert.deepEqual(getCumulativeTierLimits(LEGACY_FANTASY_RULES), [
     { level: 1, limit: 3 },
     { level: 2, limit: 6 },
     { level: 3, limit: 12 },
@@ -638,4 +645,54 @@ test("default rules remain the agreed 15-player configuration", () => {
   assert.equal(THAI_LEAGUE_FANTASY_RULES.squadSize, 15);
   assert.equal(THAI_LEAGUE_FANTASY_RULES.maximumFreeTransfers, 4);
   assert.equal(THAI_LEAGUE_FANTASY_RULES.maximumChargeableTransfers, 3);
+});
+
+test("two-tier rules allow zero through five Level 1 players but reject six", () => {
+  assert.deepEqual(getCumulativeTierLimits(), [
+    { level: 1, limit: 5 },
+    { level: 2, limit: 15 },
+  ]);
+  for (let count = 0; count <= 5; count++) {
+    assert.deepEqual(
+      validateSquadWithRules(
+        makeSquad(Array.from({ length: 15 }, (_, i) => (i < count ? 1 : 2))),
+      ),
+      [],
+    );
+  }
+  const violations = validateSquadWithRules(
+    makeSquad(Array.from({ length: 15 }, (_, i) => (i < 6 ? 1 : 2))),
+  );
+  assert.deepEqual(
+    violations.map((v) => v.code),
+    ["tier_quota"],
+  );
+  assert.deepEqual(violations[0].details, { level: 1, limit: 5, actual: 6 });
+});
+
+test("new rules reject raw legacy tiers while historical rules retain them", () => {
+  assert.ok(
+    validateSquadWithRules(makeSquad()).some((v) => v.code === "unknown_tier"),
+  );
+  assert.deepEqual(
+    validateSquadWithRules(makeSquad(), getFantasyRules("four-tier-v1")),
+    [],
+  );
+  assert.deepEqual(
+    validateSquadWithRules(
+      makeSquad().map((p) => ({ ...p, tier: resolvePlayerTier(p.tier) })),
+    ),
+    [],
+  );
+  assert.deepEqual(
+    [1, 2, 3, 4].map((tier) => resolvePlayerTier(tier)),
+    [1, 2, 2, 2],
+  );
+  assert.deepEqual(
+    [1, 2, 3, 4].map((tier) => resolvePlayerTier(tier, "four-tier-v1")),
+    [1, 2, 3, 4],
+  );
+  assert.equal(resolvePlayerTier(undefined), 2);
+  assert.equal(resolvePlayerTier(undefined, "four-tier-v1"), 4);
+  assert.equal(resolvePlayerTier(5), 5);
 });

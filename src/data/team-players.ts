@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, desc, eq, inArray } from "drizzle-orm";
 import { db } from "@/db";
@@ -107,8 +108,8 @@ export async function getTeamPlayerData(
       club: club.name,
       clubShort: club.shortName,
       position: positions[row.fantasyPlayer.lockedPosition] ?? "MID",
-      tier: member?.tier ?? 4,
-      price: member?.tier ?? 4,
+      tier: resolvePlayerTier(member?.tier, fantasy.gameweek.tierRulesVersion),
+      price: resolvePlayerTier(member?.tier, fantasy.gameweek.tierRulesVersion),
       isThai: row.fantasyPlayer.isThai,
       points: 0,
       form: 0,

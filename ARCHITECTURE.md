@@ -560,3 +560,26 @@ change or historical revision mutation is required.
 ## Public discovery and analytics
 
 Public discovery routes share the existing dynamic application shell and language preference. Rules combines the beginner introduction and rule reference; next.config.ts permanently redirects the retired /how-to-play URL to /rules before route rendering. The home page keeps its authentication flow and compact public links without a lower reading section. The public season fixtures page reads only the server-only fixtures dataset. Metadata defaults to noindex; reviewed public routes opt in via src/lib/seo.ts. Analytics is client-only, production-host-only and opt-in; auth creation emits a short-lived consented signup receipt, and the existing selection transaction returns a first-save flag without changing rules or schema. See SEO.md.
+
+## Versioned two-tier rules (2026-10-25)
+
+`fantasy_gameweeks.tier_rules_version` selects the historical four-tier rules
+or the current two-tier rules. The pure rule module owns both configurations
+and `resolvePlayerTier`; server readers use the target Gameweek's version when
+interpreting legacy effective-tier and selection/revision snapshots. The new
+configuration allows five Level 1 players, with Level 2 filling all remaining
+squad places. Existing source Levels 2–4 map to Level 2 without rewriting the
+published ranking or effective-tier provenance.
+
+Migration `0023` is a compatible expansion. It marks open/planned Gameweeks as
+`two-tier-v1`, closed Gameweeks as `four-tier-v1`, and records the adoption in
+the admin audit log. All existing team, revision, tier-history, pool, ranking,
+score and standings rows remain intact. New writes normalize snapshots under
+the target rules. Locking batches remaining draft tier normalization with audit
+records, and carryover uses the next Gameweek's version. Optimal-team solving
+receives explicit rules in both solver paths; persisted algorithm metadata
+includes the rule version. Historical recalculation continues to use four tiers.
+
+The legacy season tier-definition rows are retained as source provenance; they
+are not the active runtime configuration. Data verification checks historical
+source consistency and current Gameweek rule validity separately.

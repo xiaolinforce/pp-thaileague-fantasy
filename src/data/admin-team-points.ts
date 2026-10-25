@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, eq, inArray, sql } from "drizzle-orm";
 
@@ -170,7 +171,7 @@ export async function getAdminTeamPoints(teamId: string, params: AdminParams) {
       clubId: row.displayClubId,
       position: row.member
         .positionSnapshot as FantasyPointsSquadMember["position"],
-      tier: row.member.tierSnapshot,
+      tier: resolvePlayerTier(row.member.tierSnapshot, week.tierRulesVersion),
       isThai: row.member.isThaiSnapshot,
       lineupRole: row.member.lineupRole,
       benchOrder: row.member.benchOrder,

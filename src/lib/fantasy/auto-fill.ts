@@ -24,23 +24,26 @@ export type AutoFillCandidate = {
 export function classifyLikelyClubStartingGoalkeepers(
   candidates: AutoFillCandidate[],
 ) {
-  const bestGoalkeeperTierByClub = new Map<string, number>();
+  const bestByClub = new Map<string, AutoFillCandidate>();
   for (const candidate of candidates) {
     if (candidate.position !== "goalkeeper") continue;
-    bestGoalkeeperTierByClub.set(
-      candidate.clubId,
-      Math.min(
-        candidate.tier,
-        bestGoalkeeperTierByClub.get(candidate.clubId) ??
-          Number.POSITIVE_INFINITY,
-      ),
-    );
+    const best = bestByClub.get(candidate.clubId);
+    if (
+      !best ||
+      candidate.tier < best.tier ||
+      (candidate.tier === best.tier &&
+        candidate.projectedPoints > best.projectedPoints)
+    ) {
+      bestByClub.set(candidate.clubId, candidate);
+    }
   }
   return candidates.map((candidate) => ({
     ...candidate,
     isLikelyClubStartingGoalkeeper:
       candidate.position === "goalkeeper" &&
-      candidate.tier === bestGoalkeeperTierByClub.get(candidate.clubId),
+      candidate.tier === bestByClub.get(candidate.clubId)?.tier &&
+      candidate.projectedPoints ===
+        bestByClub.get(candidate.clubId)?.projectedPoints,
   }));
 }
 

@@ -537,3 +537,21 @@ Run `node --experimental-strip-types --test scripts/tests/seo.test.ts` and
 release workflow also runs the SEO unit tests. The HTTP check requires a running
 server and performs no authenticated writes. `SEO.md` owns search and measurement
 behavior.
+
+### Two-tier rule versions
+
+Migration `0023` adds `fantasy_gameweeks.tier_rules_version`. Confirm the target
+Neon branch before applying it. Existing open/planned weeks adopt the two-tier
+five-player allowance; closed weeks retain historical four-tier rules. The
+migration is compatible with the previous application and preserves all team
+and source records. Deploy the new application after the migration. Rolling
+back application code after managers save under the new rules requires a
+reviewed recovery plan because previous code enforces the old three-player cap.
+Do not rewrite or rerun historical ranking publications to convert tiers.
+
+Run `npm run db:verify:tiers -- --branch-id=<confirmed-development-branch-id>`
+for the rollback-only integration check. It exercises real candidate reads,
+a five-Level-1 save, rejection of a sixth, restoring a legacy baseline, locking,
+scoring and carryover. It rejects the production branch, temporarily extends an
+expired test deadline inside the transaction, then proves that every test write
+rolled back using a database fingerprint.

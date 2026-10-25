@@ -16,7 +16,12 @@ import {
   findOptimalTeam,
   OPTIMAL_TEAM_ALGORITHM_VERSION,
 } from "./optimal-team";
-import type { FantasyPosition } from "./rules";
+import {
+  getFantasyRules,
+  resolvePlayerTier,
+  type FantasyPosition,
+  type TierRulesVersion,
+} from "./rules";
 import { lockFantasySeason } from "./season-lock";
 
 type OptimalTeamDatabase = Pick<
@@ -125,6 +130,7 @@ export async function persistGameweekOptimalTeam({
     fantasySeasonId: string;
     status: "planned" | "open" | "locked" | "provisional" | "final";
     scoreComplete: boolean;
+    tierRulesVersion: TierRulesVersion;
   };
   playerResults: OptimalTeamPlayerResult[];
 }) {
@@ -143,12 +149,13 @@ export async function persistGameweekOptimalTeam({
         id: member.fantasyPlayerId,
         clubId: member.clubIdSnapshot,
         position: member.positionSnapshot as FantasyPosition,
-        tier: member.tierSnapshot,
+        tier: resolvePlayerTier(member.tierSnapshot, gameweek.tierRulesVersion),
         isThai: member.isThaiSnapshot,
         minutes: result?.minutes ?? 0,
         points: result?.points ?? 0,
       };
     }),
+    getFantasyRules(gameweek.tierRulesVersion),
   );
 
   if (!optimal || pool.length === 0) {
@@ -175,7 +182,7 @@ export async function persistGameweekOptimalTeam({
       countedPlayerIds: optimal.score.countedPlayerIds,
       playerPoolSize: pool.length,
       playerPoolSource: pool[0].sourceName,
-      algorithmVersion: OPTIMAL_TEAM_ALGORITHM_VERSION,
+      algorithmVersion: `${OPTIMAL_TEAM_ALGORITHM_VERSION}:${gameweek.tierRulesVersion}`,
       computedAt,
     })
     .onConflictDoUpdate({

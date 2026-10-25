@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, asc, desc, eq, inArray, lte } from "drizzle-orm";
 
@@ -134,7 +135,10 @@ export async function getFantasyAutoFillCandidates(
       id: row.fantasyPlayerId,
       clubId: row.clubId,
       position: row.position as FantasyPosition,
-      tier: tierByPlayer.get(row.fantasyPlayerId) ?? 4,
+      tier: resolvePlayerTier(
+        tierByPlayer.get(row.fantasyPlayerId),
+        gameweek.tierRulesVersion,
+      ),
       overallRank: row.overallRank,
       projectedPoints: row.projectedPoints,
       ownershipPercent: row.ownershipPercent ?? 0,

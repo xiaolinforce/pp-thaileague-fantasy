@@ -1,4 +1,8 @@
-import type { CaptainRole } from "./rules.ts";
+import {
+  resolvePlayerTier,
+  type CaptainRole,
+  type TierRulesVersion,
+} from "./rules.ts";
 import { refreshPlayerClubSnapshots } from "./player-club.ts";
 
 export type GameweekCarryoverMember = {
@@ -17,17 +21,19 @@ export function createGameweekCarryover({
   selectionId,
   members,
   currentClubs,
+  tierRulesVersion = "two-tier-v1",
 }: {
   selectionId: string;
   members: GameweekCarryoverMember[];
   currentClubs: ReadonlyMap<string, string>;
+  tierRulesVersion?: TierRulesVersion;
 }) {
   return refreshPlayerClubSnapshots(members, currentClubs).map((member) => ({
     selectionId,
     fantasyPlayerId: member.fantasyPlayerId,
     clubIdSnapshot: member.clubIdSnapshot,
     positionSnapshot: member.positionSnapshot,
-    tierSnapshot: member.tierSnapshot,
+    tierSnapshot: resolvePlayerTier(member.tierSnapshot, tierRulesVersion),
     isThaiSnapshot: member.isThaiSnapshot,
     lineupRole: member.lineupRole,
     benchOrder: member.benchOrder,

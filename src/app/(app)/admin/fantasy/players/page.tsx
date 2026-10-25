@@ -1,3 +1,4 @@
+import { getFantasyRules } from "@/lib/fantasy/rules";
 import { AdminLocalized } from "../components";
 import { AdminActionButton } from "../admin-action-button";
 import { updateFantasyPlayerClassificationAction } from "@/app/fantasy-actions";
@@ -65,7 +66,9 @@ export default async function Players({
             <span>ระดับ</span>
             <select name="level" defaultValue={data.level}>
               <option value="">ทุกระดับ</option>
-              {[1, 2, 3, 4].map((n) => (
+              {getFantasyRules(
+                data.week?.tierRulesVersion ?? "two-tier-v1",
+              ).tierSlots.map(({ level: n }) => (
                 <option key={n} value={n}>
                   L{n}
                 </option>
@@ -135,7 +138,9 @@ export default async function Players({
               <label>
                 <span>ระดับ</span>
                 <select name="level" defaultValue={data.state.tier}>
-                  {[1, 2, 3, 4].map((level) => (
+                  {getFantasyRules(
+                    data.week?.tierRulesVersion ?? "two-tier-v1",
+                  ).tierSlots.map(({ level }) => (
                     <option key={level} value={level}>
                       ระดับ {level}
                     </option>

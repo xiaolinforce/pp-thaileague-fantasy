@@ -1,28 +1,8 @@
-import { getCumulativeTierLimits } from "./rules.ts";
+import { THAI_LEAGUE_FANTASY_RULES } from "./rules.ts";
 
-export type TierQuotaMeterLevel = 1 | 2 | 3;
-
-const tierQuotaMeterLevels: readonly TierQuotaMeterLevel[] = [1, 2, 3];
-const tierQuotaMeterSize =
-  getCumulativeTierLimits().find(({ level }) => level === 3)?.limit ?? 0;
-
-export function buildTierQuotaMeter(
-  levelCounts: Readonly<Record<TierQuotaMeterLevel, number>>,
-) {
-  const dots: Array<TierQuotaMeterLevel | null> = [];
-
-  for (const level of tierQuotaMeterLevels) {
-    const availableDots = tierQuotaMeterSize - dots.length;
-    const visiblePlayers = Math.min(levelCounts[level], availableDots);
-
-    for (let index = 0; index < visiblePlayers; index += 1) {
-      dots.push(level);
-    }
-
-    if (dots.length === tierQuotaMeterSize) break;
-  }
-
-  while (dots.length < tierQuotaMeterSize) dots.push(null);
-
-  return dots;
+export function buildTierQuotaMeter(levelCounts: Readonly<Record<1, number>>) {
+  const limit = THAI_LEAGUE_FANTASY_RULES.tierSlots[0].slots;
+  return Array.from({ length: limit }, (_, index) =>
+    index < levelCounts[1] ? (1 as const) : null,
+  );
 }

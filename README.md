@@ -15,12 +15,12 @@ provisional/final Gameweek scores, and presents Classic league standings.
   settings, public rules/help, and internal Fantasy administration screens.
 - Thai source interface with an English display preference persisted per member
   account and stored on the current device for Guests.
-- Fifteen-player squads, valid FPL-style formations, tier and Thai-player
-  limits, automatic substitutions, captain/vice-captain, Triple Captain, Bench
+- Fifteen-player squads, valid FPL-style formations, two player tiers with at
+  most five Level 1 players, Thai-player limits, automatic substitutions, captain/vice-captain, Triple Captain, Bench
   Boost, Wildcard, free transfers, and transfer-point deductions capped at 12
   points per Gameweek.
 - Tier-guided squad auto-fill that completes vacant slots without changing the
-  current formation or lineup roles, targets the full tier allocation, prefers
+  current formation or lineup roles, targets five Level 1 players when feasible, prefers
   likely first-choice goalkeepers and foreign players, then randomizes among
   high-quality players from the published projection, using persisted player
   popularity as a final preference after 30 human teams are counted, while

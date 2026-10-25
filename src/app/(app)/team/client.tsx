@@ -1171,27 +1171,12 @@ export default function TeamClient({
   );
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
   const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
-  const levelTwo = squadPlayers.filter((player) => player.tier === 2).length;
-  const levelThree = squadPlayers.filter((player) => player.tier === 3).length;
-  const topTwoLevels = squadPlayers.filter((player) => player.tier <= 2).length;
-  const topThreeLevels = squadPlayers.filter(
-    (player) => player.tier <= 3,
-  ).length;
-  const tierQuotaDots = buildTierQuotaMeter({
-    1: levelOne,
-    2: levelTwo,
-    3: levelThree,
-  });
-  const isTierQuotaOver =
-    levelOne > (cumulativeTierLimits.get(1) ?? 0) ||
-    topTwoLevels > (cumulativeTierLimits.get(2) ?? 0) ||
-    topThreeLevels > (cumulativeTierLimits.get(3) ?? 0);
-  const tierQuotaSummary = translate(
-    "ใช้ระดับ 1 {level1} คน ระดับ 2 {level2} คน และระดับ 3 {level3} คน",
-  )
-    .replace("{level1}", String(levelOne))
-    .replace("{level2}", String(levelTwo))
-    .replace("{level3}", String(levelThree));
+  const tierQuotaDots = buildTierQuotaMeter({ 1: levelOne });
+  const tierOneLimit = cumulativeTierLimits.get(1) ?? 0;
+  const isTierQuotaOver = levelOne > tierOneLimit;
+  const tierQuotaSummary = translate("ระดับ 1: {count}/{limit} คน")
+    .replace("{count}", String(levelOne))
+    .replace("{limit}", String(tierOneLimit));
   const { freeTransfersRemaining, hasUnlimitedTransfers, transferPoints } =
     transferUsage;
   const isOverFreeTransferLimit = transferPoints > 0;
@@ -1749,7 +1734,7 @@ export default function TeamClient({
                 className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
               >
                 <div className="compact-tier-quota-heading">
-                  <span>{translate("โควต้านักเตะระดับ 1-3")}</span>
+                  <span>{translate("โควต้านักเตะระดับ 1")}</span>
                   <Popover>
                     <PopoverTrigger
                       className="compact-tier-quota-info"
@@ -1765,24 +1750,16 @@ export default function TeamClient({
                     >
                       <PopoverHeader>
                         <PopoverTitle>
-                          {translate("โควต้านักเตะระดับ 1-3")}
+                          {translate("โควต้านักเตะระดับ 1")}
                         </PopoverTitle>
                         <PopoverDescription>
-                          {[1, 2, 3].map((level) => (
-                            <span key={level}>
-                              {translate(
-                                level === 1
-                                  ? "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน"
-                                  : "ผู้เล่นระดับ 1–{level} รวมกันได้ไม่เกิน {count} คน",
-                              )
-                                .replace("{level}", String(level))
-                                .replace(
-                                  "{count}",
-                                  String(cumulativeTierLimits.get(level) ?? 0),
-                                )}
-                              {level < 3 && <br />}
-                            </span>
-                          ))}
+                          {translate(
+                            "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน",
+                          ).replace("{count}", String(tierOneLimit))}
+                          <br />
+                          {translate(
+                            "ระดับ 2 เติมได้จนครบทีม 15 คน ไม่จำเป็นต้องมีระดับ 1",
+                          )}
                         </PopoverDescription>
                       </PopoverHeader>
                     </PopoverContent>

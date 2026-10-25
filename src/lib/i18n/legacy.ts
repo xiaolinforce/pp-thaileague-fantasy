@@ -303,6 +303,11 @@ const translations: Record<string, string> = {
   ต้องเลือกรองกัปตันจากตัวจริงหนึ่งคน:
     "Choose exactly one vice-captain from the starting XI",
   โควต้าระดับ: "Tier Quotas",
+  โควต้านักเตะ: "Squad limits",
+  "โควต้านักเตะระดับ 1": "Level 1 allowance",
+  "ระดับ 1: {count}/{limit} คน": "Level 1: {count}/{limit} players",
+  "ระดับ 2 เติมได้จนครบทีม 15 คน ไม่จำเป็นต้องมีระดับ 1":
+    "Level 2 can fill all 15 squad places. Level 1 players are optional.",
   "โควต้านักเตะระดับ 1-3": "Player quota for Tiers 1-3",
   โควต้าตำแหน่งนักเตะ: "Position quotas",
   ดูวิธีนับโควต้าระดับ: "How tier quotas work",

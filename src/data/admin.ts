@@ -1,4 +1,5 @@
 import "server-only";
+import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
 import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { connection } from "next/server";
@@ -170,7 +171,18 @@ export async function getAdminTeam(id: string, gw: string) {
     join fantasy_players fp on fp.id = sp.fantasy_player_id join players p on p.id = fp.player_id
     where s.fantasy_team_id = ${id}::uuid and s.fantasy_gameweek_id = ${week?.id ?? null}::uuid
     order by sp.lineup_role desc, sp.bench_order nulls first, p.full_name_en`);
-  return { ...context, week, team: result.rows[0], squad: squad.rows };
+  return {
+    ...context,
+    week,
+    team: result.rows[0],
+    squad: squad.rows.map((member) => ({
+      ...member,
+      tier: resolvePlayerTier(
+        member.tier,
+        week?.tierRulesVersion ?? "two-tier-v1",
+      ),
+    })),
+  };
 }
 
 export async function getAdminPlayerState(playerId: string, weekId: string) {
@@ -198,7 +210,10 @@ export async function getAdminPlayerState(playerId: string, weekId: string) {
     .orderBy(desc(fantasyGameweeks.number));
   return {
     isThai: player.isThai,
-    tier: tiers.find((t) => t.number <= week.number)?.level ?? 4,
+    tier: resolvePlayerTier(
+      tiers.find((t) => t.number <= week.number)?.level,
+      week.tierRulesVersion,
+    ),
   };
 }
 
@@ -304,10 +319,20 @@ export async function getAdminPlayerOptions(params: AdminParams) {
       e.display_name_th club_th,e.display_name_en club_en,fp.locked_position::text position,fp.is_thai
     from fantasy_players fp join players p on p.id=fp.player_id join player_registrations r on r.player_id=p.id
     join competition_entries e on e.id=r.competition_entry_id and e.competition_season_id=${context.season.competitionSeasonId}::uuid
+    left join lateral (
+      select tier.level from fantasy_player_tiers tier
+      join fantasy_gameweeks gw on gw.id=tier.effective_gameweek_id
+      where tier.fantasy_player_id=fp.id and gw.number<=${week?.number ?? 1}
+      order by gw.number desc limit 1
+    ) latest_tier on true
     where fp.fantasy_season_id=${context.season.id}::uuid and fp.is_available and r.status='active' and e.is_active and (${query}='' or position(lower(${query}) in lower(coalesce(p.full_name_th,'')||' '||p.full_name_en))>0)
       and (${club}='' or e.club_id::text=${club})
       and (${position}='' or fp.locked_position::text=${position})
-      and (${level}='' or coalesce((select tier.level from fantasy_player_tiers tier join fantasy_gameweeks gw on gw.id=tier.effective_gameweek_id where tier.fantasy_player_id=fp.id and gw.number<=${week?.number ?? 1} order by gw.number desc limit 1),4)::text=${level})
+      and (${level}='' or (
+        case when ${week?.tierRulesVersion ?? "two-tier-v1"}='two-tier-v1'
+          then case when latest_tier.level in (3,4) then 2 else coalesce(latest_tier.level,2) end
+          else coalesce(latest_tier.level,4)
+        end)::text=${level})
     order by coalesce(p.full_name_th,p.full_name_en),fp.id`);
   const clubs = await db.execute<{ id: string; th: string; en: string }>(
     sql`select club_id id,display_name_th th,display_name_en en from competition_entries where competition_season_id=${context.season.competitionSeasonId}::uuid and is_active order by display_name_th`,
@@ -357,6 +382,11 @@ export async function getAdminAudit(params: AdminParams) {
   // internal properties to the browser. Only known correction fields are shown.
   const allowed = new Set([
     "level",
+    "tierSnapshot",
+    "tierRulesVersion",
+    "tierSlots",
+    "gameweek",
+    "gameweekId",
     "isThai",
     "effectiveGameweekId",
     "minutes",

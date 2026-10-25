@@ -87,10 +87,8 @@ export const THAI_LEAGUE_FANTASY_RULES: FantasyRules = {
   sameClubLimit: 3,
   foreignPlayerLimit: 7,
   tierSlots: [
-    { level: 1, slots: 3 },
-    { level: 2, slots: 3 },
-    { level: 3, slots: 6 },
-    { level: 4, slots: 3 },
+    { level: 1, slots: 5 },
+    { level: 2, slots: 10 },
   ],
   weeklyFreeTransfers: 2,
   maximumFreeTransfers: 4,
@@ -99,6 +97,35 @@ export const THAI_LEAGUE_FANTASY_RULES: FantasyRules = {
   chipUsesPerSeason: 2,
   wildcardStartGameweek: 2,
 };
+
+export type TierRulesVersion = "four-tier-v1" | "two-tier-v1";
+
+export const LEGACY_FANTASY_RULES: FantasyRules = {
+  ...THAI_LEAGUE_FANTASY_RULES,
+  tierSlots: [
+    { level: 1, slots: 3 },
+    { level: 2, slots: 3 },
+    { level: 3, slots: 6 },
+    { level: 4, slots: 3 },
+  ],
+};
+
+export function getFantasyRules(version: TierRulesVersion) {
+  if (version === "four-tier-v1") return LEGACY_FANTASY_RULES;
+  if (version === "two-tier-v1") return THAI_LEAGUE_FANTASY_RULES;
+  throw new Error(`Unknown Fantasy tier rules: ${version}`);
+}
+
+// Old classifications and revision snapshots remain immutable. Interpret them
+// through the target Gameweek's rules, including when restoring an old baseline.
+export function resolvePlayerTier(
+  tier: number | undefined,
+  version: TierRulesVersion = "two-tier-v1",
+) {
+  const rules = getFantasyRules(version);
+  const value = tier ?? rules.tierSlots.at(-1)!.level;
+  return version === "two-tier-v1" && (value === 3 || value === 4) ? 2 : value;
+}
 
 export function getCumulativeTierLimits(
   rules: Pick<FantasyRules, "tierSlots"> = THAI_LEAGUE_FANTASY_RULES,

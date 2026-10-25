@@ -18,7 +18,7 @@ function completeSquad(): GameweekCarryoverMember[] {
           : index < 12
             ? "midfielder"
             : "forward",
-    tierSnapshot: (index % 4) + 1,
+    tierSnapshot: index < 5 ? 1 : 2,
     isThaiSnapshot: index % 3 !== 0,
     lineupRole: index < 11 ? "starter" : "bench",
     benchOrder: index < 11 ? null : index - 11,
@@ -84,4 +84,33 @@ test("refreshes moved clubs without changing choices, roles or classifications",
   assert.equal(source[2].clubIdSnapshot, "club-3");
   assert.equal(copied[2].captainRole, "captain");
   assert.equal(copied.length, source.length);
+});
+
+test("normalizes legacy tiers for new carryover without rewriting the source", () => {
+  const source = completeSquad().map((p, index) => ({
+    ...p,
+    tierSnapshot: (index % 4) + 1,
+  }));
+  const before = JSON.stringify(source);
+  const current = createGameweekCarryover({
+    selectionId: "new",
+    members: source,
+    currentClubs: new Map(),
+    tierRulesVersion: "two-tier-v1",
+  });
+  assert.deepEqual(
+    current.map((p) => p.tierSnapshot),
+    source.map((p) => (p.tierSnapshot === 1 ? 1 : 2)),
+  );
+  const legacy = createGameweekCarryover({
+    selectionId: "old",
+    members: source,
+    currentClubs: new Map(),
+    tierRulesVersion: "four-tier-v1",
+  });
+  assert.deepEqual(
+    legacy.map((p) => p.tierSnapshot),
+    source.map((p) => p.tierSnapshot),
+  );
+  assert.equal(JSON.stringify(source), before);
 });

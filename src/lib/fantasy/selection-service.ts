@@ -23,6 +23,9 @@ import {
   isTeamOpeningGameweek,
   settleTransfers,
   THAI_LEAGUE_FANTASY_RULES,
+  getFantasyRules,
+  resolvePlayerTier,
+  type TierRulesVersion,
   validateChipUse,
   validateLineup,
   validateTransferLimit,
@@ -158,7 +161,10 @@ export async function saveFantasySelectionInTransaction(
       },
     ];
   });
-  const violations = validateLineup(lineup);
+  const violations = validateLineup(
+    lineup,
+    getFantasyRules(gameweek.tierRulesVersion),
+  );
   if (violations.length > 0) {
     return {
       ok: false,
@@ -457,7 +463,12 @@ export async function revertFantasySelectionInTransaction(
     : null;
   const baselineMembers = openingGameweek
     ? []
-    : restoreBaselineMembers(baseline, selection.id, season.id);
+    : restoreBaselineMembers(
+        baseline,
+        selection.id,
+        season.id,
+        gameweek.tierRulesVersion,
+      );
   if (baselineMembers === null) {
     return {
       ok: false,
@@ -579,6 +590,7 @@ function restoreBaselineMembers(
   baseline: typeof fantasyTransferRevisions.$inferSelect | null,
   selectionId: string,
   fantasySeasonId: string,
+  tierRulesVersion: TierRulesVersion,
 ): Array<
   FantasySelectionInput["members"][number] & {
     selectionId: string;
@@ -635,7 +647,10 @@ function restoreBaselineMembers(
       fantasySeasonId,
       clubIdSnapshot: snapshot.clubIdSnapshot,
       positionSnapshot: snapshot.positionSnapshot as FantasyPosition,
-      tierSnapshot: snapshot.tierSnapshot as number,
+      tierSnapshot: resolvePlayerTier(
+        snapshot.tierSnapshot as number,
+        tierRulesVersion,
+      ),
       isThaiSnapshot: snapshot.isThaiSnapshot,
     });
   }
@@ -651,6 +666,7 @@ function restoreBaselineMembers(
       benchOrder: member.benchOrder,
       captainRole: member.captainRole,
     })),
+    getFantasyRules(tierRulesVersion),
   );
   return violations.length === 0 ? restored : null;
 }
@@ -753,7 +769,10 @@ async function getCurrentPlayerSnapshots(
           fantasyPlayerId: row.fantasyPlayer.id,
           clubId: row.entry.clubId,
           position: row.fantasyPlayer.lockedPosition as FantasyPosition,
-          tier: tierByPlayer.get(row.fantasyPlayer.id) ?? 4,
+          tier: resolvePlayerTier(
+            tierByPlayer.get(row.fantasyPlayer.id),
+            gameweek.tierRulesVersion,
+          ),
           isThai: row.fantasyPlayer.isThai,
         },
       ]),
