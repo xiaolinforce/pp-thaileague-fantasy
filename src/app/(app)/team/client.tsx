@@ -93,7 +93,6 @@ import {
   type RuleViolation,
 } from "@/lib/fantasy/rules";
 import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
-import { TierReliefNotice } from "@/components/fantasy/tier-relief-notice";
 import { getChipOptionState } from "@/lib/fantasy/chip-state";
 import {
   captureSavedDraftPlayers,
@@ -1777,13 +1776,9 @@ export default function TeamClient({
                       </PopoverHeader>
                     </PopoverContent>
                   </Popover>
-                  {isTierQuotaOver && (
+                  {isTierQuotaOver && !fantasy.selection.tierRelief && (
                     <strong className="compact-tier-quota-warning">
-                      {translate(
-                        fantasy.selection.tierRelief
-                          ? "ผ่อนผันจากการปรับระดับ"
-                          : "เกินโควต้า",
-                      )}
+                      {translate("เกินโควต้า")}
                     </strong>
                   )}
                 </div>
@@ -1886,12 +1881,13 @@ export default function TeamClient({
                 </SelectContent>
               </Select>
             </div>
-            {fantasy.selection.tierRelief && (
-              <TierReliefNotice
-                count={levelOne}
-                pending={hasUnsavedChanges}
-                incomplete={hasVacancies}
-              />
+            {fantasy.selection.tierRelief && isTierQuotaOver && (
+              <div className="squad-validation-alert" role="status">
+                <TriangleAlert size={18} aria-hidden="true" />
+                <span>
+                  {translate("คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้")}
+                </span>
+              </div>
             )}
             {hasClientValidationErrors && (
               <>

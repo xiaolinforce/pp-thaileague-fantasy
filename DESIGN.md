@@ -349,7 +349,11 @@ confirmed member/league operations.
 
 Current Team and market views show only Levels 1–2. Show the Level 1 allowance
 as five circles, with the numeric count available only to screen readers and a
-visible textual overflow warning. Level 2 can occupy all remaining places, including
+visible textual overflow warning. For tier-change relief, omit the quota badge
+and visible numeric caption; show only “คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้”
+in the standard squad validation alert while the draft exceeds five Level 1
+players. The warning is informational and does not block a valid relief save.
+Level 2 can occupy all remaining places, including
 all 15 when no Level 1 players are selected. Market filters select exact Level
 1 or Level 2. Historical Points and admin Gameweek views retain the original
 tier labels when displaying a four-tier Gameweek.

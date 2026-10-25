@@ -370,6 +370,8 @@ const translations: Record<string, string> = {
     "Buy 15 players from the Player Market, then choose your starting XI",
   โควต้าผ่าน: "Quotas valid",
   เกินโควต้า: "Over quota",
+  "คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้":
+    "You cannot add any more Level 1 players to your squad",
   ผ่อนผันจากการปรับระดับ: "Tier-change allowance",
   "ระดับ 1: {count}/5 คน · ผ่อนผันจากการปรับระดับ":
     "Level 1: {count}/5 · Tier-change allowance",

@@ -565,13 +565,9 @@ export default function TransfersClient({
                   </PopoverHeader>
                 </PopoverContent>
               </Popover>
-              {isTierQuotaOver && (
+              {isTierQuotaOver && !fantasy.selection.tierRelief && (
                 <strong className="compact-tier-quota-warning">
-                  {translate(
-                    fantasy.selection.tierRelief
-                      ? "ผ่อนผันจากการปรับระดับ"
-                      : "เกินโควต้า",
-                  )}
+                  {translate("เกินโควต้า")}
                 </strong>
               )}
             </div>
@@ -594,12 +590,6 @@ export default function TransfersClient({
                 ))}
               </span>
             </div>
-            <p className="tier-quota-visible-count">
-              {tierQuotaSummary}
-              {isTierQuotaOver
-                ? ` · ${translate("เกิน {count} คน").replace("{count}", String(levelOne - tierOneLimit))}`
-                : ""}
-            </p>
           </div>
           <Dialog>
             <DialogTrigger className="compact-market-filter-dialog-trigger">

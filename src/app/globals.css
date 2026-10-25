@@ -2,38 +2,6 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-.tier-relief-notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  padding: 0.85rem;
-  margin-block: 0.75rem;
-  border: 1px solid var(--orange);
-  border-radius: 0.65rem;
-  background: var(--orange-soft);
-  color: var(--orange-deep);
-  font-size: 0.85rem;
-  line-height: 1.6;
-}
-.tier-relief-notice > svg {
-  flex-shrink: 0;
-  margin-top: 0.2rem;
-}
-.tier-relief-notice p {
-  margin-block: 0.35rem;
-}
-.tier-relief-notice small {
-  display: block;
-}
-.tier-relief-notice summary {
-  cursor: pointer;
-  text-decoration: underline;
-}
-.tier-quota-visible-count {
-  margin-top: 0.35rem;
-  font-size: 0.8rem;
-  text-align: center;
-}
 .transfer-player-action[aria-disabled="true"] {
   opacity: 0.45;
   cursor: not-allowed;
