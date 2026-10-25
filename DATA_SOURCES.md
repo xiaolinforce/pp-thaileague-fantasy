@@ -13,9 +13,13 @@ interpretation, with new classifications restricted to that version's levels.
 
 The migration was applied to confirmed development branch
 `br-broad-recipe-azz9hbkx`; GW3 is its open test Gameweek and GW1–2 retain
-historical rules. The new development migration journal checksum needs an
-owner-approved CRLF/LF metadata reconciliation before guarded release checks
-can pass. Production rollout remains pending. See `DOMAIN.md` for the
+historical rules. On 2026-10-26, explicit owner approval authorized reconciling
+only migration `0023`'s development journal checksum from the CRLF-file hash to
+the reviewed canonical LF hash. Its ID, timestamp, SQL and schema were unchanged.
+The transaction recorded audit `6cf84a88-7530-4590-9aa8-e49448e6a444`; counts and
+hashes matched across 15 protected Fantasy tables before and after the repair.
+Guarded migration verification passed with 24 applied and zero pending
+migrations. Production rollout remains pending. See `DOMAIN.md` for the
 runtime contract and `UI_REVIEW.md` for verification evidence.
 
 ## Policy

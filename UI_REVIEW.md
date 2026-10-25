@@ -93,11 +93,13 @@ change does not claim that every state has fresh screenshot evidence.
   rendering was not exercised with this Guest session. The broad
   `db:verify:fantasy` command still reports pre-existing optimal-team issues
   (`scored_gameweeks_missing_result=1`, `mismatched_statuses=1`); the matching
-  hashes show those result rows were unchanged. The newly applied development
-  migration journal contains the CRLF-file checksum rather than the canonical
-  LF checksum used by release tooling; reconciling that one metadata row is
-  awaiting owner approval under the migration-history rule. SQL semantics and
-  protected data are unchanged. Production deployment and migration remain pending.
+  hashes show those result rows were unchanged. On 2026-10-26, explicit owner
+  approval authorized reconciling migration `0023`'s development journal
+  checksum from CRLF to canonical LF. Exactly one metadata row changed, with
+  audit `6cf84a88-7530-4590-9aa8-e49448e6a444`. Migration identity, timestamp,
+  SQL, schema and the hashes of 15 protected Fantasy tables were unchanged.
+  Guarded migration verification passed: 24 applied, zero pending. Production
+  deployment and migration remain pending.
 
 ### 2026-10-09 Points transfer deduction
 
