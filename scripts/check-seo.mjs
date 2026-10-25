@@ -39,6 +39,29 @@ for (const path of paths) {
   console.log(`PASS public ${path}`);
 }
 assert.equal(new Set(titles).size, paths.length);
+for (const language of ["th", "en"]) {
+  const response = await fetch(origin, {
+    headers: { Cookie: `thai-fantasy-language=${language}` },
+    signal: AbortSignal.timeout(60000),
+  });
+  assert.equal(response.status, 200, `home ${language}`);
+  const html = await response.text();
+  assert.match(html, new RegExp(`<html[^>]+lang="${language}"`));
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)?.[1];
+  assert.ok(main, `home ${language}: server-rendered content`);
+  const heading = main.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1];
+  assert.ok(heading?.trim(), `home ${language}: server-rendered heading`);
+  if (language === "en") {
+    assert.doesNotMatch(
+      main.replace(/<[^>]*>/g, ""),
+      /[\u0E00-\u0E7F]/u,
+      "English home content must not wait for hydration to translate",
+    );
+  } else {
+    assert.match(heading, /[\u0E00-\u0E7F]/u, "Thai home heading");
+  }
+  console.log(`PASS home ${language} is localized before hydration`);
+}
 const retiredGuide = await fetch(origin + "/how-to-play", {
   redirect: "manual",
 });

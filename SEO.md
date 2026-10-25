@@ -31,6 +31,12 @@ canonical URLs, without invented last-modified timestamps. Query parameters
 do not enter canonicals. Internal public links are visible in the rendered
 HTML. The signed-in home redirect and shared account shell are retained.
 
+The anonymous homepage renders its initial copy in the language selected by
+the `thai-fantasy-language` cookie, including its heading and login choices.
+English must not depend on hydration to replace Thai text. The HTTP SEO check
+requests both language variants and checks the initial HTML. This does not
+introduce separate language URLs or change the Thai-first indexing strategy.
+
 Public fixtures reuse the server-only, five-minute cached fixture read model;
 no manager, account or private league data is passed to the page. Its fixture
 browser is shared with `/fixtures`, starts at the current Gameweek, and renders
@@ -68,6 +74,23 @@ detail paths are grouped. Auth, unsubscribe and admin routes are excluded.
 Google Signals and advertising personalisation are disabled. Cookies expire
 after 90 days and may renew on activity. GA4's own retention settings govern
 received data; withdrawing consent does not delete historical measurements.
+
+The Google tag's **List unwanted referrals** setting excludes the exact domain
+`accounts.google.com` (saved and reopened for verification on 2026-10-26).
+Google Login returns should not introduce that domain as a new acquisition
+source. Do not exclude all of `google.com`, which would suppress useful traffic
+attribution. This does not rewrite historical data; earlier attribution can
+continue to affect returning users within the lookback window. See
+[Google's unwanted-referral guidance](https://support.google.com/analytics/answer/10327750).
+
+Tag diagnostics on October 26 also showed **0% consent rate detected in some
+regions**, explicitly describing an effect on ads measurement/personalization.
+The implementation grants `analytics_storage` only after analytics consent and
+keeps `ad_storage`, `ad_user_data` and `ad_personalization` denied. That is
+consistent with the product's no-advertising measurement policy; the warning
+alone is not evidence of broken GA4 collection (the stream reported traffic
+within the past 48 hours). Do not enable advertising consent to clear it.
+Verify a consented visitor's signals if Analytics receipt later stops.
 
 | Event               | Trigger                                                                                                                                                                         |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -136,3 +159,46 @@ CSS pitch background as LCP and the Guest button's white-on-orange contrast.
 The follow-up preloads that existing image at high priority and uses the existing
 accessible orange action tokens. These lab values are a dated baseline, not a
 ranking guarantee or a real-user Core Web Vitals result.
+
+## Maintenance evidence (2026-10-26, Bangkok)
+
+Production HTTP review on October 25 passed the six current public routes,
+canonical/indexing directives, private noindex headers, robots, sitemap and
+the retired `/how-to-play` redirect. Search Console reported a successful
+sitemap fetch on October 22 with six discovered URLs, and no manual actions
+or security issues. Its aggregate indexing report was dated October 16:
+one indexed URL and five discovered but not indexed. Treat that report as
+lagged data, not a current crawl failure.
+
+On October 26, individual inspections showed both `/rules` and
+`/thai-league/2026-27/fixtures` as discovered but not indexed. Google accepted
+an indexing request for each URL and displayed **Indexing requested**. An
+initial reCAPTCHA connectivity error cleared after reloading. Acceptance adds
+the URLs to Google's crawl queue; it is not confirmation of indexing.
+Follow-up checks are scheduled in this chat for November 2 and 9 at 10:00
+Bangkok, with notifications for actionable changes or required user input.
+
+The homepage localization fix is verified locally, pending deployment. The
+HTTP check on the existing local development server passed public/private
+routes, both language variants, redirect, sitemap and robots. Targeted SEO
+and localization tests passed, along with lint and formatting of changed code.
+
+[Production PageSpeed report, October 26 at 00:11 Bangkok](https://pagespeed.web.dev/analysis/https-fantasy-ppfootball-net/zcqz28c1kk?form_factor=mobile):
+
+| Metric                               | Mobile          | Desktop         |
+| ------------------------------------ | --------------- | --------------- |
+| Performance                          | 87              | 98              |
+| Accessibility / Best Practices / SEO | 100 / 100 / 100 | 100 / 100 / 100 |
+| FCP                                  | 1.1 s           | 0.3 s           |
+| LCP                                  | 3.8 s           | 0.8 s           |
+| TBT                                  | 100 ms          | 100 ms          |
+| CLS                                  | 0               | 0               |
+
+CrUX still returned **No Data**, so field Core Web Vitals cannot be assessed.
+These lab scores describe production before this local change. The mobile LCP
+element is `section.onboarding-hero`; render-blocking CSS totals about 51 KiB,
+with an estimated 910 ms saving. The report also estimates 109 KiB of unused
+JavaScript and 15 KiB of unused CSS. A future performance change should profile
+the homepage's shared CSS and client dependencies, then compare repeated
+production-build measurements. Do not remove shared styles or framework code
+solely from Lighthouse's unused-byte estimate.

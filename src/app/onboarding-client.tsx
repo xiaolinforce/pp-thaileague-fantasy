@@ -109,7 +109,7 @@ export default function OnboardingClient({
     });
   const router = useRouter();
   const setIdentity = useSetAppIdentity();
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, translate } = useLanguage();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
@@ -523,13 +523,17 @@ export default function OnboardingClient({
           </button>
 
           <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
-          <h1>จัดทีมไทยลีกของคุณ</h1>
-          <p>เลือกนักเตะไทยลีก 15 คน ลุ้นคะแนนจากผลงานจริง และแข่งกับเพื่อน</p>
+          <h1>{translate("จัดทีมไทยลีกของคุณ")}</h1>
+          <p>
+            {translate(
+              "เลือกนักเตะไทยลีก 15 คน ลุ้นคะแนนจากผลงานจริง และแข่งกับเพื่อน",
+            )}
+          </p>
         </section>
 
         <section className="onboarding-panel" aria-labelledby="start-title">
           <h2 id="start-title" className="sr-only">
-            เลือกวิธีเริ่มเล่น
+            {translate("เลือกวิธีเริ่มเล่น")}
           </h2>
 
           <div
@@ -553,9 +557,11 @@ export default function OnboardingClient({
                   ) : (
                     <UserRound aria-hidden="true" />
                   )}
-                  {busyAction === "guest"
-                    ? "กำลังเริ่มโหมด Guest…"
-                    : "ทดลองเล่นแบบไม่สมัครสมาชิก"}
+                  {translate(
+                    busyAction === "guest"
+                      ? "กำลังเริ่มโหมด Guest…"
+                      : "ทดลองเล่นแบบไม่สมัครสมาชิก",
+                  )}
                 </button>
 
                 {googleEnabled && (
@@ -578,9 +584,11 @@ export default function OnboardingClient({
                         unoptimized
                       />
                     )}
-                    {busyAction === "google"
-                      ? "กำลังเปิด Google…"
-                      : "เข้าสู่ระบบหรือสมัครด้วย GOOGLE"}
+                    {translate(
+                      busyAction === "google"
+                        ? "กำลังเปิด Google…"
+                        : "เข้าสู่ระบบหรือสมัครด้วย GOOGLE",
+                    )}
                   </button>
                 )}
 
@@ -595,15 +603,16 @@ export default function OnboardingClient({
                     }
                   >
                     <Mail aria-hidden="true" />
-                    เข้าสู่ระบบหรือสมัครด้วย EMAIL
+                    {translate("เข้าสู่ระบบหรือสมัครด้วย EMAIL")}
                   </button>
                 )}
 
                 {emailStatus}
                 {!emailEnabled && !googleEnabled && (
                   <p className="auth-unavailable">
-                    การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้
-                    แต่ยังทดลองเล่นแบบ Guest ได้
+                    {translate(
+                      "การเข้าสู่ระบบสมาชิกยังไม่เปิดใน environment นี้ แต่ยังทดลองเล่นแบบ Guest ได้",
+                    )}
                   </p>
                 )}
               </div>
