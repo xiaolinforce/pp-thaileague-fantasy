@@ -1,5 +1,60 @@
 # Data sources
 
+## Production two-tier performance review (2026-10-26)
+
+The owner explicitly authorized reclassifying every player in production with
+approximately 5% of the current market at Level 1. The target was confirmed as
+`br-floral-silence-azzesg4n`, database `neondb`, with 24 applied migrations and
+GW7 open under `two-tier-v1`. The transaction committed at
+`2026-10-25T17:37:17.480295Z` (26 October, Bangkok), effective from GW7.
+
+All 730 season players received a new effective-tier row: 33 Level 1 and 697
+Level 2. Of the 651 available, active players with a current active season
+registration, 33 are Level 1 (5.07%) and 618 are Level 2; the 79 unavailable or
+unregistered identities are Level 2. Within the market, six previous Level 1
+players remain, 27 rise to Level 1, and 13 move to Level 2. No position or club
+quota was imposed on the classification: Level 1 contains five goalkeepers,
+seven defenders, ten midfielders and eleven forwards.
+
+The review used persisted GW1–6 Fantasy points and minutes, with GW6 final.
+Its ranking score is 70% of GW1–6 points divided by six, 20% of the latest
+published preseason projected points divided by 30, and 10% of GW4–6 points
+divided by three. Missing preseason projections use the positional median
+among players with at least 270 current-season minutes and a projection.
+Level 1 requires at least 180 minutes overall and 90 minutes in GW4–6; the
+highest 33 eligible scores qualify, breaking ties by minutes and then player
+ID. Preseason projections are estimates, not actual historical points. This
+is a six-game assessment, not a guarantee of future performance.
+
+Audit `99473d43-320c-4bf8-ad5a-1405f3eef88c` retains the complete 730-player
+decision list, metrics, model configuration, source fingerprint, changed
+draft rows, affected teams, and protected-table fingerprints. Source rows,
+published rankings, GW1–6 tiers, locked snapshots, all transfer revisions,
+scores and standings were preserved. The season lock was acquired before the
+GW7 lock, and branch, deadline, source freshness and absence of future tier
+rows were asserted. A rollback rehearsal completed first and its zero
+persisted tier/audit rows were verified. Counts and hashes across 19 protected
+table views matched before and after the committed transaction.
+
+The operation refreshed 2,168 GW7 draft member tier snapshots without changing
+player choices, captaincy, bench order, nationality or transfer charges.
+**23 existing GW7 squads now exceed the five-Level-1 limit (22 human teams and
+one bot).** Their managers must rebalance before the 30 October 17:30 Bangkok
+deadline. This is an outstanding quota violation, not a passed full Fantasy
+integrity check; no players were automatically replaced and no free transfers
+or wildcard allowances were granted. The owner was informed, including that
+ItsMePP now has eight Level 1 players.
+
+Development `db:verify:tiers` passed its save, sixth-player rejection, legacy
+restore, lock and carryover scenarios and rolled back all test changes on
+`br-broad-recipe-azz9hbkx`. Production readback verified all 730 classifications,
+zero draft-tier mismatches, valid rule versions and fixture/club counts. The
+production `/team` Level 1 filter displayed exactly 33 players and the existing
+quota warning correctly blocked saving the over-quota owner squad. The full
+production verifier was not reported as passing: its two-tier squad check
+reports the 23 outstanding violations above. Temporary review payloads and
+maintenance SQL were kept outside the repository and removed after verification.
+
 ## Two-tier interpretation (2026-10-25)
 
 The owner approved keeping former Level 1 as Level 1, combining former Levels
@@ -19,8 +74,9 @@ the reviewed canonical LF hash. Its ID, timestamp, SQL and schema were unchanged
 The transaction recorded audit `6cf84a88-7530-4590-9aa8-e49448e6a444`; counts and
 hashes matched across 15 protected Fantasy tables before and after the repair.
 Guarded migration verification passed with 24 applied and zero pending
-migrations. Production rollout remains pending. See `DOMAIN.md` for the
-runtime contract and `UI_REVIEW.md` for verification evidence.
+migrations. A subsequent production check on 2026-10-26 confirmed 24 applied
+migrations, historical rules on GW1–6, and two-tier rules on GW7–30. See
+`DOMAIN.md` for the runtime contract and `UI_REVIEW.md` for verification evidence.
 
 ## Policy
 
