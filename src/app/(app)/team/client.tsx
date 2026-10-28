@@ -1887,6 +1887,31 @@ export default function TeamClient({
                 <span>
                   {translate("คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้")}
                 </span>
+                <Popover>
+                  <PopoverTrigger
+                    className="compact-tier-quota-info squad-tier-relief-info"
+                    aria-label={translate("ดูรายละเอียดข้อจำกัดนักเตะระดับ 1")}
+                  >
+                    <CircleHelp size={18} aria-hidden="true" />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="compact-tier-quota-popover"
+                    align="end"
+                    side="bottom"
+                    sideOffset={7}
+                  >
+                    <PopoverHeader>
+                      <PopoverTitle>
+                        {translate("ข้อจำกัดนักเตะระดับ 1")}
+                      </PopoverTitle>
+                      <PopoverDescription>
+                        {translate(
+                          "ระบบได้มีการเปลี่ยนแปลงระดับนักเตะ ทำให้ทีมของคุณมีนักเตะเกินโควต้าระดับ คุณไม่สามารถนำนักเตะระดับ 1 เข้าทีมเพิ่มเติมจนกว่าทีมคุณจะกลับมามีจำนวนนักเตะไม่เกินโควต้า คุณน่าจะพยายามผ่องถ่ายนักเตะระดับ 1 ออกจากทีมบ้างเพื่อเคลียร์ข้อจำกัดนี้ หรือคุณจะคงนักเตะระดับ 1 ที่มีอยู่แล้วไว้ในทีมต่อไปก็ได้",
+                        )}
+                      </PopoverDescription>
+                    </PopoverHeader>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
             {hasClientValidationErrors && (

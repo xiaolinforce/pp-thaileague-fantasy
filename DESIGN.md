@@ -353,6 +353,10 @@ visible textual overflow warning. For tier-change relief, omit the quota badge
 and visible numeric caption; show only “คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้”
 in the standard squad validation alert while the draft exceeds five Level 1
 players. The warning is informational and does not block a valid relief save.
+Place a question-mark button at the right edge of this alert. It opens the
+existing click-triggered popover with the tier-change explanation and the
+choice to reduce the Level 1 count or retain the existing players, in Thai
+and English.
 Level 2 can occupy all remaining places, including
 all 15 when no Level 1 players are selected. Market filters select exact Level
 1 or Level 2. Historical Points and admin Gameweek views retain the original

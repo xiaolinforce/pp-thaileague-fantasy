@@ -372,6 +372,10 @@ const translations: Record<string, string> = {
   เกินโควต้า: "Over quota",
   "คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้":
     "You cannot add any more Level 1 players to your squad",
+  "ดูรายละเอียดข้อจำกัดนักเตะระดับ 1": "About the Level 1 transfer restriction",
+  "ข้อจำกัดนักเตะระดับ 1": "Level 1 transfer restriction",
+  "ระบบได้มีการเปลี่ยนแปลงระดับนักเตะ ทำให้ทีมของคุณมีนักเตะเกินโควต้าระดับ คุณไม่สามารถนำนักเตะระดับ 1 เข้าทีมเพิ่มเติมจนกว่าทีมคุณจะกลับมามีจำนวนนักเตะไม่เกินโควต้า คุณน่าจะพยายามผ่องถ่ายนักเตะระดับ 1 ออกจากทีมบ้างเพื่อเคลียร์ข้อจำกัดนี้ หรือคุณจะคงนักเตะระดับ 1 ที่มีอยู่แล้วไว้ในทีมต่อไปก็ได้":
+    "Player levels have changed, putting your squad over the tier quota. You cannot bring in additional Level 1 players until your squad is back within the quota. Consider transferring some Level 1 players out to clear this restriction, or you can keep the Level 1 players already in your squad.",
   ผ่อนผันจากการปรับระดับ: "Tier-change allowance",
   "ระดับ 1: {count}/5 คน · ผ่อนผันจากการปรับระดับ":
     "Level 1: {count}/5 · Tier-change allowance",

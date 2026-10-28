@@ -3744,6 +3744,10 @@ textarea:focus-visible {
   flex: 0 0 auto;
 }
 
+.squad-tier-relief-info {
+  margin-left: auto;
+}
+
 .squad-validation-alert + .squad-validation-alert {
   margin-top: 8px;
 }
