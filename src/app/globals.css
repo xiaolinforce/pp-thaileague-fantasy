@@ -9318,6 +9318,11 @@ body {
     margin-bottom: 10px;
   }
 
+  .compact-market-filter-dialog .compact-market-reset-filters,
+  .compact-market-filter-dialog-footer > button {
+    margin-top: 8px;
+  }
+
   .compact-market-filter-dialog .compact-market-reset-filters {
     justify-self: start;
   }
