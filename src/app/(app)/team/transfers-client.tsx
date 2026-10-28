@@ -2,13 +2,14 @@
 
 import {
   ArrowDownUp,
+  Check,
   CircleHelp,
   Plus,
   Search,
   UserRound,
   X,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useState, type ReactNode } from "react";
 
 import { ClubColor } from "@/components/fantasy/club-colors";
 import {
@@ -117,6 +118,7 @@ export default function TransfersClient({
   onPositionChange: (position: string) => void;
 }) {
   const { language, translate } = useLanguage();
+  const filterGroupId = useId();
   const [query, setQuery] = useState("");
   const [clubId, setClubId] = useState("all");
   const [tier, setTier] = useState("all");
@@ -299,7 +301,46 @@ export default function TransfersClient({
     setSort("points");
   }
 
-  const renderMarketFilters = () => (
+  const renderFilterOptions = (
+    group: string,
+    legend: string,
+    value: string,
+    onChange: (value: string) => void,
+    options: { value: string; label: string; content: ReactNode }[],
+  ) => (
+    <fieldset
+      className={`compact-market-filter-options compact-market-filter-options--${group}`}
+    >
+      <legend>{translate(legend)}</legend>
+      <div className="compact-market-filter-option-grid">
+        {options.map((option) => (
+          <label
+            className="compact-market-filter-option"
+            key={option.value}
+            title={option.label}
+          >
+            <input
+              className="sr-only"
+              type="radio"
+              name={`${filterGroupId}-${group}`}
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => onChange(option.value)}
+              aria-label={option.label}
+            />
+            {option.content}
+            <Check
+              className="compact-market-filter-option-check"
+              size={10}
+              aria-hidden="true"
+            />
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+
+  const renderMarketFilters = (isDialog = false) => (
     <div className="compact-market-toolbar">
       <div className="compact-market-primary-filters">
         <label className="search-field compact-market-search">
@@ -321,6 +362,11 @@ export default function TransfersClient({
             </button>
           )}
         </label>
+        {isDialog && (
+          <span className="compact-market-filter-label">
+            {translate("สโมสร")}
+          </span>
+        )}
         <Select
           value={clubId}
           onValueChange={(value) => value && setClubId(String(value))}
@@ -351,6 +397,111 @@ export default function TransfersClient({
           </SelectContent>
         </Select>
       </div>
+      {isDialog && (
+        <div className="compact-market-direct-filters">
+          {renderFilterOptions(
+            "position",
+            "ตำแหน่ง",
+            position,
+            onPositionChange,
+            [
+              {
+                value: "ALL",
+                label: translate("ทุกตำแหน่ง"),
+                content: (
+                  <span className="position-badge position-all">ALL</span>
+                ),
+              },
+              ...(["GK", "DEF", "MID", "FWD"] as const).map(
+                (filterPosition) => ({
+                  value: filterPosition,
+                  label: getLocalizedPositionLabel(filterPosition, language),
+                  content: <PositionBadge position={filterPosition} />,
+                }),
+              ),
+            ],
+          )}
+          {renderFilterOptions(
+            "nationality",
+            "สัญชาติ",
+            nationality,
+            setNationality,
+            [
+              {
+                value: "all",
+                label: translate("ทุกสัญชาติ"),
+                content: (
+                  <>
+                    <span
+                      className="market-select-dot market-select-dot--all"
+                      aria-hidden="true"
+                    />
+                    {translate("ทั้งหมด")}
+                  </>
+                ),
+              },
+              {
+                value: "thai",
+                label: translate("นักเตะไทย"),
+                content: (
+                  <>
+                    <span
+                      className="market-select-nationality-badge market-select-nationality-badge--thai"
+                      aria-hidden="true"
+                    />
+                    {translate("ไทย")}
+                  </>
+                ),
+              },
+              {
+                value: "foreign",
+                label: translate("นักเตะต่างชาติ"),
+                content: (
+                  <>
+                    <span
+                      className="market-select-nationality-badge market-select-nationality-badge--foreign"
+                      aria-hidden="true"
+                    >
+                      F
+                    </span>
+                    {translate("ต่างชาติ")}
+                  </>
+                ),
+              },
+            ],
+          )}
+          {renderFilterOptions("tier", "ระดับ", tier, setTier, [
+            {
+              value: "all",
+              label: translate("ทุกระดับ"),
+              content: (
+                <>
+                  <span
+                    className="market-select-dot market-select-dot--all"
+                    aria-hidden="true"
+                  />
+                  {translate("ทั้งหมด")}
+                </>
+              ),
+            },
+            ...([1, 2] as const).map((filterTier) => ({
+              value: String(filterTier),
+              label: translate(filterTier === 1 ? "ระดับ 1" : "ระดับ 2"),
+              content: (
+                <>
+                  <span
+                    className={`market-select-tier-badge market-select-tier-badge--${filterTier}`}
+                    aria-hidden="true"
+                  >
+                    {filterTier}
+                  </span>
+                  {translate(filterTier === 1 ? "ระดับ 1" : "ระดับ 2")}
+                </>
+              ),
+            })),
+          ])}
+        </div>
+      )}
       <div className="compact-position-nationality-filters">
         <Select
           value={position}
@@ -415,7 +566,10 @@ export default function TransfersClient({
           value={tier}
           onValueChange={(value) => value && setTier(String(value))}
         >
-          <SelectTrigger aria-label="กรองระดับ">
+          <SelectTrigger
+            className="compact-market-tier-dropdown"
+            aria-label="กรองระดับ"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -439,6 +593,11 @@ export default function TransfersClient({
             ))}
           </SelectContent>
         </Select>
+        {isDialog && (
+          <span className="compact-market-filter-label">
+            {translate("เรียงลำดับ")}
+          </span>
+        )}
         <Select
           value={sort}
           onValueChange={(value) => value && setSort(String(value))}
@@ -602,7 +761,7 @@ export default function TransfersClient({
               <DialogHeader>
                 <DialogTitle>{translate("กรองนักเตะ")}</DialogTitle>
               </DialogHeader>
-              {renderMarketFilters()}
+              {renderMarketFilters(true)}
               <DialogFooter className="compact-market-filter-dialog-footer">
                 <DialogClose render={<Button />}>
                   {translate("เสร็จสิ้น")}

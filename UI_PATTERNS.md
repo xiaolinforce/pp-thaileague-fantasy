@@ -175,6 +175,12 @@ proven behaviors unless a deliberate product decision replaces them:
 - On Mobile and Tablet, keep the market quota and filter-action group sticky
   below the compact workspace tabs. Open filters in the shared dialog from the
   `กรองนักเตะ` action, preserving the current filter selections.
+- In the Mobile filter dialog, expose position, nationality, and exact tier as
+  single-select radio options with 44px touch targets. Keep ALL/GK/DEF/MID/FWD
+  badges on one row, with localized full position names for assistive technology.
+  Nationality and tier options reuse the dropdowns' circular identity badges.
+  Club and sort remain dropdowns; Tablet and Desktop retain their existing
+  filter controls. Reset and closing the dialog preserve the existing behavior.
 - Present market quotas as a navy scoreboard with a narrow orange edge, muted
   light labels, white counts, and an orange free-transfer count. Preserve the
   red points-deduction badge when free transfers are exceeded.
