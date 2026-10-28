@@ -9511,19 +9511,6 @@ body {
     outline-offset: 2px;
   }
 
-  .compact-market-filter-option-check {
-    position: absolute;
-    top: 1px;
-    right: 1px;
-    display: none;
-    color: var(--orange-deep);
-  }
-
-  .compact-market-filter-option:has(input:checked)
-    .compact-market-filter-option-check {
-    display: block;
-  }
-
   .compact-market-filter-option .position-badge {
     padding: 4px 6px;
     font-size: 12px;
@@ -9532,11 +9519,6 @@ body {
   .compact-market-filter-option .position-all {
     color: var(--muted);
     background: #eceff2;
-  }
-
-  .compact-market-filter-option .market-select-dot {
-    width: 18px;
-    height: 18px;
   }
 
   .compact-market-filter-dialog

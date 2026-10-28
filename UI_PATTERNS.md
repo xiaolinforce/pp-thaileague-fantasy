@@ -178,7 +178,9 @@ proven behaviors unless a deliberate product decision replaces them:
 - In the Mobile filter dialog, expose position, nationality, and exact tier as
   single-select radio options with 44px touch targets. Keep ALL/GK/DEF/MID/FWD
   badges on one row, with localized full position names for assistive technology.
-  Nationality and tier options reuse the dropdowns' circular identity badges.
+  Nationality and tier options show only the dropdowns' circular identity
+  badges, while their All options use text. Localized accessible names and a
+  selected border and background identify each choice and its state.
   Club and sort remain dropdowns; Tablet and Desktop retain their existing
   filter controls. Reset and closing the dialog preserve the existing behavior.
 - Present market quotas as a navy scoreboard with a narrow orange edge, muted

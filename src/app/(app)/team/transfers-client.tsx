@@ -2,7 +2,6 @@
 
 import {
   ArrowDownUp,
-  Check,
   CircleHelp,
   Plus,
   Search,
@@ -329,11 +328,6 @@ export default function TransfersClient({
               aria-label={option.label}
             />
             {option.content}
-            <Check
-              className="compact-market-filter-option-check"
-              size={10}
-              aria-hidden="true"
-            />
           </label>
         ))}
       </div>
@@ -430,42 +424,28 @@ export default function TransfersClient({
               {
                 value: "all",
                 label: translate("ทุกสัญชาติ"),
-                content: (
-                  <>
-                    <span
-                      className="market-select-dot market-select-dot--all"
-                      aria-hidden="true"
-                    />
-                    {translate("ทั้งหมด")}
-                  </>
-                ),
+                content: translate("ทั้งหมด"),
               },
               {
                 value: "thai",
                 label: translate("นักเตะไทย"),
                 content: (
-                  <>
-                    <span
-                      className="market-select-nationality-badge market-select-nationality-badge--thai"
-                      aria-hidden="true"
-                    />
-                    {translate("ไทย")}
-                  </>
+                  <span
+                    className="market-select-nationality-badge market-select-nationality-badge--thai"
+                    aria-hidden="true"
+                  />
                 ),
               },
               {
                 value: "foreign",
                 label: translate("นักเตะต่างชาติ"),
                 content: (
-                  <>
-                    <span
-                      className="market-select-nationality-badge market-select-nationality-badge--foreign"
-                      aria-hidden="true"
-                    >
-                      F
-                    </span>
-                    {translate("ต่างชาติ")}
-                  </>
+                  <span
+                    className="market-select-nationality-badge market-select-nationality-badge--foreign"
+                    aria-hidden="true"
+                  >
+                    F
+                  </span>
                 ),
               },
             ],
@@ -474,29 +454,18 @@ export default function TransfersClient({
             {
               value: "all",
               label: translate("ทุกระดับ"),
-              content: (
-                <>
-                  <span
-                    className="market-select-dot market-select-dot--all"
-                    aria-hidden="true"
-                  />
-                  {translate("ทั้งหมด")}
-                </>
-              ),
+              content: translate("ทั้งหมด"),
             },
             ...([1, 2] as const).map((filterTier) => ({
               value: String(filterTier),
               label: translate(filterTier === 1 ? "ระดับ 1" : "ระดับ 2"),
               content: (
-                <>
-                  <span
-                    className={`market-select-tier-badge market-select-tier-badge--${filterTier}`}
-                    aria-hidden="true"
-                  >
-                    {filterTier}
-                  </span>
-                  {translate(filterTier === 1 ? "ระดับ 1" : "ระดับ 2")}
-                </>
+                <span
+                  className={`market-select-tier-badge market-select-tier-badge--${filterTier}`}
+                  aria-hidden="true"
+                >
+                  {filterTier}
+                </span>
               ),
             })),
           ])}
