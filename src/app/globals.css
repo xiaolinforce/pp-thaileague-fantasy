@@ -9482,8 +9482,8 @@ body {
   .compact-market-filter-option {
     position: relative;
     min-width: 0;
-    min-height: 44px;
-    padding: 8px 4px;
+    min-height: 40px;
+    padding: 6px 4px;
     border: 1px solid var(--line);
     border-radius: 8px;
     display: flex;

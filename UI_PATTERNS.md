@@ -176,7 +176,7 @@ proven behaviors unless a deliberate product decision replaces them:
   below the compact workspace tabs. Open filters in the shared dialog from the
   `กรองนักเตะ` action, preserving the current filter selections.
 - In the Mobile filter dialog, expose position, nationality, and exact tier as
-  single-select radio options with 44px touch targets. Keep ALL/GK/DEF/MID/FWD
+  single-select radio options with 40px touch targets. Keep ALL/GK/DEF/MID/FWD
   badges on one row, with localized full position names for assistive technology.
   Nationality and tier options show only the dropdowns' circular identity
   badges, while their All options use text. Localized accessible names and a
