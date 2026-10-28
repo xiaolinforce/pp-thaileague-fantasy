@@ -9301,17 +9301,33 @@ body {
   .compact-market-filter-dialog {
     max-height: calc(100dvh - 32px);
     overflow-y: auto;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 8px;
   }
 
   .compact-market-filter-dialog .compact-market-toolbar {
-    padding: 0;
+    display: contents;
+  }
+
+  .compact-market-filter-dialog [data-slot="dialog-header"],
+  .compact-market-filter-dialog .compact-market-toolbar > div {
+    grid-column: 1 / -1;
+  }
+
+  .compact-market-filter-dialog [data-slot="dialog-header"] {
+    margin-bottom: 10px;
+  }
+
+  .compact-market-filter-dialog .compact-market-reset-filters {
+    justify-self: start;
   }
 
   .compact-market-filter-dialog-footer {
-    margin-top: 0;
-    border-top: 0;
-    background: transparent;
-    padding-top: 0;
+    display: contents;
+  }
+
+  .compact-market-filter-dialog-footer > button {
+    justify-self: end;
   }
 }
 
