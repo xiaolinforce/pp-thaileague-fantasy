@@ -184,9 +184,11 @@ type SquadSecondaryInfo = {
 function PlayerFixtureCards({
   fixtures,
   clubId,
+  showDate = false,
 }: {
   fixtures: readonly CompetitionFixtureView[];
   clubId: string;
+  showDate?: boolean;
 }) {
   const { language, translate } = useLanguage();
   return (
@@ -209,11 +211,22 @@ function PlayerFixtureCards({
               <span>{localize(opponent.shortName, language)}</span>
               <span>({isHome ? "H" : "A"})</span>
             </strong>
-            <span className="player-match-date">
-              {fixture.kickoffAt
-                ? localize(fixture.dateLabel, language)
-                : translate("วันแข่งขันรอยืนยัน")}
-            </span>
+            {showDate && (
+              <span className="player-match-date">
+                {fixture.kickoffAt
+                  ? new Intl.DateTimeFormat(
+                      language === "th" ? "th-TH" : "en-GB",
+                      {
+                        calendar: language === "th" ? "buddhist" : "gregory",
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        timeZone: "Asia/Bangkok",
+                      },
+                    ).format(new Date(fixture.kickoffAt))
+                  : translate("วันแข่งขันรอยืนยัน")}
+              </span>
+            )}
             {fixture.status === "postponed" && (
               <span className="player-match-date">
                 {translate("เลื่อนการแข่งขัน")}
@@ -2227,14 +2240,14 @@ export default function TeamClient({
                 <div className="player-match-section-heading">
                   <CalendarDays size={18} aria-hidden="true" />
                   <h3 id="player-gameweek-fixtures-title">
-                    {translate("โปรแกรมใน GW นี้")} · GW
-                    {fantasy.gameweek.number}
+                    {translate("โปรแกรมใน GW นี้")}
                   </h3>
                 </div>
                 {selectedGameweekFixtures.length > 0 ? (
                   <PlayerFixtureCards
                     fixtures={selectedGameweekFixtures}
                     clubId={selected.clubId}
+                    showDate
                   />
                 ) : (
                   <p className="player-fixtures-empty">

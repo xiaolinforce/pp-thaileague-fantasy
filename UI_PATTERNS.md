@@ -127,8 +127,11 @@ proven behaviors unless a deliberate product decision replaces them:
   Show every opponent with its own home/away marker for multiple fixtures, and
   an explicit no-fixture state without substituting another Gameweek's match.
   Player details lead with the same Gameweek fixtures, dates, and recorded
-  postponement status. The next-five list remains chronological and includes
-  each fixture's Gameweek, home/away marker, and date. Do not infer postponement
+  postponement status. Keep the section heading as "โปรแกรมใน GW นี้" without
+  repeating the Gameweek number. Only this section shows fixture dates, in
+  Bangkok time with a short month and year ("3 ม.ค. 2570" / "3 Jan 2027").
+  The next-five list remains chronological and includes each fixture's Gameweek
+  and home/away marker without a date. Do not infer postponement
   history for a rescheduled fixture whose current status is scheduled.
 - After the final Gameweek closes, keep the latest squad available read-only,
   replace the countdown with an explicit completed-season label, and keep
