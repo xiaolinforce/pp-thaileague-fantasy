@@ -1824,6 +1824,12 @@ textarea:focus-visible {
   gap: 7px;
 }
 
+.player-match-strip:not(.player-match-strip--gameweek)
+  > .player-match-card--upcoming {
+  min-height: 66px;
+  padding-block: 6px;
+}
+
 @media (min-width: 1280px) {
   .player-match-strip--gameweek {
     grid-template-columns: minmax(0, 1fr);
