@@ -1774,7 +1774,7 @@ textarea:focus-visible {
 .player-match-sections {
   display: grid;
   gap: 16px;
-  padding-top: 16px;
+  padding-top: 8px;
 }
 
 .player-match-section {
