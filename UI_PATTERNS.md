@@ -122,6 +122,14 @@ proven behaviors unless a deliberate product decision replaces them:
 
 - Represent the one Gameweek currently open for squad changes. Show its number,
   live deadline, and editability without historical previous/next controls.
+- The pitch's opponent display follows that Gameweek's fixture matchweek,
+  including postponed, undated, and finished fixtures; exclude cancelled games.
+  Show every opponent with its own home/away marker for multiple fixtures, and
+  an explicit no-fixture state without substituting another Gameweek's match.
+  Player details lead with the same Gameweek fixtures, dates, and recorded
+  postponement status. The next-five list remains chronological and includes
+  each fixture's Gameweek, home/away marker, and date. Do not infer postponement
+  history for a rescheduled fixture whose current status is scheduled.
 - After the final Gameweek closes, keep the latest squad available read-only,
   replace the countdown with an explicit completed-season label, and keep
   transfers, chips, swaps, removals, auto-fill, and saving unavailable.

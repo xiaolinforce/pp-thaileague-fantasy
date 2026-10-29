@@ -42,7 +42,12 @@ import {
   type CompetitionPosition,
   type CompetitionDataset,
   type CompetitionPlayerView,
+  type CompetitionFixtureView,
 } from "@/lib/competition-types";
+import {
+  getGameweekFixturesByClub,
+  getGameweekOpponentInfo,
+} from "@/lib/fantasy/team-fixtures";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import {
   Dialog,
@@ -173,8 +178,53 @@ function isSquadSecondaryDisplay(
 type SquadSecondaryInfo = {
   value: string;
   title: string;
-  venue?: "H" | "A";
+  opponents?: Array<{ id: string; value: string; venue: "H" | "A" }>;
 };
+
+function PlayerFixtureCards({
+  fixtures,
+  clubId,
+}: {
+  fixtures: readonly CompetitionFixtureView[];
+  clubId: string;
+}) {
+  const { language, translate } = useLanguage();
+  return (
+    <div className="player-match-strip">
+      {fixtures.map((fixture) => {
+        const isHome = fixture.home.id === clubId;
+        const opponent = isHome ? fixture.away : fixture.home;
+        return (
+          <article
+            className="player-match-card player-match-card--upcoming"
+            key={fixture.id}
+          >
+            <span className="player-match-gameweek">
+              GW <strong>{fixture.matchweek}</strong>
+            </span>
+            <strong
+              className="player-match-opponent player-match-opponent--fixture"
+              title={`${localize(opponent.name, language)} (${isHome ? "H" : "A"})`}
+            >
+              <span>{localize(opponent.shortName, language)}</span>
+              <span>({isHome ? "H" : "A"})</span>
+            </strong>
+            <span className="player-match-date">
+              {fixture.kickoffAt
+                ? localize(fixture.dateLabel, language)
+                : translate("วันแข่งขันรอยืนยัน")}
+            </span>
+            {fixture.status === "postponed" && (
+              <span className="player-match-date">
+                {translate("เลื่อนการแข่งขัน")}
+              </span>
+            )}
+          </article>
+        );
+      })}
+    </div>
+  );
+}
 
 type SelectionDraftSource = {
   fantasyPlayerId: string;
@@ -510,7 +560,7 @@ function SquadPlayer({
             event.stopPropagation();
             onSelect(player, event.currentTarget);
           }}
-          aria-label={ariaLabel}
+          aria-label={`${ariaLabel}, ${secondaryInfo.title}`}
           aria-pressed={swapState === "source" ? true : undefined}
           disabled={swapState === "unavailable"}
         >
@@ -537,24 +587,24 @@ function SquadPlayer({
             {localize(player.shortName, language)}
           </span>
           <span
-            className={`squad-fixture${secondaryInfo.venue ? " squad-fixture--opponent" : ""}`}
+            className={`squad-fixture${secondaryInfo.opponents?.length ? " squad-fixture--opponents" : ""}`}
             title={secondaryInfo.title}
           >
-            {secondaryInfo.venue ? (
-              <>
-                <span
-                  className={`squad-fixture-venue squad-fixture-venue--${secondaryInfo.venue.toLowerCase()}`}
-                  aria-hidden="true"
-                >
-                  {secondaryInfo.venue}
-                </span>
-                <span className="squad-fixture-opponent-name">
-                  {secondaryInfo.value}
-                </span>
-              </>
-            ) : (
-              secondaryInfo.value
-            )}
+            {secondaryInfo.opponents?.length
+              ? secondaryInfo.opponents.map((opponent) => (
+                  <span className="squad-fixture--opponent" key={opponent.id}>
+                    <span
+                      className={`squad-fixture-venue squad-fixture-venue--${opponent.venue.toLowerCase()}`}
+                      aria-hidden="true"
+                    >
+                      {opponent.venue}
+                    </span>
+                    <span className="squad-fixture-opponent-name">
+                      {opponent.value}
+                    </span>
+                  </span>
+                ))
+              : secondaryInfo.value}
           </span>
         </button>
         {!hideActions && !actionsDisabled && (
@@ -875,47 +925,15 @@ export default function TeamClient({
       ),
     [data.players, language, translate],
   );
+  const gameweekFixturesByClub = useMemo(
+    () => getGameweekFixturesByClub(data.fixtures, fantasy.gameweek.number),
+    [data.fixtures, fantasy.gameweek.number],
+  );
   const squadSecondaryInfoByFantasyId = useMemo(() => {
-    const upcomingFixturesByClubId = new Map<
-      string,
-      CompetitionDataset["fixtures"]
-    >();
-    for (const fixture of data.fixtures) {
-      if (fixture.status === "finished" || fixture.status === "cancelled") {
-        continue;
-      }
-      for (const clubId of [fixture.home.id, fixture.away.id]) {
-        const fixtures = upcomingFixturesByClubId.get(clubId) ?? [];
-        fixtures.push(fixture);
-        upcomingFixturesByClubId.set(clubId, fixtures);
-      }
-    }
-    for (const fixtures of upcomingFixturesByClubId.values()) {
-      fixtures.sort((fixtureA, fixtureB) => {
-        const kickoffA = fixtureA.kickoffAt
-          ? new Date(fixtureA.kickoffAt).getTime()
-          : Number.POSITIVE_INFINITY;
-        const kickoffB = fixtureB.kickoffAt
-          ? new Date(fixtureB.kickoffAt).getTime()
-          : Number.POSITIVE_INFINITY;
-        return kickoffA - kickoffB || fixtureA.matchweek - fixtureB.matchweek;
-      });
-    }
-
     return new Map(
       data.players.flatMap((player) => {
         if (!player.fantasyPlayerId) return [];
 
-        const nextFixture = upcomingFixturesByClubId.get(player.clubId)?.[0];
-        const opponent = nextFixture
-          ? nextFixture.home.id === player.clubId
-            ? nextFixture.away
-            : nextFixture.home
-          : null;
-        const venue =
-          nextFixture?.home.id === player.clubId
-            ? ("H" as const)
-            : ("A" as const);
         const latestMatch = player.recentMatches[0];
         const secondaryInfo: SquadSecondaryInfo =
           squadSecondaryDisplay === "club"
@@ -924,15 +942,12 @@ export default function TeamClient({
                 title: `${translate("สโมสร")}: ${localize(player.club, language)}`,
               }
             : squadSecondaryDisplay === "opponent"
-              ? {
-                  value: opponent
-                    ? localize(opponent.shortName, language)
-                    : "—",
-                  title: opponent
-                    ? `${translate("คู่แข่งนัดถัดไป")}: ${localize(opponent.name, language)}`
-                    : translate("ยังไม่มีโปรแกรม"),
-                  venue: opponent ? venue : undefined,
-                }
+              ? getGameweekOpponentInfo(
+                  gameweekFixturesByClub.get(player.clubId) ?? [],
+                  player.clubId,
+                  fantasy.gameweek.number,
+                  language,
+                )
               : squadSecondaryDisplay === "latest_points"
                 ? {
                     value: latestMatch ? String(latestMatch.points) : "—",
@@ -954,7 +969,14 @@ export default function TeamClient({
         return [[player.fantasyPlayerId, secondaryInfo] as const];
       }),
     );
-  }, [data.fixtures, data.players, language, squadSecondaryDisplay, translate]);
+  }, [
+    gameweekFixturesByClub,
+    data.players,
+    fantasy.gameweek.number,
+    language,
+    squadSecondaryDisplay,
+    translate,
+  ]);
   const getSquadSecondaryInfo = (player: CompetitionPlayerView) =>
     player.isAvailable === false
       ? {
@@ -1057,6 +1079,9 @@ export default function TeamClient({
           member.fantasyPlayerId === mobileSelection.player.fantasyPlayerId,
       )
     : null;
+  const selectedGameweekFixtures = selected
+    ? (gameweekFixturesByClub.get(selected.clubId) ?? [])
+    : [];
   const selectedFixtures = useMemo(() => {
     if (!selected) return [];
 
@@ -1869,7 +1894,7 @@ export default function TeamClient({
                     {translate("สโมสรนักเตะ")}
                   </SelectItem>
                   <SelectItem value="opponent">
-                    {translate("คู่แข่งนัดถัดไป")}
+                    {translate("คู่แข่งใน GW นี้")}
                   </SelectItem>
                   <SelectItem value="latest_points">
                     {translate("คะแนน GW ล่าสุด")}
@@ -2197,6 +2222,28 @@ export default function TeamClient({
             <div className="player-match-sections">
               <section
                 className="player-match-section"
+                aria-labelledby="player-gameweek-fixtures-title"
+              >
+                <div className="player-match-section-heading">
+                  <CalendarDays size={18} aria-hidden="true" />
+                  <h3 id="player-gameweek-fixtures-title">
+                    {translate("โปรแกรมใน GW นี้")} · GW
+                    {fantasy.gameweek.number}
+                  </h3>
+                </div>
+                {selectedGameweekFixtures.length > 0 ? (
+                  <PlayerFixtureCards
+                    fixtures={selectedGameweekFixtures}
+                    clubId={selected.clubId}
+                  />
+                ) : (
+                  <p className="player-fixtures-empty">
+                    {translate("ไม่มีโปรแกรมใน GW นี้")}
+                  </p>
+                )}
+              </section>
+              <section
+                className="player-match-section"
                 aria-labelledby="player-recent-matches-title"
               >
                 <div className="player-match-section-heading">
@@ -2238,28 +2285,10 @@ export default function TeamClient({
                   <h3 id="player-upcoming-fixtures-title">5 โปรแกรมถัดไป</h3>
                 </div>
                 {selectedFixtures.length > 0 ? (
-                  <div className="player-match-strip">
-                    {selectedFixtures.map((fixture) => {
-                      const isHome = fixture.home.id === selected.clubId;
-                      const opponent = isHome ? fixture.away : fixture.home;
-                      return (
-                        <article
-                          className="player-match-card player-match-card--upcoming"
-                          key={fixture.id}
-                        >
-                          <span className="player-match-gameweek">
-                            GW <strong>{fixture.matchweek}</strong>
-                          </span>
-                          <strong
-                            className="player-match-opponent"
-                            title={localize(opponent.name, language)}
-                          >
-                            {localize(opponent.shortName, language)}
-                          </strong>
-                        </article>
-                      );
-                    })}
-                  </div>
+                  <PlayerFixtureCards
+                    fixtures={selectedFixtures}
+                    clubId={selected.clubId}
+                  />
                 ) : (
                   <p className="player-fixtures-empty">ยังไม่มีโปรแกรมถัดไป</p>
                 )}

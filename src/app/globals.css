@@ -1824,6 +1824,29 @@ textarea:focus-visible {
   gap: 7px;
 }
 
+.player-match-date {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.player-match-opponent--fixture {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.player-match-opponent--fixture > span:first-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-match-opponent--fixture > span:last-child {
+  flex: 0 0 auto;
+}
+
 .player-match-gameweek {
   color: var(--orange-deep);
   font-size: 11px;
@@ -4429,6 +4452,17 @@ button.vacant-squad-slot {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 11px;
+}
+
+.squad-token .squad-fixture--opponents {
+  display: grid;
+  max-height: none;
+  line-height: 1.2;
+}
+
+.squad-fixture--opponents > .squad-fixture--opponent {
+  min-width: 0;
+  padding: 1px 0;
 }
 
 .bench-panel {

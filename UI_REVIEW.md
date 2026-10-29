@@ -25,6 +25,19 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
+2026-10-29 Team Gameweek-opponent review: a temporary development-only route
+rendered the real Team components with a GW7 fixture played after the club's
+chronologically next GW8 match, a two-fixture GW including an undated postponed
+match, and a blank GW. Thai and English passed at 1440×1000 and 360×1000:
+the pitch kept the GW7 opponent, displayed both home/away markers for two
+fixtures, and did not fall back to another GW for the blank. Player details
+showed the same GW fixtures, dates, date-TBC/postponement labels and blank state;
+the next-five list retained chronological order. Separate venue markers stayed
+visible beside truncated long club names. No document overflow or browser
+runtime errors occurred. The temporary route was removed; no database or
+selection writes were used. Source fixture correctness, scoring and persistence
+were outside this rendered check; fixture-selection regressions have unit tests.
+
 2026-10-26 tier-change allowance: a temporary development-only fixture rendered
 the real Team components with eight Level 1 players and no writable selection
 ID. Desktop Thai/English showed the exact count, excess, retained-player
