@@ -1824,6 +1824,21 @@ textarea:focus-visible {
   gap: 7px;
 }
 
+@media (min-width: 1280px) {
+  .player-match-strip--gameweek {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .player-match-strip--gameweek .player-match-card {
+    min-height: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    text-align: left;
+  }
+}
+
 .player-match-date {
   color: var(--muted);
   font-size: 12px;

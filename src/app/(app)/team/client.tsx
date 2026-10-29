@@ -192,7 +192,9 @@ function PlayerFixtureCards({
 }) {
   const { language, translate } = useLanguage();
   return (
-    <div className="player-match-strip">
+    <div
+      className={`player-match-strip${showDate ? " player-match-strip--gameweek" : ""}`}
+    >
       {fixtures.map((fixture) => {
         const isHome = fixture.home.id === clubId;
         const opponent = isHome ? fixture.away : fixture.home;

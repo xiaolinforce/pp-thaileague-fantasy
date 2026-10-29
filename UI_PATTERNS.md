@@ -130,6 +130,8 @@ proven behaviors unless a deliberate product decision replaces them:
   postponement status. Keep the section heading as "โปรแกรมใน GW นี้" without
   repeating the Gameweek number. Only this section shows fixture dates, in
   Bangkok time with a short month and year ("3 ม.ค. 2570" / "3 Jan 2027").
+  On Desktop, present each Gameweek fixture as a row with its GW, opponent,
+  home/away marker, and date together.
   The next-five list remains chronological and includes each fixture's Gameweek
   and home/away marker without a date. Do not infer postponement
   history for a rescheduled fixture whose current status is scheduled.
