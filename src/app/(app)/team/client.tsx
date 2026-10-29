@@ -47,6 +47,7 @@ import {
 import {
   getGameweekFixturesByClub,
   getGameweekOpponentInfo,
+  hasDeferredGameweekFixture,
 } from "@/lib/fantasy/team-fixtures";
 import { PositionBadge } from "@/components/fantasy/position-badge";
 import {
@@ -1097,6 +1098,11 @@ export default function TeamClient({
   const selectedGameweekFixtures = selected
     ? (gameweekFixturesByClub.get(selected.clubId) ?? [])
     : [];
+  const showGameweekFixtures = hasDeferredGameweekFixture(
+    selectedGameweekFixtures,
+    data.fixtures,
+    fantasy.gameweek.number,
+  );
   const selectedFixtures = useMemo(() => {
     if (!selected) return [];
 
@@ -2235,28 +2241,24 @@ export default function TeamClient({
               </div>
             </div>
             <div className="player-match-sections">
-              <section
-                className="player-match-section"
-                aria-labelledby="player-gameweek-fixtures-title"
-              >
-                <div className="player-match-section-heading">
-                  <CalendarDays size={18} aria-hidden="true" />
-                  <h3 id="player-gameweek-fixtures-title">
-                    {translate("โปรแกรมใน GW นี้")}
-                  </h3>
-                </div>
-                {selectedGameweekFixtures.length > 0 ? (
+              {showGameweekFixtures && (
+                <section
+                  className="player-match-section"
+                  aria-labelledby="player-gameweek-fixtures-title"
+                >
+                  <div className="player-match-section-heading">
+                    <CalendarDays size={18} aria-hidden="true" />
+                    <h3 id="player-gameweek-fixtures-title">
+                      {translate("โปรแกรมใน GW นี้")}
+                    </h3>
+                  </div>
                   <PlayerFixtureCards
                     fixtures={selectedGameweekFixtures}
                     clubId={selected.clubId}
                     showDate
                   />
-                ) : (
-                  <p className="player-fixtures-empty">
-                    {translate("ไม่มีโปรแกรมใน GW นี้")}
-                  </p>
-                )}
-              </section>
+                </section>
+              )}
               <section
                 className="player-match-section"
                 aria-labelledby="player-recent-matches-title"

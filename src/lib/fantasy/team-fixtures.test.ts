@@ -7,6 +7,7 @@ import type {
 import {
   getGameweekFixturesByClub,
   getGameweekOpponentInfo,
+  hasDeferredGameweekFixture,
 } from "./team-fixtures.ts";
 
 function club(id: string, th: string): CompetitionClubView {
@@ -110,5 +111,86 @@ test("a blank GW does not fall back to a future fixture and explains the state i
   assert.deepEqual(
     getGameweekOpponentInfo(selected, buriram.id, 7, "th").opponents,
     [],
+  );
+});
+
+const nextRound = fixture({
+  id: "gw8",
+  matchweek: 8,
+  kickoffAt: "2026-11-08T12:00:00Z",
+});
+
+test("normal future fixtures do not show the extra Gameweek section", () => {
+  const normal = fixture({ kickoffAt: "2026-10-30T12:00:00Z" });
+  assert.equal(
+    hasDeferredGameweekFixture([normal], [normal, nextRound], 7),
+    false,
+  );
+});
+
+test("a rescheduled GW7 fixture in January qualifies even with scheduled status", () => {
+  assert.equal(
+    hasDeferredGameweekFixture([fixture()], [fixture(), nextRound], 7),
+    true,
+  );
+});
+
+test("an explicit postponement qualifies even without a new date or later round", () => {
+  const postponed = fixture({ status: "postponed", kickoffAt: null });
+  assert.equal(hasDeferredGameweekFixture([postponed], [postponed], 7), true);
+});
+
+test("blank, cancelled and other-Gameweek fixtures do not show the section", () => {
+  assert.equal(hasDeferredGameweekFixture([], [nextRound], 7), false);
+  assert.equal(
+    hasDeferredGameweekFixture(
+      [fixture({ status: "cancelled" })],
+      [nextRound],
+      7,
+    ),
+    false,
+  );
+  assert.equal(hasDeferredGameweekFixture([nextRound], [nextRound], 7), false);
+});
+
+test("unknown dates and schedules without a dated later round do not imply a postponement", () => {
+  assert.equal(
+    hasDeferredGameweekFixture([fixture({ kickoffAt: null })], [nextRound], 7),
+    false,
+  );
+  assert.equal(hasDeferredGameweekFixture([fixture()], [], 7), false);
+  assert.equal(
+    hasDeferredGameweekFixture(
+      [fixture()],
+      [fixture({ ...nextRound, status: "cancelled" })],
+      7,
+    ),
+    false,
+  );
+});
+
+test("compares Bangkok dates rather than UTC dates or kickoff times on the same day", () => {
+  const boundary = fixture({ ...nextRound, kickoffAt: "2026-11-08T12:00:00Z" });
+  const previousBangkokDay = fixture({ kickoffAt: "2026-11-07T16:59:00Z" });
+  const sameBangkokDay = fixture({ kickoffAt: "2026-11-07T17:00:00Z" });
+  assert.equal(
+    hasDeferredGameweekFixture([previousBangkokDay], [boundary], 7),
+    false,
+  );
+  assert.equal(
+    hasDeferredGameweekFixture([sameBangkokDay], [boundary], 7),
+    true,
+  );
+});
+
+test("one deferred fixture is enough to show a club's multi-fixture Gameweek", () => {
+  const normal = fixture({ id: "normal", kickoffAt: "2026-10-30T12:00:00Z" });
+  assert.equal(
+    hasDeferredGameweekFixture(
+      [normal, fixture()],
+      [normal, fixture(), nextRound],
+      7,
+    ),
+    true,
   );
 });

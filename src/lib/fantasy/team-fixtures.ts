@@ -28,6 +28,35 @@ export function getGameweekFixturesByClub(
   return byClub;
 }
 
+export function hasDeferredGameweekFixture(
+  gameweekFixtures: readonly CompetitionFixtureView[],
+  seasonFixtures: readonly CompetitionFixtureView[],
+  gameweek: number,
+) {
+  // The source has no original kickoff history. Use the first dated fixture
+  // from a later round as the boundary, comparing Bangkok calendar dates.
+  const bangkokDay = (kickoffAt: string) =>
+    Math.floor((Date.parse(kickoffAt) + 7 * 60 * 60 * 1000) / 86_400_000);
+  const laterRoundStart = seasonFixtures.reduce(
+    (earliest, fixture) =>
+      fixture.matchweek > gameweek &&
+      fixture.status !== "cancelled" &&
+      fixture.kickoffAt
+        ? Math.min(earliest, bangkokDay(fixture.kickoffAt))
+        : earliest,
+    Infinity,
+  );
+  return gameweekFixtures.some(
+    (fixture) =>
+      fixture.matchweek === gameweek &&
+      fixture.status !== "cancelled" &&
+      (fixture.status === "postponed" ||
+        (fixture.kickoffAt !== null &&
+          Number.isFinite(laterRoundStart) &&
+          bangkokDay(fixture.kickoffAt) >= laterRoundStart)),
+  );
+}
+
 export function getGameweekOpponentInfo(
   fixtures: readonly CompetitionFixtureView[],
   clubId: string,

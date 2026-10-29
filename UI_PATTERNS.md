@@ -126,8 +126,15 @@ proven behaviors unless a deliberate product decision replaces them:
   including postponed, undated, and finished fixtures; exclude cancelled games.
   Show every opponent with its own home/away marker for multiple fixtures, and
   an explicit no-fixture state without substituting another Gameweek's match.
-  Player details lead with the same Gameweek fixtures, dates, and recorded
-  postponement status. Keep the section heading as "โปรแกรมใน GW นี้" without
+  Player details show the extra Gameweek-fixture section only when the selected
+  club has a postponed fixture or a fixture dated on/after the first Bangkok
+  date of a later round. This schedule-based boundary also detects a deferred
+  fixture whose status has returned to scheduled. Without original kickoff
+  history or a dated later round, a scheduled fixture cannot be inferred as
+  deferred; an explicit postponed status still qualifies. Normal and blank
+  Gameweeks hide the section. When shown, it contains that club's full Gameweek
+  fixture list, dates, and recorded postponement status.
+  Keep the section heading as "โปรแกรมใน GW นี้" without
   repeating the Gameweek number. Only this section shows fixture dates, in
   Bangkok time with a short month and year ("3 ม.ค. 2570" / "3 Jan 2027").
   On Desktop, present each Gameweek fixture as a row with its GW, opponent,
