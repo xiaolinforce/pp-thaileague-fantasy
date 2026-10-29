@@ -1831,6 +1831,7 @@ textarea:focus-visible {
 
   .player-match-strip--gameweek .player-match-card {
     min-height: 0;
+    padding-inline: 14px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
