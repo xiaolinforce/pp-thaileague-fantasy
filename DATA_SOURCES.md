@@ -1,5 +1,60 @@
 # Data sources
 
+## 2026-10-30 GW7 opening match and GW8 opening
+
+Owner-approved production-only batch
+`gw7-oct30-sisaket-ratchaburi-open-gw8-20261030` recorded Sisaket United 2-5
+Ratchaburi (`37629`) on confirmed Neon branch `br-floral-silence-azzesg4n`,
+database `neondb`. The approved Thai League report owns appearances, goal
+minutes, substitutions and cards. Assists and actual individual keeper saves
+were reviewed against [FotMob](https://www.fotmob.com/matches/ratchaburi-fc-vs-sisaket-united/679o8hz3#1000017766)
+and the [AIS PLAY highlight](https://www.youtube.com/watch?v=BpYF6h2dTo4).
+The owner explicitly confirmed Fantasy assists for Njiva on Phongsakon's
+58th-minute rebound header and Robert Zulj on his 85th-minute rebound goal.
+Source assists remain five; reviewed Fantasy assists total seven.
+
+An authenticated Neon SQL Editor transaction stored 58 reviewed stat rows and
+canonical point breakdowns: 32 appearances and 26 explicit zero-minute results.
+It also marked the fixture finished and retained the official report, event
+timeline, per-player source facts, owner decisions and recovery timestamp in
+the fixture audit. There are seven goals, three yellows, no reds, own goals or
+penalty events, and 87 player points. Actual keeper statistics are Steven Van
+Dijk four saves and five conceded, and Kampol five saves and two conceded;
+both played 90 minutes. Saves were not inferred from shots on target.
+Phongsakon receives 21 points, Narongrit 10, Zulj 11 and Njiva five. Confirmed
+positions remain unchanged, including Jesse Curran and Njiva as midfielders.
+The official halftime label 46 counts as 45 minutes; Adisorn's 90+2 entry
+receives the one-minute minimum. Sisaket's three later substitutions use the
+official minute 69, and Curran's yellow uses minute 73.
+
+The import passed a full rollback rehearsal and 16 protected-table fingerprint
+comparisons before commit. The subsequent authenticated production admin
+`lockFantasyGameweek` action atomically captured the 651-player two-tier
+deadline pool, locked 523 selections, settled transfers, recalculated scores,
+refreshed ownership and standings, and opened GW8. Its 523 initial drafts
+contain 2,715 carried members. Existing tier-change relief is handled by the
+canonical service; no new classification or allowance was invented for this
+match import. Original choices, lineup roles, captaincy, nationality, tiers,
+prior revisions and GW1-6 scores passed independent preservation checks.
+
+GW7 remains `provisional`, `score_complete=false`, without a finalization
+timestamp. Only the finished fixture has results; the seven remaining fixtures
+stay pending. All 523 provisional team scores were independently recomputed,
+including 12 confirmed automatic substitutions. Average points are four,
+highest manager points 27 and optimal legal team points 80. GW8 is open with
+its unchanged 2026-11-06 17:30 Bangkok deadline. Live Points displayed
+ItsMePP's eight points and Sunrise Eleven's highest score of 27; live Team
+displayed editable GW8.
+
+Forty-three targeted rules, provisional-scoring and carryover tests passed,
+as did the development rollback check on `br-broad-recipe-azz9hbkx` and the
+production point-arithmetic checks. The fixture import audit, authenticated
+lock audit and completion audit retain the operation evidence. The SQL import
+and admin lifecycle transition are separate transactions; the latter owns all
+score and carryover writes. No production credential was read or exported.
+Temporary maintenance tools and database-read exports were removed after
+verification; development received no persistent data changes.
+
 ## Production two-tier performance review (2026-10-26)
 
 The owner explicitly authorized reclassifying every player in production with
