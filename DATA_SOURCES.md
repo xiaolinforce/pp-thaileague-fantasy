@@ -1,5 +1,56 @@
 # Data sources
 
+## 2026-10-31 GW7 Pattani and Bangkok matches
+
+Owner-approved production-only batch
+`gw7-oct31-pattani-rasi-bangkok-uthai-20261101` recorded Pattani FC 2-1
+Rasisalai United (`37633`) and True Bangkok United 2-0 Uthai Thani (`37628`)
+on confirmed Neon branch `br-floral-silence-azzesg4n`, database `neondb`.
+The approved Thai League reports own appearances, substitutions, goal timing
+and cards. Individual keeper saves and supplementary events were reviewed
+against FotMob. The owner confirmed James Beresford's Fantasy assist on
+Picha's 27th-minute rebound after his saved shot, also reviewed in the
+[highlight](https://www.youtube.com/watch?v=X14W2delLCs). His source assists
+remain zero, reviewed Fantasy assists one and match points nine.
+
+An authenticated SQL Editor transaction stored 166 reviewed results: 64
+appearances and 102 explicit zero-minute results from current registrations,
+the GW7 deadline pool and retained selection snapshots. Bangkok-Uthai has 82
+results worth 90 points; Pattani-Rasisalai has 84 worth 69. The batch contains
+five goals, four source assists, five Fantasy assists, five yellow cards,
+one penalty miss, one penalty save, and no red cards or own goals. Popp's
+21st-minute penalty was saved by Caique; William's disallowed goal is excluded.
+Actual individual saves are Damyan Damyanov six, Sakkongpop two, Patiwat five
+and Caique five, including his penalty save. No goalkeeper was substituted.
+Their points are four, one, six and seven respectively. Saves were not inferred
+from shots on target. All confirmed appearances receive at least one minute;
+halftime substitutions count as 45 minutes. Locked Fantasy positions remain
+unchanged. Fixture audits retain approved report text, official metadata,
+event timelines, every import decision, owner approval and recovery timestamp.
+
+The production import passed a rollback rehearsal and 16 protected-table
+fingerprint comparisons before commit. An authenticated admin stat save then
+preserved Beresford's imported values and invoked the canonical Gameweek
+recalculation in a separate transaction. Its correction audit retains the
+original source payload. All 224 current GW7 player calculations and 523
+provisional team scores passed independent recomputation, including 80
+confirmed automatic substitutions. Average points are 12, highest manager
+points 34 and optimal legal team points 119. Live Points displayed ItsMePP's
+12 points and Corner Flag Club's highest score of 34.
+
+GW7 remains `provisional`, `score_complete=false`, without a finalization
+timestamp; the five remaining fixtures stay pending. GW8 remains open with
+its unchanged 2026-11-06 17:30 Bangkok deadline. Fifteen independent
+preservation fingerprints confirm that selections, members, revisions,
+registrations, classifications, tiers, ownership, relief, the 651-player
+deadline pool, other fixtures and results, historical scores and other
+Gameweeks remain unchanged. Forty-three targeted rules, provisional-scoring
+and carryover tests passed. A temporary-payload transaction on development
+`br-broad-recipe-azz9hbkx` verified 64 appearances, 18 saves and 159 points,
+then rolled back without persistent changes. The completion audit retains the
+verification summary. No production credential was read or exported; temporary
+maintenance scripts and database-read exports were removed after verification.
+
 ## 2026-10-30 GW7 opening match and GW8 opening
 
 Owner-approved production-only batch
