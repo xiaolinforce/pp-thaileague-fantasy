@@ -1,5 +1,65 @@
 # Data sources
 
+## 2026-11-01 GW7 Sukhothai and Rayong matches
+
+Owner-approved production-only batch
+`gw7-nov01-sukhothai-ayutthaya-rayong-lamphun-20261101` recorded Sukhothai
+FC 0-3 Ayutthaya United (`37632`) and Rayong FC 0-4 Lamphun Warriors
+(`37634`) on confirmed Neon branch `br-floral-silence-azzesg4n`, database
+`neondb`. Approved Thai League reports own appearances, substitutions and cards;
+FotMob individual keeper statistics own reviewed save counts. The
+[Sukhothai highlight](https://www.youtube.com/watch?v=Bt71SsO8eH0) confirms
+Warinthon's saved shot before Mota's rebound, Atsadawut's cross before Thiti's
+own goal, and Passakorn's cross hitting Murilo's arm before Caique's penalty.
+The standing rebound rule gives Warinthon one Fantasy assist and nine points.
+The owner explicitly denied an assist for Atsadawut's own-goal cross, leaving
+him on five points. The handball penalty has no assist.
+
+An authenticated SQL Editor transaction stored 144 reviewed stat rows and
+canonical point breakdowns: 63 appearances and 81 explicit zero-minute
+results from current registrations, the deadline pool and retained selection
+snapshots. Sukhothai-Ayutthaya has 61 results worth 76 points; Rayong-Lamphun
+has 83 worth 91. The batch contains six credited goals, one own goal, four
+source assists, five Fantasy assists, ten yellows and one direct red. Caique
+converted the only penalty; there were no penalty saves or misses. Actual
+individual keeper saves are Kittipun three, Warut four, Wichaya two and Nont
+four, worth two, seven, zero and seven points respectively. All four played
+90 minutes; saves were not inferred from shots on target.
+
+Official timing takes precedence: Anderson Chaves's direct red is minute 48,
+Atsadawut leaves and Passakorn enters at 75, Barreto and Rhuan leave at 81,
+Parndecha leaves and Yeo enters at 40, Yeo's yellow is 41, and Rayong's final
+two changes are at 80. The report also records Athit Berg replacing Ilic at
+90+2, an appearance missing from FotMob. Halftime 46 counts as 45 minutes;
+all stoppage-time entrants receive the agreed one-minute minimum. All 63
+appearances matched fresh production identities and GW7 pool positions;
+locked positions and the approved Verot Pombuppha name remain unchanged.
+Osman receives 13 points and Anderson six. Fixture audits retain official
+metadata, report text, events, keeper evidence, owner decisions, the complete
+import plan and recovery timestamp.
+
+The import passed a rollback rehearsal and 16 protected-table fingerprints.
+A subsequent authenticated admin stat save preserved Atsadawut's imported
+values and invoked canonical Gameweek recalculation in a separate transaction.
+All 368 current GW7 player calculations and all 523 provisional team scores
+passed independent recomputation, including 136 confirmed automatic
+substitutions. Average points are 17, highest manager points 50 and optimal
+legal team points 128. Live Points displayed ItsMePP's 32 points, Warut's
+seven, Mota's captain score of 12 and a highest manager score of 50.
+
+GW7 remains `provisional`, `score_complete=false`, without a finalization
+timestamp; its three remaining fixtures stay pending. GW8 stays open with its
+unchanged 2026-11-06 17:30 Bangkok deadline. Fifteen independent preservation
+fingerprints confirmed unchanged squads, revisions, classifications, tiers,
+registrations, ownership, relief, the 651-player deadline pool, other match
+facts, historical scores and other Gameweeks. Forty-three targeted rules,
+provisional-scoring and carryover tests passed. A development temporary-payload
+transaction on `br-broad-recipe-azz9hbkx` checked 63 appearances, 13 saves and
+167 points, then rolled back without persistent changes. Import, admin
+correction and completion audits retain the evidence. No production credential
+was read or exported. Temporary maintenance scripts and database-read exports
+were removed after verification.
+
 ## 2026-10-31 GW7 Pattani and Bangkok matches
 
 Owner-approved production-only batch
