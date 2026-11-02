@@ -1,5 +1,51 @@
 # Data sources
 
+## 2026-11-02 GW7 Chonburi-BG Pathum match
+
+Owner-approved production-only batch `gw7-nov02-chonburi-bgpathum-20261103`
+recorded Chonburi FC 1-0 BG Pathum United (`37635`) on confirmed Neon branch
+`br-floral-silence-azzesg4n`, database `neondb`. The approved Thai League
+report owns appearances, event timing and cards. [FotMob match facts and
+commentary](https://www.fotmob.com/matches/chonburi-fc-vs-bg-pathum-united/hbnwfe4#1000017772)
+confirm Stenio Junior's assist for Saharat Sontisawat's 64th-minute goal.
+Individual keeper dialogs record Mendoza one save and Saranon two; both
+played 90 minutes without a goalkeeper change. Saves were not inferred from
+shots on target. There are eight yellows and no reds, own goals or penalty
+events. Official Sarach/Andersen timing is 80, rather than FotMob's 81;
+halftime 46 counts as 45 minutes. All 31 appearances matched fresh production
+identities and GW7 pool positions, without changing player classifications.
+
+An authenticated SQL Editor transaction stored 102 reviewed stat rows and
+canonical point breakdowns: 31 appearances and 71 explicit zero-minute
+results from current registrations, the deadline pool and retained selection
+snapshots. Chonburi players total 54 points and BG players 18. Saharat receives
+eight, Stenio four, Mendoza six and Saranon two. The fixture is finished, with
+attendance 6,105. Its audit retains approved report text, official metadata,
+events, individual keeper evidence, the complete import plan, owner approval
+and recovery timestamp. The import passed a rollback rehearsal and 16
+protected-table fingerprint comparisons before commit.
+
+A subsequent authenticated admin stat save preserved Saharat's imported
+values and invoked canonical Gameweek recalculation in a separate transaction.
+All 470 current GW7 player calculations and all 523 provisional team scores
+passed independent recomputation, including 201 confirmed automatic
+substitutions. Average points are 19, highest manager points 49 and optimal
+legal team points 128. Live Points displayed ItsMePP's 34 points, Kritsada's
+two and Akarapong's one bench point.
+
+GW7 remains `provisional`, `score_complete=false`, without a finalization
+timestamp; its two postponed fixtures stay pending. GW8 remains open with its
+unchanged 2026-11-06 17:30 Bangkok deadline. Fifteen independent preservation
+fingerprints confirmed unchanged squads, revisions, classifications, tiers,
+registrations, ownership, relief, the 651-player deadline pool, other match
+facts, historical scores and other Gameweeks. Forty-three targeted rules,
+provisional-scoring and carryover tests passed. A development temporary-payload
+transaction on `br-broad-recipe-azz9hbkx` checked 31 appearances, three saves
+and 72 points, then rolled back without persistent changes. Import, admin
+correction and completion audits retain the evidence. No production credential
+was read or exported. Temporary maintenance scripts and database-read exports
+were removed after verification.
+
 ## 2026-11-01 GW7 Sukhothai and Rayong matches
 
 Owner-approved production-only batch
