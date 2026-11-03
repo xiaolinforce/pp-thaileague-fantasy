@@ -56,11 +56,17 @@ with no expiry. Multi-step restore created rehearsal branch
 240 fixtures, 30 gameweeks, and the fingerprint of all fixture rows between the
 restored and original branches.
 
-Twenty-eight pre-cutover Git Preview deployments were retired. The stable
-`dev` alias still serves the new Dev database. One pre-cutover CLI Preview,
-`dpl_6vs2NMTCaAkuwGU6xWSfX9YxcxYQ`, has no assigned alias but its database
-target could not be verified. The original Dev root and rehearsal branch
-remain while retirement is pending.
+Twenty-eight pre-cutover Git Previews and the owner-approved unaliased CLI
+Preview `dpl_6vs2NMTCaAkuwGU6xWSfX9YxcxYQ` were retired. Vercel listed no
+remaining ready pre-cutover deployments for `dev`. The legacy database showed
+only Neon service connections, the SQL Editor, and idle pooler sessions during
+the final check.
+
+The legacy Dev root and restore rehearsal branch were deleted. The `PP Prod`
+project lists only the production root. The tested manual snapshot remains
+available under Backup & Restore with no expiry. For recovery, use multi-step
+restore to create a separate branch. Fixtures returned HTTP 200 in both Dev
+Preview and Production after cleanup.
 
 ## 2026-10-26 — Tier-change allowance release and recovery
 
