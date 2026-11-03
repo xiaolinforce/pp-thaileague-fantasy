@@ -12,11 +12,10 @@ production Neon compute in Singapore. Keep this deployment affinity aligned if
 the database region changes; cross-region SQL round trips multiply quickly on
 authenticated pages.
 
-Production and development persist in separate Neon root branches with no
-parent relationship. Each environment owns its accounts and Fantasy history;
-schema migrations are applied independently, and source-data maintenance must
-confirm the current branch ID before writing. Connection endpoints stayed stable
-during the 2026-10-13 root migration; current branch IDs and recovery evidence
+Production and development persist in separate Neon projects and organizations
+with independent billing. Each environment owns its accounts and Fantasy
+history. Apply schema migrations independently and confirm the current project
+and branch before source-data maintenance. Current targets and recovery evidence
 are recorded in `PRODUCTION.md`.
 
 ```text

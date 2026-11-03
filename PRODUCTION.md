@@ -6,16 +6,40 @@
 | ------------------- | -------------------------------------------------------- |
 | Public site         | `https://fantasy.ppfootball.net` on Vercel               |
 | Source branch       | GitHub `main`                                            |
-| Database            | Separate Neon `production` branch                        |
+| Database            | Neon `production` root in the `PP Prod` project          |
 | Member sign-in      | Google OAuth and passwordless Email OTP                  |
 | Bot protection      | Cloudflare Turnstile for Email OTP requests              |
 | Transactional email | Resend → Mailjet from `no-reply@auth.ppfootball.net`     |
 | User support        | `support@ppfootball.net`, forwarded to the product owner |
 | Monitoring          | Sentry Developer Free plus Vercel Runtime Logs           |
 
-The `development` Neon branch and Vercel Preview environment remain isolated
-from Production. Never copy member, session, team, selection, score, league, or
-audit rows between environments.
+Development uses a separate project in `PP Dev`. Never copy member, session,
+team, selection, score, league, or audit rows between environments.
+
+## 2026-11-04 — Separate Neon organizations
+
+| Environment | Neon organization  | Project ID                     | Default branch ID            |
+| ----------- | ------------------ | ------------------------------ | ---------------------------- |
+| Production  | `PP Prod` (Launch) | `lingering-butterfly-08105579` | `br-floral-silence-azzesg4n` |
+| Development | `PP Dev` (Free)    | `frosty-band-65544074`         | `br-late-block-a1ewumjr`     |
+
+Both projects are in Singapore. The GitHub Production environment's
+`NEON_PRODUCTION_BRANCH_ID` matches the existing Neon root and the public
+Fixtures page returned HTTP 200 after the Dev switch.
+
+Development was restored from its previous root with PostgreSQL 18.6. Counts
+and row fingerprints matched across 50 tables, including the Drizzle journal.
+The release verifier matched all 25 applied migrations to the repository with
+zero pending. Sequence state matched, and `db:check` and a rollback-only write
+probe passed through the pooled connection on the new root.
+
+Local `DATABASE_URL` points to the new Dev root. The Vercel Preview secret
+scoped to `dev` was updated to the same URL. Both Preview redeployments built
+successfully, but the Fixtures route failed at runtime when the Neon HTTP
+driver reported `TypeError: fetch failed`. Preview verification is pending.
+Earlier Preview deployments retain the environment values they received at
+deploy time. The old `development` root `br-broad-recipe-azz9hbkx` remains in
+`PP Prod` for rollback.
 
 ## 2026-10-26 — Tier-change allowance release and recovery
 

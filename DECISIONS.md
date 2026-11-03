@@ -38,6 +38,19 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-11-04 — Separate Neon organizations for billing
+
+**Decision:** Keep Production in its existing Neon project under `PP Prod`
+and run development in its own project under `PP Dev`.
+
+**Context:** Separate organizations let the owner manage development and
+production usage and plans independently. The old project was already in
+`PP Prod`, so only development required a data copy.
+
+**Consequences:** The Dev project is the target for local development, Preview,
+and disposable QA. Production releases continue to check the existing
+Production branch. See `PRODUCTION.md` for current IDs and cutover status.
+
 ## 2026-10-13 — Production and development use independent Neon roots
 
 **Decision:** Maintain exactly two long-lived Neon environments, `production`

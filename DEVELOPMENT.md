@@ -186,7 +186,7 @@ format-check failures.
 
 ## Database workflow
 
-`npm run db:verify:tier-relief -- --branch-id=br-broad-recipe-azz9hbkx` runs
+`npm run db:verify:tier-relief -- --branch-id=br-late-block-a1ewumjr` runs
 rollback-only integration scenarios for tier events, gradual saves, forbidden
 new elites, stale revisions, restore protection and future-event carryover.
 The command refuses production and verifies fingerprints after rollback.
@@ -204,13 +204,13 @@ transfer revisions or scores. Release the application with the compatible
 migration before enabling this behavior; recovery is a separate reviewed data
 operation, not a schema migration or an automatic grant to every over-quota team.
 
-Local development and the `dev` Vercel Preview use independent Neon root
-`development` (`br-broad-recipe-azz9hbkx`). Production uses root `production`
-(`br-floral-silence-azzesg4n`, default). Neither has a parent. The 2026-10-13
-cutover preserved both compute endpoints and role passwords, so existing
-connection strings remain valid; confirm the new branch ID with `db:check`
-before maintenance. Never reset one environment from the other. Disposable QA
-branches remain temporary and must be removed when testing finishes.
+Local development uses the `development` root (`br-late-block-a1ewumjr`) in
+project `frosty-band-65544074` under `PP Dev`. See `PRODUCTION.md` for the
+`dev` Vercel Preview cutover status. Vercel Production uses the
+`production` root (`br-floral-silence-azzesg4n`) in project
+`lingering-butterfly-08105579` under `PP Prod`. Confirm the intended branch
+with `db:check` before maintenance. Never reset one environment from the other.
+Create disposable QA branches in the Dev project and remove them after testing.
 
 1. Change `src/db/schema.ts`.
 2. Run `npm run db:generate`.
