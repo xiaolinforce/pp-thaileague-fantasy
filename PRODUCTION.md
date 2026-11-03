@@ -36,10 +36,11 @@ probe passed through the pooled connection on the new root.
 Local `DATABASE_URL` points to the new Dev root. The Vercel Preview secret
 scoped to `dev` was updated to the same URL. Both Preview redeployments built
 successfully, but the Fixtures route failed at runtime when the Neon HTTP
-driver reported `TypeError: fetch failed`. Preview verification is pending.
-Earlier Preview deployments retain the environment values they received at
-deploy time. The old `development` root `br-broad-recipe-azz9hbkx` remains in
-`PP Prod` for rollback.
+driver reported `TypeError: fetch failed`. The stable `dev` Preview alias was
+reassigned to the previous deployment, `dpl_6cY1t2Ktcxb1h2egMCq4m1GTT45L`.
+That deployment retains its original environment values and uses the old
+`development` root `br-broad-recipe-azz9hbkx` in `PP Prod`. Keep the alias
+there until an isolated Preview using the new Dev root passes verification.
 
 ## 2026-10-26 — Tier-change allowance release and recovery
 
