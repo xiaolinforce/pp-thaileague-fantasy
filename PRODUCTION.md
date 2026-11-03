@@ -48,7 +48,19 @@ protected network probe reached the Neon HTTPS SQL endpoint. Before assigning
 the stable `dev` alias to `dpl_6yknhvXUonim8ZZTGHSnARKYvMsp`, the public
 Fixtures page displayed eight Gameweek 10 kickoff times matching a read-only
 query on `br-late-block-a1ewumjr`. The stable alias displayed the same data
-after assignment. The old root remains available for rollback.
+after assignment.
+
+A manual snapshot of the old Dev root was captured at 2026-11-03 19:12:11 UTC
+with no expiry. Multi-step restore created rehearsal branch
+`br-still-dew-az6yazsk`. A read-only comparison matched 25 migration records,
+240 fixtures, 30 gameweeks, and the fingerprint of all fixture rows between the
+restored and original branches.
+
+Twenty-eight pre-cutover Git Preview deployments were retired. The stable
+`dev` alias still serves the new Dev database. One pre-cutover CLI Preview,
+`dpl_6vs2NMTCaAkuwGU6xWSfX9YxcxYQ`, has no assigned alias but its database
+target could not be verified. The original Dev root and rehearsal branch
+remain while retirement is pending.
 
 ## 2026-10-26 — Tier-change allowance release and recovery
 
