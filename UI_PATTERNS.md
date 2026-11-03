@@ -67,6 +67,11 @@ date grouping, club-color identity, score/kickoff display, and empty state for
 the shell and public supporting notes/links; authentication stays in the
 private route. Thai and English labels come directly from the language context.
 
+On entry, open the Gameweek of a live fixture or the next scheduled kickoff,
+in that order. When neither is available, open the highest Gameweek with a
+finished fixture, or the first available Gameweek before any results. Postponed
+fixtures stay in their assigned Gameweeks.
+
 ## Action pattern
 
 - Give each local task one visually dominant action.

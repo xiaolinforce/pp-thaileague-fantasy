@@ -10,8 +10,6 @@ import {
   clubVisualIdentities,
   competitionEntries,
   competitionSeasons,
-  fantasyGameweeks,
-  fantasySeasons,
   fixtures,
   venues,
 } from "@/db/schema";
@@ -77,14 +75,16 @@ function formatFixtureTime(date: Date | null): LocalizedText {
   return { th: time, en: time };
 }
 
-async function loadFixturesDataset(): Promise<FixturesDataset> {
+async function loadFixturesDataset(): Promise<
+  Omit<FixturesDataset, "currentGameweek">
+> {
   const startedAt = Date.now();
   const season = await db.query.competitionSeasons.findFirst({
     where: eq(competitionSeasons.externalId, COMPETITION_SEASON_EXTERNAL_ID),
   });
   if (!season) throw new Error("Competition season 2026/27 was not found.");
 
-  const [entryRows, fixtureRows, venueRows, fantasySeason] = await Promise.all([
+  const [entryRows, fixtureRows, venueRows] = await Promise.all([
     db
       .select({
         entry: competitionEntries,
@@ -106,24 +106,7 @@ async function loadFixturesDataset(): Promise<FixturesDataset> {
       .where(eq(fixtures.competitionSeasonId, season.id))
       .orderBy(asc(fixtures.matchweek), asc(fixtures.kickoffAt)),
     db.select().from(venues),
-    db.query.fantasySeasons.findFirst({
-      where: eq(fantasySeasons.competitionSeasonId, season.id),
-    }),
   ]);
-  const gameweeks = fantasySeason
-    ? await db
-        .select()
-        .from(fantasyGameweeks)
-        .where(eq(fantasyGameweeks.fantasySeasonId, fantasySeason.id))
-        .orderBy(asc(fantasyGameweeks.number))
-    : [];
-  const initialFixtureMatchweek = getInitialFixtureMatchweek(fixtureRows);
-  const currentGameweek =
-    initialFixtureMatchweek !== null
-      ? { number: initialFixtureMatchweek }
-      : (gameweeks.find((gameweek) => gameweek.status === "open") ??
-        gameweeks.find((gameweek) => gameweek.status === "planned") ??
-        gameweeks.at(-1));
 
   const clubByEntry = new Map<string, CompetitionClubView>();
   for (const { entry, club, visualIdentity } of entryRows) {
@@ -179,8 +162,7 @@ async function loadFixturesDataset(): Promise<FixturesDataset> {
   const dataset = {
     fixtures: fixtureViews,
     matchweeks: [...new Set(fixtureViews.map((fixture) => fixture.matchweek))],
-    currentGameweek: currentGameweek?.number ?? null,
-  } satisfies FixturesDataset;
+  };
   logServerTiming("fixtures.dataset", startedAt, {
     fixtures: dataset.fixtures.length,
   });
@@ -189,11 +171,15 @@ async function loadFixturesDataset(): Promise<FixturesDataset> {
 
 const getCachedFixturesDataset = unstable_cache(
   loadFixturesDataset,
-  ["fixtures-dataset-v1"],
+  ["fixtures-dataset-v2"],
   { revalidate: 300, tags: ["fixtures-dataset"] },
 );
 
 export async function getFixturesDataset(): Promise<FixturesDataset> {
   await connection();
-  return getCachedFixturesDataset();
+  const dataset = await getCachedFixturesDataset();
+  return {
+    ...dataset,
+    currentGameweek: getInitialFixtureMatchweek(dataset.fixtures, Date.now()),
+  };
 }
