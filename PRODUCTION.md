@@ -39,8 +39,16 @@ successfully, but the Fixtures route failed at runtime when the Neon HTTP
 driver reported `TypeError: fetch failed`. The stable `dev` Preview alias was
 reassigned to the previous deployment, `dpl_6cY1t2Ktcxb1h2egMCq4m1GTT45L`.
 That deployment retains its original environment values and uses the old
-`development` root `br-broad-recipe-azz9hbkx` in `PP Prod`. Keep the alias
-there until an isolated Preview using the new Dev root passes verification.
+`development` root `br-broad-recipe-azz9hbkx` in `PP Prod` while the new
+Dev connection was investigated.
+
+An isolated Preview later passed after the known-good `DATABASE_URL` was
+written directly through the Vercel API. A Vercel Authentication and token
+protected network probe reached the Neon HTTPS SQL endpoint. Before assigning
+the stable `dev` alias to `dpl_6yknhvXUonim8ZZTGHSnARKYvMsp`, the public
+Fixtures page displayed eight Gameweek 10 kickoff times matching a read-only
+query on `br-late-block-a1ewumjr`. The stable alias displayed the same data
+after assignment. The old root remains available for rollback.
 
 ## 2026-10-26 — Tier-change allowance release and recovery
 
