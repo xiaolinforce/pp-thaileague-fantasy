@@ -16,6 +16,32 @@
 Development uses a separate project in `PP Dev`. Never copy member, session,
 team, selection, score, league, or audit rows between environments.
 
+## 2026-11-05 — Sentry incident follow-up
+
+- Resolved `PP-THAILEAGUE-FANTASY-13` after the production Home multipart
+  guard returned HTTP 400 with `Cache-Control: no-store`; no recurrence was
+  recorded after 2026-10-21. Production runs `34c80cd`, which includes the fix.
+- Resolved `1A` and `R`, the correlated database/render failures from the
+  failed Dev cutover Previews. The stable `dev` alias still targets
+  `dpl_6yknhvXUonim8ZZTGHSnARKYvMsp`; its public
+  `/thai-league/2026-27/fixtures` route returned HTTP 200 with eight Gameweek 11
+  fixtures. Unauthenticated `/fixtures` correctly redirected to onboarding.
+- Resolved `17` and `18` after a read-only check on
+  `br-late-block-a1ewumjr` confirmed `fantasy_gameweeks.tier_rules_version`,
+  `fantasy_tier_reliefs`, and 25 applied migrations.
+- Keep `1B` and `1C` open for recurrence: the session and database failures
+  share a development trace from 2026-11-04; the current connection and schema
+  checks pass. No retry or error-suppression change is justified yet.
+- Keep development-only `12` and `G` open; their latest events are from
+  2026-10-25, with no demonstrated production failure.
+- `19` is a Facebook iOS injected-script failure, confirmed by its replay
+  (Facebook 584.1.0, iOS 27.0.1). The new exact-signature filter and regression
+  tests are prepared locally. Keep the issue open until deployment and an
+  affected-browser check; desktop success alone does not prove recovery.
+- The ten latest `auth-maintenance` check-ins passed, through
+  2026-11-05 02:42 Bangkok time. The previous timeout issue and simulated
+  test issue `15` were already resolved.
+
 ## 2026-11-04 — Separate Neon organizations
 
 | Environment | Neon organization  | Project ID                     | Default branch ID            |
