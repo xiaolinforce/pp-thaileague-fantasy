@@ -156,6 +156,13 @@ message and includes a frame from Facebook's injected `app://` navigation
 logger. Sentry's `in_app` classification and caller frames do not determine the
 exception source. Missing bridge frames and mixed errors remain observable.
 
+Issue `PP-THAILEAGUE-FANTASY-19` has a separate, stricter filter for Facebook's
+injected `window._META.IABInnerFrame` failure, confirmed by its Facebook iOS
+replay. It requires a Facebook user agent, the exact TypeError and browser
+`onerror` mechanism, and a nonempty stack containing only `app:///` frames
+for every exception. Missing/unknown/application frames and mixed chains stay
+reportable.
+
 The browser hook also discards the verified Obscura runtime `toLowerCase`
 rejection from issue `PP-THAILEAGUE-FANTASY-Y`: every exception must match the
 exact TypeError and unhandled-rejection mechanism, contain both

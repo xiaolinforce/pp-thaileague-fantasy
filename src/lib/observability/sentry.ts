@@ -112,6 +112,24 @@ function hasFacebookBridgeFramePerException(event: Event): boolean {
   );
 }
 
+function isVerifiedFacebookInnerFrameFailure(event: Event): boolean {
+  const exceptions = event.exception?.values ?? [];
+  return (
+    exceptions.length > 0 &&
+    exceptions.every((exception) => {
+      const frames = exception.stacktrace?.frames ?? [];
+      return (
+        exception.type === "TypeError" &&
+        exception.value ===
+          "undefined is not an object (evaluating 'window._META.IABInnerFrame')" &&
+        exception.mechanism?.type === "auto.browser.global_handlers.onerror" &&
+        frames.length > 0 &&
+        frames.every((frame) => frame.filename === "app:///")
+      );
+    })
+  );
+}
+
 const obscuraRuntimeFrames = new Set([
   "<script>",
   "<obscura:bootstrap>",
@@ -143,8 +161,9 @@ export function prepareBrowserSentryEvent<T extends Event>(
   userAgent: string,
 ): T | null {
   const exceptions = event.exception?.values ?? [];
+  const isFacebookBrowser = /\b(?:FBAN|FBAV|FB_IAB)\//.test(userAgent);
   const isFacebookBridge =
-    /\b(?:FBAN|FBAV|FB_IAB)\//.test(userAgent) &&
+    isFacebookBrowser &&
     exceptions.length > 0 &&
     exceptions.every((exception) =>
       facebookBridgeMessages.has(exception.value ?? ""),
@@ -160,6 +179,11 @@ export function prepareBrowserSentryEvent<T extends Event>(
   // Issue #Y contains only injected runtime frames, including both source
   // markers. Keep incomplete stacks, new variants, and any application frames.
   if (isVerifiedObscuraRuntimeFailure(clean)) return null;
+
+  // Issue #19's replay confirms Facebook iOS. Require its exact native-script
+  // signature; application callers, unknown frames and mixed chains stay visible.
+  if (isFacebookBrowser && isVerifiedFacebookInnerFrameFailure(clean))
+    return null;
 
   // Sentry can mark injected app:// frames as in-app and can retain the caller
   // below them. The exact message plus a verified bridge frame establishes the

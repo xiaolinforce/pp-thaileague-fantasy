@@ -230,6 +230,84 @@ test("keeps an exact bridge message without a verified bridge frame", () => {
   assert.equal(clean?.exception?.values?.[0]?.stacktrace?.frames?.length, 1);
 });
 
+function facebookInnerFrameEvent(): Event {
+  return {
+    exception: {
+      values: [
+        {
+          type: "TypeError",
+          value:
+            "undefined is not an object (evaluating 'window._META.IABInnerFrame')",
+          mechanism: {
+            type: "auto.browser.global_handlers.onerror",
+            handled: false,
+          },
+          stacktrace: {
+            frames: [
+              { filename: "app:///", lineno: 1, colno: 136, in_app: true },
+              { filename: "app:///", lineno: 1, colno: 51, in_app: true },
+            ],
+          },
+        },
+      ],
+    },
+  };
+}
+
+const facebookIosAgent = "Mozilla/5.0 [FBAN/FBIOS;FBAV/584.1.0;]";
+
+test("drops the observed Facebook IABInnerFrame native-script failure", () => {
+  const event = facebookInnerFrameEvent();
+  assert.equal(prepareBrowserSentryEvent(event, facebookIosAgent), null);
+  assert.equal(event.exception?.values?.[0]?.stacktrace?.frames?.length, 2);
+  for (const agent of ["", "Mobile Safari/605.1.15", "Chrome/152.0.0"]) {
+    assert.ok(prepareBrowserSentryEvent(event, agent));
+  }
+});
+
+test("keeps IABInnerFrame errors with application, unknown or missing frames", () => {
+  for (const filename of [
+    "/_next/static/chunks/app.js",
+    "https://fantasy.ppfootball.net/_next/static/chunks/app.js",
+    "app://unknown-script",
+    "<anonymous>",
+    undefined,
+  ]) {
+    const event = facebookInnerFrameEvent();
+    event.exception!.values![0].stacktrace!.frames!.push({ filename });
+    assert.ok(prepareBrowserSentryEvent(event, facebookIosAgent), filename);
+  }
+  const empty = facebookInnerFrameEvent();
+  empty.exception!.values![0].stacktrace!.frames = [];
+  assert.ok(prepareBrowserSentryEvent(empty, facebookIosAgent));
+  delete empty.exception!.values![0].stacktrace;
+  assert.ok(prepareBrowserSentryEvent(empty, facebookIosAgent));
+});
+
+test("keeps other Meta errors, capture mechanisms and mixed exception chains", () => {
+  const otherMessage = facebookInnerFrameEvent();
+  otherMessage.exception!.values![0].value =
+    "undefined is not an object (evaluating 'window._META.other')";
+  assert.ok(prepareBrowserSentryEvent(otherMessage, facebookIosAgent));
+  const otherType = facebookInnerFrameEvent();
+  otherType.exception!.values![0].type = "Error";
+  assert.ok(prepareBrowserSentryEvent(otherType, facebookIosAgent));
+  const manual = facebookInnerFrameEvent();
+  manual.exception!.values![0].mechanism!.type = "generic";
+  assert.ok(prepareBrowserSentryEvent(manual, facebookIosAgent));
+  delete manual.exception!.values![0].mechanism;
+  assert.ok(prepareBrowserSentryEvent(manual, facebookIosAgent));
+  const mixed = facebookInnerFrameEvent();
+  mixed.exception!.values!.push({
+    type: "Error",
+    value: "Failed query: select * from test\nparams: private-manager-id",
+  });
+  const clean = prepareBrowserSentryEvent(mixed, facebookIosAgent);
+  assert.ok(clean);
+  assert.equal(clean.exception?.values?.length, 2);
+  assert.ok(!JSON.stringify(clean).includes("private-manager-id"));
+});
+
 function obscuraRuntimeEvent(): Event {
   return {
     environment: "production",

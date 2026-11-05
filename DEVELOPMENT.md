@@ -104,6 +104,11 @@ Facebook bridge-noise boundary: only verified bridge messages whose exception
 stacks each contain an injected `app://` frame are dropped. Sentry may mark
 those injected frames as `in_app` and may retain application callers below the
 error source. Missing bridge frames and mixed exceptions remain reportable.
+The Facebook iOS `window._META.IABInnerFrame` filter is narrower: its exact
+TypeError and browser `onerror` mechanism require a Facebook user agent and
+only `app:///` frames in every exception. Regression tests retain other
+browsers, missing or mixed stacks, other messages/types/mechanisms, and chained
+application failures.
 The Obscura runtime filter requires the exact observed `toLowerCase` TypeError,
 the browser unhandled-rejection mechanism, both verified runtime markers, and
 no application or unknown stack frames. The same observability tests ensure
