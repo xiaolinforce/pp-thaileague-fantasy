@@ -1,5 +1,34 @@
 # Data sources
 
+## 2026-11-06 GW8 Lamphun–Sukhothai match
+
+Owner-approved batch `gw8-nov06-lamphun-sukhothai-20261106` recorded Lamphun
+Warriors 0–0 Sukhothai FC (`37467`) with attendance 1,771 on production Neon
+branch `br-floral-silence-azzesg4n`, database `neondb`. The [Thai League match
+report](https://competition.tl.prod.c0d1um.io/media/tmp/1945510b-23c5-49a1-9832-2e578ef94d3a.pdf)
+records nine substitutions. Both teams kept a clean sheet and the match had no
+goals, assists, cards or penalties. [FotMob individual goalkeeper stats](https://www.fotmob.com/matches/sukhothai-fc-vs-lamphun-warrior/8qdfxlt2#1000017773)
+record Nont Muangngam with zero saves and Kittipun Saensuk with four, both over
+90 minutes. They earned six and seven points respectively. The substitution
+marked 46 counts as halftime, and Wattanakorn and Rhuan each receive the
+one-minute minimum for entering at 90+2.
+
+The authenticated SQL Editor import passed a rollback rehearsal on the target
+branch. It committed 59 reviewed stat and point rows, covering 31 appearances
+and 28 zero-minute results worth 100 points in total. The fixture audit retains
+the official report, substitution times, keeper evidence and reviewed rows.
+All 46 players in the match report matched the approved minutes, saves, totals
+and breakdowns after commit. On development `br-late-block-a1ewumjr`, all 46
+scoring inputs passed a read-only comparison. The full import rehearsal there
+rolled back at the registration check for Arnold Suew (`99760`).
+
+The authenticated Gameweek lock captured a 651-player GW8 pool and computed
+provisional scores for 534 selections. The live Points page showed an average
+of two and the database recorded a highest score of 13. GW8 remains provisional
+with seven fixtures pending. GW9 opened with 534 draft selections, 184 with
+players carried over. The live Team page confirmed GW9 and its 2026-11-21
+16:30 Bangkok deadline. All 165 Fantasy rules tests passed.
+
 ## 2026-11-02 GW7 Chonburi-BG Pathum match
 
 Owner-approved production-only batch `gw7-nov02-chonburi-bgpathum-20261103`
