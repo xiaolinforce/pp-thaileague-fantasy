@@ -1,5 +1,50 @@
 # Data sources
 
+## 2026-11-07 GW8 Ayutthaya, Uthai Thani and Port matches
+
+Owner-approved production batch `gw8-nov07-three-matches-20261107` recorded
+Ayutthaya United 2–1 Pattani (`37466`), Uthai Thani 2–2 Chiangrai United
+(`37465`) and Port 1–1 Chonburi (`37464`) on confirmed Neon branch
+`br-floral-silence-azzesg4n`, database `neondb`. The owner denied a Fantasy
+assist for Lucas Serafim on Ewerton's opener, leaving Lucas on two points.
+The reviewed [Ayutthaya highlight](https://www.youtube.com/watch?v=3si2lmvoIvI)
+shows his cross deflecting off Igor Neves before reaching Ewerton. The owner
+accepted the Uthai–Chiangrai FotMob events while the official result awaited
+approval. Its official starting list confirms the squad. Dudu's equalizer is
+a direct free kick, also checked in the [Uthai highlight](https://www.youtube.com/watch?v=lJ5KOaLD2bw).
+
+Approved Thai League reports own Ayutthaya and Port event timing. Kusano's goal
+is 82, Boontawee's is 90+7, Ayutthaya's three changes are 73 and Pattani's
+paired changes are 67. Clayton enters after Kusano's goal at 82 and has zero
+goals conceded while playing. Dennis's equalizer is 51 and Chonburi's final
+two changes are 84. Halftime labels of 46 count as 45 minutes. Uthai–Chiangrai
+uses the accepted FotMob timeline, including Thanasak's 90+5 entry receiving
+one Fantasy minute. Warinthon's dismissal counts as two yellows and one red,
+giving him minus four points. All 133 match-squad identities and positions
+matched the existing GW8 deadline pool.
+
+Individual FotMob keeper dialogs record Warut three saves, Damyanov four,
+Caíque five, Apirak one, Falkesgaard one and Mendoza five. All six played
+90 minutes. The batch contains nine goals, seven assists, sixteen yellows and
+one second-yellow dismissal. The import stored 223 reviewed stat and point
+rows, covering 94 appearances and 129 explicit zero-minute results from
+registrations, the deadline pool and retained selections. Match point totals
+are 63 for Ayutthaya–Pattani, 68 for Uthai–Chiangrai and 62 for Port–Chonburi.
+Fixture audits retain official metadata, report text, events, keeper evidence,
+the complete reviewed inputs, owner decisions and recovery timestamps.
+
+The import passed a production rollback rehearsal and sixteen protected-data
+fingerprints. A temporary-payload transaction on development
+`br-late-block-a1ewumjr` checked all 133 inputs and 193 points, then rolled back.
+An authenticated admin stat save preserved Lucas's values and invoked canonical
+GW8 recalculation. Independent recomputation matched all 282 GW8 player
+calculations, all 534 provisional team scores and 116 automatic substitutions.
+Average points are nine, highest manager points 26 and optimal legal team
+points 77. Live Points showed ItsMePP on 16 points. GW8 remains provisional
+with four fixtures pending, and GW9 remains open. All 165 Fantasy rules tests
+passed. Temporary maintenance scripts and database-read exports were removed
+after verification.
+
 ## 2026-11-06 GW8 Lamphun–Sukhothai match
 
 Owner-approved batch `gw8-nov06-lamphun-sukhothai-20261106` recorded Lamphun
