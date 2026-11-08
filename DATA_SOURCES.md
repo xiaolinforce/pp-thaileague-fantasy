@@ -1,5 +1,62 @@
 # Data sources
 
+## 2026-11-08 GW8 four matches and final scores
+
+Owner-approved production batch `gw8-nov08-four-matches-final-20261108`
+recorded Ratchaburi 1–2 Buriram (`37460`), Prachuap 2–1 Sisaket (`37461`),
+BG Pathum 3–0 Rayong (`37462`) and Rasisalai 0–3 Bangkok (`37463`) on Neon
+branch `br-floral-silence-azzesg4n`, database `neondb`. All four approved
+[Thai League reports](https://thaileague.co.th/results/224) own lineups,
+event timing and cards. Individual FotMob keeper dialogs record Kampol one
+save, Etheridge four, Wattanachai three, Van Dijk three, Saranon one, Wichaya
+two, Sakkongpop three and Patiwat five. All eight played 90 minutes, without
+a goalkeeper change; saves were not inferred from shots on target.
+
+The owner granted Edgar Mendez one Fantasy assist for winning the penalty
+converted by Taua, raising Edgar from six to nine points. Source assists
+remain zero for this event. The owner denied additional assists for
+Chanathip before Leon's opener, Chanon Tamma on Mayron's own goal and James
+Beresford before Popp's first goal. They retain two, one and six points.
+These decisions were reviewed against the [BG highlight](https://www.youtube.com/watch?v=i4n44X7QXc0),
+[Prachuap highlight](https://www.youtube.com/watch?v=lNONDDjamZI) and
+[Rasisalai highlight](https://www.youtube.com/watch?v=EIdBbNqXGK0).
+Frame review confirms number 10 Andersen provides the final ball before
+Akarapong's goal, preserving his source assist and six points.
+
+Official timing includes Akarapong's goal at 53, Lara's direct red at 47,
+Sarach's exit at 60, Pansa's exit at 76 before Njiva scores at 78, and
+Bissoli's yellow at 90+5, which FotMob's event list omitted. Pansa receives
+11 points, Theerathon nine and Sarach three. Halftime labels of 46 count as
+45 minutes; Chitsanuphong's 90+6 entry receives one Fantasy minute and one
+point. Existing positions and the Verot Pombuppha identity/name remain
+unchanged. All 181 match-squad identities matched the GW8 deadline pool.
+
+The import stored 372 reviewed stat and point rows: 127 appearances and
+245 explicit zero-minute results from registrations, the deadline pool and
+retained selections. Per-match player-point totals are 81, 67, 70 and 91,
+respectively, totaling 309. The batch has 11 credited goals, one own goal,
+eight source assists, nine reviewed Fantasy assists, nine yellows, one direct
+red and 39 substitutions. Taua converted the only penalty; there were no
+penalty saves or misses. Four fixture audits retain official metadata,
+report text, timed events, keeper evidence, complete reviewed inputs, owner
+decisions, protected fingerprints and recovery timestamps.
+
+Production rollback rehearsal and committed import both passed 16 protected
+data fingerprints. A temporary-payload transaction on confirmed development
+branch `br-late-block-a1ewumjr` checked all 181 inputs and 309 points, then
+rolled back without changing development source or Fantasy rows. The
+authenticated admin finalization set GW8 to `final`, `score_complete=true`,
+at `2026-11-08T16:46:20.554Z` and invoked canonical recalculation. Independent
+recomputation matched all 654 GW8 player calculations, 534 final team scores
+and 534 Overall standings, including 339 automatic substitutions and 23
+captain fallbacks. Every one of the 651 deadline-pool players has a scored
+result, with no missing point rows. Average points are 31, highest manager
+points 58 and optimal legal team points 105. Live Points showed ItsMePP on
+40 points. GW7 remains provisional and GW9 remains open. A completion audit
+records the verified outcome and a second comparison of the 16 fingerprints.
+All 165 Fantasy rules tests passed. No production credential was read or
+exported; temporary maintenance scripts and database-read exports were removed.
+
 ## 2026-11-07 GW8 Ayutthaya, Uthai Thani and Port matches
 
 Owner-approved production batch `gw8-nov07-three-matches-20261107` recorded
