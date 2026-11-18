@@ -9,6 +9,11 @@ This project uses Next.js 16. Before changing framework code, read the
 relevant bundled guide under `node_modules/next/dist/docs/`; APIs and conventions
 may differ from older Next.js versions.
 
+The production release workflow installs Vercel CLI from
+`.github/release-cli/package-lock.json` into the runner's temporary directory.
+Its scoped `tar` override keeps `@vercel/container` on the patched release
+until upstream updates its pinned dependency.
+
 ## Environment setup
 
 Install dependencies and create the local environment file:

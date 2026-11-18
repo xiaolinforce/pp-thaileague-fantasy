@@ -66,7 +66,18 @@ jobs:
         with:
           node-version: 26.13.1
           cache: npm
-      - run: npm install --global npm@12.2.3 vercel@59.11.7
+          cache-dependency-path: |
+            package-lock.json
+            .github/release-cli/package-lock.json
+      - run: npm install --global npm@12.2.3
+      - name: Install the locked Vercel CLI
+        shell: bash
+        run: |
+          cli_dir="$RUNNER_TEMP/vercel-cli"
+          mkdir -p "$cli_dir"
+          cp .github/release-cli/package.json .github/release-cli/package-lock.json "$cli_dir"
+          npm ci --prefix "$cli_dir"
+          printf '%s\n' "$cli_dir/node_modules/.bin" >> "$GITHUB_PATH"
       - run: npm ci
       - name: Set the candidate state path on this runner
         run: echo "RELEASE_STATE_PATH=$RUNNER_TEMP/production-release.json" >> "$GITHUB_ENV"

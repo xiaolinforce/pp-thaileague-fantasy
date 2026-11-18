@@ -1,0 +1,13 @@
+{
+  "name": "pp-thaileague-fantasy-release-cli",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "vercel": "66.1.0"
+  },
+  "overrides": {
+    "@vercel/container@26.1.0": {
+      "tar": "7.5.23"
+    }
+  }
+}
