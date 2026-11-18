@@ -275,7 +275,10 @@ test("keeps IABInnerFrame errors with application, unknown or missing frames", (
   ]) {
     const event = facebookInnerFrameEvent();
     event.exception!.values![0].stacktrace!.frames!.push({ filename });
-    assert.ok(prepareBrowserSentryEvent(event, facebookIosAgent), filename);
+    assert.ok(
+      prepareBrowserSentryEvent(event, facebookIosAgent),
+      filename ?? "unidentified frame",
+    );
   }
   const empty = facebookInnerFrameEvent();
   empty.exception!.values![0].stacktrace!.frames = [];
@@ -356,7 +359,10 @@ test("keeps the same TypeError from application code or an unidentified frame", 
   ]) {
     const event = obscuraRuntimeEvent();
     event.exception!.values![0].stacktrace!.frames!.push({ filename });
-    assert.ok(prepareBrowserSentryEvent(event, "Chrome/152.0.0"), filename);
+    assert.ok(
+      prepareBrowserSentryEvent(event, "Chrome/152.0.0"),
+      filename ?? "unidentified frame",
+    );
   }
 });
 

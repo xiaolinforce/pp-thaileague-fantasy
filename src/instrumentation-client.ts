@@ -12,7 +12,6 @@ Sentry.init({
   dsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   enabled: Boolean(process.env.NEXT_PUBLIC_SENTRY_DSN),
   environment,
-  enableLogs: true,
   beforeSend: (event) => prepareBrowserSentryEvent(event, navigator.userAgent),
   beforeBreadcrumb: scrubSentryBreadcrumb,
   beforeSendTransaction: scrubSentryEvent,
@@ -37,6 +36,7 @@ Sentry.init({
     graphQL: { document: false, variables: false },
     genAI: { inputs: false, outputs: false },
     databaseQueryData: false,
+    queues: false,
     stackFrameVariables: false,
   },
 });

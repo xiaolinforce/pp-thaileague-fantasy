@@ -30,5 +30,9 @@
   "0024_busy_bloodaxe": {
     "sha256": "da4b8527596575b44cb7e6dcb0fecf9c4ebbd6c7227f13a7fc6b7319a1cfbb46",
     "compatibility": "compatible"
+  },
+  "0025_auth_account_provider_identity": {
+    "sha256": "89b19d508e19fdd2f43f6aa8e33170e5821cb64451babc270315fac1a35e837b",
+    "compatibility": "compatible"
   }
 }

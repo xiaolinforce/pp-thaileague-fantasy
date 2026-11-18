@@ -2,10 +2,10 @@
 
 ## Requirements
 
-- Node.js 24.18.1 and npm 12.0.2, pinned through Volta in `package.json`.
+- Node.js 26.13.1 and npm 12.2.3, pinned through Volta in `package.json`.
 - A populated PostgreSQL-compatible Neon database branch.
 
-This project uses Next.js 16.3.1. Before changing framework code, read the
+This project uses Next.js 16. Before changing framework code, read the
 relevant bundled guide under `node_modules/next/dist/docs/`; APIs and conventions
 may differ from older Next.js versions.
 
@@ -14,7 +14,7 @@ may differ from older Next.js versions.
 Install dependencies and create the local environment file:
 
 ```powershell
-npm install
+npm ci
 Copy-Item .env.example .env.local
 ```
 
@@ -41,6 +41,13 @@ Never commit a real connection string, auth secret, OAuth credential, email API
 key, or Turnstile secret. The Turnstile site key is intentionally public; do
 not expose any other secret with a `NEXT_PUBLIC_` prefix.
 
+Better Auth 1.7.3 and later look up accounts by provider ID and account ID.
+Migration `0025_auth_account_provider_identity` makes the legacy `issuer`
+column optional and adds a unique provider/account index. It retains the
+old issuer values and index so the previous application can still use them
+during the database-first rollout. A duplicate provider/account pair aborts
+the migration without changing stored identities. Resolve any conflicts
+before retrying.
 Better Auth cookies use the fixed `pp-thaileague-fantasy` prefix. Keep it unique
 among applications running on `localhost`; browser cookies are scoped by host
 and path, not by port.

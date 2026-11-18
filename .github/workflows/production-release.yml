@@ -27,9 +27,9 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.18.1
+          node-version: 26.13.1
           cache: npm
-      - run: npm install --global npm@12.0.2
+      - run: npm install --global npm@12.2.3
       - run: npm ci
       - run: npm run test:release
       - run: npm run test:rules
@@ -37,7 +37,7 @@ jobs:
       - run: npm run test:auth
       - run: npm run test:observability
       - run: npm run test:i18n
-      - run: node --experimental-strip-types --test scripts/tests/seo.test.ts
+      - run: node --test scripts/tests/seo.test.ts
       - run: npm run test:readiness
       - run: npm run types
       - run: npm run lint
@@ -64,9 +64,9 @@ jobs:
           persist-credentials: false
       - uses: actions/setup-node@v7
         with:
-          node-version: 24.18.1
+          node-version: 26.13.1
           cache: npm
-      - run: npm install --global npm@12.0.2 vercel@59.11.7
+      - run: npm install --global npm@12.2.3 vercel@59.11.7
       - run: npm ci
       - name: Set the candidate state path on this runner
         run: echo "RELEASE_STATE_PATH=$RUNNER_TEMP/production-release.json" >> "$GITHUB_ENV"

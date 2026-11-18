@@ -76,7 +76,7 @@ Use the Node.js and npm versions pinned in `package.json`, then install
 dependencies and create the local environment file:
 
 ```powershell
-npm install
+npm ci
 Copy-Item .env.example .env.local
 ```
 
