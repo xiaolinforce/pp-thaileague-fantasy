@@ -1,5 +1,48 @@
 # Data sources
 
+## 2026-11-21 GW9 three matches and provisional scores
+
+Owner-approved production batch `gw9-nov21-three-matches-20261122`
+recorded Pattani 1–5 Sukhothai (`37475`), Chonburi 1–2 Uthai Thani (`37474`),
+and Ratchaburi 0–1 Prachuap (`37472`) on Neon branch
+`br-floral-silence-azzesg4n`, database `neondb`. Approved reports for
+[Pattani](https://competition.tl.prod.c0d1um.io/media/tmp/d775a1dc-42e3-46b0-8e40-22f9f05c6ae2.pdf),
+[Chonburi](https://competition.tl.prod.c0d1um.io/media/tmp/3aa28ce5-a6dc-4bdf-9c3d-03453a551765.pdf),
+and [Ratchaburi](https://competition.tl.prod.c0d1um.io/media/tmp/e64f58b5-815e-4cee-8153-f6d9a4ce09ea.pdf)
+own the lineups, timings and cards. FotMob supplies source assists and
+individual goalkeeper saves. Damyanov made four saves, Kittipun seven,
+Mendoza two, Caíque six, Kampol one, and Wattanachai five. All six played
+90 minutes without a goalkeeper change.
+
+The owner denied a Fantasy assist to Negueba for Dennis's 30th-minute goal
+after the defense failed to clear Negueba's corner. Negueba receives minus
+one point, including a yellow and a missed penalty. Caíque earns 14 points
+from two penalty saves and six total saves. The Chonburi report records the
+penalty incidents at 64 and 85, with FotMob reporting the saves at 66 and 88.
+Both timestamps are recorded in the audit. The batch has ten goals, nine
+source assists, 11 yellows, two missed penalties saved by Caíque, and no
+reds or own goals.
+
+The import matched all 134 match-squad identities and stored 225 stat and
+point rows. There are 93 appearances and 132 confirmed zero-minute results.
+Per-match player-point totals are 86, 68 and 71, respectively. The three
+fixture audits retain the approved report text, source links, events,
+reviewed inputs and owner decision. A production rollback rehearsal and
+the committed import both passed 13 fingerprints for data outside the
+import scope. All 134 scoring inputs passed an independent calculation in
+a temporary-table transaction on development branch `br-late-block-a1ewumjr`
+that rolled back.
+
+The authenticated Gameweek lock captured a 651-player deadline pool and
+set GW9 to `provisional`, `score_complete=false`. Independent recomputation
+matched all 225 player results and 539 provisional team scores, including
+65 automatic substitutions. The Overall table contains 539 standings
+through GW9. Average points are ten, highest manager points 38, optimal
+legal team points 90, and ItsMePP points 18. Five GW9 fixtures remain pending.
+GW10 opened with 539 draft selections and a deadline of November 27,
+17:30 Bangkok time, confirmed on the live Team page. All 165 Fantasy rules
+tests passed.
+
 ## 2026-11-08 GW8 four matches and final scores
 
 Owner-approved production batch `gw8-nov08-four-matches-final-20261108`
