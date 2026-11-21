@@ -25,6 +25,12 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
+The match operations editor at `/match-operations` was exercised in isolated
+headless Chromium with Thai and English at 360px and 1280px. The checks covered
+the roster, blank-safe template, invalid input recovery, point previews,
+preview invalidation after editing, successful apply feedback and horizontal
+overflow. The browser used simulated server actions and a fixture roster.
+
 2026-10-29 Team Gameweek-opponent review: a temporary development-only route
 rendered the real Team components with a GW7 fixture played after the club's
 chronologically next GW8 match, a two-fixture GW including an undated postponed

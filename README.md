@@ -46,6 +46,8 @@ open.
 
 ## Routes
 
+The [Nene matchday instructions](NENE.md) cover kickoff, daily imports, Gameweek review and owner-directed finalization through `/match-operations`.
+
 | Route                         | Purpose                                                                                     |
 | ----------------------------- | ------------------------------------------------------------------------------------------- |
 | `/`                           | Account/Guest onboarding and sign-in.                                                       |

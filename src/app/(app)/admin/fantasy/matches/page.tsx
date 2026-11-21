@@ -88,7 +88,15 @@ export default async function Matches({
       <AdminHeading
         title="ผลการแข่งขันและสถิติ"
         description="เลือกคู่แข่งขัน แล้วเลือกนักเตะจากรายชื่อเพื่อตรวจและแก้ไขสถิติ"
-      />
+      >
+        <Link
+          className={styles.link}
+          href={`/match-operations?gw=${data.gw}${fixture ? "&fixture=" + fixture.id : ""}`}
+        >
+          <AdminName th="นำเข้าทั้งแมตช์" en="Import whole match" />
+          <LinkPendingHint />
+        </Link>
+      </AdminHeading>
       <section className={styles.panel} aria-label="เลือกการแข่งขัน">
         <AdminFilters
           key={`${fixture?.id}:${data.gw}`}

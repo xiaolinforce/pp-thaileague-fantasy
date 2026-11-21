@@ -16,6 +16,13 @@ until upstream updates its pinned dependency.
 
 ## Environment setup
 
+Match operations uses two server-side Better Auth user IDs. Set `NENE_AUTH_USER_ID`
+to a dedicated signed-in member and `NENE_OWNER_AUTH_USER_ID` to the owner's
+admin account in the target environment. Keep these accounts distinct. Sign in
+as the member in Nene's own browser. Give Nene the [matchday assignment](NENE.md)
+and enable the recurring task there. Scheduling and delivery of the end-of-week
+message take place in Nene's task.
+
 Install dependencies and create the local environment file:
 
 ```powershell

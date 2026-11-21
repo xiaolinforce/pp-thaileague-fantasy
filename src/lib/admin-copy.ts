@@ -57,6 +57,9 @@ export const statusLabels: Record<string, string> = {
 };
 
 export const adminTranslations: Record<string, string> = {
+  นำเข้าผลการแข่งขัน: "Import match results",
+  "บันทึกผลการแข่งขัน เหตุการณ์ และคะแนนทั้งแมตช์":
+    "Record the result, events and player scores for a fixture.",
   เริ่มใช้กติกานักเตะสองระดับ: "Adopt two-tier player rules",
   ปรับระดับตามกติกาก่อนล็อกทีม: "Apply tier rules before locking",
   รุ่นกติกานักเตะ: "Player rule version",

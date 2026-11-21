@@ -388,6 +388,13 @@ Participant counts link to matching directory filters. Tables retain their
 headers and scroll within an explicitly labelled keyboard-focusable region on
 small screens. Current player data is separate from saved team snapshots.
 
+The match operations portal keeps Gameweek and fixture selections in the URL.
+For a provisional Gameweek, the editor loads the latest whole-match import or
+provides a template with roster IDs and blank scores and minutes. Operators
+preview each player's previous and proposed points, then apply the match in one
+action. Editing the input invalidates its preview. A failed submission keeps
+the text available for correction.
+
 ### Two-tier allowance
 
 Team and Player Market share a five-circle Level 1 indicator. Keep the

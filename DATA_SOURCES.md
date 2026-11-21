@@ -1,5 +1,15 @@
 # Data sources
 
+## Match operations reports
+
+The match operator records the source URLs, chronological events and provisional
+decisions for each fixture. The match import stores these with its reviewed
+player inputs in the fixture audit. The Gameweek report reads the latest
+import for each fixture, including any decisions revised after discussion with
+the owner. Earlier maintenance batches retain their original audit format.
+The [matchday instructions](NENE.md) specify the evidence to use for goalkeeper
+saves, match timing and Fantasy assists.
+
 ## 2026-11-21 GW9 three matches and provisional scores
 
 Owner-approved production batch `gw9-nov21-three-matches-20261122`
