@@ -2,7 +2,7 @@
 
 import { refresh, updateTag } from "next/cache";
 import { transactionDb } from "@/db/transaction";
-import { requireMatchOperator } from "@/lib/auth/context";
+import { requireAdmin } from "@/lib/auth/context";
 import {
   applyMatchImport,
   MatchImportError,
@@ -10,7 +10,7 @@ import {
 } from "@/lib/fantasy/match-import-service";
 
 export async function previewMatchAction(fixtureId: string, payload: string) {
-  await requireMatchOperator();
+  await requireAdmin();
   try {
     const preview = await transactionDb.transaction((tx) =>
       previewMatchImport(tx, fixtureId, payload),
@@ -31,7 +31,7 @@ export async function applyMatchAction(
   payload: string,
   token: string,
 ) {
-  const operator = await requireMatchOperator();
+  const admin = await requireAdmin();
   try {
     const result = await transactionDb.transaction((tx) =>
       applyMatchImport(
@@ -39,7 +39,7 @@ export async function applyMatchAction(
         fixtureId,
         payload,
         token,
-        operator.user.email + " (" + operator.user.id + ")",
+        `${admin.user.email} (${admin.user.id})`,
       ),
     );
     updateTag("competition-dataset");

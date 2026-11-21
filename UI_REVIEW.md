@@ -25,7 +25,7 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
-The match operations editor at `/match-operations` was exercised in isolated
+The match operations editor, now at `/admin/fantasy/match-operations`, was exercised in isolated
 headless Chromium with Thai and English at 360px and 1280px. The checks covered
 the roster, blank-safe template, invalid input recovery, point previews,
 preview invalidation after editing, successful apply feedback and horizontal

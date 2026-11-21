@@ -10,9 +10,9 @@ import {
   AdminName,
   NameOption,
   Status,
-} from "../admin/fantasy/components";
-import { AdminDate } from "../admin/fantasy/server-components";
-import styles from "../admin/fantasy/admin.module.css";
+} from "../components";
+import { AdminDate } from "../server-components";
+import styles from "../admin.module.css";
 import { MatchImportEditor } from "./editor";
 
 export default async function MatchOperations({
@@ -26,12 +26,12 @@ export default async function MatchOperations({
   return (
     <>
       <AdminHeading
-        title="นำเข้าผลการแข่งขัน"
+        title="นำเข้าผลและคะแนน"
         description="บันทึกผลการแข่งขัน เหตุการณ์ และคะแนนทั้งแมตช์"
       >
         <Link
           className={styles.link}
-          href={`/match-operations/report?gw=${week.number}`}
+          href={`/admin/fantasy/match-operations/report?gw=${week.number}`}
         >
           <AdminName th="รายงานประจำ Gameweek" en="Gameweek report" />
         </Link>

@@ -3,9 +3,9 @@
 import { useEffect, useState, useTransition } from "react";
 import { useLanguage } from "@/components/fantasy/i18n";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
-import { AdminActionButton } from "../admin/fantasy/admin-action-button";
-import { AdminNotice } from "../admin/fantasy/components";
-import styles from "../admin/fantasy/admin.module.css";
+import { AdminActionButton } from "../admin-action-button";
+import { AdminNotice } from "../components";
+import styles from "../admin.module.css";
 import { previewMatchAction, applyMatchAction } from "./actions";
 import type { MatchRosterPlayer } from "@/lib/fantasy/match-import";
 

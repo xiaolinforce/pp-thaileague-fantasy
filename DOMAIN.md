@@ -264,9 +264,9 @@ Locking and finalization are atomic lifecycle transitions. Locking requires an
 `open` Gameweek and a contiguous `planned` successor except at the season end.
 Finalization requires a provisional Gameweek with finished fixtures, full match
 coverage, reviewed player statistics, recorded scores and matching goal totals.
-Score recalculation and the final status commit together. The match operator
-may lock an open Gameweek at its first kickoff. Admins and the designated match
-operator can finalize a completed Gameweek directly. Nene's matchday instructions
+Score recalculation and the final status commit together. From match operations,
+admins can lock an open Gameweek at its first kickoff and finalize a completed
+Gameweek directly. Nene's matchday instructions
 require an explicit message from the owner naming the Gameweek before using Final.
 
 On the Points view, a squad member without a match-stat row remains pending

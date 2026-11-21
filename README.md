@@ -46,7 +46,10 @@ open.
 
 ## Routes
 
-Match operators use `/match-operations` to import results, review a Gameweek and finalize scores.
+Admins use `/admin/fantasy/match-operations` to import results and finalize scores.
+The Gameweek report is available at `/admin/fantasy/match-operations/report`.
+Existing `/match-operations` and `/match-operations/report` links redirect to
+the corresponding admin pages with the selected Gameweek and fixture.
 
 | Route                         | Purpose                                                                                     |
 | ----------------------------- | ------------------------------------------------------------------------------------------- |

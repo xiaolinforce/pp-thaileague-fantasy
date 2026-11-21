@@ -22,6 +22,7 @@ import {
   ArrowLeft,
   Database,
   MailCheck,
+  FileInput,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -139,6 +140,11 @@ const adminNavigation = [
     label: "ผลการแข่งขันและสถิติ",
     href: "/admin/fantasy/matches",
     icon: ListChecks,
+  },
+  {
+    label: "นำเข้าผลและคะแนน",
+    href: "/admin/fantasy/match-operations",
+    icon: FileInput,
   },
   { label: "ข้อมูลนักเตะ", href: "/admin/fantasy/players", icon: Database },
   { label: "ประวัติการแก้ไข", href: "/admin/fantasy/audit", icon: History },

@@ -82,29 +82,13 @@ export const requireFantasyProfile = cache(
   },
 );
 
-const getOperationsIdentity = cache(async function getOperationsIdentity() {
+export const requireAdmin = cache(async function requireAdmin() {
   const session = await getAuthSession();
   if (!session) redirect("/");
   const account = await db.query.authUsers.findFirst({
     where: eq(authUsers.id, session.user.id),
     columns: { role: true, isAnonymous: true },
   });
-  if (!account || account.isAnonymous) redirect("/team");
-  return {
-    session,
-    role: account.role,
-    isOperator: session.user.id === process.env.NENE_AUTH_USER_ID,
-  };
+  if (account?.role !== "admin" || account.isAnonymous) redirect("/team");
+  return session;
 });
-
-export async function requireAdmin() {
-  const { session, role, isOperator } = await getOperationsIdentity();
-  if (role !== "admin" || isOperator) redirect("/team");
-  return session;
-}
-
-export async function requireMatchOperator() {
-  const { session, role, isOperator } = await getOperationsIdentity();
-  if (isOperator ? role !== "member" : role !== "admin") redirect("/team");
-  return session;
-}

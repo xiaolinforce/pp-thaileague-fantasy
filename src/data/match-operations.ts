@@ -3,7 +3,7 @@ import { sql } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { transactionDb } from "@/db/transaction";
-import { requireMatchOperator } from "@/lib/auth/context";
+import { requireAdmin } from "@/lib/auth/context";
 import { FANTASY_SEASON_SLUG } from "@/lib/fantasy/provisioning";
 import {
   getLatestMatchImport,
@@ -12,7 +12,7 @@ import {
 
 export type MatchOperationParams = { gw?: string; fixture?: string };
 export async function getMatchOperation(params: MatchOperationParams) {
-  await requireMatchOperator();
+  await requireAdmin();
   const weeks = (
     await db.execute<{
       id: string;

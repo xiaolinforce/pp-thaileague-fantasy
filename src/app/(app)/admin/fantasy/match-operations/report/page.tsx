@@ -2,8 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getMatchReport } from "@/data/match-report";
 import { getRequestLanguage } from "@/lib/i18n/server";
-import { Status } from "../../admin/fantasy/components";
-import styles from "../../admin/fantasy/admin.module.css";
+import { Status } from "../../components";
+import styles from "../../admin.module.css";
 
 export default async function MatchReportPage({
   searchParams,
@@ -21,7 +21,10 @@ export default async function MatchReportPage({
   const finished = fixtures.filter((f) => f.status === "finished").length;
   return (
     <div className="mx-auto max-w-4xl px-4 py-6">
-      <Link className={styles.backLink} href={`/match-operations?gw=${gw}`}>
+      <Link
+        className={styles.backLink}
+        href={`/admin/fantasy/match-operations?gw=${gw}`}
+      >
         {th ? "กลับไปจัดการผลการแข่งขัน" : "Back to match operations"}
       </Link>
       <header className={styles.heading}>

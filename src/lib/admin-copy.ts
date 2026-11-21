@@ -57,7 +57,6 @@ export const statusLabels: Record<string, string> = {
 };
 
 export const adminTranslations: Record<string, string> = {
-  นำเข้าผลการแข่งขัน: "Import match results",
   "บันทึกผลการแข่งขัน เหตุการณ์ และคะแนนทั้งแมตช์":
     "Record the result, events and player scores for a fixture.",
   เริ่มใช้กติกานักเตะสองระดับ: "Adopt two-tier player rules",
@@ -216,6 +215,7 @@ export const adminTranslations: Record<string, string> = {
   "ยังไม่มี Gameweek สำหรับสร้าง preview":
     "No Gameweek is available for an email preview.",
   ผลการแข่งขันและสถิติ: "Matches & stats",
+  นำเข้าผลและคะแนน: "Import results and points",
   ข้อมูลนักเตะ: "Player data",
   ประวัติการแก้ไข: "Audit history",
   กลับโหมดผู้เล่น: "Back to player mode",

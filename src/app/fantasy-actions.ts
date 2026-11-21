@@ -11,11 +11,7 @@ import {
   THAI_LEAGUE_FANTASY_RULES,
   type FantasyPosition,
 } from "@/lib/fantasy/rules";
-import {
-  requireAdmin,
-  requireFantasyProfile,
-  requireMatchOperator,
-} from "@/lib/auth/context";
+import { requireAdmin, requireFantasyProfile } from "@/lib/auth/context";
 import { GameweekOperationError } from "@/lib/fantasy/gameweek-readiness";
 import { FANTASY_SEASON_SLUG } from "@/lib/fantasy/provisioning";
 import { validateFantasyName } from "@/lib/auth/names";
@@ -380,7 +376,7 @@ export async function operateMatchGameweek(
   _previous: MatchLifecycleResult,
   formData: FormData,
 ): Promise<MatchLifecycleResult> {
-  const session = await requireMatchOperator();
+  const session = await requireAdmin();
   const operation = formData.get("operation");
   if (operation !== "lock" && operation !== "final")
     return { outcome: "STATUS" };

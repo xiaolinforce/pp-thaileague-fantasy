@@ -21,7 +21,14 @@ const contentSecurityPolicy = [
 
 const nextConfig: NextConfig = {
   async redirects() {
-    return [{ source: "/how-to-play", destination: "/rules", permanent: true }];
+    return [
+      { source: "/how-to-play", destination: "/rules", permanent: true },
+      {
+        source: "/match-operations/:path*",
+        destination: "/admin/fantasy/match-operations/:path*",
+        permanent: true,
+      },
+    ];
   },
   async headers() {
     return [

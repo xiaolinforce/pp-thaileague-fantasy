@@ -1,7 +1,7 @@
 import "server-only";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
-import { requireMatchOperator } from "@/lib/auth/context";
+import { requireAdmin } from "@/lib/auth/context";
 import { FANTASY_SEASON_SLUG } from "@/lib/fantasy/provisioning";
 
 type FixtureReport = {
@@ -19,7 +19,7 @@ type FixtureReport = {
 };
 
 export async function getMatchReport(number: number) {
-  await requireMatchOperator();
+  await requireAdmin();
   const result = await db.execute<FixtureReport>(sql`
     select f.id, home.display_name_th as "homeTh", home.display_name_en as "homeEn",
       away.display_name_th as "awayTh", away.display_name_en as "awayEn",

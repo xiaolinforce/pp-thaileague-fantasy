@@ -91,7 +91,7 @@ export default async function Matches({
       >
         <Link
           className={styles.link}
-          href={`/match-operations?gw=${data.gw}${fixture ? "&fixture=" + fixture.id : ""}`}
+          href={`/admin/fantasy/match-operations?gw=${data.gw}${fixture ? "&fixture=" + fixture.id : ""}`}
         >
           <AdminName th="นำเข้าทั้งแมตช์" en="Import whole match" />
           <LinkPendingHint />

@@ -84,8 +84,7 @@ export function NavigationBlockerProvider({
             </DialogTitle>
             <DialogDescription>
               {translate(
-                pathname.startsWith("/admin/") ||
-                  pathname.startsWith("/match-operations")
+                pathname.startsWith("/admin/")
                   ? "ข้อมูลที่แก้ไขจะหายไป หากออกจากหน้านี้โดยไม่บันทึก"
                   : "การเปลี่ยนแปลงทีมของคุณจะหายไป หากออกจากหน้านี้โดยไม่บันทึก",
               )}
