@@ -384,8 +384,8 @@ export const adminTranslations: Record<string, string> = {
     "Review this Gameweek's pending stats, then finalize scores.",
   "ถ้าล็อกตอนนี้ ผู้เล่นจะแก้ทีมไม่ได้ทันที แม้ยังไม่ถึง Deadline":
     "Locking now stops managers from editing immediately, before the deadline.",
-  "แมตช์ที่เลื่อนหรือยังไม่แข่งจะไม่มีคะแนนใน Final":
-    "Postponed or unplayed matches will not score in the final result.",
+  "ยืนยันคะแนน Final ได้เมื่อทุกแมตช์แข่งจบและบันทึกสถิติครบแล้ว":
+    "Finalize scores once all matches have finished and their statistics are complete.",
   ไปตรวจสถิติการแข่งขัน: "Review match stats",
   การลงเล่นและเกมรุก: "Appearance and attack",
   เกมรับ: "Defence",

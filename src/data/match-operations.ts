@@ -12,7 +12,7 @@ import {
 
 export type MatchOperationParams = { gw?: string; fixture?: string };
 export async function getMatchOperation(params: MatchOperationParams) {
-  const session = await requireMatchOperator();
+  await requireMatchOperator();
   const weeks = (
     await db.execute<{
       id: string;
@@ -65,6 +65,5 @@ export async function getMatchOperation(params: MatchOperationParams) {
     fixture,
     fixtures,
     editor,
-    isOperator: session.user.id === process.env.NENE_AUTH_USER_ID,
   };
 }

@@ -1,6 +1,4 @@
 import Link from "next/link";
-import { requireAdmin } from "@/lib/auth/context";
-import { MatchLifecyclePanel } from "@/components/fantasy/match-lifecycle-panel";
 import {
   finalizeFantasyGameweekAction,
   lockFantasyGameweekAction,
@@ -37,10 +35,6 @@ export default async function Gameweeks({
   searchParams: Promise<AdminParams>;
 }) {
   const { weeks, current, now } = await getAdminContext();
-  const admin = await requireAdmin();
-  const canAuthorizeOperator =
-    Boolean(process.env.NENE_AUTH_USER_ID) &&
-    admin.user.id === process.env.NENE_OWNER_AUTH_USER_ID;
   const query = await searchParams;
   const week =
     weeks.find((w) => String(w.number) === param(query, "gw")) ?? current;
@@ -205,7 +199,7 @@ export default async function Gameweeks({
                     />
                   }
                 >
-                  แมตช์ที่เลื่อนหรือยังไม่แข่งจะไม่มีคะแนนใน Final
+                  ยืนยันคะแนน Final ได้เมื่อทุกแมตช์แข่งจบและบันทึกสถิติครบแล้ว
                 </AdminNotice>
               ) : null}
               {readiness && readiness.finishedWithoutStats > 0 ? (
@@ -238,15 +232,6 @@ export default async function Gameweeks({
               >
                 <input type="hidden" name="gameweekId" value={week.id} />
               </AdminForm>
-              {canAuthorizeOperator && (
-                <MatchLifecyclePanel
-                  key={week.id}
-                  gameweekId={week.id}
-                  number={week.number}
-                  status={week.status}
-                  grant
-                />
-              )}
             </div>
           ) : (
             <p className={styles.hint}>

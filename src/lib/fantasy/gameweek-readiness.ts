@@ -12,7 +12,7 @@ import type { FantasyTransaction } from "./season-lock";
 
 export class GameweekOperationError extends Error {}
 
-// Hold the exclusive season lock from this read through grant or finalization.
+// Hold the exclusive season lock through readiness checks and finalization.
 export async function completedGameweekRevision(
   db: FantasyTransaction,
   competitionSeasonId: string,
@@ -87,7 +87,7 @@ export async function completedGameweekRevision(
     )
       throw new GameweekOperationError("INCOMPLETE");
   }
-  // Include event/uncertainty-only corrections in the approval fingerprint.
+  // Include event-only corrections in the audit revision of the finalized scores.
   const batches = await db
     .select({ id: fantasyAdminAuditLog.id })
     .from(fantasyAdminAuditLog)

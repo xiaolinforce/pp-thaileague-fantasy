@@ -20,8 +20,9 @@ export default async function MatchOperations({
 }: {
   searchParams: Promise<MatchOperationParams>;
 }) {
-  const { week, weeks, fixture, fixtures, editor, isOperator } =
-    await getMatchOperation(await searchParams);
+  const { week, weeks, fixture, fixtures, editor } = await getMatchOperation(
+    await searchParams,
+  );
   return (
     <>
       <AdminHeading
@@ -80,26 +81,12 @@ export default async function MatchOperations({
           </p>
         )}
       </section>
-      {isOperator || week.status === "open" ? (
-        <MatchLifecyclePanel
-          key={week.id}
-          gameweekId={week.id}
-          number={week.number}
-          status={week.status}
-        />
-      ) : week.status === "provisional" ? (
-        <p>
-          <Link
-            href={`/admin/fantasy/gameweeks?gw=${week.number}`}
-            className={styles.link}
-          >
-            <AdminName
-              th="จัดการสิทธิ์ปิด Gameweek"
-              en="Manage Gameweek finalization"
-            />
-          </Link>
-        </p>
-      ) : null}
+      <MatchLifecyclePanel
+        key={week.id}
+        gameweekId={week.id}
+        number={week.number}
+        status={week.status}
+      />
       {editor && fixture ? (
         <MatchImportEditor
           key={fixture.id}

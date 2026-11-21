@@ -16,12 +16,11 @@ until upstream updates its pinned dependency.
 
 ## Environment setup
 
-Match operations uses two server-side Better Auth user IDs. Set `NENE_AUTH_USER_ID`
-to a dedicated signed-in member and `NENE_OWNER_AUTH_USER_ID` to the owner's
-admin account in the target environment. Keep these accounts distinct. Sign in
-as the member in Nene's own browser. Give Nene the [matchday assignment](NENE.md)
-and enable the recurring task there. Scheduling and delivery of the end-of-week
-message take place in Nene's task.
+Set the server-side `NENE_AUTH_USER_ID` to the Better Auth user ID of Nene's
+dedicated member account in the target environment. Sign in with that account
+in Nene's browser. Give Nene the [matchday assignment](NENE.md) and enable the
+recurring task there. Nene sends the end-of-week report and waits for the
+owner's instruction in chat before selecting Final for the named Gameweek.
 
 Install dependencies and create the local environment file:
 

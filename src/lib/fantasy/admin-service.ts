@@ -45,7 +45,6 @@ import {
   completedGameweekRevision,
   GameweekOperationError,
 } from "./gameweek-readiness";
-import { matchesFinalApproval } from "./final-approval";
 
 function formInteger(formData: FormData, key: string) {
   const value = Number(formData.get(key) ?? 0);
@@ -760,7 +759,7 @@ export async function finalizeFantasyGameweek(
   formData: FormData,
   changedBy: string,
   db: FantasyTransaction,
-  approval?: { code: string; operatorId: string },
+  seasonSlug?: string,
 ) {
   const gameweekId = String(formData.get("gameweekId") ?? "");
   const target = await db.query.fantasyGameweeks.findFirst({
@@ -776,44 +775,16 @@ export async function finalizeFantasyGameweek(
     .limit(1);
   const gameweek = gameweekRows[0];
   if (!gameweek) throw new Error("Gameweek was not found.");
-  if (gameweek.status !== "provisional") {
-    if (approval) throw new GameweekOperationError("STATUS");
-    throw new Error("Only a provisional Gameweek can be finalized.");
-  }
-  if (approval && season.slug !== FANTASY_SEASON_SLUG)
+  if (
+    gameweek.status !== "provisional" ||
+    (seasonSlug && season.slug !== seasonSlug)
+  )
     throw new GameweekOperationError("STATUS");
   const revision = await completedGameweekRevision(
     db,
     season.competitionSeasonId,
     gameweek,
   );
-  let approvalId: string | undefined;
-  if (approval) {
-    const grant = await db.query.fantasyAdminAuditLog.findFirst({
-      where: and(
-        eq(fantasyAdminAuditLog.action, "authorize_operator_final"),
-        eq(fantasyAdminAuditLog.entityType, "fantasy_gameweek"),
-        eq(fantasyAdminAuditLog.entityId, gameweek.id),
-      ),
-      orderBy: [
-        desc(fantasyAdminAuditLog.createdAt),
-        desc(fantasyAdminAuditLog.id),
-      ],
-    });
-    if (
-      !grant ||
-      !matchesFinalApproval(
-        grant.after,
-        approval.code,
-        revision,
-        approval.operatorId,
-        new Date(),
-      )
-    ) {
-      throw new GameweekOperationError("APPROVAL");
-    }
-    approvalId = grant.id;
-  }
   await db
     .update(fantasyGameweeks)
     .set({
@@ -829,8 +800,8 @@ export async function finalizeFantasyGameweek(
     entityType: "fantasy_gameweek",
     entityId: gameweek.id,
     changedBy,
-    reason: "Admin confirmed final scores",
+    reason: "Confirmed final scores",
     before: { number: gameweek.number, status: gameweek.status },
-    after: { number: gameweek.number, status: "final", approvalId, revision },
+    after: { number: gameweek.number, status: "final", revision },
   });
 }

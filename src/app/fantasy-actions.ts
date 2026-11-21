@@ -1,16 +1,11 @@
 "use server";
 
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { refresh, revalidateTag } from "next/cache";
 
 import { db } from "@/db";
 import { transactionDb } from "@/db/transaction";
-import {
-  fantasyAdminAuditLog,
-  fantasyGameweeks,
-  fantasyManagers,
-  fantasyTeams,
-} from "@/db/schema";
+import { fantasyManagers, fantasyTeams } from "@/db/schema";
 import {
   isBeforeDeadline,
   THAI_LEAGUE_FANTASY_RULES,
@@ -21,12 +16,8 @@ import {
   requireFantasyProfile,
   requireMatchOperator,
 } from "@/lib/auth/context";
-import { createFinalApproval } from "@/lib/fantasy/final-approval";
-import {
-  completedGameweekRevision,
-  GameweekOperationError,
-} from "@/lib/fantasy/gameweek-readiness";
-import { lockFantasySeason } from "@/lib/fantasy/season-lock";
+import { GameweekOperationError } from "@/lib/fantasy/gameweek-readiness";
+import { FANTASY_SEASON_SLUG } from "@/lib/fantasy/provisioning";
 import { validateFantasyName } from "@/lib/auth/names";
 import { parseInterfaceLanguage } from "@/lib/auth/preferences";
 import { getFantasyAutoFillCandidates } from "@/data/fantasy-auto-fill";
@@ -383,61 +374,7 @@ export async function finalizeFantasyGameweekAction(formData: FormData) {
   refreshFantasyMutation("lifecycle");
 }
 
-export type MatchLifecycleResult = { outcome: string; code?: string };
-
-export async function issueOperatorFinalCode(
-  _previous: MatchLifecycleResult,
-  formData: FormData,
-): Promise<MatchLifecycleResult> {
-  const owner = await requireAdmin();
-  const operatorId = process.env.NENE_AUTH_USER_ID;
-  if (
-    !operatorId ||
-    owner.user.id !== process.env.NENE_OWNER_AUTH_USER_ID ||
-    owner.user.id === operatorId
-  ) {
-    return { outcome: "PERMISSION" };
-  }
-  try {
-    return await transactionDb.transaction(async (tx) => {
-      const id = String(formData.get("gameweekId") ?? "");
-      const target = await tx.query.fantasyGameweeks.findFirst({
-        where: eq(fantasyGameweeks.id, id),
-      });
-      if (!target) return { outcome: "STATUS" };
-      const season = await lockFantasySeason(tx, target.fantasySeasonId);
-      const week = await tx.query.fantasyGameweeks.findFirst({
-        where: eq(fantasyGameweeks.id, id),
-      });
-      if (!week || week.status !== "provisional") return { outcome: "STATUS" };
-      const revision = await completedGameweekRevision(
-        tx,
-        season.competitionSeasonId,
-        week,
-      );
-      const { record, code } = createFinalApproval(
-        revision,
-        operatorId,
-        new Date(),
-      );
-      await tx.insert(fantasyAdminAuditLog).values({
-        action: "authorize_operator_final",
-        createdAt: sql`clock_timestamp()`,
-        updatedAt: sql`clock_timestamp()`,
-        entityType: "fantasy_gameweek",
-        entityId: id,
-        changedBy: owner.user.id,
-        reason: "Owner authorized operator to finalize reviewed scores",
-        after: record,
-      });
-      return { outcome: "GRANTED", code };
-    });
-  } catch (error) {
-    if (error instanceof GameweekOperationError)
-      return { outcome: error.message };
-    throw error;
-  }
-}
+type MatchLifecycleResult = { outcome: string };
 
 export async function operateMatchGameweek(
   _previous: MatchLifecycleResult,
@@ -447,21 +384,13 @@ export async function operateMatchGameweek(
   const operation = formData.get("operation");
   if (operation !== "lock" && operation !== "final")
     return { outcome: "STATUS" };
-  if (
-    operation === "final" &&
-    session.user.id !== process.env.NENE_AUTH_USER_ID
-  )
-    return { outcome: "PERMISSION" };
   const actor = session.user.id;
   try {
     await transactionDb.transaction(async (tx) => {
       if (operation === "lock")
         await lockFantasyGameweek(formData, actor, tx, true);
       else
-        await finalizeFantasyGameweek(formData, actor, tx, {
-          code: String(formData.get("code") ?? "").trim(),
-          operatorId: actor,
-        });
+        await finalizeFantasyGameweek(formData, actor, tx, FANTASY_SEASON_SLUG);
     });
   } catch (error) {
     if (error instanceof GameweekOperationError)
