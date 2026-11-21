@@ -323,7 +323,8 @@ not merely because its implementation is complete.
 ## Administrator workspace
 
 Authorized admin routes replace the primary player destinations with Overview,
-Participants & teams, Gameweek, Matches & stats, Player data, and Audit history.
+Participants & teams, Gameweek, Lineup reminder email, Best possible team,
+Matches & stats, Player data, and Audit history.
 The shared sidebar and compact drawer identify Administrator mode and retain a
 Back to player mode link at the bottom, returning to `/team` without sign-out.
 Operational pages use a visible title, task-specific filters, and focused work

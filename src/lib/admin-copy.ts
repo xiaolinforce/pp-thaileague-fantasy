@@ -22,6 +22,38 @@ export const adminFieldLabels: Record<string, string> = {
   status: "สถานะ",
   number: "Gameweek",
   nextGameweek: "Gameweek ถัดไป",
+  kickoffAt: "เวลาแข่งขัน",
+  deadlineAt: "Deadline ของ Gameweek",
+  homeScore: "สกอร์เจ้าบ้าน",
+  awayScore: "สกอร์ทีมเยือน",
+  homePenaltyScore: "จุดโทษเจ้าบ้าน",
+  awayPenaltyScore: "จุดโทษทีมเยือน",
+  matchweek: "นัดที่",
+  fullNameTh: "ชื่อภาษาไทย",
+  fullNameEn: "ชื่อภาษาอังกฤษ",
+  shortNameTh: "ชื่อย่อภาษาไทย",
+  averagePoints: "คะแนนเฉลี่ย",
+  highestPoints: "คะแนนสูงสุด",
+};
+
+/** Written status labels shared by admin badges and audit values. */
+export const statusLabels: Record<string, string> = {
+  planned: "ยังไม่เปิด",
+  open: "เปิดรับจัดทีม",
+  provisional: "รอตรวจคะแนน",
+  final: "คะแนน Final",
+  locked: "ล็อกแล้ว",
+  member: "สมาชิก",
+  guest: "Guest",
+  bot: "Bot",
+  abandoned: "Guest เก็บประวัติ",
+  inactive: "ทีมไม่ใช้งาน",
+  scheduled: "รอแข่งขัน",
+  time_tbc: "รอยืนยันเวลาแข่งขัน",
+  live: "กำลังแข่งขัน",
+  finished: "จบการแข่งขัน",
+  postponed: "เลื่อนการแข่งขัน",
+  cancelled: "ยกเลิกการแข่งขัน",
 };
 
 export const adminTranslations: Record<string, string> = {
@@ -322,4 +354,134 @@ export const adminTranslations: Record<string, string> = {
   คน: "players",
   แหล่งข้อมูล: "Source",
   "สร้าง snapshot รายชื่อนักเตะย้อนหลัง": "Backfill player-pool snapshot",
+  // Admin workspace UX pass (2026-11-21)
+  ทีมคะแนนสูงสุด: "Best possible team",
+  ช่องข้อมูล: "Field",
+  ค่าเดิม: "Before",
+  ค่าใหม่: "After",
+  "ไม่มีค่าที่เปลี่ยน ระบบจะบันทึกเป็นการตรวจซ้ำพร้อมเหตุผล":
+    "Nothing changed. This will be saved as a re-review with the reason.",
+  มุมมองทีม: "Team views",
+  "งานที่ต้องจัดการและภาพรวมผู้เล่นในฤดูกาล 2026/27":
+    "Tasks to handle and participation for the 2026/27 season",
+  "ตรวจสถิติของ Gameweek ที่ค้างและยืนยันคะแนน Final ให้เรียงตามลำดับ":
+    "Review the pending Gameweek's stats and finalize Gameweeks in order.",
+  "รอตรวจสถิติให้ครบแล้วยืนยันคะแนน Final":
+    "Review all stats, then finalize scores",
+  ส่งอีเมลเตือน: "Send reminder",
+  ไปหน้าล็อกทีม: "Go to locking",
+  ตรวจสถิติ: "Review stats",
+  "ไปหน้ายืนยัน Final": "Go to finalizing",
+  "นับเป็นทีม ไม่ใช่จำนวนคนไม่ซ้ำ · กิจกรรม 7 วันนับการบันทึกหรือย้อนการจัดทีมของสมาชิกและ Guest ไม่รวม Bot · จัดครบ 15 คนรวมทีมที่ยกมาจาก GW ก่อนหน้า":
+    "Counts are teams, not unique people · 7-day activity counts member and Guest saves or reverts, excluding bots · Complete squads include teams carried over from the previous GW",
+  "ขั้นตอนของ Gameweek": "Gameweek lifecycle",
+  แมตช์ที่จบแล้ว: "Finished matches",
+  แมตช์ที่มีสถิติ: "Matches with stats",
+  "ตรวจสถิติที่ค้างของ Gameweek นี้ แล้วยืนยันคะแนน Final":
+    "Review this Gameweek's pending stats, then finalize scores.",
+  "ถ้าล็อกตอนนี้ ผู้เล่นจะแก้ทีมไม่ได้ทันที แม้ยังไม่ถึง Deadline":
+    "Locking now stops managers from editing immediately, before the deadline.",
+  "แมตช์ที่เลื่อนหรือยังไม่แข่งจะไม่มีคะแนนใน Final":
+    "Postponed or unplayed matches will not score in the final result.",
+  ไปตรวจสถิติการแข่งขัน: "Review match stats",
+  การลงเล่นและเกมรุก: "Appearance and attack",
+  เกมรับ: "Defence",
+  วินัยและอื่นๆ: "Discipline and other",
+  เว้นว่างเพื่อใช้ค่าจากไทยลีก: "Leave blank to use the Thai League value",
+  นับคะแนนเฉพาะผู้รักษาประตู: "Scores for goalkeepers only",
+  "เลือกคู่แข่งขัน แล้วเลือกนักเตะจากรายชื่อเพื่อตรวจและแก้ไขสถิติ":
+    "Choose a match, then choose a player from the roster to review and edit stats",
+  เลือกการแข่งขัน: "Choose a match",
+  การแข่งขันนี้ยังไม่จบ: "This match has not finished",
+  ยังไม่มีสถิติที่บันทึกไว้: "No stats saved yet",
+  ยังไม่มีสถิติ: "No stats yet",
+  ไม่พบนักเตะที่ลงทะเบียนกับสองสโมสรนี้:
+    "No players are registered with these clubs.",
+  แก้ไขล่าสุด: "Last edited",
+  "ตรวจสถานะการแข่งขันก่อนบันทึกสถิติ คะแนนจะถูกคำนวณใหม่ทันที":
+    "Check the match status before saving. Scores are recalculated immediately.",
+  ระบบจะสร้างรายการใหม่เมื่อบันทึก: "A new record is created when you save.",
+  เลือกนักเตะจากรายชื่อเพื่อตรวจและแก้ไขสถิติของแมตช์นี้:
+    "Choose a player from the roster to review and edit this match's stats.",
+  "ยังไม่มีการแข่งขันใน Gameweek นี้": "No matches in this Gameweek yet.",
+  สำรองผู้รักษาประตู: "Bench goalkeeper",
+  "กัปตัน (C)": "Captain (C)",
+  "รองกัปตัน (VC)": "Vice-captain (VC)",
+  เรียงตาม: "Sort by",
+  "ประเภท (สมาชิกก่อน)": "Type (members first)",
+  คะแนนรวมสูงสุด: "Highest season points",
+  "กิจกรรมล่าสุดนับการบันทึกและย้อนการจัดทีม ไม่ใช่การเข้าชมเว็บ · จำนวนทีมไม่ใช่จำนวนคนไม่ซ้ำ":
+    "Recent activity counts squad saves and reverts, not visits · Counts are teams, not unique people",
+  "ค้นหานักเตะ แล้วเลือกจากตารางเพื่อกำหนดระดับหรือสถานะไทย":
+    "Search for a player, then choose one from the table to set level or Thai status",
+  ตัวกรองนักเตะ: "Player filters",
+  ชื่อไทยหรืออังกฤษ: "Thai or English name",
+  แก้ไขระดับและสถานะ: "Edit level and status",
+  เลือกนักเตะจากตารางเพื่อดูและแก้ไขระดับหรือสถานะไทย:
+    "Choose a player from the table to review and edit level or Thai status.",
+  "เว็บไซต์จริง · อีเมลจะถึงผู้เล่นจริง":
+    "Production site · Email reaches real managers",
+  "สภาพแวดล้อมทดสอบ · ไม่ใช่เว็บไซต์จริง":
+    "Test environment · Not the production site",
+  "ไม่มีการส่งอัตโนมัติ ต้องสร้างชุดผู้รับ ตรวจตัวอย่าง และยืนยันทีละชุดก่อนส่ง ระบบหยุดส่งเมื่อเลย Deadline":
+    "Nothing is sent automatically. Create a recipient snapshot, review the preview, and confirm each batch. Sending stops at the deadline.",
+  ตรวจล่าสุด: "Checked",
+  "ตัวเลขอ่านจากฐานข้อมูลของเว็บไซต์นี้ ตรวจป้ายด้านบนก่อนส่ง":
+    "Counts come from this site's database; check the banner above before sending",
+  ตรวจรายชื่อผู้รับ: "Review recipients",
+  ตัวอย่างอีเมล: "Email preview",
+  ข้อความเดียวกันนี้ใช้กับทุกคนในกลุ่ม:
+    "Everyone in the group receives this same message",
+  หัวเรื่อง: "Subject",
+  ข้อความในกล่องจดหมาย: "Inbox preview",
+  "ลิงก์ยกเลิกในตัวอย่างใช้ไม่ได้จริง ระบบสร้างลิงก์แยกให้ผู้รับแต่ละคนตอนส่ง":
+    "The unsubscribe link in the preview is a placeholder; each recipient gets their own link when sent.",
+  "ยังไม่มี Gameweek สำหรับสร้างตัวอย่าง":
+    "No Gameweek is available for a preview yet.",
+  "ทดสอบส่งถึงตัวเอง (ไม่บังคับ)": "Send yourself a test (optional)",
+  "ส่งหนึ่งฉบับไปยังอีเมลที่ยืนยันแล้วของบัญชีผู้ดูแลที่ล็อกอินอยู่ ไม่สร้างชุดผู้รับและไม่ส่งถึงสมาชิก":
+    "Sends one email to the signed-in admin's verified address. No snapshot is created and no member is emailed.",
+  สร้างชุดผู้รับและส่ง: "Create snapshot and send",
+  มีผลไม่แน่ชัด: "Some results are uncertain",
+  "ต้องตรวจ Resend และให้ผู้ดูแลแก้ไขสถานะก่อนส่งต่อ":
+    "Check Resend and resolve the status before sending more.",
+  มีรายการค้างสถานะกำลังส่ง: "Some emails are stuck in sending",
+  "หากค้างเกิน 2 นาที ให้ตรวจ Resend ก่อน แล้วทำเครื่องหมายเป็น “ผลไม่แน่ชัด” รายการนี้จะไม่ถูกส่งซ้ำ":
+    "If stuck for more than 2 minutes, check Resend, then mark them “uncertain”. They will not be sent again.",
+  แก้ไขเวลาแข่งขัน: "Correct kickoff time",
+  ตรวจการแก้ไขเวลาแข่งขัน: "Verify kickoff correction",
+  เลื่อนเวลาแข่งขัน: "Reschedule match",
+  ปรับตารางแข่งขันเสร็จสิ้น: "Complete fixture reschedule",
+  "ปรับ Deadline ของ Gameweek": "Reschedule Gameweek deadline",
+  บันทึกจบการแข่งขัน: "Mark match finished",
+  แก้ไขผลการแข่งขัน: "Correct match result",
+  "นำเข้าสถิติทั้ง Gameweek": "Import Gameweek stats",
+  นำเข้าสถิติแมตช์เสร็จสิ้น: "Complete match import",
+  แก้ไขชื่อภาษาไทยของนักเตะ: "Correct player Thai name",
+  เปิดให้เลือกนักเตะ: "Activate Fantasy player",
+  "ใช้สถานการณ์ทดสอบ (QA)": "Apply QA scenario",
+  "จำลองการหักคะแนน Transfer (ทดสอบ)": "Simulate transfer deduction (test)",
+  "ปรับข้อมูลตรวจสอบ migration": "Reconcile migration checksum",
+  สถิตินักเตะ: "Player stats",
+  "ฤดูกาล Fantasy": "Fantasy season",
+  ระบบภายใน: "Internal system",
+  "แสดงเฉพาะประวัติที่ระบบบันทึกไว้ การล็อกและ Final ก่อนเริ่มเก็บประวัติจะไม่ปรากฏ · รายการต่อเนื่องจากการทำงานชุดเดียวกันจะรวมเป็นกลุ่ม":
+    "Only recorded history is shown; locks and finals before history began do not appear · Consecutive entries from one operation are grouped",
+  เวลาแข่งขัน: "Kickoff",
+  "Deadline ของ Gameweek": "Gameweek deadline",
+  สกอร์เจ้าบ้าน: "Home score",
+  สกอร์ทีมเยือน: "Away score",
+  จุดโทษเจ้าบ้าน: "Home penalties",
+  จุดโทษทีมเยือน: "Away penalties",
+  นัดที่: "Matchweek",
+  ชื่อภาษาไทย: "Thai name",
+  ชื่อภาษาอังกฤษ: "English name",
+  ชื่อย่อภาษาไทย: "Short Thai name",
+  รอยืนยันเวลาแข่งขัน: "Kickoff time TBC",
+  // Admin-only overrides of broader player-facing dictionary words.
+  การแข่งขัน: "Match",
+  นักเตะ: "Player",
+  นาที: "Minutes",
+  ทุกสโมสร: "All clubs",
+  ทุกตำแหน่ง: "All positions",
 };

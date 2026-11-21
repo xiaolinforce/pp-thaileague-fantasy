@@ -1,15 +1,19 @@
-import { AdminLocalized } from "../../components";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAdminTeam, param, type AdminParams } from "@/data/admin";
 import {
   AdminHeading,
+  AdminLocalized,
   AdminName,
+  AdminTabs,
   AdminUrlSelect,
   Status,
 } from "../../components";
 import { Empty, TeamSummary } from "../../server-components";
+import { positionShort } from "../../time";
+import { teamTabs } from "./tabs";
 import styles from "../../admin.module.css";
+
+const positionOrder = ["goalkeeper", "defender", "midfielder", "forward"];
 
 export default async function TeamDetail({
   params,
@@ -22,27 +26,39 @@ export default async function TeamDetail({
   const data = await getAdminTeam(id, param(await searchParams, "gw"));
   if (!data) notFound();
   const { team, squad, weeks, week } = data;
+  const starters = squad
+    .filter((p) => p.role === "starter")
+    .sort(
+      (a, b) =>
+        positionOrder.indexOf(a.position) - positionOrder.indexOf(b.position),
+    );
+  const bench = squad
+    .filter((p) => p.role !== "starter")
+    .sort((a, b) => (a.bench ?? 0) - (b.bench ?? 0));
+  const groups = [
+    { label: "ตัวจริง", rows: starters },
+    { label: "ตัวสำรอง", rows: bench },
+  ];
+
   return (
     <AdminLocalized>
       <AdminHeading
-        title="รายละเอียดทีม"
-        description="ตรวจทีมที่บันทึกไว้และคะแนนใน Gameweek ที่เลือก"
+        title={team.name}
+        titleIsData
+        back={{
+          href: `/admin/fantasy/participants?gw=${week?.number ?? ""}`,
+          label: "รายชื่อทีม",
+        }}
+      >
+        <Status value={team.kind} />
+        {!team.active ? <Status value="inactive" /> : null}
+      </AdminHeading>
+      <AdminTabs
+        label="มุมมองทีม"
+        items={teamTabs(team.id, week?.number, "squad")}
       />
-      <p>
-        <Link
-          className={styles.link}
-          href={`/admin/fantasy/participants?gw=${week?.number}`}
-          prefetch={false}
-        >
-          กลับรายชื่อทีม
-        </Link>
-      </p>
+
       <section className={styles.panel}>
-        <div className={styles.row}>
-          <h2 data-localize="off">{team.name}</h2>
-          <Status value={team.kind} />
-        </div>
-        <TeamSummary team={team} />
         <div className={styles.toolbar}>
           <AdminUrlSelect
             name="gw"
@@ -53,14 +69,8 @@ export default async function TeamDetail({
               label: `GW ${candidate.number}`,
             }))}
           />
-          <Link
-            className="secondary-button"
-            href={`/admin/fantasy/participants/${team.id}/points`}
-            prefetch={false}
-          >
-            ดูคะแนนนักเตะ
-          </Link>
         </div>
+        <TeamSummary team={team} />
         {squad.length ? (
           <div
             className={styles.scroll}
@@ -77,35 +87,45 @@ export default async function TeamDetail({
                   <th>บทบาทในทีม</th>
                 </tr>
               </thead>
-              <tbody>
-                {squad.map((p) => (
-                  <tr key={p.id}>
-                    <td>
-                      <AdminName th={p.th} en={p.en} />
-                    </td>
-                    <td>
-                      {(
-                        {
-                          goalkeeper: "GK",
-                          defender: "DEF",
-                          midfielder: "MID",
-                          forward: "FWD",
-                        } as Record<string, string>
-                      )[p.position] ?? p.position}
-                    </td>
-                    <td>L{p.tier}</td>
-                    <td>
-                      {p.role === "starter" ? "ตัวจริง" : "ตัวสำรอง"}{" "}
-                      {p.role === "bench" ? p.bench : ""}{" "}
-                      {p.captain === "captain"
-                        ? "(C)"
-                        : p.captain === "vice_captain"
-                          ? "(VC)"
-                          : ""}
-                    </td>
+              {groups.map((group) => (
+                <tbody key={group.label}>
+                  <tr className={styles.groupRow}>
+                    <th colSpan={4} scope="colgroup">
+                      {group.label} ({group.rows.length})
+                    </th>
                   </tr>
-                ))}
-              </tbody>
+                  {group.rows.map((p) => (
+                    <tr key={p.id}>
+                      <td>
+                        <AdminName th={p.th} en={p.en} />
+                      </td>
+                      <td>{positionShort[p.position] ?? p.position}</td>
+                      <td>L{p.tier}</td>
+                      <td>
+                        <span className={styles.roleCell}>
+                          {p.role === "starter" ? null : p.bench === 0 ? (
+                            "สำรองผู้รักษาประตู"
+                          ) : (
+                            <AdminName
+                              th={`สำรองลำดับ ${p.bench}`}
+                              en={`Bench ${p.bench}`}
+                            />
+                          )}
+                          {p.captain === "captain" ? (
+                            <span className={styles.roleBadge}>กัปตัน (C)</span>
+                          ) : p.captain === "vice_captain" ? (
+                            <span className={styles.roleBadge}>
+                              รองกัปตัน (VC)
+                            </span>
+                          ) : p.role === "starter" ? (
+                            "—"
+                          ) : null}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              ))}
             </table>
           </div>
         ) : (

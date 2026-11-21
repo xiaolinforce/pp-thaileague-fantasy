@@ -33,8 +33,41 @@ export const getAdminContext = cache(async () => {
     weeks.find((w) => w.status === "open") ??
     weeks.find((w) => w.status === "planned") ??
     weeks.at(-1);
-  return { season, weeks, current };
+  // One request-time clock keeps deadline copy consistent within a render.
+  return { season, weeks, current, now: new Date() };
 });
+
+export type AdminGameweekReadiness = {
+  number: number;
+  fixtures: number;
+  finished: number;
+  withStats: number;
+  finishedWithoutStats: number;
+};
+
+/** Fixture completion and stat coverage used to explain lifecycle readiness. */
+export async function getAdminGameweekReadiness(
+  numbers: number[],
+): Promise<Map<number, AdminGameweekReadiness>> {
+  const context = await getAdminContext();
+  if (!numbers.length) return new Map();
+  const result = await db.execute<AdminGameweekReadiness>(sql`
+    select f.matchweek::int as number, count(*)::int fixtures,
+      count(*) filter (where f.status = 'finished')::int finished,
+      count(*) filter (where stats.count > 0)::int "withStats",
+      count(*) filter (where f.status = 'finished' and stats.count = 0)::int "finishedWithoutStats"
+    from fixtures f
+    left join lateral (
+      select count(*)::int count from fantasy_player_match_stats s where s.fixture_id = f.id
+    ) stats on true
+    where f.competition_season_id = ${context.season.competitionSeasonId}::uuid
+      and f.matchweek in (${sql.join(
+        numbers.map((n) => sql`${n}`),
+        sql`,`,
+      )})
+    group by f.matchweek`);
+  return new Map(result.rows.map((row) => [row.number, row]));
+}
 
 export type AdminParams = Record<string, string | string[] | undefined>;
 export function param(params: AdminParams, key: string) {
@@ -89,6 +122,17 @@ export async function getAdminParticipants(
   const kind = param(params, "kind"),
     state = param(params, "state"),
     query = param(params, "q").trim().slice(0, 100);
+  const sort = ["name", "points", "recent"].includes(param(params, "sort"))
+    ? param(params, "sort")
+    : "kind";
+  const orderBy =
+    sort === "name"
+      ? sql`order by name, id`
+      : sort === "points"
+        ? sql`order by total_points desc, name, id`
+        : sort === "recent"
+          ? sql`order by last_save desc nulls last, name, id`
+          : sql`order by case kind when 'member' then 0 when 'guest' then 1 when 'bot' then 2 else 3 end, name, id`;
   const filters = sql`where (${query} = '' or position(lower(${query}) in lower(name)) > 0)
     and (${kind} not in ('member', 'guest', 'bot', 'abandoned') or kind = ${kind})
     and (${state} <> 'recent' or recent)
@@ -119,6 +163,7 @@ export async function getAdminParticipants(
       query,
       kind,
       state,
+      sort,
     };
   const count = await db.execute<{ count: number }>(
     sql`${cte} select count(*)::int count from participants ${filters}`,
@@ -129,7 +174,7 @@ export async function getAdminParticipants(
     Math.max(1, Math.ceil(total / 30)),
   );
   const rows = await db.execute<AdminTeam>(
-    sql`${cte} select * from participants ${filters} order by name, id limit 30 offset ${(page - 1) * 30}`,
+    sql`${cte} select * from participants ${filters} ${orderBy} limit 30 offset ${(page - 1) * 30}`,
   );
   return {
     ...context,
@@ -141,6 +186,7 @@ export async function getAdminParticipants(
     query,
     kind,
     state,
+    sort,
   };
 }
 
@@ -276,9 +322,15 @@ export async function getAdminMatchOptions(params: AdminParams) {
     away_th: string;
     away_en: string;
     status: string;
+    kickoff_at: string | null;
+    home_score: number | null;
+    away_score: number | null;
+    stat_rows: number;
   }>(sql`
     select f.id, f.matchweek, home.display_name_th home_th, home.display_name_en home_en,
-      away.display_name_th away_th, away.display_name_en away_en, f.status::text
+      away.display_name_th away_th, away.display_name_en away_en, f.status::text,
+      f.kickoff_at::text kickoff_at, f.home_score, f.away_score,
+      (select count(*)::int from fantasy_player_match_stats s where s.fixture_id = f.id) stat_rows
     from fixtures f join competition_entries home on home.id=f.home_entry_id join competition_entries away on away.id=f.away_entry_id
     where f.matchweek=${gw} and f.competition_season_id=${context.season.competitionSeasonId}::uuid order by f.kickoff_at nulls last, f.id`);
   const fixture =
@@ -292,17 +344,37 @@ export async function getAdminMatchOptions(params: AdminParams) {
         club_th: string;
         club_en: string;
         position: string;
+        side: "home" | "away";
+        minutes: number | null;
+        goals: number | null;
+        assists: number | null;
+        cards: number | null;
+        points: number | null;
+        has_stats: boolean;
       }>(sql`
-    select distinct on (fp.id) fp.id, coalesce(p.full_name_th,p.full_name_en) th, p.full_name_en en, e.display_name_th club_th, e.display_name_en club_en, fp.locked_position::text position
-    from fixtures f join player_registrations r on r.competition_entry_id in (f.home_entry_id,f.away_entry_id)
-    join fantasy_players fp on fp.player_id=r.player_id and fp.fantasy_season_id=${context.season.id}::uuid
-    join players p on p.id=fp.player_id join competition_entries e on e.id=r.competition_entry_id
-    where f.id=${fixture.id}::uuid order by fp.id, (r.status = 'active') desc, r.registered_from desc, e.id`)
+    select roster.*, s.minutes, s.goals, coalesce(s.fantasy_assists, s.source_assists) assists,
+      (s.yellow_cards + s.red_cards) cards, mp.total_points points, s.id is not null has_stats
+    from (
+      select distinct on (fp.id) fp.id, coalesce(p.full_name_th,p.full_name_en) th, p.full_name_en en,
+        e.display_name_th club_th, e.display_name_en club_en, fp.locked_position::text position,
+        case when r.competition_entry_id = f.home_entry_id then 'home' else 'away' end side
+      from fixtures f join player_registrations r on r.competition_entry_id in (f.home_entry_id,f.away_entry_id)
+      join fantasy_players fp on fp.player_id=r.player_id and fp.fantasy_season_id=${context.season.id}::uuid
+      join players p on p.id=fp.player_id join competition_entries e on e.id=r.competition_entry_id
+      where f.id=${fixture.id}::uuid order by fp.id, (r.status = 'active') desc, r.registered_from desc, e.id
+    ) roster
+    left join fantasy_player_match_stats s on s.fixture_id = ${fixture.id}::uuid and s.fantasy_player_id = roster.id
+    left join fantasy_player_match_points mp on mp.player_match_stats_id = s.id`)
     : { rows: [] };
-  players.rows.sort((a, b) => a.th.localeCompare(b.th, "th"));
-  const player =
-    players.rows.find((p) => p.id === param(params, "player")) ??
-    players.rows[0];
+  const positionOrder = ["goalkeeper", "defender", "midfielder", "forward"];
+  players.rows.sort(
+    (a, b) =>
+      Number(b.side === "home") - Number(a.side === "home") ||
+      Number((b.minutes ?? 0) > 0) - Number((a.minutes ?? 0) > 0) ||
+      positionOrder.indexOf(a.position) - positionOrder.indexOf(b.position) ||
+      a.th.localeCompare(b.th, "th"),
+  );
+  const player = players.rows.find((p) => p.id === param(params, "player"));
   const stats =
     fixture && player ? await getAdminMatchStats(fixture.id, player.id) : null;
   return {
@@ -334,9 +406,11 @@ export async function getAdminPlayerOptions(params: AdminParams) {
     club_en: string;
     position: string;
     is_thai: boolean;
+    level: number | null;
   }>(sql`
     select distinct fp.id, coalesce(p.full_name_th,p.full_name_en) th, p.full_name_en en, e.club_id,
-      e.display_name_th club_th,e.display_name_en club_en,fp.locked_position::text position,fp.is_thai
+      e.display_name_th club_th,e.display_name_en club_en,fp.locked_position::text position,fp.is_thai,
+      latest_tier.level
     from fantasy_players fp join players p on p.id=fp.player_id join player_registrations r on r.player_id=p.id
     join competition_entries e on e.id=r.competition_entry_id and e.competition_season_id=${context.season.competitionSeasonId}::uuid
     left join lateral (
@@ -357,14 +431,35 @@ export async function getAdminPlayerOptions(params: AdminParams) {
   const clubs = await db.execute<{ id: string; th: string; en: string }>(
     sql`select club_id id,display_name_th th,display_name_en en from competition_entries where competition_season_id=${context.season.competitionSeasonId}::uuid and is_active order by display_name_th`,
   );
-  rows.rows = Array.from(new Map(rows.rows.map((p) => [p.id, p])).values());
-  const player =
-    rows.rows.find((p) => p.id === param(params, "player")) ?? rows.rows[0];
+  const unique = Array.from(
+    new Map(
+      rows.rows.map((p) => [
+        p.id,
+        {
+          ...p,
+          level: resolvePlayerTier(
+            p.level ?? undefined,
+            week?.tierRulesVersion ?? "two-tier-v1",
+          ),
+        },
+      ]),
+    ).values(),
+  );
+  const pageSize = 25;
+  const total = unique.length;
+  const page = Math.min(
+    pageNumber(param(params, "page")),
+    Math.max(1, Math.ceil(total / pageSize)),
+  );
+  const player = unique.find((p) => p.id === param(params, "player"));
   const state =
     player && week ? await getAdminPlayerState(player.id, week.id) : null;
   return {
     ...context,
-    rows: rows.rows,
+    rows: unique.slice((page - 1) * pageSize, page * pageSize),
+    total,
+    page,
+    pageSize,
     clubs: clubs.rows,
     player,
     week,
@@ -374,6 +469,106 @@ export async function getAdminPlayerOptions(params: AdminParams) {
     position,
     level,
   };
+}
+
+const auditFieldAliases: Record<string, string> = {
+  kickoff_at: "kickoffAt",
+  deadline_at: "deadlineAt",
+  home_score: "homeScore",
+  away_score: "awayScore",
+  home_penalty_score: "homePenaltyScore",
+  away_penalty_score: "awayPenaltyScore",
+  full_name_th: "fullNameTh",
+  full_name_en: "fullNameEn",
+  short_name_th: "shortNameTh",
+  goals_conceded_while_playing: "goalsConcededWhilePlaying",
+  source_assists: "sourceAssists",
+  fantasy_assists: "fantasyAssists",
+  penalty_saves: "penaltySaves",
+  penalty_misses: "penaltyMisses",
+  yellow_cards: "yellowCards",
+  red_cards: "redCards",
+  own_goals: "ownGoals",
+  is_thai: "isThai",
+  average_points: "averagePoints",
+  highest_points: "highestPoints",
+};
+
+// Do not send source payloads, bot provisioning payloads or other unrelated
+// internal properties to the browser. Only known correction fields are shown.
+const auditAllowedFields = new Set([
+  "level",
+  "tierSnapshot",
+  "tierRulesVersion",
+  "tierSlots",
+  "gameweek",
+  "gameweekId",
+  "isThai",
+  "effectiveGameweekId",
+  "minutes",
+  "goals",
+  "sourceAssists",
+  "fantasyAssists",
+  "goalsConcededWhilePlaying",
+  "saves",
+  "penaltySaves",
+  "penaltyMisses",
+  "yellowCards",
+  "redCards",
+  "ownGoals",
+  "status",
+  "number",
+  "nextGameweek",
+  "kickoffAt",
+  "deadlineAt",
+  "homeScore",
+  "awayScore",
+  "homePenaltyScore",
+  "awayPenaltyScore",
+  "matchweek",
+  "fullNameTh",
+  "fullNameEn",
+  "shortNameTh",
+  "averagePoints",
+  "highestPoints",
+]);
+
+function auditValue(value: unknown) {
+  if (value === null || value === undefined) return null;
+  if (typeof value === "object") return JSON.stringify(value);
+  return String(value);
+}
+
+/**
+ * Normalise snake_case database snapshots and camelCase service payloads into
+ * one allowlisted shape, then keep the fields whose value actually changed.
+ * When only one side was recorded, every recorded field is shown.
+ */
+function auditChanges(
+  before: Record<string, unknown> | null,
+  after: Record<string, unknown> | null,
+) {
+  const pick = (value: Record<string, unknown> | null) => {
+    const picked: Record<string, string | null> = {};
+    for (const [key, raw] of Object.entries(value ?? {})) {
+      const name = auditFieldAliases[key] ?? key;
+      if (auditAllowedFields.has(name)) picked[name] = auditValue(raw);
+    }
+    return picked;
+  };
+  const left = pick(before);
+  const right = pick(after);
+  const keys = Array.from(
+    new Set([...Object.keys(left), ...Object.keys(right)]),
+  );
+  const compare = before && after;
+  return keys
+    .filter((key) => !compare || (left[key] ?? null) !== (right[key] ?? null))
+    .map((key) => ({
+      key,
+      before: left[key] ?? null,
+      after: right[key] ?? null,
+    }));
 }
 
 export async function getAdminAudit(params: AdminParams) {
@@ -398,46 +593,31 @@ export async function getAdminAudit(params: AdminParams) {
     )
     .limit(30)
     .offset((page - 1) * 30);
-  // Do not send source payloads, bot provisioning payloads or other unrelated
-  // internal properties to the browser. Only known correction fields are shown.
-  const allowed = new Set([
-    "level",
-    "tierSnapshot",
-    "tierRulesVersion",
-    "tierSlots",
-    "gameweek",
-    "gameweekId",
-    "isThai",
-    "effectiveGameweekId",
-    "minutes",
-    "goals",
-    "sourceAssists",
-    "fantasyAssists",
-    "goalsConcededWhilePlaying",
-    "saves",
-    "penaltySaves",
-    "penaltyMisses",
-    "yellowCards",
-    "redCards",
-    "ownGoals",
-    "status",
-    "number",
-    "nextGameweek",
-  ]);
-  const pick = (value: Record<string, unknown> | null) =>
-    Object.fromEntries(
-      Object.entries(value ?? {}).filter(([key]) => allowed.has(key)),
-    );
+  const actions = await db
+    .selectDistinct({ action: fantasyAdminAuditLog.action })
+    .from(fantasyAdminAuditLog)
+    .orderBy(asc(fantasyAdminAuditLog.action));
   const names = rows.length
-    ? await db.execute<{ id: string; th: string; en: string }>(sql`
-    select a.id, coalesce(p.full_name_th,p.full_name_en,t.name,'GW '||g.number::text,a.entity_type) th,
-      coalesce(p.full_name_en,t.name,'GW '||g.number::text,a.entity_type) en
+    ? await db.execute<{
+        id: string;
+        th: string | null;
+        en: string | null;
+      }>(sql`
+    select a.id,
+      coalesce(p.full_name_th, p.full_name_en, direct.full_name_th, direct.full_name_en, t.name,
+        'GW ' || g.number::text, fh.display_name_th || ' พบ ' || fa.display_name_th) th,
+      coalesce(p.full_name_en, direct.full_name_en, t.name,
+        'GW ' || g.number::text, fh.display_name_en || ' vs ' || fa.display_name_en) en
     from fantasy_admin_audit_log a
     left join fantasy_player_match_stats s on a.entity_type='fantasy_player_match_stats' and s.id=a.entity_id
     left join fantasy_players fp on fp.id=case when a.entity_type='fantasy_player' then a.entity_id else s.fantasy_player_id end
     left join players p on p.id=fp.player_id
+    left join players direct on a.entity_type='player' and direct.id=a.entity_id
     left join fantasy_teams t on a.entity_type='fantasy_team' and t.id=a.entity_id
     left join fantasy_gameweeks g on a.entity_type='fantasy_gameweek' and g.id=a.entity_id
+    left join fixtures f on a.entity_type='fixture' and f.id=a.entity_id
+    left join competition_entries fh on fh.id=f.home_entry_id
+    left join competition_entries fa on fa.id=f.away_entry_id
     where a.id in (${sql.join(
       rows.map((r) => sql`${r.id}::uuid`),
       sql`,`,
@@ -445,12 +625,24 @@ export async function getAdminAudit(params: AdminParams) {
     : { rows: [] };
   const byId = new Map(names.rows.map((n) => [n.id, n]));
   return {
-    rows: rows.map((row) => ({
-      ...row,
-      name: byId.get(row.id) ?? { th: row.entityType, en: row.entityType },
-      before: pick(row.before),
-      after: pick(row.after),
-    })),
+    rows: rows.map((row) => {
+      const name = byId.get(row.id);
+      return {
+        id: row.id,
+        action: row.action,
+        entityType: row.entityType,
+        entityId: row.entityId,
+        reason: row.reason,
+        changedBy: row.changedBy,
+        createdAt: row.createdAt,
+        name:
+          name?.th || name?.en
+            ? { th: name.th ?? name.en ?? "", en: name.en ?? name.th ?? "" }
+            : null,
+        changes: auditChanges(row.before, row.after),
+      };
+    }),
+    actions: actions.map((row) => row.action),
     total: count.count,
     page,
     action,

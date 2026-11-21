@@ -364,6 +364,26 @@ player, match or Gameweek and the effects of the operation; form values remain
 available when cancelling or recovering from an error. Pending submissions
 disable the form and completion/failure is announced locally.
 
+- **Task first:** Overview starts with pending Gameweek work (deadline
+  countdown, readiness counts, out-of-order warnings) before metrics.
+- **List + editor workbench:** record-editing pages (player data, match stats)
+  pair a filtered table with a sticky editor that opens from a row link. The
+  editor scrolls internally so its save action stays reachable; at 1100px and
+  below it stacks above the list once a record is selected. Never use a
+  dropdown for hundreds of records.
+- **Diff confirmations:** `AdminForm` receives saved `initialValues` and
+  optional `valueLabels`; its dialog lists only changed fields as before →
+  after plus the reason.
+- **Status tones:** `Status` maps lifecycle, fixture and team kinds to
+  neutral/success/info/warning/danger/accent tones; the written label remains
+  the meaning.
+- **Stepped operations:** multi-stage operations such as reminders show
+  numbered steps in the order they are performed, and environment context
+  that changes consequences appears as a prominent banner.
+- **Dynamic text:** counts and sentences with values use `AdminName` with
+  explicit Thai and English; avoid short generic dictionary keys because
+  the admin dictionary also performs substring replacement.
+
 Participant counts link to matching directory filters. Tables retain their
 headers and scroll within an explicitly labelled keyboard-focusable region on
 small screens. Current player data is separate from saved team snapshots.

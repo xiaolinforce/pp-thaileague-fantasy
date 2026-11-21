@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getAdminTeamPoints } from "@/data/admin-team-points";
@@ -6,9 +5,11 @@ import type { AdminParams } from "@/data/admin";
 import {
   AdminHeading,
   AdminLocalized,
+  AdminTabs,
   AdminUrlSelect,
   Status,
 } from "../../../components";
+import { teamTabs } from "../tabs";
 import { AdminScoredSquad } from "../../../scored-squad";
 import styles from "../../../admin.module.css";
 
@@ -26,17 +27,18 @@ export default async function TeamPointsPage({
   return (
     <AdminLocalized>
       <div className={styles.optimalPage}>
-        <AdminHeading title="คะแนนนักเตะในทีม" />
-        <div className={styles.teamPointsContext}>
-          <strong data-localize="off">{state.team.name}</strong>
-          <Link
-            className={styles.link}
-            href={`/admin/fantasy/participants/${state.team.id}${state.week ? `?gw=${state.week.number}` : ""}`}
-            prefetch={false}
-          >
-            กลับรายละเอียดทีม
-          </Link>
-        </div>
+        <AdminHeading
+          title={state.team.name}
+          titleIsData
+          back={{
+            href: `/admin/fantasy/participants?gw=${state.week?.number ?? ""}`,
+            label: "รายชื่อทีม",
+          }}
+        />
+        <AdminTabs
+          label="มุมมองทีม"
+          items={teamTabs(state.team.id, state.week?.number, "points")}
+        />
         <div className={styles.optimalToolbar}>
           <AdminUrlSelect
             name="gw"

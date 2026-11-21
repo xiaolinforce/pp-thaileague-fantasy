@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Link, { useLinkStatus } from "next/link";
 import {
+  Fragment,
   useEffect,
   useId,
   useRef,
@@ -10,6 +11,7 @@ import {
   type ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
+import { ChevronLeft, CircleCheck, Info, TriangleAlert } from "lucide-react";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { useNavigationBlocker } from "@/components/fantasy/navigation-blocker";
 import {
@@ -29,12 +31,18 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import styles from "./admin.module.css";
-import { adminFieldLabels } from "@/lib/admin-copy";
+import { adminFieldLabels, statusLabels } from "@/lib/admin-copy";
 import {
   AdminActionButton,
   AdminPendingContext,
   AdminPendingIndicator,
 } from "./admin-action-button";
+
+/** Inline progress for dynamic admin links that cannot be prefetched. */
+export function LinkPendingHint() {
+  const { pending } = useLinkStatus();
+  return pending ? <AdminPendingIndicator /> : null;
+}
 
 export function AdminLocalized({ children }: { children: ReactNode }) {
   return <Localized>{children}</Localized>;
@@ -43,18 +51,96 @@ export function AdminLocalized({ children }: { children: ReactNode }) {
 export function AdminHeading({
   title,
   description,
+  back,
+  children,
+  titleIsData = false,
 }: {
   title: string;
   description?: string;
+  back?: { href: string; label: string };
+  children?: ReactNode;
+  /** User-entered names such as team names must never be dictionary-translated. */
+  titleIsData?: boolean;
 }) {
   const { translate: t } = useLanguage();
   return (
     <header className={styles.heading}>
       <div>
-        <h1>{t(title)}</h1>
+        {back ? (
+          <Link prefetch={false} className={styles.backLink} href={back.href}>
+            <ChevronLeft aria-hidden="true" width={16} height={16} />
+            {t(back.label)}
+          </Link>
+        ) : null}
+        {titleIsData ? (
+          <h1 data-localize="off">{title}</h1>
+        ) : (
+          <h1>{t(title)}</h1>
+        )}
         {description ? <p>{t(description)}</p> : null}
       </div>
+      {children ? (
+        <div className={styles.headingActions}>{children}</div>
+      ) : null}
     </header>
+  );
+}
+
+/** Peer views of the same record, such as a team's squad and its points. */
+export function AdminTabs({
+  label,
+  items,
+}: {
+  label: string;
+  items: Array<{ href: string; label: string; current: boolean }>;
+}) {
+  const { translate: t } = useLanguage();
+  return (
+    <nav className={styles.tabs} aria-label={t(label)}>
+      {items.map((item) => (
+        <Link
+          key={item.href}
+          prefetch={false}
+          href={item.href}
+          className={styles.tab}
+          aria-current={item.current ? "page" : undefined}
+        >
+          {t(item.label)}
+          <LinkPendingHint />
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
+export type AdminNoticeTone = "info" | "warning" | "danger" | "success";
+
+export function AdminNotice({
+  tone = "info",
+  title,
+  children,
+}: {
+  tone?: AdminNoticeTone;
+  title?: ReactNode;
+  children?: ReactNode;
+}) {
+  const Icon =
+    tone === "danger" || tone === "warning"
+      ? TriangleAlert
+      : tone === "success"
+        ? CircleCheck
+        : Info;
+  return (
+    <div
+      className={`${styles.notice} ${styles[`notice_${tone}`]}`}
+      role={tone === "danger" ? "alert" : undefined}
+    >
+      <Icon aria-hidden="true" width={18} height={18} />
+      <div>
+        {title ? <strong>{title}</strong> : null}
+        {children ? <div>{children}</div> : null}
+      </div>
+    </div>
   );
 }
 
@@ -229,26 +315,35 @@ export function AdminFilters({
     </form>
   );
 }
-export const statusLabels: Record<string, string> = {
-  planned: "ยังไม่เปิด",
-  open: "เปิดรับจัดทีม",
-  provisional: "รอตรวจคะแนน",
-  final: "คะแนน Final",
-  locked: "ล็อกแล้ว",
-  member: "สมาชิก",
-  guest: "Guest",
-  bot: "Bot",
-  abandoned: "Guest เก็บประวัติ",
-  scheduled: "รอแข่งขัน",
-  live: "กำลังแข่งขัน",
-  finished: "จบการแข่งขัน",
-  postponed: "เลื่อนการแข่งขัน",
-  cancelled: "ยกเลิกการแข่งขัน",
+
+/**
+ * Status tone carries the same meaning across admin pages. The written label
+ * remains the source of meaning; colour only speeds up scanning.
+ */
+const statusTones: Record<string, string> = {
+  planned: "neutral",
+  open: "success",
+  locked: "info",
+  provisional: "warning",
+  final: "info",
+  member: "info",
+  guest: "neutral",
+  bot: "accent",
+  abandoned: "neutral",
+  scheduled: "neutral",
+  live: "warning",
+  finished: "success",
+  postponed: "danger",
+  cancelled: "danger",
+  inactive: "neutral",
 };
 export function Status({ value }: { value: string }) {
   const { translate: t } = useLanguage();
+  const tone = statusTones[value] ?? "neutral";
   return (
-    <span className={styles.badge}>{t(statusLabels[value] ?? value)}</span>
+    <span className={`${styles.badge} ${styles[`tone_${tone}`]}`}>
+      {t(statusLabels[value] ?? value)}
+    </span>
   );
 }
 export function Pagination({
@@ -256,35 +351,90 @@ export function Pagination({
   total,
   base,
   params,
+  pageSize = 30,
 }: {
   page: number;
   total: number;
   base: string;
   params: Record<string, string>;
+  pageSize?: number;
 }) {
-  const { translate: t } = useLanguage();
-  const pages = Math.max(1, Math.ceil(total / 30));
-  const url = (n: number) =>
-    `${base}?${new URLSearchParams({ ...params, page: String(n) })}`;
+  const { translate: t, language } = useLanguage();
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const url = (n: number) => {
+    const query = new URLSearchParams(
+      Object.entries(params).filter(([, value]) => value !== ""),
+    );
+    query.set("page", String(n));
+    return `${base}?${query}`;
+  };
+  const numbers = Array.from(new Set([1, page - 1, page, page + 1, pages]))
+    .filter((n) => n >= 1 && n <= pages)
+    .sort((a, b) => a - b);
   return (
     <nav className={styles.pagination} aria-label={t("แบ่งหน้า")}>
-      <span>
-        {t("ทั้งหมด")} {total.toLocaleString()} · {t("หน้า")} {page} / {pages}
+      <span data-localize="off">
+        {language === "th"
+          ? `ทั้งหมด ${total.toLocaleString()} รายการ`
+          : `${total.toLocaleString()} total`}
       </span>
-      <div className={styles.actions}>
-        {page > 1 && (
-          <Link prefetch={false} className={styles.link} href={url(page - 1)}>
-            {t("ก่อนหน้า")}
-          </Link>
-        )}
-        {page < pages && (
-          <Link prefetch={false} className={styles.link} href={url(page + 1)}>
-            {t("ถัดไป")}
-          </Link>
-        )}
-      </div>
+      {pages > 1 ? (
+        <div className={styles.pageLinks}>
+          {page > 1 ? (
+            <Link
+              prefetch={false}
+              className={styles.pageLink}
+              href={url(page - 1)}
+            >
+              {t("ก่อนหน้า")}
+            </Link>
+          ) : null}
+          {numbers.map((n, index) => (
+            <Fragment key={n}>
+              {index > 0 && n - numbers[index - 1] > 1 ? (
+                <span aria-hidden="true">…</span>
+              ) : null}
+              <Link
+                prefetch={false}
+                className={styles.pageLink}
+                href={url(n)}
+                aria-current={n === page ? "page" : undefined}
+                aria-label={`${t("หน้า")} ${n}`}
+              >
+                {n}
+              </Link>
+            </Fragment>
+          ))}
+          {page < pages ? (
+            <Link
+              prefetch={false}
+              className={styles.pageLink}
+              href={url(page + 1)}
+            >
+              {t("ถัดไป")}
+            </Link>
+          ) : null}
+        </div>
+      ) : null}
     </nav>
   );
+}
+
+const hiddenPreviewFields = new Set([
+  "fixtureId",
+  "fantasyPlayerId",
+  "effectiveGameweekId",
+  "gameweekId",
+  "reason",
+]);
+
+function previewValue(
+  key: string,
+  value: string,
+  valueLabels: Record<string, Record<string, string>>,
+) {
+  if (value === "") return "—";
+  return valueLabels[key]?.[value] ?? value;
 }
 
 export function AdminForm({
@@ -293,12 +443,17 @@ export function AdminForm({
   label,
   confirmation,
   trackChanges = true,
+  initialValues,
+  valueLabels = {},
 }: {
   action: (data: FormData) => Promise<void>;
   children: ReactNode;
   label: string;
   confirmation: { th: string; en: string };
   trackChanges?: boolean;
+  /** Saved values; the confirmation then lists only changed fields. */
+  initialValues?: Record<string, string>;
+  valueLabels?: Record<string, Record<string, string>>;
 }) {
   const { translate: t, language } = useLanguage();
   const id = useId();
@@ -392,25 +547,80 @@ export function AdminForm({
             <DialogTitle>{t(label)}</DialogTitle>
             <DialogDescription>{confirmation[language]}</DialogDescription>
           </DialogHeader>
-          {payload && trackChanges && (
-            <div className={styles.changePreview}>
-              {Array.from(payload.entries())
-                .filter(
-                  ([key]) =>
-                    ![
-                      "fixtureId",
-                      "fantasyPlayerId",
-                      "effectiveGameweekId",
-                    ].includes(key),
-                )
-                .map(([key, value]) => (
-                  <p key={key}>
-                    <span>{t(adminFieldLabels[key] ?? key)}</span>:{" "}
-                    <strong>{String(value) || "—"}</strong>
-                  </p>
-                ))}
-            </div>
-          )}
+          {payload && trackChanges
+            ? (() => {
+                const entries = Array.from(payload.entries())
+                  .filter(([key]) => !hiddenPreviewFields.has(key))
+                  .map(([key, value]) => [key, String(value)] as const);
+                const changed = initialValues
+                  ? entries.filter(
+                      ([key, value]) => (initialValues[key] ?? "") !== value,
+                    )
+                  : entries;
+                const reason = String(payload.get("reason") ?? "").trim();
+                return (
+                  <div className={styles.changePreview}>
+                    {changed.length ? (
+                      <table className={styles.diffTable}>
+                        <thead>
+                          <tr>
+                            <th scope="col">{t("ช่องข้อมูล")}</th>
+                            {initialValues ? (
+                              <th scope="col">{t("ค่าเดิม")}</th>
+                            ) : null}
+                            <th scope="col">{t("ค่าใหม่")}</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {changed.map(([key, value]) => (
+                            <tr key={key}>
+                              <th scope="row">
+                                {t(adminFieldLabels[key] ?? key)}
+                              </th>
+                              {initialValues ? (
+                                <td>
+                                  {t(
+                                    previewValue(
+                                      key,
+                                      initialValues[key] ?? "",
+                                      valueLabels,
+                                    ),
+                                  )}
+                                </td>
+                              ) : null}
+                              <td>
+                                <strong>
+                                  {t(previewValue(key, value, valueLabels))}
+                                </strong>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    ) : (
+                      <p className={styles.hint}>
+                        {t(
+                          "ไม่มีค่าที่เปลี่ยน ระบบจะบันทึกเป็นการตรวจซ้ำพร้อมเหตุผล",
+                        )}
+                      </p>
+                    )}
+                    {initialValues && changed.length < entries.length ? (
+                      <p className={styles.hint} data-localize="off">
+                        {language === "th"
+                          ? `ไม่เปลี่ยน ${entries.length - changed.length} ช่อง`
+                          : `${entries.length - changed.length} unchanged fields`}
+                      </p>
+                    ) : null}
+                    {reason ? (
+                      <p className={styles.previewReason}>
+                        <span>{t("เหตุผล")}</span>
+                        <span data-localize="off">{reason}</span>
+                      </p>
+                    ) : null}
+                  </div>
+                );
+              })()
+            : null}
           <DialogFooter>
             <Button
               variant="outline"

@@ -131,7 +131,7 @@ const adminNavigation = [
     icon: MailCheck,
   },
   {
-    label: "ทีมที่ดีที่สุด",
+    label: "ทีมคะแนนสูงสุด",
     href: "/admin/fantasy/optimal-team",
     icon: Trophy,
   },

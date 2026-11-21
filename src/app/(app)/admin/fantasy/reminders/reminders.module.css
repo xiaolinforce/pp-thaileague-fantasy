@@ -1,41 +1,162 @@
-.readOnlyNotice {
+.environmentBanner {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 14px;
   align-items: start;
   margin-bottom: 24px;
-  padding: 16px 18px;
-  border: 1px solid var(--line);
+  padding: 16px 20px;
+  border: 1px solid currentColor;
+  border-left-width: 6px;
   border-radius: 14px;
-  background: var(--warm);
 }
 
-.operationNotice,
-.blockedNotice {
-  margin: 0 0 18px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background: var(--orange-soft);
+.environmentBanner > svg {
+  width: 24px;
+  height: 24px;
+  margin-top: 2px;
+}
+
+.environmentBanner h2 {
+  margin: 0 0 4px;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.environmentBanner p {
+  margin: 0;
   color: var(--ink);
   font-size: 14px;
-  line-height: 1.6;
+  line-height: 1.65;
 }
 
-.blockedNotice {
-  margin: 16px 0 0;
+/* Production sends real email, so it carries the stronger consequence tone. */
+.productionEnvironment {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 6%, white);
+}
+
+.nonProductionEnvironment {
+  color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.stepHeading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 12px;
+  align-items: start;
+  margin-bottom: 18px;
+}
+
+.stepHeading h2 {
+  margin: 2px 0 4px;
+}
+
+.stepHeading p {
+  margin: 0;
+}
+
+.stepNumber {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--navy);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.audienceSelect {
+  flex: 1 1 320px;
+  max-width: 520px;
+}
+
+.audienceSelect > div {
+  width: 100%;
+}
+
+.audienceResult {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 20px;
+  align-items: center;
+  margin: 4px 0 16px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: var(--orange-soft);
+}
+
+.selectedCount {
+  display: grid;
+  justify-items: center;
+  min-width: 128px;
+  color: var(--orange-deep);
+  font-size: 13px;
+}
+
+.selectedCount strong {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.audienceDescription,
+.scopeNote {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.audienceDescription {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.scopeNote {
+  margin-top: 4px;
+  color: var(--muted);
+}
+
+.audienceBreakdown {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0 24px;
+  margin: 0;
+}
+
+.audienceBreakdown > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+}
+
+.audienceBreakdown dt {
+  color: var(--muted);
+}
+
+.audienceBreakdown dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .campaignMeta {
-  margin: 0 0 18px;
+  margin: 0 0 14px;
   color: var(--muted);
   font-size: 14px;
 }
 
 .deliverySummary {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
-  gap: 12px;
-  margin: 0;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  margin: 0 0 16px;
 }
 
 .deliverySummary > div {
@@ -51,16 +172,25 @@
 
 .deliverySummary dd {
   margin: 4px 0 0;
-  font-size: 19px;
+  font-size: 20px;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+}
+
+.deliverySummary .problemStatus {
+  border-color: color-mix(in srgb, var(--red) 35%, transparent);
+  background: color-mix(in srgb, var(--red) 6%, white);
+}
+
+.deliverySummary .problemStatus dd {
+  color: var(--red);
 }
 
 .sendForm {
   display: grid;
   justify-items: start;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 8px;
   font-size: 14px;
 }
 
@@ -73,8 +203,22 @@
   font-weight: 600;
 }
 
+.sendForm code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--warm);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+.confirmRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
 .sendForm input:not([type="hidden"]) {
-  width: min(100%, 320px);
+  width: min(100%, 240px);
   min-height: 44px;
   padding: 8px 12px;
   border: 1px solid var(--line);
@@ -113,127 +257,17 @@
   cursor: not-allowed;
 }
 
-.readOnlyNotice > svg {
-  width: 20px;
-  height: 20px;
-  margin-top: 2px;
-  color: var(--orange-deep);
-}
-
-.readOnlyNotice h2 {
-  margin: 0 0 4px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
-.readOnlyNotice p,
-.audienceDescription,
-.scopeNote {
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.65;
-}
-
-.environmentBadge {
-  padding: 5px 9px;
-  border: 1px solid currentColor;
-  border-radius: 7px;
-  font-size: 12px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.productionEnvironment {
-  color: var(--green-dark);
-  background: var(--paper);
-}
-
-.nonProductionEnvironment {
-  color: var(--orange-deep);
-  background: var(--orange-soft);
-}
-
-.sectionHeading,
-.previewTitle {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-  margin-bottom: 18px;
-}
-
-.sectionHeading h2,
-.previewTitle h2 {
-  margin-bottom: 5px;
-}
-
-.audienceDescription {
-  max-width: 78ch;
-  margin: -4px 0 5px;
-  color: var(--ink);
-}
-
-.audienceSummary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(145px, 1fr));
-  margin: 22px 0 16px;
-  border-block: 1px solid var(--line);
-}
-
-.audienceSummary > div {
-  display: grid;
-  gap: 7px;
-  padding: 16px;
-  border-right: 1px solid var(--line);
-}
-
-.audienceSummary > div:last-child {
-  border-right: 0;
-}
-
-.audienceSummary dt {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.audienceSummary dd {
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
-
-.selectedSummary {
-  background: var(--orange-soft);
-}
-
-.selectedSummary dd {
-  color: var(--orange-deep);
-}
-
-.scopeNote {
-  padding-top: 2px;
-}
-
 .reviewGrid {
   display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(420px, 0.9fr);
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 0.9fr);
   gap: 24px;
   align-items: start;
+  margin-bottom: 24px;
 }
 
 .recipientPanel,
 .previewPanel {
   margin-bottom: 0;
-}
-
-.resultCount {
-  font-size: 16px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
 }
 
 .squadCount {
@@ -255,13 +289,21 @@
 }
 
 .previewTitle {
-  justify-content: flex-start;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 18px;
+}
+
+.previewTitle h2 {
+  margin-bottom: 5px;
 }
 
 .previewTitle > span {
   display: grid;
   width: 38px;
   height: 38px;
+  flex: 0 0 auto;
   place-items: center;
   border-radius: 10px;
   background: var(--orange-soft);
@@ -282,7 +324,7 @@
 
 .previewMetadata > div {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 140px minmax(0, 1fr);
   gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
@@ -315,12 +357,12 @@
 .previewFrame {
   display: block;
   width: 100%;
-  height: 720px;
+  height: 760px;
   border: 0;
   background: var(--warm);
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1100px) {
   .reviewGrid {
     grid-template-columns: 1fr;
   }
@@ -330,42 +372,14 @@
   }
 }
 
-@media (max-width: 820px) {
-  .audienceSummary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .audienceSummary > div {
-    border-bottom: 1px solid var(--line);
-  }
-
-  .audienceSummary > div:nth-child(2n) {
-    border-right: 0;
-  }
-
-  .audienceSummary > div:last-child {
-    border-bottom: 0;
-  }
-}
-
 @media (max-width: 600px) {
-  .readOnlyNotice {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .environmentBadge {
-    grid-column: 2;
-    justify-self: start;
-  }
-
-  .audienceSummary {
+  .audienceResult {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
 
-  .audienceSummary > div,
-  .audienceSummary > div:nth-child(2n) {
-    border-right: 0;
-    border-bottom: 1px solid var(--line);
+  .selectedCount {
+    justify-items: start;
   }
 
   .previewMetadata > div {

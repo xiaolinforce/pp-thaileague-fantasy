@@ -1,10 +1,14 @@
-import { AdminLocalized } from "../components";
-import { AdminActionButton } from "../admin-action-button";
-import { AdminDate } from "../server-components";
 import Link from "next/link";
 import { getAdminParticipants, type AdminParams } from "@/data/admin";
-import { AdminFilters, AdminHeading, Pagination, Status } from "../components";
-import { Empty, WeekSelect } from "../server-components";
+import { AdminActionButton } from "../admin-action-button";
+import {
+  AdminFilters,
+  AdminHeading,
+  AdminLocalized,
+  Pagination,
+  Status,
+} from "../components";
+import { AdminDate, Empty } from "../server-components";
 import styles from "../admin.module.css";
 
 export default async function Participants({
@@ -12,8 +16,10 @@ export default async function Participants({
 }: {
   searchParams: Promise<AdminParams>;
 }) {
-  const { week, weeks, rows, total, page, query, kind, state } =
+  const { week, weeks, rows, total, page, query, kind, state, sort } =
     await getAdminParticipants(await searchParams);
+  const scored = week && week.status !== "planned" && week.status !== "open";
+  const filtered = Boolean(query || kind || state || sort !== "kind");
   return (
     <AdminLocalized>
       <AdminHeading
@@ -21,14 +27,12 @@ export default async function Participants({
         description="ค้นหาทีมและดูการมีส่วนร่วม แยกสมาชิก Guest และ Bot"
       />
       <section className={styles.panel}>
-        <AdminFilters
-          key={`${query}:${kind}:${state}:${week?.number}`}
-          autoSubmit={false}
-        >
-          <label>
+        <AdminFilters key={`${query}:${kind}:${state}:${sort}:${week?.number}`}>
+          <label className={styles.searchField}>
             <span>ค้นหาชื่อทีม</span>
             <input
               data-localize="off"
+              type="search"
               name="q"
               defaultValue={query}
               maxLength={100}
@@ -53,25 +57,41 @@ export default async function Participants({
               <option value="incomplete">ยังไม่ครบ / ทีมไม่ใช้งาน</option>
             </select>
           </label>
-          <WeekSelect weeks={weeks} selected={week?.number} />
+          <label className={styles.narrowField}>
+            <span>Gameweek</span>
+            <select name="gw" defaultValue={week?.number}>
+              {weeks.map((w) => (
+                <option key={w.number} value={w.number}>
+                  GW {w.number}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            <span>เรียงตาม</span>
+            <select name="sort" defaultValue={sort}>
+              <option value="kind">ประเภท (สมาชิกก่อน)</option>
+              <option value="name">ชื่อทีม</option>
+              <option value="points">คะแนนรวมสูงสุด</option>
+              <option value="recent">บันทึกทีมล่าสุด</option>
+            </select>
+          </label>
           <AdminActionButton
             className="secondary-button"
             pendingLabel="กำลังค้นหา…"
           >
             ค้นหา
           </AdminActionButton>
-          <Link
-            className={styles.link}
-            href="/admin/fantasy/participants"
-            prefetch={false}
-          >
-            ล้างตัวกรอง
-          </Link>
+          {filtered ? (
+            <Link
+              className={styles.link}
+              href={`/admin/fantasy/participants?gw=${week?.number ?? ""}`}
+              prefetch={false}
+            >
+              ล้างตัวกรอง
+            </Link>
+          ) : null}
         </AdminFilters>
-        <p className={styles.hint}>
-          กิจกรรมล่าสุดนับการบันทึกและย้อนการจัดทีม ไม่ใช่การเข้าชมเว็บ
-          จำนวนทีมไม่ใช่จำนวนคนไม่ซ้ำ
-        </p>
         {rows.length ? (
           <div
             className={styles.scroll}
@@ -84,8 +104,11 @@ export default async function Participants({
                 <tr>
                   <th>ชื่อทีม</th>
                   <th>ประเภททีม</th>
-                  <th>นักเตะในทีม</th>
-                  <th>คะแนน GW</th>
+                  <th className={styles.num}>นักเตะในทีม</th>
+                  {scored ? (
+                    <th className={styles.num}>คะแนน GW {week.number}</th>
+                  ) : null}
+                  <th className={styles.num}>คะแนนรวมฤดูกาล</th>
                   <th>บันทึกทีมล่าสุด</th>
                 </tr>
               </thead>
@@ -95,19 +118,32 @@ export default async function Participants({
                     <td>
                       <Link
                         data-localize="off"
-                        className={styles.link}
-                        href={`/admin/fantasy/participants/${team.id}?gw=${week?.number}`}
+                        className={`${styles.link} ${styles.rowLink}`}
+                        href={`/admin/fantasy/participants/${team.id}?gw=${week?.number ?? ""}`}
                         prefetch={false}
                       >
                         {team.name}
                       </Link>
-                      {!team.active && <p>ทีมไม่ใช้งาน</p>}
                     </td>
                     <td>
-                      <Status value={team.kind} />
+                      <span className={styles.badgeRow}>
+                        <Status value={team.kind} />
+                        {!team.active ? <Status value="inactive" /> : null}
+                      </span>
                     </td>
-                    <td>{team.members} / 15</td>
-                    <td>{team.points ?? "—"}</td>
+                    <td className={styles.num}>
+                      <span
+                        className={
+                          team.members < 15 ? styles.incomplete : undefined
+                        }
+                      >
+                        {team.members} / 15
+                      </span>
+                    </td>
+                    {scored ? (
+                      <td className={styles.num}>{team.points ?? "—"}</td>
+                    ) : null}
+                    <td className={styles.num}>{team.total_points}</td>
                     <td>
                       <AdminDate value={team.last_save} />
                     </td>
@@ -123,8 +159,18 @@ export default async function Participants({
           page={page}
           total={total}
           base="/admin/fantasy/participants"
-          params={{ q: query, kind, state, gw: String(week?.number ?? "") }}
+          params={{
+            q: query,
+            kind,
+            state,
+            sort: sort === "kind" ? "" : sort,
+            gw: String(week?.number ?? ""),
+          }}
         />
+        <p className={styles.footnote}>
+          กิจกรรมล่าสุดนับการบันทึกและย้อนการจัดทีม ไม่ใช่การเข้าชมเว็บ ·
+          จำนวนทีมไม่ใช่จำนวนคนไม่ซ้ำ
+        </p>
       </section>
     </AdminLocalized>
   );

@@ -19,7 +19,10 @@ export default async function OptimalTeamPage({
   return (
     <AdminLocalized>
       <div className={styles.optimalPage}>
-        <AdminHeading title="ทีมคะแนนสูงสุดที่เป็นไปได้" />
+        <AdminHeading
+          title="ทีมคะแนนสูงสุด"
+          description="ดูการจัดทีมที่ถูกกติกาและทำคะแนนได้สูงสุดจากผลจริงของแต่ละ Gameweek"
+        />
         <div className={styles.optimalToolbar}>
           <AdminUrlSelect
             name="gw"
