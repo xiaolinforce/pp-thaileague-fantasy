@@ -262,9 +262,12 @@ draft into the next Gameweek.
 
 Locking and finalization are atomic lifecycle transitions. Locking requires an
 `open` Gameweek and a contiguous `planned` successor except at the season end.
-Finalization requires `provisional`; score recalculation and the final status
-commit together so a failed calculation cannot leave a partially transitioned
-Gameweek.
+Finalization requires a provisional Gameweek with finished fixtures, full match
+coverage, reviewed player statistics, recorded scores and matching goal totals.
+Score recalculation and the final status commit together. The match operator
+may lock an open Gameweek at its first kickoff. Its Final action requires the
+owner's one-use approval code for that Gameweek and the current match data.
+Corrections, a replacement code or expiry invalidate the previous approval.
 
 On the Points view, a squad member without a match-stat row remains pending
 until scoring is complete. During provisional scoring, a missing result does not

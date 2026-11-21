@@ -40,6 +40,12 @@ import {
   writeTierRelief,
 } from "./tier-relief-service";
 import { isTierOneAllowed } from "./tier-relief";
+import { FANTASY_SEASON_SLUG } from "./provisioning";
+import {
+  completedGameweekRevision,
+  GameweekOperationError,
+} from "./gameweek-readiness";
+import { matchesFinalApproval } from "./final-approval";
 
 function formInteger(formData: FormData, key: string) {
   const value = Number(formData.get(key) ?? 0);
@@ -301,6 +307,7 @@ export async function lockFantasyGameweek(
   formData: FormData,
   changedBy: string,
   db: FantasyTransaction,
+  atKickoffOnly = false,
 ) {
   const gameweekId = String(formData.get("gameweekId") ?? "");
   const target = await db.query.fantasyGameweeks.findFirst({
@@ -316,8 +323,23 @@ export async function lockFantasyGameweek(
     .limit(1);
   const gameweek = gameweekRows[0];
   if (!gameweek) throw new Error("Gameweek was not found.");
+  if (atKickoffOnly && season.slug !== FANTASY_SEASON_SLUG)
+    throw new GameweekOperationError("STATUS");
+  if (atKickoffOnly && gameweek.status === "provisional") return;
   if (gameweek.status !== "open") {
+    if (atKickoffOnly) throw new GameweekOperationError("STATUS");
     throw new Error("Only an open Gameweek can be locked.");
+  }
+  if (atKickoffOnly) {
+    const started = await db.query.fixtures.findFirst({
+      where: and(
+        eq(fixtures.competitionSeasonId, season.competitionSeasonId),
+        eq(fixtures.matchweek, gameweek.number),
+        sql`(${fixtures.status} in ('live','finished') or (${fixtures.status} = 'scheduled' and ${fixtures.kickoffAt} <= now()))`,
+      ),
+      columns: { id: true },
+    });
+    if (!started) throw new GameweekOperationError("KICKOFF");
   }
   const lastGameweekRows = await db
     .select({ number: fantasyGameweeks.number })
@@ -738,13 +760,14 @@ export async function finalizeFantasyGameweek(
   formData: FormData,
   changedBy: string,
   db: FantasyTransaction,
+  approval?: { code: string; operatorId: string },
 ) {
   const gameweekId = String(formData.get("gameweekId") ?? "");
   const target = await db.query.fantasyGameweeks.findFirst({
     where: eq(fantasyGameweeks.id, gameweekId),
   });
   if (!target) throw new Error("Gameweek was not found.");
-  await lockFantasySeason(db, target.fantasySeasonId);
+  const season = await lockFantasySeason(db, target.fantasySeasonId);
   const gameweekRows = await db
     .select()
     .from(fantasyGameweeks)
@@ -754,7 +777,42 @@ export async function finalizeFantasyGameweek(
   const gameweek = gameweekRows[0];
   if (!gameweek) throw new Error("Gameweek was not found.");
   if (gameweek.status !== "provisional") {
+    if (approval) throw new GameweekOperationError("STATUS");
     throw new Error("Only a provisional Gameweek can be finalized.");
+  }
+  if (approval && season.slug !== FANTASY_SEASON_SLUG)
+    throw new GameweekOperationError("STATUS");
+  const revision = await completedGameweekRevision(
+    db,
+    season.competitionSeasonId,
+    gameweek,
+  );
+  let approvalId: string | undefined;
+  if (approval) {
+    const grant = await db.query.fantasyAdminAuditLog.findFirst({
+      where: and(
+        eq(fantasyAdminAuditLog.action, "authorize_operator_final"),
+        eq(fantasyAdminAuditLog.entityType, "fantasy_gameweek"),
+        eq(fantasyAdminAuditLog.entityId, gameweek.id),
+      ),
+      orderBy: [
+        desc(fantasyAdminAuditLog.createdAt),
+        desc(fantasyAdminAuditLog.id),
+      ],
+    });
+    if (
+      !grant ||
+      !matchesFinalApproval(
+        grant.after,
+        approval.code,
+        revision,
+        approval.operatorId,
+        new Date(),
+      )
+    ) {
+      throw new GameweekOperationError("APPROVAL");
+    }
+    approvalId = grant.id;
   }
   await db
     .update(fantasyGameweeks)
@@ -773,6 +831,6 @@ export async function finalizeFantasyGameweek(
     changedBy,
     reason: "Admin confirmed final scores",
     before: { number: gameweek.number, status: gameweek.status },
-    after: { number: gameweek.number, status: "final" },
+    after: { number: gameweek.number, status: "final", approvalId, revision },
   });
 }

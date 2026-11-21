@@ -6,7 +6,12 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { db } from "@/db";
-import { fantasyManagers, fantasySeasons, fantasyTeams } from "@/db/schema";
+import {
+  authUsers,
+  fantasyManagers,
+  fantasySeasons,
+  fantasyTeams,
+} from "@/db/schema";
 import { auth } from "@/lib/auth/server";
 import {
   ensureFantasyProfile,
@@ -77,12 +82,29 @@ export const requireFantasyProfile = cache(
   },
 );
 
-export async function requireAdmin() {
+const getOperationsIdentity = cache(async function getOperationsIdentity() {
   const session = await getAuthSession();
   if (!session) redirect("/");
-  const role = String(
-    (session.user as typeof session.user & { role?: string }).role ?? "member",
-  );
-  if (role !== "admin") redirect("/team");
+  const account = await db.query.authUsers.findFirst({
+    where: eq(authUsers.id, session.user.id),
+    columns: { role: true, isAnonymous: true },
+  });
+  if (!account || account.isAnonymous) redirect("/team");
+  return {
+    session,
+    role: account.role,
+    isOperator: session.user.id === process.env.NENE_AUTH_USER_ID,
+  };
+});
+
+export async function requireAdmin() {
+  const { session, role, isOperator } = await getOperationsIdentity();
+  if (role !== "admin" || isOperator) redirect("/team");
+  return session;
+}
+
+export async function requireMatchOperator() {
+  const { session, role, isOperator } = await getOperationsIdentity();
+  if (isOperator ? role !== "member" : role !== "admin") redirect("/team");
   return session;
 }
