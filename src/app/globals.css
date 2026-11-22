@@ -3286,6 +3286,7 @@ textarea:focus-visible {
   font-size: 11px;
   font-weight: 400;
   line-height: 1.2;
+  white-space: nowrap;
 }
 
 @media (width < 80rem) {
@@ -3296,10 +3297,16 @@ textarea:focus-visible {
 
   .compact-transfer-stats strong,
   .compact-transfer-stats strong.compact-transfer-unlimited,
-  .compact-transfer-stats strong.compact-transfer-overage,
   .compact-position-quota-stats strong {
     margin-top: 2px;
     font-size: 14px;
+  }
+
+  .compact-transfer-stats strong.compact-transfer-overage {
+    min-height: 20px;
+    margin-top: 2px;
+    padding: 1px 7px;
+    font-size: 11px;
   }
 }
 
