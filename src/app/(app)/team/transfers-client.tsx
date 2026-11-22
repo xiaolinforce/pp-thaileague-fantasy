@@ -1,5 +1,6 @@
 "use client";
 
+import { Autocomplete } from "@base-ui/react/autocomplete";
 import {
   ArrowDownUp,
   CircleHelp,
@@ -87,6 +88,98 @@ const fantasyPositions: Record<CompetitionPosition, FantasyPosition> = {
 const cumulativeTierLimits = new Map(
   getCumulativeTierLimits().map(({ level, limit }) => [level, limit]),
 );
+
+function MarketPlayerSearch({
+  query,
+  onQueryChange,
+  suggestions,
+}: {
+  query: string;
+  onQueryChange: (query: string) => void;
+  suggestions?: string[];
+}) {
+  const { translate } = useLanguage();
+  const [isOpen, setIsOpen] = useState(false);
+  const hasQuery = query.trim() !== "";
+  const searchLabel = translate("ค้นหาชื่อนักเตะ");
+  const clearLabel = translate("ล้างคำค้น");
+  const inputProps = {
+    className: "market-search-input",
+    placeholder: searchLabel,
+    "aria-label": searchLabel,
+  };
+
+  if (!suggestions) {
+    return (
+      <div className="search-field compact-market-search">
+        <Search size={17} aria-hidden="true" />
+        <Input
+          {...inputProps}
+          value={query}
+          onChange={(event) => onQueryChange(event.target.value)}
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => onQueryChange("")}
+            aria-label={clearLabel}
+          >
+            <X size={15} aria-hidden="true" />
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <Autocomplete.Root
+      items={hasQuery ? [query, ...suggestions] : []}
+      filter={null}
+      value={query}
+      onValueChange={(value, details) => {
+        if (details.reason === "escape-key") return;
+        onQueryChange(value);
+        const hasValue = value.trim() !== "";
+        if (details.reason === "input-change" || !hasValue) {
+          setIsOpen(hasValue);
+        }
+      }}
+      open={isOpen && hasQuery}
+      onOpenChange={setIsOpen}
+      openOnInputClick={hasQuery}
+    >
+      <Autocomplete.InputGroup className="search-field compact-market-search has-[:focus-visible]:border-ring!">
+        <Search size={17} aria-hidden="true" />
+        <Autocomplete.Input render={<Input {...inputProps} />} />
+        <Autocomplete.Clear aria-label={clearLabel} tabIndex={0}>
+          <X size={15} aria-hidden="true" />
+        </Autocomplete.Clear>
+      </Autocomplete.InputGroup>
+      <Autocomplete.Portal>
+        <Autocomplete.Positioner sideOffset={4} className="isolate z-50">
+          <Autocomplete.Popup className="max-h-[min(16rem,var(--available-height))] w-(--anchor-width) overflow-y-auto overscroll-contain rounded-lg bg-popover text-sm text-popover-foreground shadow-md ring-1 ring-foreground/10">
+            <Autocomplete.List aria-label={searchLabel} className="p-1">
+              {(name: string, index: number) => (
+                <Autocomplete.Item
+                  key={name}
+                  value={name}
+                  className="flex min-h-10 cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 data-highlighted:bg-accent data-highlighted:text-accent-foreground"
+                >
+                  {index === 0 && (
+                    <Search size={15} className="shrink-0" aria-hidden="true" />
+                  )}
+                  <span className="min-w-0 wrap-anywhere whitespace-pre-wrap">
+                    {name}
+                  </span>
+                </Autocomplete.Item>
+              )}
+            </Autocomplete.List>
+          </Autocomplete.Popup>
+        </Autocomplete.Positioner>
+      </Autocomplete.Portal>
+    </Autocomplete.Root>
+  );
+}
 
 export default function TransfersClient({
   data,
@@ -336,25 +429,21 @@ export default function TransfersClient({
   const renderMarketFilters = (isDialog = false) => (
     <div className="compact-market-toolbar">
       <div className="compact-market-primary-filters">
-        <label className="search-field compact-market-search">
-          <Search size={17} aria-hidden="true" />
-          <Input
-            className="market-search-input"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="ค้นหาชื่อนักเตะ"
-            aria-label="ค้นหาชื่อนักเตะ"
-          />
-          {query && (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              aria-label="ล้างคำค้น"
-            >
-              <X size={15} aria-hidden="true" />
-            </button>
-          )}
-        </label>
+        <MarketPlayerSearch
+          query={query}
+          onQueryChange={setQuery}
+          suggestions={
+            isDialog
+              ? [
+                  ...new Set(
+                    players.map((player) => localize(player.name, language)),
+                  ),
+                ]
+                  .filter((name) => name !== query)
+                  .slice(0, 10)
+              : undefined
+          }
+        />
         {isDialog && (
           <span className="compact-market-filter-label">
             {translate("สโมสร")}

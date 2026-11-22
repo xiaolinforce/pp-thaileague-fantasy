@@ -107,6 +107,16 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-11-22 — Team player search suggestions
+
+- Local Chrome at 467px in Thai showed the typed query followed by ten names
+  for a broad match and only the typed query when no players matched. Mouse
+  and keyboard selection filled the field, Escape dismissed the suggestions,
+  and Clear emptied the field.
+- At 850px in English, a Thai query returned English player names aligned to
+  the search field. The chosen name persisted after closing and reopening the
+  filter dialog. The 1440px inline search retained its text field behavior.
+
 ### 2026-11-21 — Admin workspace UX pass
 
 - **Scope:** all `/admin/fantasy` routes. Shared changes: written status

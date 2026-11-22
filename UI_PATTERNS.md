@@ -203,6 +203,11 @@ proven behaviors unless a deliberate product decision replaces them:
 - On Mobile and Tablet, keep the market quota and filter-action group sticky
   below the compact workspace tabs. Open filters in the shared dialog from the
   `กรองนักเตะ` action, preserving the current filter selections.
+- In the filter dialog, show the exact typed query as the first search option,
+  followed by up to ten distinct player names from the current filtered market
+  results. Search matches Thai and English names and short names, and suggestions
+  display full names in the current language. Choosing an option sets the search
+  query and closes the dropdown, keeping the filter dialog open.
 - In the Mobile filter dialog, expose position, nationality, and exact tier as
   single-select radio options with 40px touch targets. Keep ALL/GK/DEF/MID/FWD
   badges on one row, with localized full position names for assistive technology.
