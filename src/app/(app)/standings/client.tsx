@@ -12,7 +12,7 @@ import {
 import type { LeagueTableData, LeagueTableRow } from "@/data/standings";
 import styles from "./standings.module.css";
 
-type Zone = "leader" | "relegation" | null;
+type Zone = "relegation" | null;
 
 const formCopy: Record<
   FormResult,
@@ -25,7 +25,6 @@ const formCopy: Record<
 
 function zoneFor(row: LeagueTableRow, total: number): Zone {
   if (total < RELEGATION_PLACES + 2) return null;
-  if (row.position === 1) return "leader";
   if (row.position > total - RELEGATION_PLACES) return "relegation";
   return null;
 }
@@ -38,21 +37,8 @@ export default function StandingsClient({ data }: { data: LeagueTableData }) {
   const { language } = useLanguage();
   const text = (th: string, en: string) => (language === "th" ? th : en);
   const total = data.rows.length;
-  const hasZones = total >= RELEGATION_PLACES + 2;
-  const adjusted = data.rows.filter((row) => row.pointsAdjustment !== 0);
-  const updatedLabel = data.updatedAt
-    ? new Intl.DateTimeFormat(language === "th" ? "th-TH" : "en-GB", {
-        dateStyle: "medium",
-        timeStyle: "short",
-        timeZone: "Asia/Bangkok",
-      }).format(new Date(data.updatedAt))
-    : null;
   const zoneLabel = (zone: Zone) =>
-    zone === "leader"
-      ? text("จ่าฝูง", "League leader")
-      : zone === "relegation"
-        ? text("โซนตกชั้น", "Relegation zone")
-        : null;
+    zone === "relegation" ? text("โซนตกชั้น", "Relegation zone") : null;
 
   return (
     <AppShell localizeContent={false}>
@@ -67,31 +53,6 @@ export default function StandingsClient({ data }: { data: LeagueTableData }) {
             </span>
             <h1>{text("ตารางคะแนน", "League table")}</h1>
           </div>
-          {total > 0 && (
-            <dl className={styles.heroMeta}>
-              {data.throughMatchweek !== null && (
-                <div>
-                  <dt>{text("ข้อมูลถึง", "Through")}</dt>
-                  <dd>
-                    {text(
-                      `นัดที่ ${data.throughMatchweek}`,
-                      `Matchweek ${data.throughMatchweek}`,
-                    )}
-                  </dd>
-                </div>
-              )}
-              {updatedLabel && (
-                <div>
-                  <dt>{text("อัปเดตล่าสุด", "Last updated")}</dt>
-                  <dd>
-                    <time dateTime={data.updatedAt ?? undefined}>
-                      {updatedLabel}
-                    </time>
-                  </dd>
-                </div>
-              )}
-            </dl>
-          )}
         </header>
 
         <section
@@ -241,6 +202,10 @@ export default function StandingsClient({ data }: { data: LeagueTableData }) {
                             {row.pointsAdjustment !== 0 && (
                               <sup
                                 className={styles.adjustmentMark}
+                                title={text(
+                                  `ปรับคะแนน ${signed(row.pointsAdjustment)}`,
+                                  `Points adjusted ${signed(row.pointsAdjustment)}`,
+                                )}
                                 aria-label={text(
                                   `ปรับคะแนน ${signed(row.pointsAdjustment)}`,
                                   `Points adjusted ${signed(row.pointsAdjustment)}`,
@@ -286,48 +251,6 @@ export default function StandingsClient({ data }: { data: LeagueTableData }) {
                   </tbody>
                 </table>
               </div>
-              <footer className={styles.footer}>
-                {hasZones && (
-                  <ul className={styles.legend}>
-                    <li>
-                      <span
-                        className={`${styles.swatch} ${styles.swatch_leader}`}
-                        aria-hidden="true"
-                      />
-                      {text("จ่าฝูง", "League leader")}
-                    </li>
-                    <li>
-                      <span
-                        className={`${styles.swatch} ${styles.swatch_relegation}`}
-                        aria-hidden="true"
-                      />
-                      {text(
-                        `โซนตกชั้น (${RELEGATION_PLACES} อันดับสุดท้าย)`,
-                        `Relegation zone (bottom ${RELEGATION_PLACES})`,
-                      )}
-                    </li>
-                  </ul>
-                )}
-                {adjusted.length > 0 && (
-                  <ul className={styles.notes}>
-                    {adjusted.map((row) => (
-                      <li key={row.entryId}>
-                        *{" "}
-                        {text(
-                          `${localize(row.club.name, "th")} ปรับคะแนน ${signed(row.pointsAdjustment)}`,
-                          `${localize(row.club.name, "en")} points adjusted ${signed(row.pointsAdjustment)}`,
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                <p className={styles.notes}>
-                  {text(
-                    "เรียงตามคะแนน หากเท่ากันใช้ผลการพบกัน ผลต่างประตู และประตูได้ ตามที่ผู้ดูแลระบบยืนยัน",
-                    "Ordered by points; ties follow head-to-head, goal difference and goals scored as confirmed by an administrator.",
-                  )}
-                </p>
-              </footer>
             </>
           )}
         </section>
