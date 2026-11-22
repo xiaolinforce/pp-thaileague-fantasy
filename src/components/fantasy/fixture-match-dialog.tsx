@@ -273,12 +273,6 @@ export function FixtureMatchDialog({
                                 {text(" (เข้าประตูตัวเอง)", " (own goal)")}
                               </small>
                             ) : null}
-                            {entry.assists.length > 0 ? (
-                              <small className="fixture-match-assist">
-                                {text("แอสซิสโดย", "Assisted by")}{" "}
-                                {assistNames(entry.assists)}
-                              </small>
-                            ) : null}
                           </span>
                         </li>
                       ))}
@@ -289,16 +283,14 @@ export function FixtureMatchDialog({
                   ))}
                 </div>
               )}
-              {summary.unattributedAssists.home.length +
-                summary.unattributedAssists.away.length >
-              0 ? (
+              {summary.assists.home.length + summary.assists.away.length > 0 ? (
                 <div className="fixture-match-columns fixture-match-assists">
                   {SIDES.map((side) => (
                     <p className={`is-${side}`} key={side}>
-                      {summary.unattributedAssists[side].length > 0 ? (
+                      {summary.assists[side].length > 0 ? (
                         <>
                           <span>{text("แอสซิสโดย", "Assisted by")}</span>{" "}
-                          {assistNames(summary.unattributedAssists[side])}
+                          {assistNames(summary.assists[side])}
                         </>
                       ) : null}
                     </p>

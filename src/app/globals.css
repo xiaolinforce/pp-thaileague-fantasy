@@ -11745,13 +11745,6 @@ body {
   color: var(--muted);
 }
 
-.fixture-match-events .fixture-match-assist {
-  display: block;
-  margin-top: 1px;
-  font-size: 13px;
-  line-height: 1.35;
-}
-
 .fixture-match-events li.is-empty {
   color: #b4b0aa;
 }
