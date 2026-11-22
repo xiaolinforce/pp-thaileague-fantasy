@@ -3243,7 +3243,7 @@ textarea:focus-visible {
 .compact-transfer-stats strong,
 .compact-position-quota-stats strong {
   margin-top: 6px;
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 500;
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
