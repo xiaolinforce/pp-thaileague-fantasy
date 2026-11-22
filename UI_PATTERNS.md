@@ -67,6 +67,18 @@ date grouping, club-color identity, score/kickoff display, and empty state for
 the shell and public supporting notes/links; authentication stays in the
 private route. Thai and English labels come directly from the language context.
 
+On `/fixtures` only (`matchDetails`), a finished fixture with both scores is a
+full-row button whose score sits in a soft orange pill. It opens the shared
+`product-dialog` match detail: Gameweek and full-time eyebrow, a scoreboard
+with club colors and home/away labels, date/time/venue (and attendance when
+recorded), then scorers with assists, cards, and the five highest Fantasy
+scores from that match. Source data has no event minutes, so lists are grouped
+by side rather than drawn as a timeline; own goals count for the opposing
+side and are labelled. Details load on first open with a skeleton, show a
+retryable error, and explain when no player statistics or goals exist. When
+recorded scorers do not account for the scoreline, say so instead of
+inventing the remainder. Other fixture states stay non-interactive.
+
 On entry, open the Gameweek of a live fixture or the next scheduled kickoff,
 in that order. When neither is available, open the highest Gameweek with a
 finished fixture, or the first available Gameweek before any results. Postponed

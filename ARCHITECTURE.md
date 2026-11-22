@@ -73,6 +73,7 @@ This is a request-shape guard, not authentication or an action-ID allowlist.
 | Transactional email   | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
 | Auth maintenance      | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
 | Ownership maintenance | `/api/cron/fantasy-ownership`        | Daily reconciliation of persisted open-Gameweek player ownership.                                |
+| Match detail read     | `/api/fixtures/[id]/details`         | Session-required GET of one finished fixture's player events and points for the Fixtures dialog. |
 | Scoring               | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
 | Score persistence     | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
 | Persistence           | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
@@ -133,7 +134,12 @@ layout and its page share one session/identity lookup. Existing complete
 profiles take a read-only path; provisioning writes run only when account state
 may need creation or repair. The full competition read model and the smaller
 fixture-only model used by `/fixtures` are shared through tagged five-minute
-server caches. Fantasy mutations invalidate the relevant tags.
+server caches. Fantasy mutations invalidate the relevant tags. The per-fixture
+match detail read model (`src/data/match-details.ts`) carries both the
+`fixtures-dataset` and `competition-dataset` tags, so score, lifecycle, and stat
+corrections all refresh it. It attributes each player to the club from the
+Gameweek pool snapshot, then the registration valid on match day, so later
+transfers never rewrite a past match.
 Main navigation does not automatically prefetch these authenticated database
 routes, avoiding duplicate hidden-sidebar requests and speculative SQL work.
 

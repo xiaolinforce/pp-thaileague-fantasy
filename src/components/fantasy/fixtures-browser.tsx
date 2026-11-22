@@ -3,6 +3,10 @@
 import { CalendarDays } from "lucide-react";
 import { useState } from "react";
 import { ClubColor } from "@/components/fantasy/club-colors";
+import {
+  FixtureMatchDialog,
+  isFixtureDetailAvailable,
+} from "@/components/fantasy/fixture-match-dialog";
 import { GameweekSelector } from "@/components/fantasy/gameweek-selector";
 import { useLanguage } from "@/components/fantasy/i18n";
 import { localize, type CompetitionFixtureView } from "@/lib/competition-types";
@@ -49,7 +53,14 @@ function getFixtureState(
   };
 }
 
-export function FixturesBrowser({ data }: { data: FixturesPageData }) {
+export function FixturesBrowser({
+  data,
+  matchDetails = false,
+}: {
+  data: FixturesPageData;
+  /** Finished rows open the authenticated match detail dialog. */
+  matchDetails?: boolean;
+}) {
   const { language } = useLanguage();
   const [week, setWeek] = useState(() =>
     data.currentGameweek !== null &&
@@ -92,8 +103,8 @@ export function FixturesBrowser({ data }: { data: FixturesPageData }) {
               </div>
               {fixtures.map((fixture) => {
                 const fixtureState = getFixtureState(fixture, language);
-                return (
-                  <article className="fixture-row" key={fixture.id}>
+                const rowContent = (
+                  <>
                     <time
                       className="fixture-row-mobile-state"
                       dateTime={fixture.kickoffAt ?? undefined}
@@ -101,9 +112,9 @@ export function FixturesBrowser({ data }: { data: FixturesPageData }) {
                     >
                       {fixtureState.label}
                     </time>
-                    <div className="fixture-club home">
+                    <span className="fixture-club home">
                       <strong>{localize(fixture.home.name, language)}</strong>
-                    </div>
+                    </span>
                     <ClubColor
                       color={fixture.home.colors[0]}
                       secondaryColor={fixture.home.colors[1]}
@@ -128,9 +139,25 @@ export function FixturesBrowser({ data }: { data: FixturesPageData }) {
                         `${localize(fixture.away.name, language)} team colours`,
                       )}
                     />
-                    <div className="fixture-club">
+                    <span className="fixture-club">
                       <strong>{localize(fixture.away.name, language)}</strong>
-                    </div>
+                    </span>
+                  </>
+                );
+                if (matchDetails && isFixtureDetailAvailable(fixture)) {
+                  return (
+                    <FixtureMatchDialog
+                      key={fixture.id}
+                      fixture={fixture}
+                      triggerClassName="fixture-row fixture-row--interactive"
+                    >
+                      {rowContent}
+                    </FixtureMatchDialog>
+                  );
+                }
+                return (
+                  <article className="fixture-row" key={fixture.id}>
+                    {rowContent}
                   </article>
                 );
               })}

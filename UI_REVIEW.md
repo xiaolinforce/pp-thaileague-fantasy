@@ -107,6 +107,18 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-11-23 — Fixture match detail dialog
+
+- In-app browser at 800px in Thai on the development database: Gameweek 1
+  finished rows showed the score in a tappable pill and opened the shared
+  dialog with a loading skeleton, scoreboard, date/time/venue, scorers with
+  assists, cards, and the five highest Fantasy scores. Escape returned focus to
+  the row.
+- At 375px the dialog filled the screen. English mode on a 0–0 result showed
+  the no-goals state, cards, and English labels; no console errors. Signed-out
+  requests to the detail route returned 401 and unknown fixtures 404. The
+  public season fixtures page keeps non-interactive rows.
+
 ### 2026-11-22 — Team player search suggestions
 
 - Local Chrome at 467px in Thai showed the typed query followed by ten names
