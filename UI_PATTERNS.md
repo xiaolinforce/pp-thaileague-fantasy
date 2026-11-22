@@ -74,7 +74,10 @@ with club colors and home/away labels, date/time/venue (and attendance when
 recorded), then scorers with assists, cards, and the five highest Fantasy
 scores from that match. Source data has no event minutes, so lists are grouped
 by side rather than drawn as a timeline; own goals count for the opposing
-side and are labelled. Details load on first open with a skeleton, show a
+side and are labelled. Each scorer shows their assister beneath the name in
+smaller muted text when per-player totals prove the pairing (no self-assists,
+at most one assist per goal); otherwise the side keeps one "Assists" line
+rather than guessing. Details load on first open with a skeleton, show a
 retryable error, and explain when no player statistics or goals exist. When
 recorded scorers do not account for the scoreline, say so instead of
 inventing the remainder. Other fixture states stay non-interactive.

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  attributeAssists,
   summarizeMatchDetails,
   type FixtureMatchDetails,
   type MatchDetailPlayer,
@@ -98,7 +99,10 @@ test("groups assists and cards by side with red cards first", () => {
   );
   assert.deepEqual(summary.cards.away, []);
   assert.deepEqual(
-    summary.assists.away.map((entry) => [entry.name.en, entry.count]),
+    summary.unattributedAssists.away.map((entry) => [
+      entry.name.en,
+      entry.count,
+    ]),
     [["Creator", 2]],
   );
 });
@@ -126,4 +130,89 @@ test("reports when no player statistics were recorded", () => {
   const summary = summarizeMatchDetails(match([], 1, 0));
   assert.equal(summary.hasPlayerStats, false);
   assert.equal(summary.goalsComplete, false);
+});
+
+test("places assists under the scorer when the totals allow one outcome", () => {
+  const summary = summarizeMatchDetails(
+    match(
+      [
+        player("Striker", "home", { goals: 2 }),
+        player("Winger", "home", { assists: 1 }),
+        player("Captain", "home", { assists: 1 }),
+      ],
+      2,
+      0,
+    ),
+  );
+  assert.deepEqual(
+    summary.goals.home[0].assists.map((entry) => entry.name.en),
+    ["Captain", "Winger"],
+  );
+  assert.deepEqual(summary.unattributedAssists.home, []);
+});
+
+test("uses the rule that a player cannot assist their own goal", () => {
+  const summary = summarizeMatchDetails(
+    match(
+      [
+        player("A", "home", { goals: 1, assists: 1 }),
+        player("B", "home", { goals: 1, assists: 1 }),
+      ],
+      2,
+      0,
+    ),
+  );
+  assert.deepEqual(
+    summary.goals.home.map((entry) => [
+      entry.name.en,
+      entry.assists.map((assist) => assist.name.en),
+    ]),
+    [
+      ["A", ["B"]],
+      ["B", ["A"]],
+    ],
+  );
+});
+
+test("keeps ambiguous assists at side level instead of guessing", () => {
+  const summary = summarizeMatchDetails(
+    match(
+      [
+        player("A", "home", { goals: 1 }),
+        player("B", "home", { goals: 1 }),
+        player("Creator", "home", { assists: 1 }),
+      ],
+      2,
+      0,
+    ),
+  );
+  assert.ok(summary.goals.home.every((entry) => entry.assists.length === 0));
+  assert.deepEqual(
+    summary.unattributedAssists.home.map((entry) => entry.name.en),
+    ["Creator"],
+  );
+});
+
+test("never attributes assists to own goals", () => {
+  assert.equal(
+    attributeAssists([], [{ fantasyPlayerId: "Creator", count: 1 }]),
+    null,
+  );
+  const summary = summarizeMatchDetails(
+    match(
+      [
+        player("Scorer", "home", { goals: 1 }),
+        player("Creator", "home", { assists: 1 }),
+        player("Unlucky", "away", { ownGoals: 1 }),
+      ],
+      2,
+      0,
+    ),
+  );
+  const [scorer, ownGoal] = summary.goals.home;
+  assert.deepEqual(
+    scorer.assists.map((entry) => entry.name.en),
+    ["Creator"],
+  );
+  assert.deepEqual(ownGoal.assists, []);
 });

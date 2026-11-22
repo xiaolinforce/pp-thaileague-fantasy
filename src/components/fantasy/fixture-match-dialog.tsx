@@ -29,6 +29,7 @@ import { localize, type CompetitionFixtureView } from "@/lib/competition-types";
 import {
   summarizeMatchDetails,
   type FixtureMatchDetails,
+  type MatchEventEntry,
   type MatchSide,
 } from "@/lib/fantasy/match-details";
 
@@ -69,6 +70,15 @@ export function FixtureMatchDialog({
   const awayName = localize(fixture.away.name, language);
   const score = `${fixture.homeScore}–${fixture.awayScore}`;
   const clubName = (side: MatchSide) => (side === "home" ? homeName : awayName);
+  const assistNames = (entries: MatchEventEntry[]) =>
+    entries
+      .map(
+        (entry) =>
+          `${localize(entry.name, language)}${
+            entry.count > 1 ? ` ×${entry.count}` : ""
+          }`,
+      )
+      .join(", ");
 
   async function load() {
     setState({ status: "loading" });
@@ -268,6 +278,12 @@ export function FixtureMatchDialog({
                                 {text(" (เข้าประตูตัวเอง)", " (own goal)")}
                               </small>
                             ) : null}
+                            {entry.assists.length > 0 ? (
+                              <small className="fixture-match-assist">
+                                {text("แอสซิสต์", "Assist")}{" "}
+                                {assistNames(entry.assists)}
+                              </small>
+                            ) : null}
                           </span>
                         </li>
                       ))}
@@ -278,21 +294,16 @@ export function FixtureMatchDialog({
                   ))}
                 </div>
               )}
-              {summary.assists.home.length + summary.assists.away.length > 0 ? (
+              {summary.unattributedAssists.home.length +
+                summary.unattributedAssists.away.length >
+              0 ? (
                 <div className="fixture-match-columns fixture-match-assists">
                   {SIDES.map((side) => (
                     <p className={`is-${side}`} key={side}>
-                      {summary.assists[side].length > 0 ? (
+                      {summary.unattributedAssists[side].length > 0 ? (
                         <>
                           <span>{text("แอสซิสต์", "Assists")}</span>{" "}
-                          {summary.assists[side]
-                            .map(
-                              (entry) =>
-                                `${localize(entry.name, language)}${
-                                  entry.count > 1 ? ` ×${entry.count}` : ""
-                                }`,
-                            )
-                            .join(", ")}
+                          {assistNames(summary.unattributedAssists[side])}
                         </>
                       ) : null}
                     </p>
