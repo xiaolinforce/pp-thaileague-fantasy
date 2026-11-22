@@ -62,7 +62,6 @@ import {
   fillPreferredOrFirstMatchingDraftVacancy,
   type DraftLineupMember,
 } from "@/lib/fantasy/team-draft";
-import { buildTierQuotaMeter } from "@/lib/fantasy/tier-quota-meter";
 import { isTierOneAllowed } from "@/lib/fantasy/tier-relief";
 import {
   getCountedTransfers,
@@ -239,9 +238,9 @@ export default function TransfersClient({
       limit: THAI_LEAGUE_FANTASY_RULES.positionLimits[fantasyPosition],
     };
   });
-  const tierQuotaDots = buildTierQuotaMeter(levelOne);
   const tierOneLimit = cumulativeTierLimits.get(1) ?? 0;
   const isTierQuotaOver = levelOne > tierOneLimit;
+  const isTierQuotaWarning = isTierQuotaOver && !fantasy.selection.tierRelief;
   const tierQuotaSummary = translate("ระดับ 1: {count}/{limit} คน")
     .replace("{count}", String(levelOne))
     .replace("{limit}", String(tierOneLimit));
@@ -645,6 +644,55 @@ export default function TransfersClient({
                 <span className="quota-count-current">{foreignPlayers}</span>/7
               </strong>
             </div>
+            <div
+              className={`compact-tier-quota-stat${isTierQuotaWarning ? " compact-tier-quota-stat--over" : ""}`}
+            >
+              <span className="compact-tier-quota-stat-label">
+                {translate("ระดับ 1")}
+                <Popover>
+                  <PopoverTrigger
+                    className="compact-tier-quota-info compact-tier-quota-info--inline"
+                    aria-label="ดูวิธีนับโควต้าระดับ"
+                  >
+                    <CircleHelp size={13} aria-hidden="true" />
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="compact-tier-quota-popover"
+                    align="end"
+                    side="bottom"
+                    sideOffset={7}
+                  >
+                    <PopoverHeader>
+                      <PopoverTitle>
+                        {translate("โควต้านักเตะระดับ 1")}
+                      </PopoverTitle>
+                      <PopoverDescription>
+                        {translate(
+                          "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน",
+                        ).replace("{count}", String(tierOneLimit))}
+                        <br />
+                        {translate(
+                          "ระดับ 2 เติมได้จนครบทีม 15 คน ไม่จำเป็นต้องมีระดับ 1",
+                        )}
+                      </PopoverDescription>
+                    </PopoverHeader>
+                  </PopoverContent>
+                </Popover>
+              </span>
+              <strong aria-hidden="true">
+                <span className="quota-count-current">{levelOne}</span>/
+                {tierOneLimit}
+              </strong>
+              <span
+                className="sr-only"
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+              >
+                {tierQuotaSummary}
+                {isTierQuotaWarning ? `, ${translate("เกินโควต้า")}` : ""}
+              </span>
+            </div>
           </div>
           <div
             className="compact-position-quota-stats"
@@ -658,66 +706,6 @@ export default function TransfersClient({
                 </strong>
               </div>
             ))}
-          </div>
-          <div
-            className={`compact-tier-quota-strip${isTierQuotaOver ? " compact-tier-quota-strip--over" : ""}`}
-          >
-            <div className="compact-tier-quota-heading">
-              <span>{translate("โควต้านักเตะระดับ 1")}</span>
-              <Popover>
-                <PopoverTrigger
-                  className="compact-tier-quota-info"
-                  aria-label="ดูวิธีนับโควต้าระดับ"
-                >
-                  <CircleHelp size={16} aria-hidden="true" />
-                </PopoverTrigger>
-                <PopoverContent
-                  className="compact-tier-quota-popover"
-                  align="start"
-                  side="bottom"
-                  sideOffset={7}
-                >
-                  <PopoverHeader>
-                    <PopoverTitle>
-                      {translate("โควต้านักเตะระดับ 1")}
-                    </PopoverTitle>
-                    <PopoverDescription>
-                      {translate(
-                        "ผู้เล่นระดับ 1 รวมกันได้ไม่เกิน {count} คน",
-                      ).replace("{count}", String(tierOneLimit))}
-                      <br />
-                      {translate(
-                        "ระดับ 2 เติมได้จนครบทีม 15 คน ไม่จำเป็นต้องมีระดับ 1",
-                      )}
-                    </PopoverDescription>
-                  </PopoverHeader>
-                </PopoverContent>
-              </Popover>
-              {isTierQuotaOver && !fantasy.selection.tierRelief && (
-                <strong className="compact-tier-quota-warning">
-                  {translate("เกินโควต้า")}
-                </strong>
-              )}
-            </div>
-            <div
-              className="compact-tier-quota-dots"
-              role="status"
-              aria-live="polite"
-              aria-atomic="true"
-            >
-              <span className="sr-only">
-                {tierQuotaSummary}
-                {isTierQuotaOver ? `, ${translate("เกินโควต้า")}` : ""}
-              </span>
-              <span className="compact-tier-quota-dot-track" aria-hidden="true">
-                {tierQuotaDots.map((dot, index) => (
-                  <span
-                    className={`compact-tier-quota-dot compact-tier-quota-dot--${dot}`}
-                    key={index}
-                  />
-                ))}
-              </span>
-            </div>
           </div>
           <Dialog>
             <DialogTrigger className="compact-market-filter-dialog-trigger">

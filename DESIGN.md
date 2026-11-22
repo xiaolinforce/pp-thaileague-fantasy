@@ -351,10 +351,12 @@ confirmed member/league operations.
 ### Two-tier quota presentation
 
 Current Team and market views show only Levels 1–2. Show the Level 1 allowance
-as five circles, followed by one borderless light-orange circle for each player
-above the limit. Keep the numeric count available to screen readers and show a
-visible textual overflow warning. For tier-change relief, omit the quota badge
-and visible numeric caption; show only “คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้”
+as a `count/limit` value in the third column of the navy quota panel, after
+free transfers and the foreign-player quota, with a question-mark button beside
+its label for the allowance explanation. Keep the same three equal columns at
+every breakpoint. When the draft exceeds the limit outside tier-change relief,
+tint the value light red and announce the overflow to screen readers. For
+tier-change relief, keep the value neutral; show only “คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้”
 in the standard squad validation alert while the draft exceeds five Level 1
 players. The warning is informational and does not block a valid relief save.
 Place a question-mark button at the right edge of this alert. It opens the
