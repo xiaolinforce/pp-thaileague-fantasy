@@ -217,17 +217,20 @@
   background: var(--red);
 }
 
-@container (min-width: 520px) {
-  .table .wdl {
-    display: table-cell;
-  }
-
+/* Full club names from a 400px viewport: 400 − 2 × 12px gutter − 2px border. */
+@container (min-width: 374px) {
   .clubName {
     display: block;
   }
 
   .clubShortName {
     display: none;
+  }
+}
+
+@container (min-width: 520px) {
+  .table .wdl {
+    display: table-cell;
   }
 
   .table th,
