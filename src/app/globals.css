@@ -11612,7 +11612,7 @@ body {
   display: grid;
   grid-template-areas: "home score away";
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-  align-items: stretch;
+  align-items: start;
   gap: 12px;
   padding: 18px 12px;
   border-radius: 16px;
@@ -11640,11 +11640,6 @@ body {
   overflow-wrap: anywhere;
 }
 
-.fixture-match-team small {
-  margin-top: auto;
-}
-
-.fixture-match-team small,
 .fixture-match-score small {
   color: var(--muted);
   font-size: 12px;

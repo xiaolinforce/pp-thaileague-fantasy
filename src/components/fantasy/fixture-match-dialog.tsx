@@ -163,11 +163,6 @@ export function FixtureMatchDialog({
                   label=""
                 />
                 <strong>{localize(club.name, language)}</strong>
-                <small>
-                  {side === "home"
-                    ? text("เจ้าบ้าน", "Home")
-                    : text("ทีมเยือน", "Away")}
-                </small>
               </div>
             );
           })}
@@ -280,7 +275,7 @@ export function FixtureMatchDialog({
                             ) : null}
                             {entry.assists.length > 0 ? (
                               <small className="fixture-match-assist">
-                                {text("แอสซิสต์", "Assist")}{" "}
+                                {text("แอสซิสโดย", "Assisted by")}{" "}
                                 {assistNames(entry.assists)}
                               </small>
                             ) : null}
@@ -302,7 +297,7 @@ export function FixtureMatchDialog({
                     <p className={`is-${side}`} key={side}>
                       {summary.unattributedAssists[side].length > 0 ? (
                         <>
-                          <span>{text("แอสซิสต์", "Assists")}</span>{" "}
+                          <span>{text("แอสซิสโดย", "Assisted by")}</span>{" "}
                           {assistNames(summary.unattributedAssists[side])}
                         </>
                       ) : null}

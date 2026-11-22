@@ -115,12 +115,13 @@ async function loadFixtureMatchDetails(
 
   const players: MatchDetailPlayer[] = playerResult.rows.flatMap((row) => {
     if (!row.side) return [];
-    const fullTh = row.nameTh || row.nameEn;
     return [
       {
         fantasyPlayerId: row.fantasyPlayerId,
         name: {
-          th: row.shortNameTh || fullTh,
+          // Same short-name order as the Points pitch: foreign players
+          // without a Thai short name use their English short name.
+          th: row.shortNameTh || row.shortNameEn || row.nameTh || row.nameEn,
           en: row.shortNameEn || row.nameEn,
         },
         side: row.side,
@@ -151,7 +152,7 @@ async function loadFixtureMatchDetails(
 
 const getCachedFixtureMatchDetails = unstable_cache(
   loadFixtureMatchDetails,
-  ["fixture-match-details-v1"],
+  ["fixture-match-details-v2"],
   {
     revalidate: 300,
     // Score and lifecycle changes expire fixtures; stat edits expire the
