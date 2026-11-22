@@ -25,6 +25,19 @@ when new behavior invalidates prior coverage.
 
 ## Current route inventory
 
+2026-11-22 Thai League standings: `/standings` was rendered as a local Guest
+against the development branch after a table computed from its 16 finished
+results was saved through `saveCompetitionStandings`. Thai at 375×812 showed
+the compact position, club short name, played, goal difference and points
+columns with no document overflow; the drawer listed and highlighted
+Standings. Tablet (768) added won/drawn/lost; Desktop (1440) Thai and English
+showed every column, recent-form chips, the leader and relegation markers with
+a written legend, and the matchweek/updated metadata. The empty state was
+checked at Tablet and Mobile before the save. `/admin/fantasy/standings`
+redirected the Guest to `/team`; the editor itself has no rendered evidence
+because no admin session was available, and point-adjustment footnotes were not
+exercised by the seeded data.
+
 The match operations editor, now at `/admin/fantasy/match-operations`, was exercised in isolated
 headless Chromium with Thai and English at 360px and 1280px. The checks covered
 the roster, blank-safe template, invalid input recovery, point previews,
@@ -77,6 +90,7 @@ full authentication-flow audit; the route maturity labels below remain valid.
 | `/`                           | Authentication flow   | Unreviewed  | Audit Guest, provider availability, Email OTP stages, errors, and compact flow.                                                                                                                                         |
 | `/upgrade`                    | Authentication flow   | Unreviewed  | Audit preservation messaging, provider states, cancellation, and recovery.                                                                                                                                              |
 | `/fixtures`                   | Data browser          | In progress | Focused Gameweek browsing implemented; empty, bilingual, and responsive states remain the next review focus.                                                                                                            |
+| `/standings`                  | Ranking/community     | In progress | Thai League table with leader/relegation zones and form; Thai/English 375/768/1440 reviewed 2026-11-22. Adjustment footnotes and long names pending.                                                                    |
 | `/leagues`                    | Ranking/community     | In progress | Overall close-during-load and bilingual validation reset were reviewed; populated authenticated Private operations still need rendered evidence.                                                                        |
 | `/profile`                    | Account identity      | In progress | Guest/read-only team identity and responsive states reviewed; member rename evidence remains pending.                                                                                                                   |
 | `/settings`                   | Settings              | In progress | Guest device persistence and responsive language control reviewed; member reload evidence remains pending.                                                                                                              |

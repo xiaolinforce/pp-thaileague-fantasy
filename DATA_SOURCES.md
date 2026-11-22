@@ -724,6 +724,7 @@ the identifiers for another season.
 | Transfermarkt public data            | Identity enrichment, profile facts, market value, and partial prior-season facts for newcomers.            |
 | Reviewed player spreadsheet          | Human-reviewed bilingual names, short names, Thai/foreign grouping, position, club, and tier corrections.  |
 | Fantasy administrator                | Match-stat corrections, Fantasy assists, Thai status, and effective tier changes after setup.              |
+| Fantasy administrator (league table) | Thai League 1 table counts, point adjustments, and tie-break order in `competition_standings`.             |
 
 The Thai League tournament roster owns current eligibility. Transfermarkt and
 other public aggregators are enrichment only and must not activate a player who
@@ -733,6 +734,13 @@ stable identifiers and same-club evidence; display names alone are insufficient.
 Nationality determines the implemented Thai-player eligibility decision. It is
 not a quality proxy in player ranking. Individual performance, expected
 minutes, market evidence, position, and club context take precedence.
+
+The league table is not imported from an external feed. Administrators enter
+or confirm it at `/admin/fantasy/standings`, optionally prefilled from finished
+`fixtures` rows with recorded scores; the official Thai League table remains the
+authority for point deductions and head-to-head order. Every save writes a
+`create_competition_standings` or `update_competition_standings` audit entry
+with the complete before/after table.
 
 ## Reviewed Thai display names
 

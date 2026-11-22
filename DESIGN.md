@@ -130,7 +130,8 @@ Reuse `AppShell` and `PageHeader` for authenticated product routes.
 - Desktop uses a fixed 238px navy sidebar and a flexible main canvas.
 - Mobile and Tablet use a navy Top bar with a hamburger that opens the same full
   navigation in a left drawer.
-- The four primary destinations are Team, Points, Leagues, and Fixtures.
+- The five primary destinations are Team, Points, Leagues, Fixtures, and
+  Standings (the Thai League table).
   Profile, Settings, Game Rules, Help, Guest upgrade, and sign-out live in the
   manager menu at the bottom of the Desktop sidebar and inside the compact
   drawer. Compact modes must not remove information that Desktop users can reach.
@@ -324,7 +325,8 @@ not merely because its implementation is complete.
 
 Authorized admin routes replace the primary player destinations with Overview,
 Participants & teams, Gameweek, Lineup reminder email, Best possible team,
-Matches & stats, Player data, and Audit history.
+Matches & stats, Import results and points, Thai League table, Player data, and
+Audit history.
 The shared sidebar and compact drawer identify Administrator mode and retain a
 Back to player mode link at the bottom, returning to `/team` without sign-out.
 Operational pages use a visible title, task-specific filters, and focused work

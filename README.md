@@ -11,7 +11,7 @@ provisional/final Gameweek scores, and presents Classic league standings.
 - Thai League 1 season 2026/27.
 - Passwordless Email OTP, Google OAuth, and device-bound Guest accounts through Better Auth.
 - One manager identity per account, with one automatically provisioned empty team draft per season.
-- Landing, team selection, transfers, points, leagues, fixtures, profile,
+- Landing, team selection, transfers, points, leagues, fixtures, standings, profile,
   settings, public rules/help, and internal Fantasy administration screens.
 - Thai source interface with an English display preference persisted per member
   account and stored on the current device for Guests.
@@ -60,6 +60,7 @@ the corresponding admin pages with the selected Gameweek and fixture.
 | `/leagues`                    | Overall standings plus Private League creation and joining.                                 |
 | `/leagues/[id]`               | Member-only standings and owner/member League controls.                                     |
 | `/fixtures`                   | Competition fixtures grouped by Gameweek.                                                   |
+| `/standings`                  | Admin-maintained Thai League 1 table with recent form from finished fixtures.               |
 | `/profile`                    | Account details, the public team name, or Guest upgrade.                                    |
 | `/settings`                   | Interface language preference for the current identity/device.                              |
 | `/rules`                      | Public beginner introduction and rules generated from the executable Fantasy configuration. |
@@ -72,6 +73,7 @@ the corresponding admin pages with the selected Gameweek and fixture.
 | `/admin/fantasy/reminders`    | Admin-only recipient preview, frozen campaign, and guarded manual batches.                  |
 | `/admin/fantasy/optimal-team` | Best possible legal team from each completed Gameweek's results.                            |
 | `/admin/fantasy/matches`      | Fixture-scoped player statistics and corrections.                                           |
+| `/admin/fantasy/standings`    | Edit, reorder, or fill the Thai League table from finished results, with audit history.     |
 | `/admin/fantasy/players`      | Current player search, effective tiers and Thai status.                                     |
 | `/admin/fantasy/audit`        | Paginated administrative operation history.                                                 |
 

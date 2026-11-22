@@ -35,6 +35,8 @@
   Private Classic standings with transactional owner/member limits, owner
   controls, and audit history.
 - Verified database-backed competition and Fantasy data with source provenance.
+- Admin-maintained Thai League table at `/standings`, editable and audited at
+  `/admin/fantasy/standings`; it is not yet synchronized from an official feed.
 
 ## Production readiness blockers
 

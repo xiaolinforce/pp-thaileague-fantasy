@@ -107,12 +107,14 @@ not create a campaign or require the bulk-send gate.
 | `/leagues`                 | Server-loads summaries, opens Overall standings, and links each Private League to its detail route. |
 | `/leagues/[id]`            | Authorizes membership, then renders paginated standings, invite details, and role controls.         |
 | `/fixtures`                | Server-loads a fixture-only read model, then delegates interactive browsing to a Client Component.  |
+| `/standings`               | Server-loads the cached `competition_standings` table plus form derived from finished fixtures.     |
 | `/profile`                 | Authenticated account/team identity, member naming, and Guest upgrade.                              |
 | `/settings`                | Authenticated language preference; member value persists on the manager row.                        |
 | `/rules`                   | Public long-form rules built from shared executable rule and scoring constants.                     |
 | `/help`                    | Public support destinations and legal links; no account data is required.                           |
 | `/admin/fantasy`           | Role-protected controls for stats, classification, locking, and finalization.                       |
 | `/admin/fantasy/reminders` | Role-protected masked preview, recipient snapshot, and manual guarded batches.                      |
+| `/admin/fantasy/standings` | Role-protected league-table editor; one Server Action replaces the season table transactionally.    |
 | `/email/unsubscribe`       | Public signed-link confirmation for opting out of reminder emails.                                  |
 
 The `(app)` root layout resolves identity, language and navigation for game and
@@ -476,6 +478,16 @@ Match editors use registrations for the chosen fixture's clubs, including
 historical registrations for correction work, and load existing stored stats.
 Server Actions retain their fresh session and database validation boundaries.
 
+The Thai League table is stored in `competition_standings`, one row per active
+club entry per season. The admin editor submits counts in display order; the
+server locks the competition season row, rejects a stale editor (last-saved
+timestamp mismatch), validates the submission against fresh active entries,
+recomputes played and points, then deletes and reinserts the season table with
+one audit entry. Database CHECK constraints enforce `played = W + D + L` and
+`points = 3W + D + adjustment`. Positions are administrator-owned because Thai
+League ties are broken head-to-head; the "sort by points" and "fill from
+results" helpers only prefill the editor.
+
 Admin pages defer recursive localization of server-authored content until
 hydration. Lazy RSC table rows may not be traversable during server rendering;
 translating them only on the client prevents a mismatched initial tree. Explicit
@@ -515,7 +527,9 @@ Squad confirmation invalidates only `fantasy-ownership`; the roster, fixture and
 statistics dataset remains warm. Ownership percentages are grouped in SQL, with
 the numerator and distinct populated-squad denominator read in one statement.
 Stats/classification changes invalidate `competition-dataset`; lifecycle changes
-also invalidate fixtures and ownership. Name changes refresh dynamic identity
+also invalidate fixtures and ownership. League-table saves invalidate only
+`competition-standings`; the standings read model also carries the
+`fixtures-dataset` tag so match imports refresh its recent-form column. Name changes refresh dynamic identity
 data without invalidating shared datasets. Server Actions use `refresh()` for
 the active router instead of expiring all page dependencies. Chip usage reads
 only the current team and groups its locked selections in SQL.
