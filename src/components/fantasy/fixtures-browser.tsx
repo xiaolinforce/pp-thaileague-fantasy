@@ -93,15 +93,7 @@ export function FixturesBrowser({ data }: { data: FixturesPageData }) {
               {fixtures.map((fixture) => {
                 const fixtureState = getFixtureState(fixture, language);
                 return (
-                  <article
-                    className="fixture-row"
-                    key={fixture.id}
-                    title={
-                      fixture.venue
-                        ? localize(fixture.venue, language)
-                        : undefined
-                    }
-                  >
+                  <article className="fixture-row" key={fixture.id}>
                     <time
                       className="fixture-row-mobile-state"
                       dateTime={fixture.kickoffAt ?? undefined}
