@@ -34,6 +34,8 @@ export const adminFieldLabels: Record<string, string> = {
   shortNameTh: "ชื่อย่อภาษาไทย",
   averagePoints: "คะแนนเฉลี่ย",
   highestPoints: "คะแนนสูงสุด",
+  throughMatchweek: "ข้อมูลถึงนัดที่",
+  changedClubs: "จำนวนทีมที่เปลี่ยน",
 };
 
 /** Written status labels shared by admin badges and audit values. */
@@ -217,6 +219,13 @@ export const adminTranslations: Record<string, string> = {
   ผลการแข่งขันและสถิติ: "Matches & stats",
   นำเข้าผลและคะแนน: "Import results and points",
   ข้อมูลนักเตะ: "Player data",
+  ตารางคะแนนไทยลีก: "Thai League table",
+  "แก้ไขสถิติแต่ละสโมสรและลำดับในตาราง แล้วบันทึกเพื่อเผยแพร่ในหน้าตารางคะแนน":
+    "Edit each club's record and table order, then save to publish it on the standings page.",
+  สร้างตารางคะแนนไทยลีก: "Create Thai League table",
+  แก้ไขตารางคะแนนไทยลีก: "Update Thai League table",
+  ข้อมูลถึงนัดที่: "Through matchweek",
+  จำนวนทีมที่เปลี่ยน: "Clubs changed",
   ประวัติการแก้ไข: "Audit history",
   กลับโหมดผู้เล่น: "Back to player mode",
   "ติดตามผู้เล่นและงานที่ต้องจัดการในฤดูกาล 2026/27":

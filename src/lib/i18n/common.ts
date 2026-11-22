@@ -5,6 +5,7 @@ export const commonTranslations: Record<string, string> = {
   คะแนน: "Points",
   ลีก: "Leagues",
   โปรแกรม: "Fixtures",
+  ตารางคะแนน: "Standings",
   โปรไฟล์: "Profile",
   เมนูหลัก: "Main navigation",
   เปิดเมนูหลัก: "Open main navigation",

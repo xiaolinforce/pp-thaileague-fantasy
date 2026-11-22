@@ -6,6 +6,7 @@ import {
   ChevronDown,
   CircleHelp,
   ListChecks,
+  ListOrdered,
   LockKeyhole,
   LogIn,
   LogOut,
@@ -60,6 +61,12 @@ const navigation = [
     shortLabel: "โปรแกรม",
     href: "/fixtures",
     icon: CalendarDays,
+  },
+  {
+    label: "ตารางคะแนน",
+    shortLabel: "ตาราง",
+    href: "/standings",
+    icon: ListOrdered,
   },
 ];
 
@@ -145,6 +152,11 @@ const adminNavigation = [
     label: "นำเข้าผลและคะแนน",
     href: "/admin/fantasy/match-operations",
     icon: FileInput,
+  },
+  {
+    label: "ตารางคะแนนไทยลีก",
+    href: "/admin/fantasy/standings",
+    icon: ListOrdered,
   },
   { label: "ข้อมูลนักเตะ", href: "/admin/fantasy/players", icon: Database },
   { label: "ประวัติการแก้ไข", href: "/admin/fantasy/audit", icon: History },

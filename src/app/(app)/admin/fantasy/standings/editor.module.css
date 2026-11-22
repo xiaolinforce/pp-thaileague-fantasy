@@ -1,0 +1,203 @@
+.summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0 0 16px;
+}
+
+.summary > div {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--warm);
+}
+
+.summary dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.summary dd {
+  margin: 2px 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.summary small {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 400;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.matchweekField {
+  display: grid;
+  gap: 8px;
+  width: min(100%, 180px);
+  font-size: 14px;
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tools :global(.secondary-button) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+}
+
+.scroll {
+  max-width: 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table thead th {
+  padding-block: 10px;
+  color: var(--muted);
+  background: var(--warm);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.table abbr {
+  text-decoration: none;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.table .clubHead {
+  text-align: left;
+}
+
+.table .position {
+  width: 44px;
+  padding-inline-start: 14px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.changed {
+  background: var(--orange-soft);
+}
+
+.changed > td:first-child {
+  box-shadow: inset 3px 0 0 var(--orange);
+}
+
+.table .club {
+  min-width: 170px;
+  max-width: 240px;
+  text-align: left;
+  font-weight: 500;
+}
+
+.club > span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.club > span > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table input.number {
+  width: 64px;
+  min-height: 40px;
+  padding: 6px 4px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.table input.number[aria-invalid="true"],
+.matchweekField input[aria-invalid="true"] {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red);
+}
+
+.computed {
+  min-width: 44px;
+  color: var(--muted);
+}
+
+.points {
+  min-width: 52px;
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.moves {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.moves button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  color: var(--ink);
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.moves button:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange-deep);
+}
+
+.moves button:focus-visible {
+  outline: 2px solid var(--orange-deep);
+  outline-offset: 2px;
+}
+
+.moves button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.changeSummary {
+  color: var(--muted);
+  font-size: 14px;
+}

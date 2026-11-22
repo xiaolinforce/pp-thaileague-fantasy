@@ -28,6 +28,11 @@ const translations: Record<string, string> = {
   คะแนน: "Points",
   ลีก: "Leagues",
   โปรแกรม: "Fixtures",
+  ตารางคะแนน: "Standings",
+  กำลังโหลดตารางคะแนน: "Loading standings",
+  โหลดตารางคะแนนไม่สำเร็จ: "Could not load standings",
+  กรุณาตรวจสอบการเชื่อมต่อแล้วลองอีกครั้ง:
+    "Check your connection and try again.",
   โปรไฟล์และกติกา: "Profile & Rules",
   โปรไฟล์: "Profile",
   เมนูหลัก: "Main navigation",

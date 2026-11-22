@@ -472,6 +472,7 @@ export async function getAdminPlayerOptions(params: AdminParams) {
 }
 
 const auditFieldAliases: Record<string, string> = {
+  through_matchweek: "throughMatchweek",
   kickoff_at: "kickoffAt",
   deadline_at: "deadlineAt",
   home_score: "homeScore",
@@ -497,6 +498,8 @@ const auditFieldAliases: Record<string, string> = {
 // Do not send source payloads, bot provisioning payloads or other unrelated
 // internal properties to the browser. Only known correction fields are shown.
 const auditAllowedFields = new Set([
+  "throughMatchweek",
+  "changedClubs",
   "level",
   "tierSnapshot",
   "tierRulesVersion",

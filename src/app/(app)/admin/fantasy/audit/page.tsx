@@ -36,6 +36,8 @@ const actions: Record<string, string> = {
   apply_qa_scenario: "ใช้สถานการณ์ทดสอบ (QA)",
   simulate_dev_transfer_deduction: "จำลองการหักคะแนน Transfer (ทดสอบ)",
   reconcile_migration_checksum: "ปรับข้อมูลตรวจสอบ migration",
+  create_competition_standings: "สร้างตารางคะแนนไทยลีก",
+  update_competition_standings: "แก้ไขตารางคะแนนไทยลีก",
 };
 
 const entityLabels: Record<string, string> = {
@@ -48,6 +50,7 @@ const entityLabels: Record<string, string> = {
   fantasy_season: "ฤดูกาล Fantasy",
   fantasy_team_selection: "การจัดทีม",
   migration_metadata: "ระบบภายใน",
+  competition_standings: "ตารางคะแนนไทยลีก",
 };
 
 type AuditRow = Awaited<ReturnType<typeof getAdminAudit>>["rows"][number];

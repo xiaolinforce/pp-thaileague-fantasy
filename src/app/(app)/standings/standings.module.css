@@ -1,0 +1,346 @@
+.page {
+  min-width: 0;
+  display: grid;
+  gap: 20px;
+}
+
+/* Header: same navy match-night surface as League detail headings. */
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px 32px;
+  padding: clamp(20px, 3vw, 28px) clamp(20px, 3vw, 30px);
+  border-radius: 16px;
+  color: #fff;
+  background:
+    radial-gradient(
+      120% 160% at 100% 0%,
+      color-mix(in srgb, var(--orange) 22%, transparent) 0%,
+      transparent 55%
+    ),
+    var(--navy);
+}
+
+.hero h1 {
+  margin: 4px 0 0;
+  color: #fff;
+  font-size: clamp(26px, 3.4vw, 38px);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.eyebrow {
+  color: #ffb98f;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.heroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+}
+
+.heroMeta > div {
+  min-width: 0;
+  padding: 9px 14px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 12px;
+  background: rgb(255 255 255 / 0.06);
+}
+
+.heroMeta dt {
+  color: #bdc5ca;
+  font-size: 12px;
+}
+
+.heroMeta dd {
+  margin: 1px 0 0;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.card {
+  min-width: 0;
+  container-type: inline-size;
+}
+
+.scroll {
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  outline: none;
+}
+
+.scroll:focus-visible {
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--orange) 28%, transparent);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+}
+
+.table abbr {
+  text-decoration: none;
+}
+
+.table th,
+.table td {
+  height: 52px;
+  padding: 8px 6px;
+  border-bottom: 1px solid #efede9;
+  text-align: center;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.table thead th {
+  height: 42px;
+  color: var(--muted);
+  background: #faf9f7;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.table tbody tr:last-child > * {
+  border-bottom: 0;
+}
+
+.table tbody tr:hover {
+  background: #fcfbf9;
+}
+
+.table .positionCell {
+  width: 44px;
+  padding-inline: 14px 4px;
+  text-align: left;
+}
+
+.position {
+  display: inline-grid;
+  place-items: center;
+  min-width: 26px;
+  height: 26px;
+  padding-inline: 4px;
+  border-radius: 8px;
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.zone_leader .position {
+  color: #fff;
+  background: var(--green);
+}
+
+.zone_relegation .position {
+  color: var(--red);
+  background: color-mix(in srgb, var(--red) 10%, transparent);
+}
+
+.zone_leader > td:first-child {
+  box-shadow: inset 3px 0 0 var(--green);
+}
+
+.zone_relegation > td:first-child {
+  box-shadow: inset 3px 0 0 var(--red);
+}
+
+.table .clubCell {
+  width: 100%;
+  max-width: 0;
+  text-align: left;
+}
+
+.table tbody .clubCell {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.club {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.clubColor {
+  flex: 0 0 auto;
+}
+
+.clubName,
+.clubShortName {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.clubName {
+  display: none;
+}
+
+.table .pointsCell {
+  width: 56px;
+  padding-inline-end: 14px;
+}
+
+.pointsCell strong {
+  color: var(--ink);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.adjustmentMark {
+  margin-inline-start: 1px;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.positive {
+  color: var(--green);
+}
+
+.negative {
+  color: var(--red);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.table .wdl,
+.table .goals,
+.table .formCell {
+  display: none;
+}
+
+.form {
+  display: inline-flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.form li {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.form .form_W {
+  background: var(--green);
+}
+
+.form .form_D {
+  color: var(--ink);
+  background: #dcd8d2;
+}
+
+.form .form_L {
+  background: var(--red);
+}
+
+.footer {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px 16px;
+  border-top: 1px solid #efede9;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.legend,
+.notes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 4px;
+}
+
+.swatch_leader {
+  background: var(--green);
+}
+
+.swatch_relegation {
+  background: var(--red);
+}
+
+@container (min-width: 520px) {
+  .table .wdl {
+    display: table-cell;
+  }
+
+  .clubName {
+    display: block;
+  }
+
+  .clubShortName {
+    display: none;
+  }
+
+  .table th,
+  .table td {
+    padding-inline: 8px;
+  }
+}
+
+@container (min-width: 760px) {
+  .table .goals {
+    display: table-cell;
+  }
+
+  .table td:not(.clubCell, .positionCell, .formCell) {
+    min-width: 44px;
+  }
+
+  .footer {
+    padding-inline: 20px;
+  }
+}
+
+@container (min-width: 960px) {
+  .table .formCell {
+    display: table-cell;
+    padding-inline: 12px 18px;
+  }
+
+  .table .pointsCell {
+    padding-inline-end: 8px;
+  }
+}
+
+.footer p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
