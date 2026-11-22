@@ -637,6 +637,58 @@ export const fixtures = pgTable(
   ],
 );
 
+/**
+ * Administrator-maintained league table. One row per club entry per season;
+ * played and points are derived values checked by the database so a manual
+ * edit cannot store an inconsistent row.
+ */
+export const competitionStandings = pgTable(
+  "competition_standings",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    competitionSeasonId: uuid("competition_season_id")
+      .notNull()
+      .references(() => competitionSeasons.id, { onDelete: "cascade" }),
+    competitionEntryId: uuid("competition_entry_id")
+      .notNull()
+      .references(() => competitionEntries.id, { onDelete: "cascade" }),
+    position: smallint("position").notNull(),
+    played: smallint("played").default(0).notNull(),
+    won: smallint("won").default(0).notNull(),
+    drawn: smallint("drawn").default(0).notNull(),
+    lost: smallint("lost").default(0).notNull(),
+    goalsFor: smallint("goals_for").default(0).notNull(),
+    goalsAgainst: smallint("goals_against").default(0).notNull(),
+    pointsAdjustment: smallint("points_adjustment").default(0).notNull(),
+    points: smallint("points").default(0).notNull(),
+    throughMatchweek: smallint("through_matchweek"),
+    updatedBy: text("updated_by").notNull(),
+    ...timestamps,
+  },
+  (table) => [
+    uniqueIndex("competition_standings_season_entry_unique").on(
+      table.competitionSeasonId,
+      table.competitionEntryId,
+    ),
+    uniqueIndex("competition_standings_season_position_unique").on(
+      table.competitionSeasonId,
+      table.position,
+    ),
+    check(
+      "competition_standings_values_check",
+      sql`${table.position} >= 1 and ${table.won} >= 0 and ${table.drawn} >= 0 and ${table.lost} >= 0 and ${table.goalsFor} >= 0 and ${table.goalsAgainst} >= 0 and (${table.throughMatchweek} is null or ${table.throughMatchweek} >= 1)`,
+    ),
+    check(
+      "competition_standings_played_check",
+      sql`${table.played} = ${table.won} + ${table.drawn} + ${table.lost}`,
+    ),
+    check(
+      "competition_standings_points_check",
+      sql`${table.points} = ${table.won} * 3 + ${table.drawn} + ${table.pointsAdjustment}`,
+    ),
+  ],
+);
+
 export const competitionPlayerSeasonStats = pgTable(
   "competition_player_season_stats",
   {

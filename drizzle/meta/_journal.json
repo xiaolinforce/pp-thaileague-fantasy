@@ -183,6 +183,13 @@
       "when": 1795013389254,
       "tag": "0025_auth_account_provider_identity",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1795321371902,
+      "tag": "0026_competition_standings",
+      "breakpoints": true
     }
   ]
 }

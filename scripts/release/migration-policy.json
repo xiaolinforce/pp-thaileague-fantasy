@@ -34,5 +34,9 @@
   "0025_auth_account_provider_identity": {
     "sha256": "89b19d508e19fdd2f43f6aa8e33170e5821cb64451babc270315fac1a35e837b",
     "compatibility": "compatible"
+  },
+  "0026_competition_standings": {
+    "sha256": "d90692ad510bb29a85c3daff9f4de8e654659fe85b6fd88857b33f546f2cdb92",
+    "compatibility": "compatible"
   }
 }
