@@ -566,7 +566,6 @@ function SquadPlayer({
     <Localized>
       <div
         className={`squad-token-shell${swapState ? ` swap-${swapState}` : ""}`}
-        onClick={swapState === "source" ? () => onSelect(player) : undefined}
       >
         {captain && <SquadCaptainBadge captain={captain} />}
         <span className="squad-player-tier">
@@ -578,10 +577,7 @@ function SquadPlayer({
         </span>
         <button
           className="squad-token"
-          onClick={(event) => {
-            event.stopPropagation();
-            onSelect(player, event.currentTarget);
-          }}
+          onClick={(event) => onSelect(player, event.currentTarget)}
           aria-label={`${ariaLabel}, ${secondaryInfo.title}`}
           aria-pressed={swapState === "source" ? true : undefined}
           disabled={swapState === "unavailable"}
@@ -766,7 +762,6 @@ function VacantSquadSlot({
   return (
     <div
       className={`squad-token-shell vacant-squad-token-shell${swapState ? ` swap-${swapState}` : ""}`}
-      onClick={isSource ? onSelect : undefined}
     >
       {captain && <SquadCaptainBadge captain={captain} />}
       {canSelectSlot ? (
@@ -794,10 +789,7 @@ function VacantSquadSlot({
         <button
           type="button"
           className="squad-token-action squad-swap-action"
-          onClick={(event) => {
-            event.stopPropagation();
-            onSwap();
-          }}
+          onClick={onSwap}
           disabled={actionsDisabled || swapDisabled}
           aria-pressed={isSource}
           aria-label={
@@ -1402,6 +1394,29 @@ export default function TeamClient({
     return () => window.removeEventListener("beforeunload", warnBeforeLeaving);
   }, [hasUnsavedChanges]);
 
+  useEffect(() => {
+    if (!swapFrom) return;
+
+    const cancelSwapOnOutsideClick = (event: MouseEvent) => {
+      if (
+        event.target instanceof Element &&
+        event.target.closest(
+          ".squad-token-shell:is(.swap-source, .swap-available) > button",
+        )
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      setSwapFrom(null);
+    };
+
+    document.addEventListener("click", cancelSwapOnOutsideClick, true);
+    return () =>
+      document.removeEventListener("click", cancelSwapOnOutsideClick, true);
+  }, [swapFrom]);
+
   const saveTeam = () => {
     if (!isEditable) {
       toast.error(translate("ปิดรับการจัดทีมสำหรับ Gameweek นี้แล้ว"));
@@ -1686,7 +1701,11 @@ export default function TeamClient({
 
   return (
     <AppShell>
-      <main id="main-content" className="content product-content">
+      <main
+        id="main-content"
+        className="content product-content"
+        data-swap-active={swapFrom ? "" : undefined}
+      >
         <PageHeader title="ทีมของฉัน" />
         <section className="gameweek-banner compact-gameweek">
           <div className="compact-gameweek__desktop">

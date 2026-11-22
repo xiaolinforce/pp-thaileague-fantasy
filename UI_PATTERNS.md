@@ -236,19 +236,21 @@ proven behaviors unless a deliberate product decision replaces them:
   selected token or overlay, or pressing Escape, dismisses it. More information
   replaces the spotlight with the shared player dialog. Other commands close
   the spotlight before entering their existing flow; removal focuses the new
-  vacancy. Active swap-target selection and market details retain their
-  existing interactions. Tablet keeps its established token geometry while
-  adopting this compact action behavior.
+  vacancy. Tablet keeps its established token geometry while adopting this
+  compact action behavior.
 - On Desktop (1280px and above), editable occupied-token actions appear in a
-  vertical column to the right of the player while the token is hovered or
-  contains keyboard focus. Starter tokens add compact captain and vice-captain
+  vertical column to the right of the player. Hovering over the token or the
+  column area reveals the actions, as does focusing the token or an action
+  with the keyboard. Starter tokens add compact captain and vice-captain
   controls alongside the persistent role badge:
   an unassigned starter exposes both controls, the captain exposes only the
   vice-captain control, and the vice-captain exposes only the captain control.
   Bench tokens never expose captaincy controls. Once the deadline closes, the
   occupied token still opens player details without exposing disabled hover
-  controls. Direct player-detail selection and the existing swap/remove
-  behavior remain available.
+  controls. Direct player-detail selection and removal remain available.
+- While selecting a swap target, activating an eligible occupied or vacant
+  slot completes the swap. Clicking or tapping anywhere else cancels the swap
+  without changing the draft or activating another control on that click.
 
 The exact pitch geometry, player-token placement, tier meter, and market-row
 layout are Team-specific patterns. Reuse their underlying identity and

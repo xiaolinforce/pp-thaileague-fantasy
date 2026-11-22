@@ -3902,11 +3902,13 @@ textarea:focus-visible {
 }
 
 .squad-token-shell {
+  --squad-token-hover-lift: 4px;
+  --squad-token-hover-transition: transform 0.18s ease;
   position: relative;
   min-width: 78px;
   display: grid;
   place-items: center;
-  transition: transform 0.18s ease;
+  transition: var(--squad-token-hover-transition);
 }
 
 .squad-token {
@@ -3921,7 +3923,7 @@ textarea:focus-visible {
 }
 
 .squad-token-shell:hover {
-  transform: translateY(-4px);
+  transform: translateY(calc(-1 * var(--squad-token-hover-lift)));
 }
 
 .mobile-player-actions-modal {
@@ -4015,6 +4017,11 @@ textarea:focus-visible {
   transform: none;
 }
 
+/* Let clicks on disabled controls reach the swap cancellation handler. */
+.app-shell:has([data-swap-active]) :disabled {
+  pointer-events: none;
+}
+
 .squad-captain-role,
 .squad-player-tier {
   position: absolute;
@@ -4039,7 +4046,6 @@ textarea:focus-visible {
   align-items: center;
   gap: 4px;
   transform: translateY(-50%);
-  pointer-events: none;
 }
 
 .squad-token-actions .squad-token-action {
@@ -4186,10 +4192,15 @@ textarea:focus-visible {
     transform: none;
   }
 
-  .squad-token-shell:not(.vacant-squad-token-shell):hover .squad-token-actions,
-  .squad-token-shell:not(.vacant-squad-token-shell):focus-within
+  @media (prefers-reduced-motion: no-preference) {
+    /* Keep the hover area in place as the token lifts. */
     .squad-token-actions {
-    pointer-events: auto;
+      transition: var(--squad-token-hover-transition);
+    }
+
+    .squad-token-shell:hover .squad-token-actions {
+      transform: translateY(calc(-50% + var(--squad-token-hover-lift)));
+    }
   }
 }
 
