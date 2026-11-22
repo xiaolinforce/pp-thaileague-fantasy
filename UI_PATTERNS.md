@@ -127,6 +127,9 @@ proven behaviors unless a deliberate product decision replaces them:
 
 - Represent the one Gameweek currently open for squad changes. Show its number,
   live deadline, and editability without historical previous/next controls.
+- The squad's Total points display shows each starter and substitute's
+  accumulated Fantasy points across all scored matches in the season. Retained
+  unavailable players show their points alongside a warning indicator.
 - The pitch's opponent display follows that Gameweek's fixture matchweek,
   including postponed, undated, and finished fixtures; exclude cancelled games.
   Show every opponent with its own home/away marker for multiple fixtures, and

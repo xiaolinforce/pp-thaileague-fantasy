@@ -1,10 +1,12 @@
 import "server-only";
 import { resolvePlayerTier } from "@/lib/fantasy/rules";
 
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@/db";
 import {
   competitionEntries,
+  fantasyPlayerMatchPoints,
+  fantasyPlayerMatchStats,
   fantasyPlayers,
   fantasySeasons,
   playerRegistrations,
@@ -41,6 +43,13 @@ export async function getTeamPlayerData(
           player: players,
           fantasyPlayer: fantasyPlayers,
           clubId: competitionEntries.clubId,
+          points: sql<number>`coalesce((
+            select sum(${fantasyPlayerMatchPoints.totalPoints})
+            from ${fantasyPlayerMatchStats}
+            inner join ${fantasyPlayerMatchPoints}
+              on ${fantasyPlayerMatchPoints.playerMatchStatsId} = ${fantasyPlayerMatchStats.id}
+            where ${fantasyPlayerMatchStats.fantasyPlayerId} = ${fantasyPlayers.id}
+          ), 0)::int`,
         })
         .from(fantasyPlayers)
         .innerJoin(players, eq(players.id, fantasyPlayers.playerId))
@@ -111,7 +120,7 @@ export async function getTeamPlayerData(
       tier: resolvePlayerTier(member?.tier, fantasy.gameweek.tierRulesVersion),
       price: resolvePlayerTier(member?.tier, fantasy.gameweek.tierRulesVersion),
       isThai: row.fantasyPlayer.isThai,
-      points: 0,
+      points: row.points,
       form: 0,
       fantasyAppearances: 0,
       selected: 0,

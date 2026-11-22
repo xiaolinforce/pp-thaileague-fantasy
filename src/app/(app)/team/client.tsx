@@ -159,7 +159,12 @@ type PlayerSwapState = "source" | "available" | "unavailable";
 type TeamWorkspaceView = "squad" | "market";
 
 type SquadSecondaryDisplay =
-  "club" | "opponent" | "latest_points" | "form" | "popularity";
+  | "club"
+  | "opponent"
+  | "latest_points"
+  | "total_points"
+  | "form"
+  | "popularity";
 
 const SQUAD_SECONDARY_DISPLAY_STORAGE_KEY =
   "thai-fantasy-squad-secondary-display";
@@ -171,6 +176,7 @@ function isSquadSecondaryDisplay(
     value === "club" ||
     value === "opponent" ||
     value === "latest_points" ||
+    value === "total_points" ||
     value === "form" ||
     value === "popularity"
   );
@@ -179,6 +185,7 @@ function isSquadSecondaryDisplay(
 type SquadSecondaryInfo = {
   value: string;
   title: string;
+  showUnavailableIcon?: boolean;
   opponents?: Array<{ id: string; value: string; venue: "H" | "A" }>;
 };
 
@@ -606,21 +613,31 @@ function SquadPlayer({
             className={`squad-fixture${secondaryInfo.opponents?.length ? " squad-fixture--opponents" : ""}`}
             title={secondaryInfo.title}
           >
-            {secondaryInfo.opponents?.length
-              ? secondaryInfo.opponents.map((opponent) => (
-                  <span className="squad-fixture--opponent" key={opponent.id}>
-                    <span
-                      className={`squad-fixture-venue squad-fixture-venue--${opponent.venue.toLowerCase()}`}
-                      aria-hidden="true"
-                    >
-                      {opponent.venue}
-                    </span>
-                    <span className="squad-fixture-opponent-name">
-                      {opponent.value}
-                    </span>
+            {secondaryInfo.opponents?.length ? (
+              secondaryInfo.opponents.map((opponent) => (
+                <span className="squad-fixture--opponent" key={opponent.id}>
+                  <span
+                    className={`squad-fixture-venue squad-fixture-venue--${opponent.venue.toLowerCase()}`}
+                    aria-hidden="true"
+                  >
+                    {opponent.venue}
                   </span>
-                ))
-              : secondaryInfo.value}
+                  <span className="squad-fixture-opponent-name">
+                    {opponent.value}
+                  </span>
+                </span>
+              ))
+            ) : (
+              <>
+                {secondaryInfo.showUnavailableIcon && (
+                  <TriangleAlert
+                    className="me-1 inline size-3 align-text-bottom"
+                    aria-hidden="true"
+                  />
+                )}
+                {secondaryInfo.value}
+              </>
+            )}
           </span>
         </button>
         {!hideActions && !actionsDisabled && (
@@ -947,8 +964,26 @@ export default function TeamClient({
   );
   const squadSecondaryInfoByFantasyId = useMemo(() => {
     return new Map(
-      data.players.flatMap((player) => {
+      data.players.flatMap<readonly [string, SquadSecondaryInfo]>((player) => {
         if (!player.fantasyPlayerId) return [];
+
+        if (squadSecondaryDisplay === "total_points") {
+          const unavailable = player.isAvailable === false;
+          const value = String(player.points);
+          const title = `${translate("คะแนนรวม")}: ${value}`;
+          return [
+            [
+              player.fantasyPlayerId,
+              {
+                value,
+                title: unavailable
+                  ? `${title}, ${translate("ไม่พร้อมให้เลือก")}`
+                  : title,
+                showUnavailableIcon: unavailable,
+              },
+            ],
+          ];
+        }
 
         const latestMatch = player.recentMatches[0];
         const secondaryInfo: SquadSecondaryInfo =
@@ -982,7 +1017,7 @@ export default function TeamClient({
                       value: `${player.selected.toFixed(1)}%`,
                       title: `${translate("ความนิยม")}: ${player.selected.toFixed(1)}%`,
                     };
-        return [[player.fantasyPlayerId, secondaryInfo] as const];
+        return [[player.fantasyPlayerId, secondaryInfo]];
       }),
     );
   }, [
@@ -994,7 +1029,7 @@ export default function TeamClient({
     translate,
   ]);
   const getSquadSecondaryInfo = (player: CompetitionPlayerView) =>
-    player.isAvailable === false
+    player.isAvailable === false && squadSecondaryDisplay !== "total_points"
       ? {
           value: translate("ไม่พร้อมให้เลือก"),
           title: translate(
@@ -1919,6 +1954,9 @@ export default function TeamClient({
                   </SelectItem>
                   <SelectItem value="latest_points">
                     {translate("คะแนน GW ล่าสุด")}
+                  </SelectItem>
+                  <SelectItem value="total_points">
+                    {translate("คะแนนรวม")}
                   </SelectItem>
                   <SelectItem value="form">{translate("ฟอร์ม")}</SelectItem>
                   <SelectItem value="popularity">
