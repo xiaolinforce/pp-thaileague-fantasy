@@ -349,7 +349,8 @@ confirmed member/league operations.
 ### Two-tier quota presentation
 
 Current Team and market views show only Levels 1–2. Show the Level 1 allowance
-as five circles, with the numeric count available only to screen readers and a
+as five circles, followed by one borderless light-orange circle for each player
+above the limit. Keep the numeric count available to screen readers and show a
 visible textual overflow warning. For tier-change relief, omit the quota badge
 and visible numeric caption; show only “คุณเพิ่มนักเตะระดับ 1 เข้าทีมอีกไม่ได้”
 in the standard squad validation alert while the draft exceeds five Level 1

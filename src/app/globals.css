@@ -3455,6 +3455,7 @@ textarea:focus-visible {
 
 .compact-tier-quota-dot-track {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 5px;
@@ -3469,19 +3470,14 @@ textarea:focus-visible {
   background: var(--paper);
 }
 
-.compact-tier-quota-dot--1 {
+.compact-tier-quota-dot--filled {
   border-color: #b8410c;
-  background: #f56617;
+  background: var(--orange);
 }
 
-.compact-tier-quota-dot--2 {
-  border-color: #866200;
-  background: #d6a20f;
-}
-
-.compact-tier-quota-dot--3 {
-  border-color: #36566f;
-  background: #607a8d;
+.compact-tier-quota-dot--overflow {
+  border: 0;
+  background: #ffa66b;
 }
 
 .compact-tier-quota-strip--over {

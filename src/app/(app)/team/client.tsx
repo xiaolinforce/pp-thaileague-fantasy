@@ -1217,7 +1217,7 @@ export default function TeamClient({
   );
   const foreignPlayers = squadPlayers.filter((player) => !player.isThai).length;
   const levelOne = squadPlayers.filter((player) => player.tier === 1).length;
-  const tierQuotaDots = buildTierQuotaMeter({ 1: levelOne });
+  const tierQuotaDots = buildTierQuotaMeter(levelOne);
   const tierOneLimit = cumulativeTierLimits.get(1) ?? 0;
   const isTierQuotaOver = levelOne > tierOneLimit;
   const tierQuotaSummary = translate("ระดับ 1: {count}/{limit} คน")
@@ -1842,9 +1842,9 @@ export default function TeamClient({
                     className="compact-tier-quota-dot-track"
                     aria-hidden="true"
                   >
-                    {tierQuotaDots.map((tierLevel, index) => (
+                    {tierQuotaDots.map((dot, index) => (
                       <span
-                        className={`compact-tier-quota-dot${tierLevel ? ` compact-tier-quota-dot--${tierLevel}` : ""}`}
+                        className={`compact-tier-quota-dot compact-tier-quota-dot--${dot}`}
                         key={index}
                       />
                     ))}
