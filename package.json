@@ -38,7 +38,7 @@
     "db:verify:fantasy": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-game.ts",
     "db:verify:player-stats": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-current-season-player-stats.ts",
     "db:verify:transaction": "node --require ./scripts/windows-node-user-info-shim.cjs --import tsx ./scripts/verify-fantasy-transaction.ts",
-    "test:readiness": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/readiness.test.ts",
+    "test:readiness": "node --conditions react-server --require ./scripts/windows-node-user-info-shim.cjs --import tsx --test scripts/tests/readiness.test.ts scripts/tests/ownership-heartbeat.test.ts",
     "test:release": "node --test scripts/tests/release.test.ts"
   },
   "dependencies": {

@@ -73,6 +73,7 @@ This is a request-shape guard, not authentication or an action-ID allowlist.
 | Transactional email   | `src/lib/email`                      | OTP delivery routing, provider quota headroom, and privacy-safe delivery logs.                   |
 | Auth maintenance      | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
 | Ownership maintenance | `/api/cron/fantasy-ownership`        | Daily reconciliation of persisted open-Gameweek player ownership.                                |
+| Ownership heartbeat   | `/api/health/ownership`              | Authenticated GitHub Actions probe of the last successful ownership reconciliation.              |
 | Match detail read     | `/api/fixtures/[id]/details`         | Session-required GET of one finished fixture's player events and points for the Fixtures dialog. |
 | Scoring               | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
 | Score persistence     | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
@@ -152,6 +153,10 @@ HTTP bodies, database values, user details, and local variables are disabled at
 the SDK boundary. Vercel Runtime Logs remain the short-term raw operational log
 source, while Sentry owns longer-lived error correlation, releases, source maps,
 the daily auth-maintenance check-in, and public uptime monitoring.
+The ownership cron records successful completion in Neon. A separate GitHub
+Actions schedule probes the timestamp after the Vercel execution window and
+reports a missed run as a Sentry error. Ordinary squad writes do not record
+this heartbeat.
 
 Shared Sentry hooks under `src/lib/observability/sentry.ts` also scrub exception
 messages, breadcrumbs, structured logs, and transaction events. In particular,

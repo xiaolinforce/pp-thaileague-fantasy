@@ -191,11 +191,17 @@ days. It must never delete accounts, Fantasy managers, teams, selections,
 scores, transfers, league history, or audit records.
 
 The same deployment runs `/api/cron/fantasy-ownership` daily at 02:43
-Asia/Bangkok (19:43 UTC). It uses the same `CRON_SECRET` and Sentry scheduling
-margin, locks the active Fantasy season against concurrent selection writes,
-and rebuilds persisted ownership only for the open Gameweek. Normal selection
-saves and restores update the affected ownership rows transactionally; the
-daily job is reconciliation rather than the primary freshness mechanism.
+Asia/Bangkok (19:43 UTC). It uses the same `CRON_SECRET`, locks the active
+Fantasy season against concurrent selection writes, and rebuilds persisted
+ownership only for the open Gameweek. Normal selection saves and restores
+update the affected rows transactionally. Only a successful cron run updates
+the heartbeat, including a successful run with zero open Gameweeks.
+
+GitHub Actions checks `POST /api/health/ownership` separately at 04:17
+Bangkok time with `READINESS_SECRET`. `test:readiness` covers authorization,
+successful and missing heartbeats, and the migration grace window. The probe
+sends a Sentry error when overdue and returns 503 to the workflow. It requires
+no additional Cron Monitor slot.
 
 Database commands use a small Windows Node user-info compatibility shim. Keep
 the wrapper in package scripts unless the underlying Windows issue is confirmed

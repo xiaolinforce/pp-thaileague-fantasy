@@ -1,0 +1,29 @@
+name: Fantasy ownership heartbeat
+
+on:
+  schedule:
+    - cron: "17 21 * * *" # 04:17 Asia/Bangkok
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  check:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: Production
+    timeout-minutes: 2
+    steps:
+      - name: Check production ownership heartbeat
+        env:
+          READINESS_SECRET: ${{ secrets.READINESS_SECRET }}
+        run: |
+          : "${READINESS_SECRET:?Missing Production READINESS_SECRET}"
+          status=$(curl --silent --show-error --max-time 30 --write-out '%{http_code}' \
+            --output "$RUNNER_TEMP/ownership-heartbeat.json" \
+            --request POST --header "Authorization: Bearer $READINESS_SECRET" \
+            https://fantasy.ppfootball.net/api/health/ownership)
+          jq -er '.status' "$RUNNER_TEMP/ownership-heartbeat.json"
+          test "$status" = 200
+          jq -e '.status == "okay" or .status == "initializing" or .status == "pending"' \
+            "$RUNNER_TEMP/ownership-heartbeat.json" >/dev/null

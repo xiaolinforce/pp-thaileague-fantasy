@@ -2,6 +2,7 @@ import * as Sentry from "@sentry/nextjs";
 import { revalidateTag } from "next/cache";
 
 import { reconcileOpenFantasyPlayerOwnership } from "@/lib/fantasy/ownership-service";
+import { recordOwnershipHeartbeat } from "@/lib/observability/ownership-heartbeat";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -22,31 +23,18 @@ export async function GET(request: Request) {
   }
 
   try {
-    return await Sentry.withMonitor(
-      "fantasy-ownership",
-      async () => {
-        const result = await reconcileOpenFantasyPlayerOwnership();
-        revalidateTag("fantasy-ownership", "max");
+    const result = await reconcileOpenFantasyPlayerOwnership();
+    revalidateTag("fantasy-ownership", "max");
+    await recordOwnershipHeartbeat();
 
-        console.info(
-          JSON.stringify({ event: "fantasy_ownership_refreshed", ...result }),
-        );
-        Sentry.logger.info("Fantasy ownership refreshed", {
-          event: "fantasy_ownership_refreshed",
-          ...result,
-        });
-        return Response.json({ ok: true, ...result });
-      },
-      {
-        schedule: { type: "crontab", value: "43 2 * * *" },
-        timezone: "Asia/Bangkok",
-        checkinMargin: 60,
-        maxRuntime: 5,
-        failureIssueThreshold: 1,
-        recoveryThreshold: 1,
-        isolateTrace: true,
-      },
+    console.info(
+      JSON.stringify({ event: "fantasy_ownership_refreshed", ...result }),
     );
+    Sentry.logger.info("Fantasy ownership refreshed", {
+      event: "fantasy_ownership_refreshed",
+      ...result,
+    });
+    return Response.json({ ok: true, ...result });
   } catch (error) {
     Sentry.captureException(error, { tags: { job: "fantasy-ownership" } });
     console.error("Fantasy ownership maintenance failed.", error);

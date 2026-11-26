@@ -1507,6 +1507,16 @@ export const fantasyTeamSelectionPlayers = pgTable(
   ],
 );
 
+export const cronHeartbeats = pgTable("cron_heartbeats", {
+  job: text("job").primaryKey(),
+  monitoringStartedAt: timestamp("monitoring_started_at", {
+    withTimezone: true,
+  })
+    .defaultNow()
+    .notNull(),
+  lastSucceededAt: timestamp("last_succeeded_at", { withTimezone: true }),
+});
+
 export const fantasyPlayerOwnerships = pgTable(
   "fantasy_player_ownerships",
   {

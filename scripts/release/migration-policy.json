@@ -38,5 +38,9 @@
   "0026_competition_standings": {
     "sha256": "d90692ad510bb29a85c3daff9f4de8e654659fe85b6fd88857b33f546f2cdb92",
     "compatibility": "compatible"
+  },
+  "0027_ownership_heartbeat": {
+    "sha256": "34a0f37dbfab4487e2f7bb9d404936b147c71653a5753e775a9d1e8c99a5ba4e",
+    "compatibility": "compatible"
   }
 }

@@ -732,7 +732,25 @@ the same Production-only bearer secret. The route reconciles the open
 Gameweek's persisted player-ownership rows from complete active Guest/member
 teams, excluding bots, abandoned identities, and incomplete drafts. Selection
 saves and restores normally maintain those rows transactionally; this daily run
-repairs drift and reports a separate `fantasy-ownership` Sentry check-in.
+repairs drift. After reconciliation and cache invalidation succeed, it stores
+the completion time in `cron_heartbeats`, including when no Gameweek is open.
+
+After migration `0027` and deployment, the `Fantasy ownership heartbeat`
+workflow on `main` checks the production heartbeat daily at 04:17 Bangkok
+time using the existing `READINESS_SECRET`. After 04:00, if no success has
+been recorded since 02:00, the authenticated probe returns HTTP 503 and
+emits a Sentry error with `area=ownership_heartbeat`, grouped by missed day.
+The first partial day after migration is allowed for installation. Keep
+`auth-maintenance` as the single Sentry Cron Monitor. The [heartbeat alert in
+Sentry](https://itsmepp.sentry.io/monitors/alerts/6411865/) emails the owner on
+new or regressed issues with the heartbeat tag in Production. The public
+liveness probe remains independent.
+
+After deployment, dispatch the workflow on `main` to verify the probe and
+check the next daily result for `okay`. For `missed`, inspect the Vercel job
+and its fresh runtime logs before rerunning the reconciliation. For
+`check_failed`, inspect the heartbeat table and the Sentry exception. A failed
+or skipped GitHub schedule itself must be investigated in GitHub Actions.
 
 ## Monitoring cadence
 
