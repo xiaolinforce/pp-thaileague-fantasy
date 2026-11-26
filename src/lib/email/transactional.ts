@@ -2,7 +2,8 @@ import "server-only";
 
 import { createHash } from "node:crypto";
 
-import { and, count, desc, eq, gte } from "drizzle-orm";
+import * as Sentry from "@sentry/nextjs";
+import { and, count, desc, eq, gt, gte, inArray, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { authEmailDeliveries } from "@/db/schema";
@@ -94,27 +95,71 @@ async function lastDelivery(provider: EmailProviderName) {
   return last;
 }
 
+const failureCooldownMs = 60_000;
+
+async function getAvailabilitySnapshot(
+  providers: EmailProviderName[],
+  now: Date,
+) {
+  const { provider, status, createdAt } = authEmailDeliveries;
+  const { day, month } = utcBoundaries(now);
+  const recent = new Date(now.getTime() - failureCooldownMs);
+  const accepted = eq(status, "accepted");
+  const acceptedToday = and(accepted, gte(createdAt, day));
+  const acceptedThisMonth = and(accepted, gte(createdAt, month));
+
+  // Window counts run before DISTINCT ON keeps each provider's latest row.
+  // Include recent failures across UTC month rollover without counting them.
+  return db
+    .selectDistinctOn([provider], {
+      provider,
+      status,
+      createdAt,
+      daily:
+        sql`count(*) filter (where ${acceptedToday}) over (partition by ${provider})`.mapWith(
+          Number,
+        ),
+      monthly:
+        sql`count(*) filter (where ${acceptedThisMonth}) over (partition by ${provider})`.mapWith(
+          Number,
+        ),
+    })
+    .from(authEmailDeliveries)
+    .where(
+      and(
+        inArray(provider, providers),
+        or(acceptedThisMonth, gt(createdAt, recent)),
+      ),
+    )
+    .orderBy(provider, desc(createdAt));
+}
+
 export async function isAuthenticationEmailAvailable() {
   try {
     const providers = getProviderConfigs().filter(
       (provider) => provider.configured,
     );
-    const available = await Promise.all(
-      providers.map(async (provider) => {
-        const [usage, last] = await Promise.all([
-          providerUsage(provider, new Date()),
-          lastDelivery(provider.name),
-        ]);
-        return (
-          quotaState(usage, provider) !== "exhausted" &&
-          !(
-            last?.status === "failed" &&
-            Date.now() - last.createdAt.getTime() < 60_000
-          )
-        );
-      }),
+    if (!providers.length) return false;
+    const rows = await Sentry.startSpan(
+      { name: "auth.email.availability", op: "auth.email" },
+      () =>
+        getAvailabilitySnapshot(
+          providers.map(({ name }) => name),
+          new Date(),
+        ),
     );
-    return available.some(Boolean);
+    const snapshots = new Map(rows.map((row) => [row.provider, row]));
+    return providers.some((provider) => {
+      const snapshot = snapshots.get(provider.name);
+      return (
+        quotaState(snapshot ?? { daily: 0, monthly: 0 }, provider) !==
+          "exhausted" &&
+        !(
+          snapshot?.status === "failed" &&
+          Date.now() - snapshot.createdAt.getTime() < failureCooldownMs
+        )
+      );
+    });
   } catch {
     return false;
   }

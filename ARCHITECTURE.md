@@ -333,9 +333,11 @@ Explicit OTP requests await delivery through a request-local Better Auth hook:
 a provider rejection returns HTTP 503 with `EMAIL_DELIVERY_UNAVAILABLE`, rather
 than advancing the client to code entry. Mailjet HTTP 200 responses must also
 contain per-message success and a message ID. The landing and upgrade pages
-read quota/last-failure availability on the server and offer a read-only retry
-action. A recent provider failure suppresses its availability for 60 seconds;
-an already displayed OTP verification form remains usable.
+read availability through a single query for all configured providers. It reads
+the accepted totals for the current UTC day and month and each provider's last
+delivery status together. The read-only retry action uses the same query. A
+recent provider failure suppresses its availability for 60 seconds, and an
+already displayed OTP verification form remains usable.
 
 Accepted-message counts warn at 80% and stop routing to a provider at 90% of
 either configured UTC daily/monthly budget. These counts are per database and
