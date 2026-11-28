@@ -24,6 +24,11 @@ const nextConfig: NextConfig = {
     return [
       { source: "/how-to-play", destination: "/rules", permanent: true },
       {
+        source: "/thai-league/2026-27/fixtures",
+        destination: "/fixtures",
+        permanent: true,
+      },
+      {
         source: "/match-operations/:path*",
         destination: "/admin/fantasy/match-operations/:path*",
         permanent: true,
@@ -36,7 +41,6 @@ const nextConfig: NextConfig = {
         "team",
         "points",
         "leagues",
-        "fixtures",
         "profile",
         "settings",
         "upgrade",

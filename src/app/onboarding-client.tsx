@@ -92,21 +92,23 @@ export default function OnboardingClient({
   emailAvailable = true,
   googleEnabled,
   turnstileSiteKey,
-  upgradeMode = false,
+  mode = "onboarding",
   returnTo = "/team",
 }: {
   emailEnabled: boolean;
   emailAvailable?: boolean;
   googleEnabled: boolean;
   turnstileSiteKey: string | null;
-  upgradeMode?: boolean;
+  mode?: "onboarding" | "embedded" | "upgrade";
   returnTo?: string;
 }) {
-  if (!upgradeMode)
+  const upgradeMode = mode === "upgrade";
+  if (mode === "onboarding") {
     preload("/onboarding-pitch-pattern.svg", {
       as: "image",
       fetchPriority: "high",
     });
+  }
   const router = useRouter();
   const setIdentity = useSetAppIdentity();
   const { language, setLanguage, translate } = useLanguage();
@@ -122,6 +124,18 @@ export default function OnboardingClient({
   const [error, setError] = useState("");
   const [authView, setAuthView] = useState<"choices" | "email">("choices");
   const busy = busyAction !== null;
+
+  const finishSignIn = async (guest = false) => {
+    const completion = await completeAuthenticationAction({ returnTo });
+    if (guest) trackEvent("guest_start");
+    if (mode === "embedded") {
+      // Read the new session even when returning to the current URL.
+      window.location.replace(completion.destination);
+    } else {
+      setIdentity(completion.identity);
+      router.replace(completion.destination);
+    }
+  };
 
   const sendOtp = async () => {
     setBusyAction("send-otp");
@@ -162,9 +176,7 @@ export default function OnboardingClient({
         otp: otp.trim(),
       });
       if (result.error) throw result.error;
-      const completion = await completeAuthenticationAction({ returnTo });
-      setIdentity(completion.identity);
-      router.replace(completion.destination);
+      await finishSignIn();
     } catch (requestError) {
       setError(errorMessage(requestError));
       setBusyAction(null);
@@ -177,10 +189,7 @@ export default function OnboardingClient({
     try {
       const result = await authClient.signIn.anonymous();
       if (result.error) throw result.error;
-      const completion = await completeAuthenticationAction({ returnTo });
-      setIdentity(completion.identity);
-      trackEvent("guest_start");
-      router.replace(completion.destination);
+      await finishSignIn(true);
     } catch (requestError) {
       setError(errorMessage(requestError));
       setBusyAction(null);
@@ -497,44 +506,55 @@ export default function OnboardingClient({
     );
   }
 
+  const embedded = mode === "embedded";
+  const SignInHeading = embedded ? "h1" : "h2";
+
   return (
     <Localized>
-      <main id="main-content" className="onboarding-page">
-        <section className="onboarding-hero">
-          <button
-            type="button"
-            className="onboarding-language-switcher"
-            role="switch"
-            aria-checked={language === "en"}
-            aria-label={
-              language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"
-            }
-            title={
-              language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"
-            }
-            onClick={toggleLanguage}
-          >
-            <span className={language === "th" ? "is-active" : undefined}>
-              TH
-            </span>
-            <span className={language === "en" ? "is-active" : undefined}>
-              EN
-            </span>
-          </button>
+      <main
+        id="main-content"
+        className={embedded ? "fantasy-sign-in" : "onboarding-page"}
+      >
+        {!embedded && (
+          <section className="onboarding-hero">
+            <button
+              type="button"
+              className="onboarding-language-switcher"
+              role="switch"
+              aria-checked={language === "en"}
+              aria-label={
+                language === "th" ? "เปลี่ยนเป็น English" : "Switch to Thai"
+              }
+              title={
+                language === "th" ? "เปลี่ยนเป็น English" : "สลับเป็นภาษาไทย"
+              }
+              onClick={toggleLanguage}
+            >
+              <span className={language === "th" ? "is-active" : undefined}>
+                TH
+              </span>
+              <span className={language === "en" ? "is-active" : undefined}>
+                EN
+              </span>
+            </button>
 
-          <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
-          <h1>{translate("จัดทีมไทยลีกของคุณ")}</h1>
-          <p>
-            {translate(
-              "เลือกนักเตะไทยลีก 15 คน ลุ้นคะแนนจากผลงานจริง และแข่งกับเพื่อน",
-            )}
-          </p>
-        </section>
+            <div className="onboarding-kicker">PP THAI LEAGUE FANTASY</div>
+            <h1>{translate("จัดทีมไทยลีกของคุณ")}</h1>
+            <p>
+              {translate(
+                "เลือกนักเตะไทยลีก 15 คน ลุ้นคะแนนจากผลงานจริง และแข่งกับเพื่อน",
+              )}
+            </p>
+          </section>
+        )}
 
-        <section className="onboarding-panel" aria-labelledby="start-title">
-          <h2 id="start-title" className="sr-only">
+        <section
+          className={embedded ? undefined : "onboarding-panel"}
+          aria-labelledby="start-title"
+        >
+          <SignInHeading id="start-title" className="sr-only">
             {translate("เลือกวิธีเริ่มเล่น")}
-          </h2>
+          </SignInHeading>
 
           <div
             className={
@@ -628,19 +648,25 @@ export default function OnboardingClient({
               {error}
             </p>
           )}
-          <nav
-            className="onboarding-links"
-            aria-label={language === "th" ? "ข้อมูลเกม" : "Game information"}
-            data-localize="off"
-          >
-            <Link href="/rules">
-              {language === "th" ? "กติกาและวิธีเล่น" : "Rules and how to play"}
-            </Link>
-            <Link href="/thai-league/2026-27/fixtures">
-              {language === "th" ? "โปรแกรมแข่งขัน" : "Fixtures"}
-            </Link>
-            <Link href="/help">{language === "th" ? "ช่วยเหลือ" : "Help"}</Link>
-          </nav>
+          {!embedded && (
+            <nav
+              className="onboarding-links"
+              aria-label={language === "th" ? "ข้อมูลเกม" : "Game information"}
+              data-localize="off"
+            >
+              <Link href="/rules">
+                {language === "th"
+                  ? "กติกาและวิธีเล่น"
+                  : "Rules and how to play"}
+              </Link>
+              <Link href="/fixtures">
+                {language === "th" ? "โปรแกรมแข่งขัน" : "Fixtures"}
+              </Link>
+              <Link href="/help">
+                {language === "th" ? "ช่วยเหลือ" : "Help"}
+              </Link>
+            </nav>
+          )}
         </section>
       </main>
     </Localized>

@@ -53,14 +53,7 @@ function getFixtureState(
   };
 }
 
-export function FixturesBrowser({
-  data,
-  matchDetails = false,
-}: {
-  data: FixturesPageData;
-  /** Finished rows open the authenticated match detail dialog. */
-  matchDetails?: boolean;
-}) {
+export function FixturesBrowser({ data }: { data: FixturesPageData }) {
   const { language } = useLanguage();
   const [week, setWeek] = useState(() =>
     data.currentGameweek !== null &&
@@ -144,7 +137,7 @@ export function FixturesBrowser({
                     </span>
                   </>
                 );
-                if (matchDetails && isFixtureDetailAvailable(fixture)) {
+                if (isFixtureDetailAvailable(fixture)) {
                   return (
                     <FixtureMatchDialog
                       key={fixture.id}

@@ -28,7 +28,6 @@ export function analyticsPath(path: string): string | null {
     "/leagues",
     "/profile",
     "/settings",
-    "/thai-league/2026-27/fixtures",
   ].includes(clean)
     ? clean
     : null;

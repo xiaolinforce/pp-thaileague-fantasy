@@ -5,7 +5,7 @@ export const SITE_NAME = "PP Thai League Fantasy";
 export const PUBLIC_PATHS = [
   "/",
   "/rules",
-  "/thai-league/2026-27/fixtures",
+  "/fixtures",
   "/help",
   "/privacy",
   "/terms",
@@ -35,7 +35,7 @@ const copy: Record<PublicPath, { th: [string, string]; en: [string, string] }> =
         "Get started with PP Thai League Fantasy and read the squad limits, player tiers, transfers, chips, captaincy, substitutions and scoring rules.",
       ],
     },
-    "/thai-league/2026-27/fixtures": {
+    "/fixtures": {
       th: [
         "โปรแกรมและผลการแข่งขันไทยลีก 2026/27",
         "ดูโปรแกรมและผลการแข่งขันไทยลีก 1 ฤดูกาล 2026/27 แยกตามสัปดาห์ พร้อมเวลาประเทศไทย เพื่อวางแผนทีมแฟนตาซีของคุณ",

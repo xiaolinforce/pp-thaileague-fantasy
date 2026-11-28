@@ -122,11 +122,12 @@ their own account controls.
 
 ## Application shell and navigation
 
-Reuse `AppShell` and `PageHeader` for authenticated product routes.
+Reuse `AppShell` and `PageHeader` for product routes.
 
-- Visitors without a session see no sidebar, hamburger, or navigation drawer
-  on any route. Their main canvas uses the full available width; the compact
-  Top bar retains the brand. A started Guest session has normal player navigation.
+- Visitors without a session see player navigation on the five primary routes,
+  Rules, and Help. The sidebar and drawer omit the manager menu until a Guest
+  or member session exists. Team, Points, and Leagues show the shared account
+  choices within the selected route. Fixtures and Standings open directly.
 - Desktop uses a fixed 238px navy sidebar and a flexible main canvas.
 - Mobile and Tablet use a navy Top bar with a hamburger that opens the same full
   navigation in a left drawer.
@@ -137,8 +138,9 @@ Reuse `AppShell` and `PageHeader` for authenticated product routes.
   drawer. Compact modes must not remove information that Desktop users can reach.
 - The active route is identified structurally and in text treatment, not by
   color alone.
-- Points remains directly below Team. While Gameweek 1 is `open`, Points is a
-  disabled, non-navigable item and direct `/points` requests return to Team.
+- Points remains directly below Team. While Gameweek 1 is `open`, the Points
+  link is disabled for Guest and member sessions and their direct `/points`
+  requests return to Team. Visitors can still open the sign-in choices.
 - Preserve visible keyboard focus in both white and navy contexts and provide a
   skip link to the main content.
 
@@ -181,15 +183,15 @@ public links beside the authentication choices. Fit the normal landing state
 within one viewport where space permits, while preserving natural scrolling for
 short screens, enlarged text, keyboard display and taller authentication states.
 
-Public season fixtures use the same data-browser composition as `/fixtures`:
-the shared Gameweek selector, date groups, club colors, and centered time or
-score. Start at the read model's current Gameweek and browse locally with
-previous/next controls. On Mobile, stack team names beside the time or score.
-Unknown times and postponed matches need explicit written labels. Keep the
-game-information links below the primary list.
+The public `/fixtures` route uses the shared Gameweek selector, date groups,
+club colors, and centered time or score. Start at the read model's current
+Gameweek and browse locally with previous/next controls. On Mobile, stack
+team names beside the time or score.
+Unknown times and postponed matches need explicit written labels. Finished
+matches open their details for visitors, Guests, and members.
 
-Finish these surfaces with visible, wrapping game-information links, including
-the guide, rules, public fixtures, support, and legal pages. Preserve practical
+Finish the reading surfaces with visible, wrapping game-information links,
+including rules, public fixtures, support, and legal pages. Preserve practical
 touch targets and underlined link text; discovery must not depend on opening the
 account menu. Select complete Thai or English copy from the shared language
 preference, including fixture status and supporting notes.

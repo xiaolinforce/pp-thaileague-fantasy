@@ -119,6 +119,19 @@ change does not claim that every state has fresh screenshot evidence.
   actor in the audit trail. A second save restored the original table order.
   Email delivery and Gameweek lifecycle mutations were excluded from this pass.
 
+### 2026-11-28 — Signed-out navigation and competition browsing
+
+- Chromium at 1440px in Thai and 360px in English opened `/fixtures` from
+  Home, switched Gameweeks, and opened a finished-match dialog from a public
+  HTTP 200 response. `/standings` rendered the Thai League table from the same
+  sidebar or drawer.
+- Team, Points, and Leagues each opened the three configured sign-in choices
+  and legal links in place. The sidebar and drawer had no manager menu. The
+  sign-in panel fit both viewports without document overflow.
+- The local HTTP SEO check covered both Home languages and the 308 from the
+  old season fixtures URL. This pass covered signed-out browsing and the Email
+  form, without creating an account, submitting OTP, or completing Google sign-in.
+
 ### 2026-11-23 — Fixture match detail dialog
 
 - In-app browser at 800px in Thai on the development database: Gameweek 1

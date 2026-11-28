@@ -1,14 +1,21 @@
-import { redirect } from "next/navigation";
-
+import { FantasySignIn } from "@/app/fantasy-sign-in";
 import { AppShell } from "@/components/fantasy/app-shell";
 import { getLeagueOverview } from "@/data/leagues";
-import { getCurrentFantasyIdentity } from "@/lib/auth/context";
+import { getAuthSession } from "@/lib/auth/context";
 import { LeagueOverview } from "./client";
 
-export default async function LeaguesPage() {
-  const identity = await getCurrentFantasyIdentity();
-  if (!identity) {
-    redirect(`/?returnTo=${encodeURIComponent("/leagues")}`);
+export default async function LeaguesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ join?: string | string[] }>;
+}) {
+  if (!(await getAuthSession())) {
+    const { join } = await searchParams;
+    const returnTo =
+      typeof join === "string"
+        ? `/leagues?join=${encodeURIComponent(join)}`
+        : "/leagues";
+    return <FantasySignIn returnTo={returnTo} />;
   }
   const overview = await getLeagueOverview();
 

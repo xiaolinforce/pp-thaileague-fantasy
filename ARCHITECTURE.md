@@ -74,7 +74,7 @@ This is a request-shape guard, not authentication or an action-ID allowlist.
 | Auth maintenance      | `/api/cron/auth-maintenance`         | Secret-protected daily cleanup of expired auth artifacts without deleting Fantasy history.       |
 | Ownership maintenance | `/api/cron/fantasy-ownership`        | Daily reconciliation of persisted open-Gameweek player ownership.                                |
 | Ownership heartbeat   | `/api/health/ownership`              | Authenticated GitHub Actions probe of the last successful ownership reconciliation.              |
-| Match detail read     | `/api/fixtures/[id]/details`         | Session-required GET of one finished fixture's player events and points for the Fixtures dialog. |
+| Match detail read     | `/api/fixtures/[id]/details`         | Public GET of one finished fixture's player events and points for the Fixtures dialog.           |
 | Scoring               | `src/lib/fantasy/scoring.ts`         | Pure player-points and team-score calculation.                                                   |
 | Score persistence     | `src/lib/fantasy/scoring-service.ts` | Server-only Gameweek recalculation and score upserts.                                            |
 | Persistence           | `src/db`                             | Drizzle client and the PostgreSQL schema source of truth.                                        |
@@ -120,8 +120,10 @@ not create a campaign or require the bulk-send gate.
 | `/email/unsubscribe`       | Public signed-link confirmation for opting out of reminder emails.                                  |
 
 The `(app)` root layout resolves identity, language and navigation for game and
-document routes, and provides Mitr, shared tooltips and toast feedback. Guest and
-Email OTP sign-in complete account provisioning through a Server Action before
+document routes, and provides Mitr, shared tooltips and toast feedback. Team,
+Points, and Leagues render the shared sign-in choices for visitors before
+loading account-owned data. Fixtures and Standings read public competition
+data. Guest and Email OTP sign-in complete account provisioning through a Server Action before
 client navigation so the application shell receives the new identity immediately.
 Invite links carry a validated app-local return target through Email OTP, Google,
 Guest creation, and Guest upgrade. External, malformed, authentication, and admin
@@ -570,14 +572,12 @@ Recheck CSP whenever an external browser integration or Sentry region changes.
 ## Document rendering and localization boundaries (2026-09-06)
 
 Rules, Help, Privacy and Terms use the `(app)` root layout and the same initial
-identity, navigation availability and request language as game routes. The shell
-therefore renders navigation only when a manager identity exists, without a
-second client-side identity request. Visitors without a session receive no
-sidebar or compact drawer, and their main canvas has no sidebar offset. Started
-Guest sessions retain player navigation. These document routes depend on the
-database-backed layout and do not have separate `/en/…` counterparts; English
-content follows the account or device
-language used throughout the application.
+identity, navigation availability and request language as game routes. Rules,
+Help and the five primary game routes share player navigation with visitors.
+The manager menu is available once a Guest or member identity exists. Privacy
+and Terms use a full-width canvas for visitors. These document routes use the
+database-backed layout. English content follows the account or device language
+used throughout the application.
 
 The lightweight common namespace and explicit message keys own shared-shell copy.
 The compatibility game dictionary loads only with GameProviders; the admin
@@ -611,7 +611,7 @@ change or historical revision mutation is required.
 
 ## Public discovery and analytics
 
-Public discovery routes share the existing dynamic application shell and language preference. Rules combines the beginner introduction and rule reference; next.config.ts permanently redirects the retired /how-to-play URL to /rules before route rendering. The home page keeps its authentication flow and compact public links without a lower reading section. The public season fixtures page reads only the server-only fixtures dataset. Metadata defaults to noindex; reviewed public routes opt in via src/lib/seo.ts. Analytics is client-only, production-host-only and opt-in; auth creation emits a short-lived consented signup receipt, and the existing selection transaction returns a first-save flag without changing rules or schema. See SEO.md.
+Public discovery routes share the existing dynamic application shell and language preference. Rules combines the beginner introduction and rule reference. The home page keeps its authentication flow and links directly to `/rules`, `/fixtures`, and `/help`. Next.js permanently redirects `/how-to-play` to `/rules` and `/thai-league/2026-27/fixtures` to `/fixtures`. Metadata defaults to noindex; reviewed public routes opt in via src/lib/seo.ts. Analytics is client-only, production-host-only and opt-in; auth creation emits a short-lived consented signup receipt, and the existing selection transaction returns a first-save flag without changing rules or schema. See SEO.md.
 
 ## Versioned two-tier rules (2026-10-25)
 

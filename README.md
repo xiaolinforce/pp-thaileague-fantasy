@@ -13,6 +13,9 @@ provisional/final Gameweek scores, and presents Classic league standings.
 - One manager identity per account, with one automatically provisioned empty team draft per season.
 - Landing, team selection, transfers, points, leagues, fixtures, standings, profile,
   settings, public rules/help, and internal Fantasy administration screens.
+- Visitors can browse Thai League fixtures, match details, and the league table
+  before signing in. Team, Points, and Leagues show shared sign-in choices to
+  visitors and open the Fantasy workspace with a Guest or member session.
 - Thai source interface with an English display preference persisted per member
   account and stored on the current device for Guests.
 - Fifteen-player squads, valid FPL-style formations, two player tiers with at

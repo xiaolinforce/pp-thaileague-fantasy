@@ -3,10 +3,12 @@ import { translateLegacyEnglish } from "@/lib/i18n/legacy";
 import { Zap } from "lucide-react";
 import { redirect } from "next/navigation";
 
+import { FantasySignIn } from "@/app/fantasy-sign-in";
 import { AppShell, PageHeader } from "@/components/fantasy/app-shell";
 import { PointsPlayerToken } from "@/components/fantasy/points-player-token";
 import { getFantasyPointsState } from "@/data/fantasy";
 import { getFantasyNavigationAvailability } from "@/data/navigation";
+import { getAuthSession } from "@/lib/auth/context";
 import { parsePointsGameweek } from "@/lib/fantasy/points-gameweek";
 import {
   getDisplayedPlayerPoints,
@@ -28,14 +30,21 @@ export default async function PointsPage({
 }: {
   searchParams: Promise<{ gw?: string | string[] }>;
 }) {
+  const query = await searchParams;
+  const parsedGameweek = parsePointsGameweek(query.gw);
+  if (!(await getAuthSession())) {
+    const returnTo = parsedGameweek.requested
+      ? `/points?gw=${parsedGameweek.requested}`
+      : "/points";
+    return <FantasySignIn returnTo={returnTo} />;
+  }
+
   const language = await getRequestLanguage();
   const translate =
     language === "en" ? translateLegacyEnglish : (text: string) => text;
   const navigationAvailability = await getFantasyNavigationAvailability();
   if (!navigationAvailability.pointsEnabled) redirect("/team");
 
-  const query = await searchParams;
-  const parsedGameweek = parsePointsGameweek(query.gw);
   const points = await getFantasyPointsState(parsedGameweek.requested);
   const isCanonicalGameweek =
     parsedGameweek.canonical &&

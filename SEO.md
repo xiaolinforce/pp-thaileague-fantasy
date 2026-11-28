@@ -8,17 +8,17 @@ the existing language preference. English is a display mode on the same URL,
 not a separate locale route. Do not publish `/en` hreflang until real English
 routes and their canonical policy exist.
 
-Indexable routes: `/`, `/rules`, `/help`, `/privacy`, `/terms`,
-and `/thai-league/2026-27/fixtures`. Each has its own title, description,
+Indexable routes are `/`, `/rules`, `/help`, `/privacy`, `/terms`, and
+`/fixtures`. Each has its own title, description,
 canonical, Open Graph and Twitter metadata. The home page includes a WebSite
 schema with the real PP Football publisher. No invented ratings, FAQ rich-result
 promises, injury news or automatic mass-generated player pages.
 
 Rules includes a short beginner introduction followed by the executable-rule
-reference. `/how-to-play` permanently redirects to `/rules` with HTTP 308 and
-is excluded from public metadata, the sitemap and analytics route labels. The
-home page contains the authentication choices, a short game description and
-compact links to Rules, public fixtures and Help, without a lower content section.
+reference. `/how-to-play` and `/thai-league/2026-27/fixtures` permanently redirect
+to `/rules` and `/fixtures`, respectively. The home page contains the
+authentication choices, a short game description and compact links to the
+in-game Rules, Fixtures and Help pages.
 
 The shared root defaults to noindex; public pages opt in. Private/auth/admin/API
 route families also receive `X-Robots-Tag: noindex, nofollow`, including redirects.
@@ -37,13 +37,11 @@ English must not depend on hydration to replace Thai text. The HTTP SEO check
 requests both language variants and checks the initial HTML. This does not
 introduce separate language URLs or change the Thai-first indexing strategy.
 
-Public fixtures reuse the server-only, five-minute cached fixture read model;
-no manager, account or private league data is passed to the page. Its fixture
-browser is shared with `/fixtures`, starts at the current Gameweek, and renders
-that week's matches in the initial HTML; previous/next controls browse other
-weeks locally. The public metadata, canonical and footer links remain available.
-Fixture status and times reflect the selected environment's database, not a
-live source feed.
+`/fixtures` serves the same competition data to visitors and signed-in players
+from the server-only, five-minute cached fixture read model. The browser starts
+at the current Gameweek and renders that week's matches in the initial HTML.
+The previous and next controls browse other weeks locally. Fixture status and
+times reflect the database for the selected environment.
 Development scenarios are not evidence of production match results.
 
 ## Search Console

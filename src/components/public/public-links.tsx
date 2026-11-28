@@ -9,7 +9,7 @@ export function PublicLinks() {
   const links = [
     ["/", "เริ่มเล่น", "Start playing"],
     ["/rules", "กติกาและวิธีเล่น", "Rules and how to play"],
-    ["/thai-league/2026-27/fixtures", "โปรแกรมไทยลีก", "Thai League fixtures"],
+    ["/fixtures", "โปรแกรมไทยลีก", "Thai League fixtures"],
     ["/help", "ช่วยเหลือ", "Help"],
     ["/privacy", "ความเป็นส่วนตัว", "Privacy"],
     ["/terms", "ข้อกำหนด", "Terms"],

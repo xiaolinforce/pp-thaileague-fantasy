@@ -25,7 +25,7 @@ export default async function UpgradeGuestPage({
       emailAvailable={await checkEmailAvailabilityAction()}
       googleEnabled={authFeatures.google}
       turnstileSiteKey={authFeatures.turnstileSiteKey}
-      upgradeMode
+      mode="upgrade"
       returnTo={returnTo}
     />
   );

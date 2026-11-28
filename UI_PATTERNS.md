@@ -27,20 +27,20 @@ football pitch, a score rail, or an admin table remains local to that route.
 
 ## Shared compositions
 
-| Pattern                  | Purpose                                                            | Current implementation direction                                                  |
-| ------------------------ | ------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| Product shell            | Stable navigation and manager context around authenticated routes. | `AppShell` with Desktop sidebar or compact Top bar/drawer.                        |
-| Semantic page identity   | Name the route for screen readers and orient visible content.      | `PageHeader` plus visible task/status content as needed.                          |
-| Task surface             | Group one meaningful job and its local action.                     | `product-card` or a purpose-built workspace surface.                              |
-| Consequential status     | Show deadline, lifecycle, deduction, or risk before an action.     | Written callout/banner with color and icon as support.                            |
-| Local primary action     | Commit the state currently being edited.                           | One primary button close to validation and changed state.                         |
-| Supporting metric group  | Compare a small set of values around one primary result.           | Stable numerics; primary value visually dominant.                                 |
-| Filter and sort controls | Narrow a data set without changing domain truth.                   | Labelled controls in task order; preserve selection state.                        |
-| Scan-friendly row/list   | Compare repeated identities and values quickly.                    | Consistent identity, aligned values, and local action.                            |
-| Data table               | Compare genuinely tabular records.                                 | Written headers, aligned numerics, narrow-screen scroll.                          |
-| Detail dialog            | Inspect secondary detail without losing page context.              | Shared `product-dialog`; full-screen flow on Mobile, constrained modal elsewhere. |
-| Inline data state        | Explain loading, empty, or failed data within its owning surface.  | Shared Fantasy data state or `inline-empty-state`.                                |
-| Responsive disclosure    | Reduce simultaneous density without removing capability.           | Tabs for peer workspaces; accordion for supporting tools.                         |
+| Pattern                  | Purpose                                                           | Current implementation direction                                                  |
+| ------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Product shell            | Stable navigation and manager context around product routes.      | `AppShell` with Desktop sidebar or compact Top bar/drawer.                        |
+| Semantic page identity   | Name the route for screen readers and orient visible content.     | `PageHeader` plus visible task/status content as needed.                          |
+| Task surface             | Group one meaningful job and its local action.                    | `product-card` or a purpose-built workspace surface.                              |
+| Consequential status     | Show deadline, lifecycle, deduction, or risk before an action.    | Written callout/banner with color and icon as support.                            |
+| Local primary action     | Commit the state currently being edited.                          | One primary button close to validation and changed state.                         |
+| Supporting metric group  | Compare a small set of values around one primary result.          | Stable numerics; primary value visually dominant.                                 |
+| Filter and sort controls | Narrow a data set without changing domain truth.                  | Labelled controls in task order; preserve selection state.                        |
+| Scan-friendly row/list   | Compare repeated identities and values quickly.                   | Consistent identity, aligned values, and local action.                            |
+| Data table               | Compare genuinely tabular records.                                | Written headers, aligned numerics, narrow-screen scroll.                          |
+| Detail dialog            | Inspect secondary detail without losing page context.             | Shared `product-dialog`; full-screen flow on Mobile, constrained modal elsewhere. |
+| Inline data state        | Explain loading, empty, or failed data within its owning surface. | Shared Fantasy data state or `inline-empty-state`.                                |
+| Responsive disclosure    | Reduce simultaneous density without removing capability.          | Tabs for peer workspaces; accordion for supporting tools.                         |
 
 ## Information hierarchy pattern
 
@@ -62,12 +62,11 @@ make a decision or understand a blocking state.
 
 `FixturesBrowser` under `src/components/fantasy` owns the Gameweek selection,
 date grouping, club-color identity, score/kickoff display, and empty state for
-`/fixtures` and `/thai-league/2026-27/fixtures`. Both routes use the same
-`fixtures-page` geometry and server-only fixture dataset. Route wrappers own
-the shell and public supporting notes/links; authentication stays in the
-private route. Thai and English labels come directly from the language context.
+the public `/fixtures` route. The route wrapper owns the application shell
+and loads the server-only fixture dataset. Thai and English labels come
+directly from the language context.
 
-On `/fixtures` only (`matchDetails`), a finished fixture with both scores is a
+On `/fixtures`, a finished fixture with both scores is a
 full-row button whose score sits in a soft orange pill. It opens the shared
 `product-dialog` match detail: Gameweek and full-time eyebrow, a scoreboard
 with club colors and names (home left, away right; no home/away labels),

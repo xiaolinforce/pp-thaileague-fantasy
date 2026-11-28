@@ -1,9 +1,10 @@
 import FixturesClient from "./client";
 import { getFixturesDataset } from "@/data/fixtures";
-import { requireFantasyProfile } from "@/lib/auth/context";
+import { pageMetadata } from "@/lib/seo-server";
+
+export const generateMetadata = () => pageMetadata("/fixtures");
 
 export default async function FixturesPage() {
-  await requireFantasyProfile();
   const data = await getFixturesDataset();
   return <FixturesClient data={data} />;
 }

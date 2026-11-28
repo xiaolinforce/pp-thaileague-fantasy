@@ -10,7 +10,7 @@ export default function FixturesClient({ data }: { data: FixturesPageData }) {
   return (
     <AppShell localizeContent={false}>
       <main id="main-content" className="content product-content fixtures-page">
-        <FixturesBrowser data={data} matchDetails />
+        <FixturesBrowser data={data} />
       </main>
     </AppShell>
   );

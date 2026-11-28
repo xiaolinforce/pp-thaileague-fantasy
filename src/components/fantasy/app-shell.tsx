@@ -8,7 +8,6 @@ import {
   ListChecks,
   ListOrdered,
   LockKeyhole,
-  LogIn,
   LogOut,
   Menu,
   Settings,
@@ -101,31 +100,26 @@ const accountNavigation = [
     label: "โปรไฟล์",
     href: "/profile",
     icon: UserRound,
-    requiresIdentity: true,
   },
   {
     label: "ตั้งค่า",
     href: "/settings",
     icon: Settings,
-    requiresIdentity: true,
   },
   {
     label: "กติกาเกม",
     href: "/rules",
     icon: BookOpenText,
-    requiresIdentity: false,
   },
   {
     label: "ช่วยเหลือ",
     href: "/help",
     icon: CircleHelp,
-    requiresIdentity: false,
   },
   {
     label: "แอดมิน",
     href: "/admin/fantasy",
     icon: ShieldCheck,
-    requiresIdentity: true,
     requiresAdmin: true,
   },
 ] as const;
@@ -188,7 +182,7 @@ function ManagerMenu({
   pathname,
   onNavigate,
 }: {
-  identity: AppIdentity;
+  identity: NonNullable<AppIdentity>;
   pathname: string;
   onNavigate?: () => void;
 }) {
@@ -249,11 +243,7 @@ function ManagerMenu({
         <UserRound size={20} strokeWidth={1.9} />
       </span>
       <span className="manager-card-copy">
-        {identity ? (
-          <strong data-localize="off">{identity.teamName}</strong>
-        ) : (
-          <strong>{translate("เริ่มเล่น Fantasy")}</strong>
-        )}
+        <strong data-localize="off">{identity.teamName}</strong>
       </span>
       <ChevronDown
         className={open ? "manager-menu-chevron open" : "manager-menu-chevron"}
@@ -266,27 +256,17 @@ function ManagerMenu({
   const menu = (
     <div className="manager-menu-panel">
       <div className="manager-menu-identity">
-        {identity ? (
-          <strong data-localize="off">{identity.teamName}</strong>
-        ) : (
-          <strong>{translate("เริ่มเล่น Fantasy")}</strong>
-        )}
+        <strong data-localize="off">{identity.teamName}</strong>
         <span>
-          {identity
-            ? identity.isGuest
-              ? translate("ผู้เล่น Guest")
-              : (identity.email ?? translate("บัญชีสมาชิก"))
-            : translate("เริ่มจัดทีมไทยลีกของคุณ")}
+          {identity.isGuest
+            ? translate("ผู้เล่น Guest")
+            : (identity.email ?? translate("บัญชีสมาชิก"))}
         </span>
       </div>
       <nav aria-label={translate("เมนูบัญชี")}>
         {accountNavigation
           .filter(
-            (item) =>
-              (!item.requiresIdentity || Boolean(identity)) &&
-              (!("requiresAdmin" in item) ||
-                !item.requiresAdmin ||
-                identity?.role === "admin"),
+            (item) => !("requiresAdmin" in item) || identity.role === "admin",
           )
           .map(({ label, href, icon: Icon }) => {
             const active = pathname === href;
@@ -305,12 +285,7 @@ function ManagerMenu({
           })}
       </nav>
       <div className="manager-menu-actions">
-        {!identity ? (
-          <Link href="/" onNavigate={(event) => closeAndNavigate(event, "/")}>
-            <LogIn size={18} aria-hidden="true" />
-            <span>{translate("เริ่มเล่น")}</span>
-          </Link>
-        ) : identity.isGuest ? (
+        {identity.isGuest && (
           <Link
             href="/upgrade"
             onNavigate={(event) => closeAndNavigate(event, "/upgrade")}
@@ -318,20 +293,18 @@ function ManagerMenu({
             <UserPlus size={18} aria-hidden="true" />
             <span>{translate("สมัครสมาชิก")}</span>
           </Link>
-        ) : null}
-        {identity ? (
-          <button
-            type="button"
-            onClick={signOut}
-            disabled={signingOut}
-            aria-busy={signingOut}
-          >
-            <LogOut size={18} aria-hidden="true" />
-            <span>
-              {translate(signingOut ? "กำลังออกจากระบบ…" : "ออกจากระบบ")}
-            </span>
-          </button>
-        ) : null}
+        )}
+        <button
+          type="button"
+          onClick={signOut}
+          disabled={signingOut}
+          aria-busy={signingOut}
+        >
+          <LogOut size={18} aria-hidden="true" />
+          <span>
+            {translate(signingOut ? "กำลังออกจากระบบ…" : "ออกจากระบบ")}
+          </span>
+        </button>
       </div>
     </div>
   );
@@ -407,7 +380,7 @@ function SidebarContent({
             const active =
               pathname === href ||
               (href !== "/admin/fantasy" && pathname.startsWith(`${href}/`));
-            const disabled = href === "/points" && !pointsEnabled;
+            const disabled = identity && href === "/points" && !pointsEnabled;
 
             if (disabled) {
               return (
@@ -465,13 +438,13 @@ function SidebarContent({
           <form action={adminAccess.signOut}>
             <AdminSignOutButton />
           </form>
-        ) : (
+        ) : identity ? (
           <ManagerMenu
             identity={identity}
             pathname={pathname}
             onNavigate={onNavigate}
           />
-        )}
+        ) : null}
       </div>
     </>
   );
@@ -490,7 +463,13 @@ export function AppShell({
   const pathname = usePathname();
   const identity = useAppIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
-  const hasSidebar = Boolean(identity || adminAccess);
+  const hasSidebar =
+    Boolean(identity || adminAccess) ||
+    pathname === "/rules" ||
+    pathname === "/help" ||
+    navigation.some(
+      ({ href }) => pathname === href || pathname.startsWith(`${href}/`),
+    );
   const compactTopbar = (
     <div className="compact-topbar">
       {hasSidebar && (

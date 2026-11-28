@@ -1,14 +1,7 @@
 import assert from "node:assert/strict";
 
 const origin = new URL(process.argv[2] || "http://127.0.0.1:3016").origin;
-const paths = [
-  "/",
-  "/rules",
-  "/help",
-  "/privacy",
-  "/terms",
-  "/thai-league/2026-27/fixtures",
-];
+const paths = ["/", "/rules", "/help", "/privacy", "/terms", "/fixtures"];
 const titles = [];
 for (const path of paths) {
   const response = await fetch(origin + path, {
@@ -16,6 +9,11 @@ for (const path of paths) {
     headers: { "User-Agent": "Googlebot" },
   });
   assert.equal(response.status, 200, path);
+  assert.doesNotMatch(
+    response.headers.get("x-robots-tag") ?? "",
+    /\bnoindex\b/i,
+    `${path}: noindex header must not override public metadata`,
+  );
   const html = await response.text();
   const canonical = html.match(/<link rel="canonical" href="([^"]+)"/);
   assert.equal(
@@ -49,6 +47,12 @@ for (const language of ["th", "en"]) {
   assert.match(html, new RegExp(`<html[^>]+lang="${language}"`));
   const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/)?.[1];
   assert.ok(main, `home ${language}: server-rendered content`);
+  for (const path of ["/rules", "/fixtures", "/help"]) {
+    assert.ok(
+      main.includes(`href="${path}"`),
+      `home ${language}: link to ${path}`,
+    );
+  }
   const heading = main.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/)?.[1];
   assert.ok(heading?.trim(), `home ${language}: server-rendered heading`);
   if (language === "en") {
@@ -62,19 +66,22 @@ for (const language of ["th", "en"]) {
   }
   console.log(`PASS home ${language} is localized before hydration`);
 }
-const retiredGuide = await fetch(origin + "/how-to-play", {
-  redirect: "manual",
-});
-assert.equal(retiredGuide.status, 308, "guide permanently redirects");
-assert.equal(
-  new URL(retiredGuide.headers.get("location"), origin).pathname,
-  "/rules",
-);
-console.log("PASS retired guide redirects to rules");
+const retiredPaths = [
+  ["/how-to-play", "/rules"],
+  ["/thai-league/2026-27/fixtures", "/fixtures"],
+];
+for (const [source, destination] of retiredPaths) {
+  const response = await fetch(origin + source, { redirect: "manual" });
+  assert.equal(response.status, 308, `${source} permanently redirects`);
+  assert.equal(
+    new URL(response.headers.get("location"), origin).pathname,
+    destination,
+  );
+  console.log(`PASS ${source} redirects to ${destination}`);
+}
 for (const path of [
   "/team",
   "/points",
-  "/fixtures",
   "/leagues",
   "/admin/fantasy",
   "/auth/complete",
@@ -89,10 +96,9 @@ for (const path of [
 }
 const sitemap = await (await fetch(origin + "/sitemap.xml")).text();
 assert.equal((sitemap.match(/<loc>/g) || []).length, paths.length);
-assert.ok(
-  !sitemap.includes("/how-to-play"),
-  "retired guide is absent from sitemap",
-);
+for (const [source] of retiredPaths) {
+  assert.ok(!sitemap.includes(source), `${source} is absent from sitemap`);
+}
 for (const path of paths)
   assert.ok(
     sitemap.includes(

@@ -1,5 +1,17 @@
 # Decision log
 
+## 2026-11-28 — Open Thai League browsing in the game shell
+
+Visitors can view `/fixtures`, including finished-match details, and `/standings`
+without a session. The shared navigation brings them to the sign-in choices on
+Team, Points, and Leagues. The manager menu appears after a Guest or member
+session has a Fantasy identity.
+
+Home and Rules/Help link to the same `/fixtures` route used by players.
+`/thai-league/2026-27/fixtures` permanently redirects there. Fantasy account
+reads and mutations continue to require a session, with Private League detail
+also requiring its existing membership checks.
+
 ## 2026-10-26 — Identity-based tier-change relief
 
 **Decision:** Teams pushed above five Level 1 players by an authorized

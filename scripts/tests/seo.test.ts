@@ -25,10 +25,15 @@ test("analytics never exposes private URL parameters or league identifiers", () 
   }
 });
 
-test("retired guide is excluded from public indexing and measurement", () => {
-  assert.ok(!PUBLIC_PATHS.some((path: string) => path === "/how-to-play"));
-  assert.equal(analyticsPath("/how-to-play"), null);
-  assert.equal(analyticsPath("/rules"), "/rules");
+test("only the current rules and fixtures URLs are indexed and measured", () => {
+  for (const retired of ["/how-to-play", "/thai-league/2026-27/fixtures"]) {
+    assert.ok(!PUBLIC_PATHS.some((path) => path === retired));
+    assert.equal(analyticsPath(retired), null);
+  }
+  for (const current of ["/rules", "/fixtures"] as const) {
+    assert.ok(PUBLIC_PATHS.includes(current));
+    assert.equal(analyticsPath(current), current);
+  }
 });
 
 test("public pages have unique titles and canonical URLs in both languages", () => {
