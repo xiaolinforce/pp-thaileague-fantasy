@@ -228,6 +228,7 @@ export const adminTranslations: Record<string, string> = {
   จำนวนทีมที่เปลี่ยน: "Clubs changed",
   ประวัติการแก้ไข: "Audit history",
   กลับโหมดผู้เล่น: "Back to player mode",
+  ออกจากโหมดแอดมิน: "Exit admin mode",
   "ติดตามผู้เล่นและงานที่ต้องจัดการในฤดูกาล 2026/27":
     "Track participants and operations for the 2026/27 season",
   ดูข้อมูล: "View data",

@@ -325,13 +325,9 @@ export async function revertFantasySelectionAction(
 }
 
 export async function savePlayerMatchStatsAction(formData: FormData) {
-  const admin = await requireAdmin();
+  const { auditActor } = await requireAdmin();
   await transactionDb.transaction((tx) =>
-    savePlayerMatchStats(
-      formData,
-      `${admin.user.email} (${admin.user.id})`,
-      tx,
-    ),
+    savePlayerMatchStats(formData, auditActor, tx),
   );
   refreshFantasyMutation("stats");
 }
@@ -339,33 +335,25 @@ export async function savePlayerMatchStatsAction(formData: FormData) {
 export async function updateFantasyPlayerClassificationAction(
   formData: FormData,
 ) {
-  const admin = await requireAdmin();
+  const { auditActor } = await requireAdmin();
   await transactionDb.transaction((tx) =>
-    updateFantasyPlayerClassification(
-      formData,
-      `${admin.user.email} (${admin.user.id})`,
-      tx,
-    ),
+    updateFantasyPlayerClassification(formData, auditActor, tx),
   );
   refreshFantasyMutation("classification");
 }
 
 export async function lockFantasyGameweekAction(formData: FormData) {
-  const admin = await requireAdmin();
+  const { auditActor } = await requireAdmin();
   await transactionDb.transaction((tx) =>
-    lockFantasyGameweek(formData, `${admin.user.email} (${admin.user.id})`, tx),
+    lockFantasyGameweek(formData, auditActor, tx),
   );
   refreshFantasyMutation("lifecycle");
 }
 
 export async function finalizeFantasyGameweekAction(formData: FormData) {
-  const admin = await requireAdmin();
+  const { auditActor } = await requireAdmin();
   await transactionDb.transaction((tx) =>
-    finalizeFantasyGameweek(
-      formData,
-      `${admin.user.email} (${admin.user.id})`,
-      tx,
-    ),
+    finalizeFantasyGameweek(formData, auditActor, tx),
   );
   refreshFantasyMutation("lifecycle");
 }
@@ -376,11 +364,12 @@ export async function operateMatchGameweek(
   _previous: MatchLifecycleResult,
   formData: FormData,
 ): Promise<MatchLifecycleResult> {
-  const session = await requireAdmin();
+  const admin = await requireAdmin();
   const operation = formData.get("operation");
   if (operation !== "lock" && operation !== "final")
     return { outcome: "STATUS" };
-  const actor = session.user.id;
+  const actor =
+    admin.accessMode === "password" ? admin.auditActor : admin.user.id;
   try {
     await transactionDb.transaction(async (tx) => {
       if (operation === "lock")

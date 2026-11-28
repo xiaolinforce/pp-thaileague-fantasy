@@ -38,6 +38,21 @@ Record durable decisions here when an alternative is likely to be reconsidered.
 Each entry states the date, decision, context, and consequences. This file is
 not a changelog or a place for short-lived implementation notes.
 
+## 2026-11-28 — Dedicated account for password admin entry
+
+**Decision:** Allow optional form-based password sign-in to the full admin
+workspace. Resolve the session to a dedicated verified admin account whose ID
+is configured per environment.
+
+**Context:** The owner wants a password-only route to the workspace, including
+operations that need an audit actor or a verified test email address.
+
+**Consequences:** Password sessions are short-lived and separate from player
+sessions. The dedicated account owns records created through this entry and
+the audit trail identifies the shared password entry. Individual attribution
+requires account-based sign-in. Existing command-specific safeguards apply to
+both administrator sign-in methods.
+
 ## 2026-11-04 — Separate Neon organizations for billing
 
 **Decision:** Keep Production in its existing Neon project under `PP Prod`

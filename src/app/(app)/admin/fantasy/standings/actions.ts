@@ -17,7 +17,7 @@ export async function saveStandingsAction(input: {
   expectedUpdatedAt: string | null;
   reason: string;
 }) {
-  const admin = await requireAdmin();
+  const { auditActor } = await requireAdmin();
   const reason = input.reason.trim().slice(0, REASON_LIMIT) || null;
   try {
     const seasonId = await getCompetitionSeasonId();
@@ -38,7 +38,7 @@ export async function saveStandingsAction(input: {
         },
         expectedUpdatedAt: input.expectedUpdatedAt,
         reason,
-        changedBy: `${admin.user.email} (${admin.user.id})`,
+        changedBy: auditActor,
       }),
     );
     if (!result.unchanged) {

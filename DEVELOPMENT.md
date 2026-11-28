@@ -513,6 +513,15 @@ Also confirm as applicable:
 
 ## Reviewing the admin workspace
 
+The optional `/admin/fantasy/login` entry reads `FANTASY_ADMIN_PASSWORD` and
+`FANTASY_ADMIN_PASSWORD_USER_ID` from that environment. Set the user ID to the
+dedicated non-Guest `admin` account with a verified email in that environment's
+database. Configure the password as a server secret. Keep the dedicated mailbox
+eligible for the reminder test and keep provider and campaign gates in place.
+Leave either variable empty to disable password sign-in. Rotating the password
+or replacing the account ID invalidates existing password sessions after the new
+configuration is deployed. Account-based admin sign-in is also supported.
+
 Use the local `/admin/fantasy` workspace with an existing authorized admin
 session. Check mode switching, URL-backed filters, loaded current values and
 confirmation cancellation before exercising any mutation. Compare participant

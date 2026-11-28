@@ -17,6 +17,7 @@ import {
 } from "@/data/admin-deadline-reminders";
 import { renderDeadlineReminderEmail } from "@/emails/render-deadline-reminder";
 import { deadlineReminderSubject } from "@/emails/deadline-reminder";
+import { requireAdmin } from "@/lib/auth/context";
 import { getReminderDeadlineLabels } from "@/lib/fantasy/deadline-presentation";
 import type { DeadlineAudienceId } from "@/lib/email/deadline-audience";
 import {
@@ -74,6 +75,7 @@ export async function getDeadlineCampaignSummary(
   gameweekId: string,
   audience: DeadlineAudienceId,
 ) {
+  await requireAdmin();
   const [campaign] = await db
     .select()
     .from(deadlineReminderCampaigns)

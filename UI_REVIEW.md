@@ -107,6 +107,18 @@ The Reference labels for Team and Points reflect the product owner's accepted
 baseline and their use as the source for `UI_PATTERNS.md`. This documentation
 change does not claim that every state has fresh screenshot evidence.
 
+### 2026-11-28 — Password admin entry
+
+- Checked the Thai and English login form in Chrome on localhost. A direct
+  unauthenticated admin URL redirected to the form, a wrong password was rejected,
+  and the password session could navigate to the standings and audit pages.
+- Password entry showed an exit button and omitted the player-mode link on the
+  desktop sidebar and 360 px drawer. The account-based admin retained its
+  player-mode link. After exit, a direct admin URL required sign-in again.
+- A standings save on the isolated QA database recorded the dedicated password
+  actor in the audit trail. A second save restored the original table order.
+  Email delivery and Gameweek lifecycle mutations were excluded from this pass.
+
 ### 2026-11-23 — Fixture match detail dialog
 
 - In-app browser at 800px in Thai on the development database: Gameweek 1

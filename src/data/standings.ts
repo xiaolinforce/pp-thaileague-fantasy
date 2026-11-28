@@ -13,6 +13,7 @@ import {
   competitionStandings,
   fixtures,
 } from "@/db/schema";
+import { requireAdmin } from "@/lib/auth/context";
 import type {
   ClubColorPalette,
   CompetitionClubView,
@@ -230,7 +231,7 @@ export async function getLeagueTable(): Promise<LeagueTableData> {
 }
 
 export async function getAdminStandingsEditor(): Promise<AdminStandingsEditorData> {
-  await connection();
+  await requireAdmin();
   const seasonId = await getCompetitionSeasonId();
   const [clubByEntry, results, saved] = await Promise.all([
     loadClubs(seasonId),

@@ -48,6 +48,8 @@ open.
 
 Admins use `/admin/fantasy/match-operations` to import results and finalize scores.
 The Gameweek report is available at `/admin/fantasy/match-operations/report`.
+Deployments can optionally enable `/admin/fantasy/login` for password entry with
+a dedicated admin account. See [Development](DEVELOPMENT.md#reviewing-the-admin-workspace).
 Existing `/match-operations` and `/match-operations/report` links redirect to
 the corresponding admin pages with the selected Gameweek and fixture.
 

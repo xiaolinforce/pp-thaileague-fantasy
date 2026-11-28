@@ -31,16 +31,10 @@ export async function applyMatchAction(
   payload: string,
   token: string,
 ) {
-  const admin = await requireAdmin();
+  const { auditActor } = await requireAdmin();
   try {
     const result = await transactionDb.transaction((tx) =>
-      applyMatchImport(
-        tx,
-        fixtureId,
-        payload,
-        token,
-        `${admin.user.email} (${admin.user.id})`,
-      ),
+      applyMatchImport(tx, fixtureId, payload, token, auditActor),
     );
     updateTag("competition-dataset");
     updateTag("fixtures-dataset");

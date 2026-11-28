@@ -465,6 +465,15 @@ boundaries and recovery procedures.
 
 ## Admin workspace
 
+`/admin/fantasy/login` optionally accepts a server-configured password over a
+POST Server Action. Failed attempts are throttled with `auth_rate_limits`.
+Successful sign-in issues a separate, signed admin cookie with a 30-minute
+lifetime. Each protected read or mutation resolves the configured verified
+admin account in fresh database state. Explicit sign-out revokes that cookie's
+session ID in `auth_verifications` until expiry. Auth maintenance removes the
+expired revocations and rate limits. The dedicated account remains the actor
+for record ownership. Free-text audit entries label the shared password entry.
+
 The seven primary pages under `/admin/fantasy`, plus contextual participant
 detail and player-points pages, share a role-protected layout and route-aware
 `AppShell`. Admin read models check the admin session before querying the shared

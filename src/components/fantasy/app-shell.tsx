@@ -29,6 +29,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useState, type ReactNode } from "react";
+import { useFormStatus } from "react-dom";
 import { DevelopmentLanguageTester } from "@/components/fantasy/development-language-tester";
 import { Localized, useLanguage } from "@/components/fantasy/i18n";
 import { useNavigationAvailability } from "@/components/fantasy/navigation-availability";
@@ -161,6 +162,26 @@ const adminNavigation = [
   { label: "ข้อมูลนักเตะ", href: "/admin/fantasy/players", icon: Database },
   { label: "ประวัติการแก้ไข", href: "/admin/fantasy/audit", icon: History },
 ];
+
+type AdminAccess =
+  { mode: "account" } | { mode: "password"; signOut: () => Promise<void> };
+
+function AdminSignOutButton() {
+  const { pending } = useFormStatus();
+  const { translate } = useLanguage();
+
+  return (
+    <button
+      type="submit"
+      className={styles.adminSignOut}
+      disabled={pending}
+      aria-busy={pending}
+    >
+      <LogOut size={19} aria-hidden="true" />
+      {translate(pending ? "กำลังออกจากระบบ…" : "ออกจากโหมดแอดมิน")}
+    </button>
+  );
+}
 
 function ManagerMenu({
   identity,
@@ -333,16 +354,16 @@ function ManagerMenu({
 function SidebarContent({
   pathname,
   identity,
+  adminAccess,
   onNavigate,
 }: {
   pathname: string;
   identity: AppIdentity;
+  adminAccess?: AdminAccess;
   onNavigate?: () => void;
 }) {
   const { requestNavigation } = useNavigationBlocker();
   const { pointsEnabled } = useNavigationAvailability();
-  const adminMode =
-    pathname.startsWith("/admin/") && identity?.role === "admin";
   const { language, translate } = useLanguage();
   const pointsDisabledLabel =
     language === "th"
@@ -377,11 +398,11 @@ function SidebarContent({
   return (
     <>
       <Brand />
-      {adminMode && (
+      {adminAccess && (
         <p className={styles.adminMode}>{translate("ผู้ดูแลระบบ")}</p>
       )}
       <nav className="side-nav" aria-label={translate("เมนูหลัก")}>
-        {(adminMode ? adminNavigation : navigation).map(
+        {(adminAccess ? adminNavigation : navigation).map(
           ({ label, href, icon: Icon }) => {
             const active =
               pathname === href ||
@@ -429,7 +450,7 @@ function SidebarContent({
         )}
       </nav>
       <div className="sidebar-bottom">
-        {adminMode &&
+        {adminAccess?.mode === "account" &&
           linkFor({
             href: "/team",
             className: styles.returnToPlayer,
@@ -440,11 +461,17 @@ function SidebarContent({
               </>
             ),
           })}
-        <ManagerMenu
-          identity={identity}
-          pathname={pathname}
-          onNavigate={onNavigate}
-        />
+        {adminAccess?.mode === "password" ? (
+          <form action={adminAccess.signOut}>
+            <AdminSignOutButton />
+          </form>
+        ) : (
+          <ManagerMenu
+            identity={identity}
+            pathname={pathname}
+            onNavigate={onNavigate}
+          />
+        )}
       </div>
     </>
   );
@@ -453,17 +480,20 @@ function SidebarContent({
 export function AppShell({
   children,
   localizeContent = true,
+  adminAccess,
 }: {
   children: ReactNode;
   localizeContent?: boolean;
+  adminAccess?: AdminAccess;
 }) {
   const { message } = useLanguage();
   const pathname = usePathname();
   const identity = useAppIdentity();
   const [menuOpen, setMenuOpen] = useState(false);
+  const hasSidebar = Boolean(identity || adminAccess);
   const compactTopbar = (
     <div className="compact-topbar">
-      {identity && (
+      {hasSidebar && (
         <SheetTrigger
           className="compact-menu-trigger"
           aria-label={message("openNavigation")}
@@ -481,16 +511,20 @@ export function AppShell({
           {message("skipContent")}
         </a>
         {showDevelopmentLanguageTester ? <DevelopmentLanguageTester /> : null}
-        {identity && (
+        {hasSidebar && (
           <aside className="sidebar">
-            <SidebarContent pathname={pathname} identity={identity} />
+            <SidebarContent
+              pathname={pathname}
+              identity={identity}
+              adminAccess={adminAccess}
+            />
           </aside>
         )}
 
         <div
-          className={`main-shell${identity ? "" : ` ${styles.publicMainShell}`}`}
+          className={`main-shell${hasSidebar ? "" : ` ${styles.publicMainShell}`}`}
         >
-          {identity ? (
+          {hasSidebar ? (
             <Sheet open={menuOpen} onOpenChange={setMenuOpen}>
               {compactTopbar}
               <SheetContent
@@ -514,6 +548,7 @@ export function AppShell({
                   <SidebarContent
                     pathname={pathname}
                     identity={identity}
+                    adminAccess={adminAccess}
                     onNavigate={() => setMenuOpen(false)}
                   />
                 </aside>

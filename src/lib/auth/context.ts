@@ -14,6 +14,11 @@ import {
 } from "@/db/schema";
 import { auth } from "@/lib/auth/server";
 import {
+  ADMIN_PASSWORD_LOGIN_PATH,
+  getAdminPasswordUser,
+  isAdminPasswordEnabled,
+} from "@/lib/auth/admin-password";
+import {
   ensureFantasyProfile,
   FANTASY_SEASON_SLUG,
 } from "@/lib/fantasy/provisioning";
@@ -83,12 +88,27 @@ export const requireFantasyProfile = cache(
 );
 
 export const requireAdmin = cache(async function requireAdmin() {
+  const passwordUser = await getAdminPasswordUser();
+  if (passwordUser) {
+    return {
+      user: passwordUser,
+      accessMode: "password" as const,
+      auditActor: `Admin password login (${passwordUser.id})`,
+    };
+  }
+
   const session = await getAuthSession();
-  if (!session) redirect("/");
+  const loginPath = isAdminPasswordEnabled() ? ADMIN_PASSWORD_LOGIN_PATH : null;
+  if (!session) redirect(loginPath ?? "/");
   const account = await db.query.authUsers.findFirst({
     where: eq(authUsers.id, session.user.id),
     columns: { role: true, isAnonymous: true },
   });
-  if (account?.role !== "admin" || account.isAnonymous) redirect("/team");
-  return session;
+  if (account?.role !== "admin" || account.isAnonymous)
+    redirect(loginPath ?? "/team");
+  return {
+    user: session.user,
+    accessMode: "account" as const,
+    auditActor: `${session.user.email} (${session.user.id})`,
+  };
 });

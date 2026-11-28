@@ -327,8 +327,10 @@ Authorized admin routes replace the primary player destinations with Overview,
 Participants & teams, Gameweek, Lineup reminder email, Best possible team,
 Matches & stats, Import results and points, Thai League table, Player data, and
 Audit history.
-The shared sidebar and compact drawer identify Administrator mode and retain a
-Back to player mode link at the bottom, returning to `/team` without sign-out.
+The shared sidebar and compact drawer identify Administrator mode. An admin
+using a personal account can return to `/team` from the navigation without
+signing out. An admin using the password entrance sees an Exit admin mode
+action that ends the dedicated session and returns to the password form.
 Operational pages use a visible title, task-specific filters, and focused work
 areas. Internal bot counts and labels appear only within authorized admin pages.
 
